@@ -4,7 +4,10 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
+import '../design/icons.dart';
+import '../design/theme.dart';
 import '../design/tokens.dart';
+import '../design/widgets.dart';
 import '../domain/recurrence.dart' as recurrence;
 import '../l10n/app_localizations.dart';
 import 'messages.dart';
@@ -28,43 +31,35 @@ class HomesScreen extends StatelessWidget {
       appBar: AppBar(title: Text(l10n.homes)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => open(null),
-        icon: const Icon(Icons.add),
+        icon: const HcIcon(HcIcons.add),
         label: Text(l10n.newHome),
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: 88),
+      body: HcScreenList(
         children: [
-          for (final home in active)
-            ListTile(
-              leading: const Icon(Icons.home_outlined),
-              title: Text(home.name),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => open(home),
-            ),
-          if (archived.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                HcSpace.s4,
-                HcSpace.s4,
-                HcSpace.s4,
-                HcSpace.s2,
-              ),
-              child: Semantics(
-                header: true,
-                child: Text(
-                  l10n.homesArchived,
-                  style: Theme.of(context).textTheme.titleSmall
-                      ?.copyWith(color: HcColors.textMuted),
+          const SizedBox(height: HcSpace.s2),
+          HcCardList(
+            children: [
+              for (final home in active)
+                HcRow(
+                  title: home.name,
+                  text: home.currency,
+                  onTap: () => open(home),
                 ),
-              ),
+            ],
+          ),
+          if (archived.isNotEmpty) ...[
+            HcSectionHeading(l10n.homesArchived),
+            HcCardList(
+              children: [
+                for (final home in archived)
+                  HcRow(
+                    title: home.name,
+                    text: home.currency,
+                    onTap: () => open(home),
+                  ),
+              ],
             ),
-          for (final home in archived)
-            ListTile(
-              leading: const Icon(Icons.inventory_2_outlined),
-              title: Text(home.name),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => open(home),
-            ),
+          ],
         ],
       ),
     );
@@ -168,61 +163,73 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(home?.name ?? l10n.newHome),
         actions: [
-          if (editable) TextButton(onPressed: _save, child: Text(l10n.save)),
+          if (editable) HcBarAction(label: l10n.save, onPressed: _save),
         ],
       ),
       body: Form(
         key: _form,
-        child: ListView(
-          padding: const EdgeInsets.all(HcSpace.s4),
+        child: HcScreenList(
           children: [
+            const SizedBox(height: HcSpace.s2),
             if (archived)
               Padding(
                 padding: const EdgeInsets.only(bottom: HcSpace.s4),
-                child: Text(l10n.homeArchivedNotice),
+                child: Text(l10n.homeArchivedNotice, style: HcText.body),
               ),
-            TextFormField(
-              key: const Key('home-name'),
-              controller: _name,
-              enabled: editable,
-              decoration: InputDecoration(labelText: l10n.homeName),
-              validator: (value) =>
-                  (value ?? '').trim().isEmpty ? l10n.errTitleRequired : null,
-            ),
-            const SizedBox(height: HcSpace.s4),
-            TextFormField(
-              key: const Key('home-currency'),
-              controller: _currency,
-              enabled: editable,
-              textCapitalization: TextCapitalization.characters,
-              decoration: InputDecoration(labelText: l10n.homeCurrency),
-              validator: (value) =>
-                  RegExp(r'^[A-Z]{3}$')
-                      .hasMatch((value ?? '').trim().toUpperCase())
-                  ? null
-                  : l10n.errCurrencyInvalid,
-            ),
-            const SizedBox(height: HcSpace.s4),
-            DropdownButtonFormField<String>(
-              initialValue: _hemisphere,
-              isExpanded: true,
-              decoration: InputDecoration(labelText: l10n.homeHemisphere),
-              items: [
-                DropdownMenuItem(
-                  value: recurrence.north,
-                  child: Text(l10n.hemisphereNorth),
-                ),
-                DropdownMenuItem(
-                  value: recurrence.south,
-                  child: Text(l10n.hemisphereSouth),
-                ),
-              ],
-              onChanged: editable
-                  ? (value) => setState(() => _hemisphere = value!)
-                  : null,
+            HcCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  HcField(
+                    label: l10n.homeName,
+                    child: TextFormField(
+                      key: const Key('home-name'),
+                      controller: _name,
+                      enabled: editable,
+                      validator: (value) => (value ?? '').trim().isEmpty
+                          ? l10n.errTitleRequired
+                          : null,
+                    ),
+                  ),
+                  HcField(
+                    label: l10n.homeCurrency,
+                    child: TextFormField(
+                      key: const Key('home-currency'),
+                      controller: _currency,
+                      enabled: editable,
+                      textCapitalization: TextCapitalization.characters,
+                      validator: (value) =>
+                          RegExp(r'^[A-Z]{3}$')
+                              .hasMatch((value ?? '').trim().toUpperCase())
+                          ? null
+                          : l10n.errCurrencyInvalid,
+                    ),
+                  ),
+                  HcField(
+                    label: l10n.homeHemisphere,
+                    child: DropdownButtonFormField<String>(
+                      initialValue: _hemisphere,
+                      isExpanded: true,
+                      items: [
+                        DropdownMenuItem(
+                          value: recurrence.north,
+                          child: Text(l10n.hemisphereNorth),
+                        ),
+                        DropdownMenuItem(
+                          value: recurrence.south,
+                          child: Text(l10n.hemisphereSouth),
+                        ),
+                      ],
+                      onChanged: editable
+                          ? (value) => setState(() => _hemisphere = value!)
+                          : null,
+                    ),
+                  ),
+                ],
+              ),
             ),
             if (home != null) ...[
-              const SizedBox(height: HcSpace.s6),
+              const SizedBox(height: HcSpace.s4),
               Wrap(
                 spacing: HcSpace.s2,
                 runSpacing: HcSpace.s2,
@@ -288,11 +295,13 @@ class _DeleteDialogState extends State<_DeleteDialog> {
         children: [
           Text(l10n.homeDeleteBody),
           const SizedBox(height: HcSpace.s4),
-          TextField(
-            key: const Key('home-delete-name'),
-            controller: _typed,
-            decoration: InputDecoration(labelText: l10n.homeName),
-            onChanged: (_) => setState(() {}),
+          HcField(
+            label: l10n.homeName,
+            child: TextField(
+              key: const Key('home-delete-name'),
+              controller: _typed,
+              onChanged: (_) => setState(() {}),
+            ),
           ),
         ],
       ),
@@ -301,8 +310,10 @@ class _DeleteDialogState extends State<_DeleteDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.cancel),
         ),
-        TextButton(
-          style: TextButton.styleFrom(foregroundColor: HcColors.danger),
+        // The danger button, kept for the action that destroys
+        // (`.button-danger`, design guide of the web).
+        FilledButton(
+          style: hcDangerStyle(),
           onPressed: matches
               ? () => Navigator.of(context).pop(_typed.text)
               : null,

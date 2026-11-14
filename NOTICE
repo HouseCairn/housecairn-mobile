@@ -34,3 +34,13 @@ Additional terms under section 7 of the GNU Affero General Public License
 These additional terms apply to the whole program. They are terms permitted by
 section 7(b) and 7(e), not "further restrictions" within the meaning of
 section 7.
+
+
+Bundled font
+------------
+
+The app bundles the font Manrope, Copyright 2018 The Manrope Project Authors
+(https://github.com/googlefonts/manrope), unmodified, in the files
+assets/fonts/manrope-*.ttf. Manrope is licensed under the SIL Open Font
+License, Version 1.1, not under the GNU Affero General Public License: see
+assets/fonts/Manrope-OFL.txt and assets/fonts/README.md.

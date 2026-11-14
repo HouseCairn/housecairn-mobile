@@ -39,6 +39,16 @@ double parseLength(String value) {
   throw FormatException('Unknown length', value);
 }
 
+/// `0.08em` is 0.08 (a multiple of the size).
+double parseEm(String value) => double.parse(value.replaceAll('em', ''));
+
+/// A length, a multiple of the size (`em`) or a plain number.
+double parseNumber(String value) {
+  if (value.endsWith('rem') || value.endsWith('px')) return parseLength(value);
+  if (value.endsWith('em')) return parseEm(value);
+  return double.parse(value);
+}
+
 void main() {
   test('every colour token is in HcColors, with its value', () {
     final colours = (tokens['color'] as Map<String, dynamic>)
@@ -73,6 +83,68 @@ void main() {
         parseLength(entry.value),
         reason: entry.key,
       );
+    }
+  });
+
+  test('type sizes and weights are those of the tokens', () {
+    final font = (tokens['font'] as Map<String, dynamic>)
+        .cast<String, String>();
+    for (final entry in HcFont.sizeByName.entries) {
+      expect(entry.value, parseLength(font[entry.key]!), reason: entry.key);
+    }
+    expect(
+      HcFont.sizeByName.keys.toSet(),
+      font.keys.where((k) => k.startsWith('size-')).toSet(),
+    );
+    for (final entry in HcFont.weightByName.entries) {
+      expect(entry.value.value, int.parse(font[entry.key]!), reason: entry.key);
+    }
+    expect(HcFont.lineHeight, double.parse(font['line-height']!));
+    expect(HcFont.lineHeightTight, double.parse(font['line-height-tight']!));
+    expect(HcFont.trackingCaps, parseEm(font['tracking-caps']!));
+    expect(font['family-base'], startsWith('"${HcFont.family}"'));
+  });
+
+  test('shadows are those of the tokens', () {
+    final shadow = (tokens['shadow'] as Map<String, dynamic>)
+        .cast<String, String>();
+    expect(HcShadow.byName.keys.toSet(), shadow.keys.toSet());
+    for (final entry in shadow.entries) {
+      final parts = RegExp(r'^(-?\d+)(?:px)? (-?\d+)px (\d+)px (rgba\(.*\))$')
+          .firstMatch(entry.value)!;
+      final box = HcShadow.byName[entry.key]!.single;
+      expect(box.offset.dx, double.parse(parts.group(1)!), reason: entry.key);
+      expect(box.offset.dy, double.parse(parts.group(2)!), reason: entry.key);
+      expect(box.blurRadius, double.parse(parts.group(3)!), reason: entry.key);
+      expect(box.color, parseColor(parts.group(4)!), reason: entry.key);
+    }
+  });
+
+  test('component sizes are those of the tokens', () {
+    final component = (tokens['component'] as Map<String, dynamic>)
+        .cast<String, String>();
+    expect(HcComponent.byName.keys.toSet(), component.keys.toSet());
+    for (final entry in component.entries) {
+      expect(
+        HcComponent.byName[entry.key],
+        parseNumber(entry.value),
+        reason: entry.key,
+      );
+    }
+  });
+
+  test('every value of the tokens names its web source', () {
+    final sources = (tokens[r'$sources'] as Map<String, dynamic>)
+        .cast<String, String>();
+    final keys = <String>{
+      for (final MapEntry(key: group, value: values) in tokens.entries)
+        if (!group.startsWith(r'$'))
+          for (final key in (values as Map<String, dynamic>).keys)
+            '$group.$key',
+    };
+    expect(sources.keys.toSet(), keys);
+    for (final source in sources.values) {
+      expect(source, matches(RegExp(r'^(design|src/housecairn/static)/')));
     }
   });
 

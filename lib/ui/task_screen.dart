@@ -4,7 +4,9 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
+import '../design/theme.dart';
 import '../design/tokens.dart';
+import '../design/widgets.dart';
 import '../domain/day.dart';
 import '../domain/recurrence.dart' as recurrence;
 import '../l10n/app_localizations.dart';
@@ -158,161 +160,194 @@ class _TaskScreenState extends State<TaskScreen> {
             .firstOrNull
             ?.hemisphere ??
         recurrence.north;
-    final text = Theme.of(context).textTheme;
     final repeats = _mode != recurrence.once;
+    // The text size of the phone at which a pair of fields stacks.
+    final wide = MediaQuery.textScalerOf(context).scale(1) > 1.3;
     final next = _preview(hemisphere);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.taskId == null ? l10n.newTask : l10n.task),
-        actions: [TextButton(onPressed: _save, child: Text(l10n.save))],
+        actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       ),
       body: Form(
         key: _form,
-        child: ListView(
-          padding: const EdgeInsets.all(HcSpace.s4),
+        child: HcScreenList(
           children: [
-            TextFormField(
-              key: const Key('task-title'),
-              controller: _title,
-              autofocus: widget.taskId == null,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(labelText: l10n.taskTitle),
-              validator: (value) =>
-                  (value ?? '').trim().isEmpty ? l10n.errTitleRequired : null,
-            ),
             const SizedBox(height: HcSpace.s2),
-            Text(l10n.taskDueDate, style: text.labelLarge),
-            Wrap(
-              spacing: HcSpace.s2,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  _due == null
-                      ? l10n.todayNoDate
-                      : l10n.dueOn(formatDay(context, _due!)),
-                  style: text.bodyLarge,
-                ),
-                TextButton(
-                  onPressed: _chooseDate,
-                  child: Text(l10n.taskChooseDate),
-                ),
-                if (_due != null)
-                  TextButton(
-                    onPressed: () => setState(() => _due = null),
-                    child: Text(l10n.taskClearDate),
-                  ),
-              ],
-            ),
-            const SizedBox(height: HcSpace.s4),
-            DropdownButtonFormField<String>(
-              key: const Key('task-repeat'),
-              initialValue: _mode,
-              isExpanded: true,
-              decoration: InputDecoration(labelText: l10n.repeat),
-              items: [
-                DropdownMenuItem(
-                  value: recurrence.once,
-                  child: Text(l10n.repeatOnce),
-                ),
-                DropdownMenuItem(
-                  value: recurrence.fixed,
-                  child: Text(l10n.repeatFixed),
-                ),
-                DropdownMenuItem(
-                  value: recurrence.afterLast,
-                  child: Text(l10n.repeatAfterLast),
-                ),
-              ],
-              onChanged: (value) => setState(() => _mode = value!),
-            ),
-            if (repeats) ...[
-              const SizedBox(height: HcSpace.s4),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            HcCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
+                  HcField(
+                    label: l10n.taskTitle,
                     child: TextFormField(
-                      key: const Key('task-interval'),
-                      controller: _interval,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(labelText: l10n.repeatEvery),
-                      onChanged: (_) => setState(() {}),
-                      validator: (value) {
-                        final n = int.tryParse((value ?? '').trim());
-                        final max = recurrence.maxInterval[_unit]!;
-                        return n == null || n < 1 || n > max
-                            ? l10n.errIntervalOutOfRange
-                            : null;
-                      },
+                      key: const Key('task-title'),
+                      controller: _title,
+                      autofocus: widget.taskId == null,
+                      textCapitalization: TextCapitalization.sentences,
+                      validator: (value) => (value ?? '').trim().isEmpty
+                          ? l10n.errTitleRequired
+                          : null,
                     ),
                   ),
-                  const SizedBox(width: HcSpace.s4),
-                  Expanded(
+                  Text(l10n.taskDueDate, style: HcText.fieldLabel),
+                  const SizedBox(height: HcSpace.s1),
+                  Wrap(
+                    spacing: HcSpace.s2,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        _due == null
+                            ? l10n.todayNoDate
+                            : l10n.dueOn(formatDay(context, _due!)),
+                        style: HcText.body,
+                      ),
+                      TextButton(
+                        onPressed: _chooseDate,
+                        child: Text(l10n.taskChooseDate),
+                      ),
+                      if (_due != null)
+                        TextButton(
+                          onPressed: () => setState(() => _due = null),
+                          child: Text(l10n.taskClearDate),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: HcSpace.s3),
+            HcCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  HcField(
+                    label: l10n.repeat,
                     child: DropdownButtonFormField<String>(
-                      initialValue: _unit,
+                      key: const Key('task-repeat'),
+                      initialValue: _mode,
                       isExpanded: true,
                       items: [
-                        for (final (unit, label) in [
-                          (recurrence.dayUnit, l10n.unitDays),
-                          (recurrence.weekUnit, l10n.unitWeeks),
-                          (recurrence.monthUnit, l10n.unitMonths),
-                          (recurrence.yearUnit, l10n.unitYears),
-                        ])
-                          DropdownMenuItem(value: unit, child: Text(label)),
+                        DropdownMenuItem(
+                          value: recurrence.once,
+                          child: Text(l10n.repeatOnce),
+                        ),
+                        DropdownMenuItem(
+                          value: recurrence.fixed,
+                          child: Text(l10n.repeatFixed),
+                        ),
+                        DropdownMenuItem(
+                          value: recurrence.afterLast,
+                          child: Text(l10n.repeatAfterLast),
+                        ),
                       ],
-                      onChanged: (value) => setState(() => _unit = value!),
+                      onChanged: (value) => setState(() => _mode = value!),
+                    ),
+                  ),
+                  if (repeats)
+                    HcField(
+                      label: l10n.repeatEvery,
+                      // A number and its unit on one line, as `.field-pair`;
+                      // with a large text, the unit goes under the number.
+                      child: Flex(
+                        direction: wide ? Axis.vertical : Axis.horizontal,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _pairPart(
+                            wide,
+                            TextFormField(
+                              key: const Key('task-interval'),
+                              controller: _interval,
+                              keyboardType: TextInputType.number,
+                              onChanged: (_) => setState(() {}),
+                              validator: (value) {
+                                final n = int.tryParse((value ?? '').trim());
+                                final max = recurrence.maxInterval[_unit]!;
+                                return n == null || n < 1 || n > max
+                                    ? l10n.errIntervalOutOfRange
+                                    : null;
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: HcSpace.s2, height: HcSpace.s2),
+                          _pairPart(
+                            wide,
+                            DropdownButtonFormField<String>(
+                              initialValue: _unit,
+                              isExpanded: true,
+                              items: [
+                                for (final (unit, label) in [
+                                  (recurrence.dayUnit, l10n.unitDays),
+                                  (recurrence.weekUnit, l10n.unitWeeks),
+                                  (recurrence.monthUnit, l10n.unitMonths),
+                                  (recurrence.yearUnit, l10n.unitYears),
+                                ])
+                                  DropdownMenuItem(
+                                    value: unit,
+                                    child: Text(label),
+                                  ),
+                              ],
+                              onChanged: (value) =>
+                                  setState(() => _unit = value!),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  HcField(
+                    label: l10n.season,
+                    child: DropdownButtonFormField<String>(
+                      initialValue: _season,
+                      isExpanded: true,
+                      items: [
+                        for (final (season, label) in [
+                          ('', l10n.seasonWholeYear),
+                          (recurrence.spring, l10n.seasonSpring),
+                          (recurrence.summer, l10n.seasonSummer),
+                          (recurrence.autumn, l10n.seasonAutumn),
+                          (recurrence.winter, l10n.seasonWinter),
+                          if (_season == recurrence.custom)
+                            (recurrence.custom, l10n.seasonCustom),
+                        ])
+                          DropdownMenuItem(value: season, child: Text(label)),
+                      ],
+                      onChanged: (value) => setState(() => _season = value!),
+                    ),
+                  ),
+                  HcField(
+                    label: l10n.taskNotes,
+                    child: TextFormField(
+                      controller: _notes,
+                      minLines: 2,
+                      maxLines: 6,
                     ),
                   ),
                 ],
               ),
-            ],
-            const SizedBox(height: HcSpace.s4),
-            DropdownButtonFormField<String>(
-              initialValue: _season,
-              isExpanded: true,
-              decoration: InputDecoration(labelText: l10n.season),
-              items: [
-                for (final (season, label) in [
-                  ('', l10n.seasonWholeYear),
-                  (recurrence.spring, l10n.seasonSpring),
-                  (recurrence.summer, l10n.seasonSummer),
-                  (recurrence.autumn, l10n.seasonAutumn),
-                  (recurrence.winter, l10n.seasonWinter),
-                  if (_season == recurrence.custom)
-                    (recurrence.custom, l10n.seasonCustom),
-                ])
-                  DropdownMenuItem(value: season, child: Text(label)),
-              ],
-              onChanged: (value) => setState(() => _season = value!),
-            ),
-            const SizedBox(height: HcSpace.s4),
-            TextFormField(
-              controller: _notes,
-              minLines: 2,
-              maxLines: 6,
-              decoration: InputDecoration(labelText: l10n.taskNotes),
             ),
             if (next.isNotEmpty) ...[
-              const SizedBox(height: HcSpace.s4),
-              Text(l10n.taskNextDates, style: text.titleSmall),
-              for (final day in next)
-                Text(
-                  l10n.dueOn(formatDay(context, day)),
-                  style: text.bodyMedium,
-                ),
+              HcSectionHeading(l10n.taskNextDates),
+              HcCardList(
+                children: [
+                  for (final day in next)
+                    HcRow(title: l10n.dueOn(formatDay(context, day))),
+                ],
+              ),
             ],
             if (_history.isNotEmpty) ...[
-              const SizedBox(height: HcSpace.s4),
-              Text(l10n.taskHistory, style: text.titleSmall),
-              for (final o in _history)
-                Text(
-                  o.status == 'done' && o.completedOn != null
-                      ? l10n.historyDone(
-                          formatDay(context, Day.parse(o.completedOn!)),
-                        )
-                      : l10n.historySkipped,
-                  style: text.bodyMedium,
-                ),
+              HcSectionHeading(l10n.taskHistory),
+              HcCardList(
+                children: [
+                  for (final o in _history)
+                    HcRow(
+                      title: o.status == 'done' && o.completedOn != null
+                          ? l10n.historyDone(
+                              formatDay(context, Day.parse(o.completedOn!)),
+                            )
+                          : l10n.historySkipped,
+                    ),
+                ],
+              ),
             ],
           ],
         ),
@@ -320,3 +355,7 @@ class _TaskScreenState extends State<TaskScreen> {
     );
   }
 }
+
+/// One field of a pair: half the line, or the whole line when they stack.
+Widget _pairPart(bool stacked, Widget field) =>
+    stacked ? field : Expanded(child: field);

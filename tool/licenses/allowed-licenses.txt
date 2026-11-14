@@ -11,3 +11,7 @@ BSD-3-Clause
 Apache-2.0
 ISC
 Zlib
+# Fonts bundled with the app (assets/fonts/README.md): the SIL Open Font License
+# lets a font be bundled and distributed with any software, the font itself
+# staying under the OFL (docs/adr/0011-design-from-the-web-app.md).
+OFL-1.1

@@ -25,7 +25,6 @@
   "todayEmpty": "Rien à faire pour l'instant.",
   "dueOn": "Échéance : {date}",
   "postponedTo": "Reportée au {date}",
-  "rowInHome": "{home} · {when}",
   "actionDone": "Fait",
   "actionMore": "Autres actions",
   "actionSkip": "Ignorer cette fois",
@@ -92,5 +91,8 @@
   "errLastActiveHome": "Le dernier logement actif ne peut être ni archivé ni supprimé.",
   "errNameMismatch": "Tapez le nom exact du logement.",
   "errCurrencyInvalid": "Utilisez un code ISO 4217, par exemple EUR.",
-  "errNotFound": "Cela n'existe plus."
+  "errNotFound": "Cela n'existe plus.",
+  "dueToday": "Aujourd'hui",
+  "dayLate": "1 jour de retard",
+  "daysLate": "{count} jours de retard"
 }

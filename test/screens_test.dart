@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/data/repository.dart';
+import 'package:housecairn_mobile/design/widgets.dart';
 import 'package:housecairn_mobile/ui/task_screen.dart';
 import 'package:housecairn_mobile/ui/today.dart';
 import 'package:material_ui/material_ui.dart';
@@ -102,7 +103,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Fix the tap'), findsOneWidget);
 
-        await tester.tap(find.byIcon(Icons.check_circle_outline));
+        await tester.tap(find.widgetWithText(FilledButton, t('Done', 'Fait')));
         await tester.pumpAndSettle();
         expect(find.text('Fix the tap'), findsNothing);
         final undo = find.descendant(
@@ -144,21 +145,18 @@ void main() {
         expect(find.text('Main smoke alarm'), findsOneWidget);
         expect(find.text('Second smoke alarm'), findsOneWidget);
         // Every row shown names its home; both homes have rows.
-        final subtitles = tester
-            .widgetList<ListTile>(find.byType(ListTile))
-            .map((tile) => (tile.subtitle! as Text).data!)
+        final named = tester
+            .widgetList<HcTaskRow>(find.byType(HcTaskRow))
+            .map((row) => row.text)
             .toList();
-        expect(subtitles, isNotEmpty);
+        expect(named, isNotEmpty);
         expect(
-          subtitles.every(
-            (s) =>
-                s.startsWith('Main home · ') || s.startsWith('Second home · '),
-          ),
+          named.every((s) => s == 'Main home' || s == 'Second home'),
           isTrue,
-          reason: '$subtitles',
+          reason: '$named',
         );
-        expect(subtitles.any((s) => s.startsWith('Main home · ')), isTrue);
-        expect(subtitles.any((s) => s.startsWith('Second home · ')), isTrue);
+        expect(named, contains('Main home'));
+        expect(named, contains('Second home'));
         final rows = await state.repository.todayEntries();
         expect(rows, hasLength(6));
         expect(rows.where((e) => e.home.id == homes.second), hasLength(3));
@@ -171,7 +169,13 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Main smoke alarm'), findsNothing);
         expect(find.text('Second smoke alarm'), findsOneWidget);
-        expect(find.textContaining('Second home · '), findsNothing);
+        // On one home, the rows do not name it.
+        expect(
+          tester
+              .widgetList<HcTaskRow>(find.byType(HcTaskRow))
+              .every((row) => row.text == null),
+          isTrue,
+        );
         expect(state.current!.id, homes.second);
       },
     );
@@ -187,7 +191,7 @@ void main() {
         await tester.tap(find.text(t('Archive', 'Archiver')));
         await tester.pumpAndSettle();
         expect(state.activeHomes, hasLength(1));
-        expect(find.text(t('Archived', 'Archivés')), findsOneWidget);
+        expect(heading(t('Archived', 'Archivés')), findsOneWidget);
         await tester.tap(destination(l.today));
         await tester.pumpAndSettle();
         expect(selector(), findsNothing);
@@ -206,14 +210,14 @@ void main() {
         await tester.tap(find.text(t('Delete', 'Supprimer')));
         await tester.pumpAndSettle();
         final confirm = find.widgetWithText(
-          TextButton,
+          FilledButton,
           t('Delete for good', 'Supprimer définitivement'),
         );
-        expect(tester.widget<TextButton>(confirm).onPressed, isNull);
+        expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
         final typed = find.byKey(const Key('home-delete-name'));
         await tester.enterText(typed, 'second home');
         await tester.pump();
-        expect(tester.widget<TextButton>(confirm).onPressed, isNull);
+        expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
         await tester.enterText(typed, 'Second home');
         await tester.pump();
         await tester.tap(confirm);
@@ -306,8 +310,8 @@ void main() {
                 matching: find.byType(ListView),
               )
               .first;
-          final history = find.text(t('History', 'Historique'));
-          final nextDates = find.text(t('Next dates', 'Prochaines dates'));
+          final history = heading(t('History', 'Historique'));
+          final nextDates = heading(t('Next dates', 'Prochaines dates'));
           var sawNextDates = nextDates.evaluate().isNotEmpty;
           for (var i = 0; i < 12 && history.evaluate().isEmpty; i++) {
             await tester.drag(list, const Offset(0, -250));

@@ -33,3 +33,19 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  # Manrope, the font of the web application, in the four weights the app
+  # draws (assets/fonts/README.md, lib/design/tokens.dart HcFont.weights).
+  fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/manrope-regular.ttf
+          weight: 400
+        - asset: assets/fonts/manrope-semibold.ttf
+          weight: 600
+        - asset: assets/fonts/manrope-bold.ttf
+          weight: 700
+        - asset: assets/fonts/manrope-extrabold.ttf
+          weight: 800
+  assets:
+    # Shown on the licence page of About (lib/design/fonts.dart).
+    - assets/fonts/Manrope-OFL.txt

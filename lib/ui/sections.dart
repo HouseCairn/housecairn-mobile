@@ -2,7 +2,9 @@
 
 import 'package:material_ui/material_ui.dart';
 
+import '../design/icons.dart';
 import '../design/tokens.dart';
+import '../design/widgets.dart';
 import '../l10n/app_localizations.dart';
 import 'about.dart';
 import 'home_selector.dart';
@@ -31,16 +33,11 @@ class EmptySection extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(title(l10n)), actions: const [HomeSelector()]),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(HcSpace.s6),
-          child: Text(
-            l10n.emptySection,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge
-                ?.copyWith(color: HcColors.textMuted),
-          ),
-        ),
+      body: HcScreenList(
+        children: [
+          const SizedBox(height: HcSpace.s4),
+          HcEmpty(l10n.emptySection),
+        ],
       ),
     );
   }
@@ -56,57 +53,37 @@ class MoreScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.navMore)),
-      body: ListView(
+      body: HcScreenList(
         children: [
-          _GroupHeading(l10n.moreHouseholdGroup),
-          ListTile(
-            leading: const Icon(Icons.home_work_outlined),
-            title: Text(l10n.homes),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => const HomesScreen(),
+          HcSectionHeading(l10n.moreHouseholdGroup),
+          HcCardList(
+            children: [
+              HcRow(
+                leading: const HcIcon(HcIcons.homes, color: HcColors.primary),
+                title: l10n.homes,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const HomesScreen(),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-          _GroupHeading(l10n.moreHelpGroup),
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: Text(l10n.about),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => const AboutScreen(),
+          HcSectionHeading(l10n.moreHelpGroup),
+          HcCardList(
+            children: [
+              HcRow(
+                leading: const HcIcon(HcIcons.info, color: HcColors.primary),
+                title: l10n.about,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const AboutScreen(),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _GroupHeading extends StatelessWidget {
-  const _GroupHeading(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        HcSpace.s4,
-        HcSpace.s4,
-        HcSpace.s4,
-        HcSpace.s2,
-      ),
-      child: Semantics(
-        header: true,
-        child: Text(
-          text,
-          style: Theme.of(context).textTheme.titleSmall
-              ?.copyWith(color: HcColors.textMuted),
-        ),
       ),
     );
   }

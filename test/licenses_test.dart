@@ -135,6 +135,82 @@ void main() {
     );
   });
 
+  group('bundled fonts', () {
+    test('sha256Hex is SHA-256', () {
+      expect(
+        sha256Hex(const []),
+        'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      );
+      expect(
+        sha256Hex('abc'.codeUnits),
+        'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
+      );
+      // Two blocks of padding (56 bytes and more).
+      expect(
+        sha256Hex(
+          'abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq'.codeUnits,
+        ),
+        '248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1',
+      );
+    });
+
+    test('names the SIL Open Font License', () {
+      expect(
+        identifyLicences(
+          File('assets/fonts/Manrope-OFL.txt').readAsStringSync(),
+        ),
+        {'OFL-1.1'},
+      );
+    });
+
+    test('every font of assets/fonts passes, with its recorded SHA-256', () {
+      final results = checkProjectFonts(Directory.current);
+      expect(results.map((r) => r.path.split('/').last).toList(), [
+        'manrope-bold.ttf',
+        'manrope-extrabold.ttf',
+        'manrope-regular.ttf',
+        'manrope-semibold.ttf',
+      ]);
+      for (final r in results) {
+        expect(r.problems, isEmpty, reason: r.path);
+        expect(r.licences, {'OFL-1.1'}, reason: r.path);
+      }
+    });
+
+    test('fails a font that changed, is not listed, or has no licence', () {
+      final dir = Directory.systemTemp.createTempSync('fonts');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      File('${dir.path}/a.ttf').writeAsStringSync('font a');
+      File('${dir.path}/b.ttf').writeAsStringSync('font b');
+      File('${dir.path}/c.ttf').writeAsStringSync('font c');
+      File('${dir.path}/OFL.txt').writeAsStringSync(
+        File('assets/fonts/Manrope-OFL.txt').readAsStringSync(),
+      );
+      final shaA = sha256Hex('font a'.codeUnits);
+      final shaC = sha256Hex('font c'.codeUnits);
+      File('${dir.path}/README.md').writeAsStringSync(
+        '| `a.ttf` | 400 | `$shaA` | `OFL.txt` |\n'
+        '| `c.ttf` | 400 | `$shaC` | `GPL.txt` |\n',
+      );
+      final results = {
+        for (final r in checkFonts(dir, {'OFL-1.1'}))
+          r.path.split('/').last: r.problems,
+      };
+      expect(results['a.ttf'], isEmpty);
+      expect(results['b.ttf']!.single, startsWith('not in'));
+      expect(results['c.ttf']!.single, 'no licence file GPL.txt');
+      File('${dir.path}/a.ttf').writeAsStringSync('font a, changed');
+      expect(
+        checkFonts(dir, {'OFL-1.1'}).first.problems.single,
+        startsWith('SHA-256 differs'),
+      );
+      expect(
+        checkFonts(dir, {'MIT'}).first.problems.last,
+        'licence not allowed: OFL-1.1',
+      );
+    });
+  });
+
   test('every dependency of this project passes the policy', () {
     final results = checkProject(Directory.current);
     final refused = [

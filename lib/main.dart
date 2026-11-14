@@ -8,10 +8,12 @@ import 'app.dart';
 import 'core/clock.dart';
 import 'data/database.dart';
 import 'data/repository.dart';
+import 'design/fonts.dart';
 import 'ui/state.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerFontLicences();
   // Opens (or creates and migrates) the database of the phone before the
   // first screen, so that a failure shows at start.
   final db = AppDatabase.onPhone();
