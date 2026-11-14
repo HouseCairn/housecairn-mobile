@@ -126,8 +126,9 @@ jobs:
           apk=build/app/outputs/flutter-apk/app-release.apk
           aapt2=$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f | sort -V | tail -n 1)
           "$aapt2" dump badging "$apk" | grep -E "^(application-icon|application:)"
-          "$aapt2" dump badging "$apk" | grep -q "^application-icon-65535:'res/.*\.xml'"
-          # 65535 is the "any density" entry: the adaptive icon (an XML resource).
+          "$aapt2" dump badging "$apk" | grep -q "^application-icon-65534:'res/.*\.xml'"
+          # 65534 is the "any density" entry: the adaptive icon is an XML resource
+          # (its path is obfuscated by resource shrinking, hence not matched by name).
       - name: Keep the APK (14 days)
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
