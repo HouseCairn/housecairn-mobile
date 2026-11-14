@@ -296,3 +296,5 @@ Choices of the maintainer, still open. Nothing in these documents sets a price.
 3. **End of a subscription**: proposed in [ADR 0006](adr/0006-subscription.md), 30 days during
    which the space is read only, then deletion, with notices at 7 days and 1 day; to confirm
    or change.
+
+<!-- Test PR for the path filter: documentation only, not to be merged. -->
