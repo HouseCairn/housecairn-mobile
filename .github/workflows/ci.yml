@@ -22,11 +22,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-env:
-  # The archive of the SDK is kept by actions/cache under this directory.
-  FLUTTER_ARCHIVES: ${{ github.workspace }}/../flutter-archives
-  PUB_CACHE: ${{ github.workspace }}/../pub-cache
-
 jobs:
   checks:
     name: Format, analyze, tests and licences
@@ -40,14 +35,14 @@ jobs:
       - name: Cache the Flutter archive
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ${{ env.FLUTTER_ARCHIVES }}
+          path: ~/.cache/housecairn-ci/flutter-archives
           key: flutter-archive-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/scripts/install-flutter.sh') }}
       - name: Install Flutter (pinned, checksum verified)
-        run: .github/scripts/install-flutter.sh "$FLUTTER_ARCHIVES"
+        run: .github/scripts/install-flutter.sh "$HOME/.cache/housecairn-ci/flutter-archives"
       - name: Cache the pub packages
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ${{ env.PUB_CACHE }}
+          path: ~/.pub-cache
           key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
       - name: Get the locked packages (flutter pub get --enforce-lockfile)
         run: flutter pub get --enforce-lockfile
@@ -84,15 +79,15 @@ jobs:
       - name: Cache the Flutter archive
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ${{ env.FLUTTER_ARCHIVES }}
+          path: ~/.cache/housecairn-ci/flutter-archives
           key: flutter-archive-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/scripts/install-flutter.sh') }}
       - name: Install Flutter (pinned, checksum verified)
-        run: .github/scripts/install-flutter.sh "$FLUTTER_ARCHIVES"
+        run: .github/scripts/install-flutter.sh "$HOME/.cache/housecairn-ci/flutter-archives"
       - name: Cache the pub packages and Gradle
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
-            ${{ env.PUB_CACHE }}
+            ~/.pub-cache
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: android-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'android/**/*.gradle.kts', 'android/gradle/wrapper/gradle-wrapper.properties') }}
@@ -106,7 +101,8 @@ jobs:
         run: |
           apk=build/app/outputs/flutter-apk/app-release.apk
           aapt2=$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f | sort -V | tail -n 1)
-          "$aapt2" dump badging "$apk" | tee "$RUNNER_TEMP/badging.txt" | head -n 3
+          "$aapt2" dump badging "$apk" > "$RUNNER_TEMP/badging.txt"
+          grep -E "^(package|application-label|sdkVersion|targetSdkVersion|uses-permission|locales)" "$RUNNER_TEMP/badging.txt"
           package=$(sed -n "s/^package: name='\([^']*\)'.*/\1/p" "$RUNNER_TEMP/badging.txt")
           echo "Android package: $package"
           test "$package" = "app.housecairn.mobile"
@@ -131,14 +127,14 @@ jobs:
       - name: Cache the Flutter archive
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ${{ env.FLUTTER_ARCHIVES }}
+          path: ~/.cache/housecairn-ci/flutter-archives
           key: flutter-archive-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/scripts/install-flutter.sh') }}
       - name: Install Flutter (pinned, checksum verified)
-        run: .github/scripts/install-flutter.sh "$FLUTTER_ARCHIVES"
+        run: .github/scripts/install-flutter.sh "$HOME/.cache/housecairn-ci/flutter-archives"
       - name: Cache the pub packages
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ${{ env.PUB_CACHE }}
+          path: ~/.pub-cache
           key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
       - name: Get the locked packages
         run: flutter pub get --enforce-lockfile
