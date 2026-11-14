@@ -15,6 +15,32 @@
 - **Device** below means a test that needs a real phone or a macOS machine, which CI cannot run;
   the maintainer runs it, and the lot lists the exact steps.
 
+## Alignment with the web application
+
+The app carries rules of the web application: the recurrence and seasons
+(`housecairn.tasks.recurrence`), the library of task templates (`tasks/task_templates.yaml`,
+web ADR 0049) and the design tokens (`design/tokens.json`). A change of the web reaches the app
+without depending on anyone's memory:
+
+- **One pin.** `tool/web_alignment.json` names the release and commit of HouseCairn/housecairn
+  each element was aligned on. It moves only through `python3 tool/web_alignment.py update
+  --web <clone> --release vX.Y.Z`, which regenerates what follows mechanically: the recurrence
+  vectors (`tool/recurrence_vectors.py`, run in the web environment of the pinned commit,
+  `uv sync --frozen --no-dev`), the templates (`assets/task_templates.yaml`, a copy) and the web
+  values of the design tokens (the app may add its own tokens, never change a web one).
+- **A check on every pull request.** The `Web alignment` job of CI regenerates every element at
+  its pin and compares: the vectors and templates byte for byte, the tokens value by value. A
+  vector edited by hand, a token that is not the web's or a missing pin fails it.
+- **A pull request when the web moves.** The daily `Web alignment` workflow compares with the
+  latest web release; when something differs, it runs `flutter test` on the regenerated files
+  and opens, or updates, the one pull request of the branch `web-alignment/housecairn`, with the
+  new pin and a report of the web files that changed, those cited by the [spec](spec.md)
+  included. When the tests fail, a rule changed on the web: the pull request says that Dart code
+  is needed, and stays red until it is ported on that branch. It is opened with the project's
+  GitHub App (environment `app-update`), as the app update of the Home Assistant add-on.
+- What no script ports, the data model and the rules of the spec, is read by a person: the
+  report lists the web files cited by the spec that changed since the commit the spec names.
+
 ## Lot 1. Foundations
 
 **Scope**: Flutter project for Android and iOS, `pubspec.lock`, the interfaces `Db`, `Crypto`,
