@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Export options of .github/workflows/ios-testflight.yml (lot 1b of
+  docs/plan.md, ADR 0009). xcodebuild -exportArchive signs the unsigned
+  archive with a cloud-managed distribution certificate and uploads the build
+  to App Store Connect (destination "upload"). The workflow adds the teamID key
+  to a copy of this file at run time, from a secret: no identifier of an
+  account is committed. The build number comes from the workflow, never from
+  Xcode (manageAppVersionAndBuildNumber false).
+-->
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>app-store-connect</string>
+	<key>destination</key>
+	<string>upload</string>
+	<key>signingStyle</key>
+	<string>automatic</string>
+	<key>uploadSymbols</key>
+	<true/>
+	<key>manageAppVersionAndBuildNumber</key>
+	<false/>
+</dict>
+</plist>
