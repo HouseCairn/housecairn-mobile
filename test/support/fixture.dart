@@ -97,6 +97,13 @@ class TwoHomes {
   }
 }
 
+/// The tables whose rows belong to a home, read from the schema (those with
+/// a `home_id` column) and not from the code under test.
+List<String> homeOwnedTables(Repository repo) => [
+  for (final t in repo.db.allTables)
+    if (t.$columns.any((c) => c.$name == 'home_id')) t.actualTableName,
+]..sort();
+
 /// Every row of [homeId] in every table, with the clocks of their fields,
 /// as bytes: two dumps are equal when nothing of that home changed.
 Future<List<int>> dumpHome(
@@ -133,7 +140,7 @@ Future<List<int>> dumpHome(
       [key],
     );
   }
-  for (final table in homeTables) {
+  for (final table in homeOwnedTables(repo)) {
     await rows('SELECT * FROM $table WHERE home_id = ? ORDER BY id', [key]);
     await rows(
       'SELECT * FROM field_clock WHERE entity = ? AND row_id IN '

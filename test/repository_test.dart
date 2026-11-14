@@ -625,7 +625,15 @@ void main() {
       await repo.deleteHome(homes.second, typedName: 'Second home');
 
       final key = uuidBytes(homes.second);
-      for (final table in homeTables) {
+      // The tables come from the schema, not from the code under test.
+      final owned = homeOwnedTables(repo);
+      expect(owned, isNotEmpty);
+      expect(
+        homeTables.toSet(),
+        owned.toSet(),
+        reason: 'deleteHome must visit every table with a home_id',
+      );
+      for (final table in owned) {
         final left = await repo.db
             .customSelect(
               'SELECT COUNT(*) AS n FROM $table WHERE home_id = ?',
@@ -641,7 +649,7 @@ void main() {
           .customSelect(
             'SELECT COUNT(*) AS n FROM field_clock f WHERE NOT EXISTS ('
             "${[
-              for (final t in ['homes', ...homeTables]) 'SELECT 1 FROM $t WHERE $t.id = f.row_id',
+              for (final t in ['homes', ...owned]) 'SELECT 1 FROM $t WHERE $t.id = f.row_id',
             ].join(' UNION ALL ')})",
           )
           .getSingle();
