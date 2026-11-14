@@ -2,6 +2,13 @@
 # request, every merge queue entry and every push to `main`. Job names are the
 # status checks a ruleset of `main` may require: rename them only together.
 #
+# The Android and iOS builds run only when the change can alter the app (paths
+# listed in .github/scripts/app-changed.sh). No `paths` filter on the trigger:
+# those jobs are required checks, and a workflow that does not run leaves them
+# pending. Instead the `changes` job compares the commits and the two builds are
+# skipped, which a ruleset counts as passing. The checks job (format, analyze,
+# tests, licences) always runs. If `changes` fails or says nothing, the builds run.
+#
 # No third-party action: Flutter is installed from its official archive by
 # .github/scripts/install-flutter.sh (pinned version, SHA-256 checked on every
 # run); actions/cache only keeps the downloads between runs. Every action is
@@ -23,6 +30,49 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    name: Does the change touch the app?
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      app: ${{ steps.detect.outputs.app }}
+    steps:
+      - name: Check out (full history, to compare with the base)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Compare with the base
+        id: detect
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          GROUP_BASE: ${{ github.event.merge_group.base_sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          case "$EVENT" in
+            pull_request) old="$PR_BASE"; new=HEAD ;;
+            merge_group) old="$GROUP_BASE"; new="$HEAD_SHA" ;;
+            push) old="$PUSH_BEFORE"; new="$HEAD_SHA" ;;
+            *) old=""; new=HEAD ;;
+          esac
+          if [ -z "$old" ]; then
+            echo "No base to compare with on a $EVENT event: building."
+            echo "app=true" >> "$GITHUB_OUTPUT"
+          else
+            .github/scripts/app-changed.sh diff "$old" "$new"
+          fi
+          {
+            echo "### Does the change touch the app?"
+            echo
+            if grep -qx 'app=true' "$GITHUB_OUTPUT"; then
+              echo "Yes (or not sure): the Android and iOS builds run."
+            else
+              echo "No: the Android and iOS builds are skipped."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
   checks:
     name: Format, analyze, tests and licences
     runs-on: ubuntu-24.04
@@ -80,9 +130,13 @@ jobs:
         # Node.js is preinstalled on the runner image; the tests use only
         # Node's built-in modules.
         run: node --test .github/scripts/cla.test.js
+      - name: Change detection tests (shell, throwaway repository)
+        run: .github/scripts/test-app-changed.sh
 
   android:
     name: Android build
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.app != 'false' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
@@ -139,6 +193,8 @@ jobs:
 
   ios:
     name: iOS build (unsigned)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.app != 'false' }}
     runs-on: macos-15
     timeout-minutes: 45
     steps:

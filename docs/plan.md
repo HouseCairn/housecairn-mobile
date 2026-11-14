@@ -63,6 +63,11 @@ lot 2 is the largest lot.
 - The job checks that the archive's bundle id is `app.housecairn.mobile` and its build number the
   run number.
 - The unsigned iOS build of lot 1 is unchanged.
+- A push to `main` that changes no file of the app (documentation, issue forms, tests, other
+  workflows) sends no build: `on.push.paths` of `ios-testflight.yml` lists the app files, and a
+  manual run is never filtered. On pull requests and in the merge queue, the Android and iOS
+  builds of `ci.yml` are skipped by the same list (`.github/scripts/app-changed.sh`) while every
+  required check still reports; format, analyze and tests always run.
 
 **Device**: once enabled, a build of `main` installs from TestFlight on an iPhone and starts in
 English and French; the build number shown in TestFlight is the run number.
