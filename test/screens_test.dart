@@ -165,7 +165,9 @@ void main() {
 
         await tester.tap(selector());
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Second home').last);
+        await tester.tap(
+          find.widgetWithText(CheckedPopupMenuItem<String>, 'Second home'),
+        );
         await tester.pumpAndSettle();
         expect(find.text('Main smoke alarm'), findsNothing);
         expect(find.text('Second smoke alarm'), findsOneWidget);
@@ -271,7 +273,10 @@ void main() {
           await tester.pumpAndSettle();
           check('home selector');
           await tester.tap(
-            find.text(t('All homes', 'Tous les logements')).last,
+            find.widgetWithText(
+              CheckedPopupMenuItem<String>,
+              t('All homes', 'Tous les logements'),
+            ),
           );
           await tester.pumpAndSettle();
 
