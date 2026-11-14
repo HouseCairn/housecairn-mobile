@@ -1,0 +1,18 @@
+{
+  "@@locale": "fr",
+  "appTitle": "Housecairn",
+  "navToday": "Aujourd'hui",
+  "navRooms": "Pièces",
+  "navProjects": "Projets",
+  "navBudget": "Budget",
+  "navMore": "Plus",
+  "emptySection": "Rien ici pour l'instant.",
+  "moreHelpGroup": "Aide",
+  "about": "À propos",
+  "aboutAttribution": "Housecairn, by Robvred",
+  "aboutVersion": "version {version}",
+  "aboutLicence": "Logiciel libre sous licence AGPL-3.0.",
+  "aboutSource": "Code source et signalement de sécurité : {address}",
+  "aboutAi": "Développé avec un agent IA, sous revue humaine.",
+  "aboutLicences": "Licences open source"
+}

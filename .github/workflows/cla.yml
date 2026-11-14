@@ -1,0 +1,105 @@
+# Contributor License Agreement of the project (CLA.md of HouseCairn/housecairn,
+# docs/adr/0007-license.md), signed by a pull request comment and recorded in
+# this repository on the `cla-signatures` branch. The same mechanism as the web
+# repository (its docs/adr/0014): the logic is .github/scripts/cla.js, tested by
+# .github/scripts/cla.test.js; the only change is that the CLA text is read
+# from the web repository.
+#
+# Exception to the "no pull_request_target" rule, accepted for this file only,
+# as in the web repository:
+# the check must comment on pull requests from forks, set a commit status and
+# record signatures, which the read-only token of `pull_request` cannot do.
+# This workflow never checks out, builds or runs the code of the pull request:
+# its only checkout is the default branch (the script), and the
+# script reads the pull request through the API only (its commits' authors,
+# one comment). `issue_comment` is needed to receive the signature comment.
+# No `${{ github.event.* }}` value reaches a script: cla.js reads `context`.
+#
+# `merge_group`: if a merge queue is used, it waits for the `CLA` status on the
+# head of each entry. The `CLA queue` job checks the queued pull request again
+# and sets that status, with a token that can only read and set statuses.
+name: CLA
+
+on:
+  issue_comment: # zizmor: ignore[dangerous-triggers] -- no checkout of PR code, see above
+    types: [created]
+  pull_request_target: # zizmor: ignore[dangerous-triggers] -- no checkout of PR code, see above
+    types: [opened, synchronize, reopened]
+  merge_group:
+    types: [checks_requested]
+
+permissions: {}
+
+concurrency:
+  # One run at a time per pull request, never cancelled while it runs. GitHub
+  # keeps at most one waiting run per group: a third event cancels the waiting
+  # one. Writes from other pull
+  # requests are not serialized here but by the script: the file update names
+  # the version it replaces, and a refused update is read and retried.
+  # A merge queue entry has no pull request number: its own branch is its group.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number || github.event.merge_group.head_ref }}
+  cancel-in-progress: false
+
+jobs:
+  cla:
+    # The required check is the `CLA` commit status set by the script on the
+    # head of the pull request, not this job: on `pull_request_target` and
+    # `issue_comment` the job runs on the default branch.
+    name: CLA signatures
+    # Pre-filter only (expressions compare case-insensitively); cla.js does the
+    # exact comparison of the comment body.
+    if: >-
+      github.event_name == 'pull_request_target'
+      || (github.event.issue.pull_request
+          && github.event.comment.user.type != 'Bot'
+          && (contains(github.event.comment.body, 'I have read the CLA Document and I hereby sign the CLA')
+              || contains(github.event.comment.body, 'recheck')))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write # record signatures on the `cla-signatures` branch (contents API); read the public CLA.md
+      pull-requests: write # read the pull request and its commits, post or update the bot comment
+      statuses: write # set the `CLA` commit status on the head of the pull request
+    steps:
+      - name: Check out the default branch (script only, never the pull request)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          sparse-checkout: |
+            /.github/scripts/cla.js
+          sparse-checkout-cone-mode: false
+      - name: Check signatures
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const cla = require('./.github/scripts/cla.js');
+            await cla.run({ github, context, core });
+
+  cla-queue:
+    # Sets the `CLA` status on the head of a merge queue entry, after checking
+    # the signatures of the queued pull request again. Same script, same
+    # default-branch checkout as above; it records nothing and comments nothing.
+    name: CLA queue
+    if: github.event_name == 'merge_group'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read # read the signatures on the `cla-signatures` branch
+      pull-requests: read # read the queued pull request and its commits
+      statuses: write # set the `CLA` commit status on the head of the entry
+    steps:
+      - name: Check out the default branch (script only)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          sparse-checkout: |
+            /.github/scripts/cla.js
+          sparse-checkout-cone-mode: false
+      - name: Check signatures of the queued pull request
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const cla = require('./.github/scripts/cla.js');
+            await cla.run({ github, context, core });

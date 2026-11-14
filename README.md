@@ -1,6 +1,6 @@
 # Housecairn mobile
 
-![status: framing](https://img.shields.io/badge/status-framing-lightgrey.svg)
+![status: foundations](https://img.shields.io/badge/status-foundations-lightgrey.svg)
 ![stage: alpha](https://img.shields.io/badge/stage-alpha-orange.svg)
 
 A phone app for iOS and Android that answers the question
@@ -29,8 +29,12 @@ application (Paperless-ngx, Sure, Apprise), calendar feeds.
 
 ## Status
 
-**Framing.** This repository holds no application code yet, only the documents that frame it.
-Nothing here is released; when the first builds come they will be alpha.
+**Foundations.** The documents below frame the app; the code has its foundations (lot 1 of
+the [plan](docs/plan.md)): the Flutter project for Android and iOS, the app shell with its
+five sections and an About screen, English and French, the empty database, and the
+continuous integration (checks, tests, licences of every dependency, an Android APK and an
+unsigned iOS build on every pull request). No feature yet, and nothing is released; the
+first builds will be alpha. How to build and test: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 | Document | What it settles |
 | --- | --- |
