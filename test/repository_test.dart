@@ -470,7 +470,11 @@ void main() {
           final roll = rng.nextInt(10);
           if (roll < 3) {
             beforeClose[open.id] = fieldsOf(open);
-            await repo.complete(open.id);
+            // Half of the completions carry a note: undo must clear it.
+            await repo.complete(
+              open.id,
+              note: rng.nextBool() ? 'Note of step $step' : '',
+            );
             closedStack.add(open.id);
           } else if (roll < 5) {
             beforeClose[open.id] = fieldsOf(open);
