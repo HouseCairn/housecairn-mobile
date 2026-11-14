@@ -346,9 +346,8 @@ void main() {
           check('Home');
           // The undo bar of "Skip this time" covers the Delete button at the
           // large scale: close it so the tap really opens the dialog.
-          ScaffoldMessenger.of(
-            tester.element(find.byType(Scaffold).first),
-          ).removeCurrentSnackBar();
+          ScaffoldMessenger.of(tester.element(find.byType(Scaffold).first))
+              .removeCurrentSnackBar();
           await tester.pumpAndSettle();
           await tester.tap(find.text(t('Delete', 'Supprimer')));
           await tester.pumpAndSettle();
