@@ -40,6 +40,36 @@ system's large text size.
 
 **Depends on**: lot 0 merged (licence and application id are decided).
 
+## Lot 1b. TestFlight builds
+
+**Scope**: internal and external TestFlight builds from `main` once the maintainer enables it
+([ADR 0009](adr/0009-early-testflight-builds.md)): the workflow `ios-testflight.yml`, with a
+`TestFlight plan` job on every event and a `TestFlight upload` job on `main` only; unsigned
+archive, cloud signing and upload by `xcodebuild -exportArchive` with an App Store Connect API
+key; Xcode 26 on a macOS 26 runner; build number from the run number; export options committed
+without any account identifier, and checked on every pull request. No change to the app. A
+separate lot rather than a part of lot 2: it is CI and supply chain work, reviewed as such, and
+lot 2 is the largest lot.
+
+**Acceptance**:
+- On a pull request and in the merge queue, `TestFlight plan` passes and `TestFlight upload` is
+  skipped, not failed; the run summary says why. No job of a pull request reads a secret.
+- `TestFlight upload` runs only on `main` (push or manual run) and only when enabled; it is the
+  only job that enters the `testflight` environment, and is not a required check.
+- No third-party action and no cache in the upload job; every action pinned to a full commit SHA;
+  zizmor passes.
+- The API key is written with mode 600, removed at the end of its step and of the job, failed or
+  not, and never printed.
+- The job checks that the archive's bundle id is `app.housecairn.mobile` and its build number the
+  run number.
+- The unsigned iOS build of lot 1 is unchanged.
+
+**Device**: once enabled, a build of `main` installs from TestFlight on an iPhone and starts in
+English and French; the build number shown in TestFlight is the run number.
+
+**Depends on**: lot 1. Lot 2 does not wait for it; from lot 2 on, the iPhone part of each
+Device test may use the TestFlight build of `main`.
+
 ## Lot 2. Core: rooms, items, tasks, occurrences, today
 
 **Scope**: tables and repository for homes, rooms, items, photos, contractors, tasks,
@@ -155,6 +185,8 @@ removal and rotation; recovery code; members and assignment; encrypted export an
 - Export with two homes, then import into a fresh install, gives the same rows and files; import
   as a copy of one home of the file adds that home with new ids next to the existing ones; a
   wrong passphrase gives a clear error and no partial data.
+- Export compliance revisited: `ITSAppUsesNonExemptEncryption` and the store declarations match
+  the cryptography of this lot ([ADR 0009](adr/0009-early-testflight-builds.md)).
 
 **Device**: QR invitation between an Android phone and an iPhone; keys survive an app update and
 are gone after uninstall; the export file is shared to and imported from the Files app.
@@ -210,13 +242,13 @@ self-hosting.
 **Device**: purchase, renewal, cancellation and restore in the App Store sandbox and with a
 Google Play licence tester; refund seen by the relay.
 
-**Depends on**: lot 6; products created by the maintainer, in the organisation developer
-accounts; price and trial decided ([open questions](#open-questions)).
+**Depends on**: lot 6; products created by the maintainer in App Store Connect and Google
+Play Console; price and trial decided ([open questions](#open-questions)).
 
 ## Lot 8. Beta
 
-**Scope**: TestFlight and Google Play closed testing, from the **organisation** developer
-accounts of Apple and Google; hosted relay and push gateway in production, in the European
+**Scope**: the wider beta, several households for a month, on the TestFlight builds of lot 1b
+and on Google Play closed testing; hosted relay and push gateway in production, in the European
 Union; privacy policy and store data declarations (App Privacy, Data safety); onboarding of sync
 with the recovery code step; in-app explanation of what the relay can see; an optional app
 lock (biometrics or the phone's code); the findings of the external review fixed.
@@ -230,8 +262,7 @@ lock (biometrics or the phone's code); the findings of the external review fixed
 **Device**: the beta used by at least two households for a month, with a written report of
 conflicts, lost reminders and sync delays.
 
-**Depends on**: lot 7, the external review of the protocol, and the organisation developer
-accounts opened by the maintainer before the lot starts.
+**Depends on**: lot 7, lot 1b and the external review of the protocol.
 
 ## Lot 9. Publication
 
