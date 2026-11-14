@@ -67,6 +67,26 @@ jobs:
         # Node's built-in modules.
         run: node --test .github/scripts/cla.test.js
 
+  web-alignment:
+    # The rules the app carries from the web application are those of the web
+    # release pinned in tool/web_alignment.json: the recurrence vectors are
+    # regenerated at that commit and compared byte for byte (a vector edited by
+    # hand fails), the task templates too, the design tokens value by value.
+    name: Web alignment
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Clone the web application
+        run: git clone --quiet --filter=blob:none https://github.com/HouseCairn/housecairn "$RUNNER_TEMP/web"
+      - name: Install uv (pinned, checksum verified)
+        run: .github/scripts/install-uv.sh "$RUNNER_TEMP/uv-archive"
+      - name: The app carries what its pinned web release gives (tool/web_alignment.py check)
+        run: python3 tool/web_alignment.py check --web "$RUNNER_TEMP/web"
+
   android:
     name: Android build
     runs-on: ubuntu-24.04

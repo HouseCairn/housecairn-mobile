@@ -74,6 +74,8 @@ def show(web: Path, commit: str, path: str) -> bytes:
 
 
 def load_reference() -> dict:
+    if not REFERENCE.exists():
+        raise AlignmentError(f"{REFERENCE.relative_to(ROOT)} is missing: the pin of the web release is required")
     reference = json.loads(REFERENCE.read_text(encoding="utf-8"))
     if reference.get("repository") != WEB_REPOSITORY:
         raise AlignmentError(f"{REFERENCE.name}: repository must be {WEB_REPOSITORY}")
