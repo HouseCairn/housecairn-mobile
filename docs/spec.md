@@ -51,7 +51,7 @@ and each operation names its home ([ADR 0008](adr/0008-several-homes-one-family-
 | Project task link (a task in one project at most) | `projects/models.py:340-344` | |
 | Annual envelope (one per year) | `projects/models.py:355-377` | |
 | Report: what is wrong, where (room, item or article, at most one), photo, status, task made from it | `reports/models.py:26-30`, `:43-103` | |
-| Task templates (bundled library, EN and FR, with sources) | `tasks/task_templates.yaml`, web ADR 0049 | Shipped with the app, read only. |
+| Task templates (bundled library, EN and FR, with sources) | `tasks/task_templates.yaml`, web ADR 0049 | Shipped with the app, read only: `assets/task_templates.yaml`, a copy at the web release pinned in `tool/web_alignment.json` ([plan](plan.md#alignment-with-the-web-application)). |
 
 **Rules taken as they are** (ported to Dart, checked against the Python code by shared test
 vectors, [ADR 0001](adr/0001-flutter-stack-and-packages.md)):
