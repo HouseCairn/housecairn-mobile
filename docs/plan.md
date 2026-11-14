@@ -1,6 +1,6 @@
 # Plan: lots 1 to 9
 
-- Status: proposed (lot 0), with the maintainer's decisions of 2026-11-14
+- Status: proposed (lot 0), with the maintainer's decisions of 2026-11-14 (including those on the third way)
 - One lot is one pull request (or one per repository when a lot spans the app and the relay),
   reviewed by another model, merged by the maintainer. A lot starts when the lots it depends on
   are merged. No estimate in days.
@@ -14,7 +14,10 @@
 - **Three ways to use the app** ([ADR 0010](adr/0010-three-ways-to-use-the-app.md)): alone on
   the phone, family sync through the relay, a Housecairn server. The first-start screen and the
   transport interface come early (lot 2c); each way is turned on by its own lot (lot 7 for the
-  family sync, lot 4b for a server).
+  family sync, lot 4b for a server). A phone is in **one way at a time**, and the third way
+  keeps **everything** on the server. Business model: the app is free with the first way
+  complete, the relay is a subscription, the third way is unlocked by a single in-app
+  purchase (principle only; the AGPL licence lets anyone build without the lock, accepted).
 - Each lot updates the documents it changes (spec, ADR, protocol) in the same pull request.
 - **Device** below means a test that needs a real phone or a macOS machine, which CI cannot run;
   the maintainer runs it, and the lot lists the exact steps.
@@ -125,7 +128,9 @@ Device steps.
 
 **Scope**: the first-start screen of [ADR 0010](adr/0010-three-ways-to-use-the-app.md), with
 the three ways: **Alone on this phone**, selected and the only one active; **Family sync** and
-**My Housecairn server** shown, disabled, with "Coming later". The way is stored in
+**My Housecairn server** shown, disabled, with "Coming later". The decisions of 2026-11-14
+change one text of this screen: the third way says that everything of the phone is kept on the
+server and that a one-time purchase unlocks it (no price). The way is stored in
 `local_settings` (`sync_mode`, no migration). Settings shows the way in use and the other two,
 disabled. The interface `SyncTransport` of ADR 0010 in `lib/sync/transport.dart`, **defined
 only**, as lot 1 did for `Store`, with a fake in the tests. The texts of ADR 0010 in the EN and
@@ -149,7 +154,8 @@ what is coming and what each way shows to whom, and the interface is settled bef
 - An install of a lot 2 build, with homes and no `sync_mode`, opens on its homes without the
   screen, and Settings shows it as Alone.
 - The texts of the three ways exist in both ARB files; the server's text says that the server
-  stores and can read the homes (a test on the keys, in both languages).
+  stores and can read the homes, that all the phone's homes are kept on it, and that a one-time
+  purchase unlocks it (a test on the keys, in both languages). No price in any text.
 - `SyncTransport` has the members of ADR 0010 and no implementation in `lib/`; nothing in
   `lib/` opens a socket or an HTTP client (a test lists the imports of `lib/`).
 - Widget tests of the screen at 360 px and with the largest system text size.
@@ -214,12 +220,19 @@ against in-memory doubles of it.
 
 **Scope**: the third way of [ADR 0010](adr/0010-three-ways-to-use-the-app.md): `ServerTransport`
 on the sync API of a Housecairn server (the web application or the Home Assistant add-on); the
-screens address, token and confirmation, with the sentence that the server reads the homes; the
-token in `Store`, HTTPS only; the moves alone to server (send this phone's homes into empty
-homes, or take the server's homes after an export is offered) and server to alone; the files of
-photos and attachments; the server's members of each home, read only, for assignment; the
-choice **My Housecairn server** of the first-start screen turned on; the threat model gains the
-server as an adversary.
+screens address, sign-in and confirmation, with the sentence that the server reads the homes;
+the **sign-in by OAuth 2 with PKCE in the browser**, the homes covered by the access chosen
+there, an access revocable per device, the credential in `Store`; **HTTPS**, and `http://` only
+towards a local address (private networks, `.local`) with a clear warning; the moves alone to
+server (**keep this phone's homes** into empty homes the phone creates under its access's right,
+or **keep the server's homes** after an export is offered; with data on both sides the person
+must choose one, never a merge) and server to alone; the files of photos and attachments; the
+server's members of each home, read only, for assignment, the phone standing for the signed-in
+account and reminding its tasks and those with no assignee; archiving of homes as the web will
+have it; the **single in-app purchase that unlocks the way** (the flow in the app; the price and
+the store side are not in this plan); the choice **My Housecairn server** of the first-start
+screen turned on; the threat model gains the server as an adversary. Everything of the phone
+is on the server in this way: no relay next to it, no home kept only on the phone.
 
 **Acceptance**:
 - Against a Housecairn instance started in CI from its image, at the web release that brings the
@@ -233,19 +246,29 @@ server as an adversary.
 - Send with **two homes**: every id on the server is the phone's; a send cut in the middle and
   repeated creates no duplicate. Take: the local homes are removed only after the export was
   offered and the confirmation typed; cancelling leaves the phone as it was.
-- Disconnect removes the token from `Store`; unsent changes are listed first.
-- No request goes to another host than the address typed; `http://` is refused (unless the
-  maintainer decides otherwise, [open questions](#open-questions)); a certificate error is shown
-  and cannot be skipped; the token is never in a log, the database or an export (tests).
+- Disconnect removes the credential of the access from `Store`; unsent changes are listed first.
+- No request goes to another host than the address typed; `http://` is refused unless the host
+  is a local address (private ranges, `.local`), and then a warning is shown first; a
+  certificate error is shown and cannot be skipped; the credential is never in a log, the
+  database or an export (tests).
+- The sign-in uses the system browser with PKCE, and no token is typed or pasted; revoking the
+  access on the server stops the phone at its next call, and the phone says so.
+- The way stays locked until the purchase is made (or restored); the first way and the data
+  of the phone are untouched by a refused or cancelled purchase.
+- Reminders on the phone cover the tasks of the signed-in account and the tasks with no
+  assignee.
 - A server too old for the sync API is refused with a message that names the version needed.
 
 **Device**: a phone against the Home Assistant add-on and against the web application on a home
 server; a day in airplane mode with edits on both sides, then sync.
 
 **Depends on**: lot 4; and a lot of the web repository, `HouseCairn/housecairn`, that brings the
-sync API with the needs listed in ADR 0010, merged and released. Not on lots 5 to 7: no crypto,
-no relay, no subscription. Whether lot 8 waits for it is the maintainer's call
-([open questions](#open-questions)).
+sync API with the needs listed in ADR 0010 (OAuth 2 with PKCE for the app, the right to create
+homes, `archived_at`), merged and released; **that web lot starts now**, in parallel with the
+mobile lots, as a card of its own in the web repository. A change in the Home Assistant add-on
+(a port of its own for the app, since Ingress needs a Home Assistant sign-in) is needed before
+the way works against the add-on, and is made in the add-on's repository. Not on lots 5 to 7:
+no crypto, no relay, no subscription. **Lot 8 waits for this lot.**
 
 ## Lot 5. Encryption and family
 
@@ -346,7 +369,8 @@ lock (biometrics or the phone's code); the findings of the external review fixed
 **Device**: the beta used by at least two households for a month, with a written report of
 conflicts, lost reminders and sync delays.
 
-**Depends on**: lot 7, lot 1b and the external review of the protocol.
+**Depends on**: lot 7, **lot 4b** (the third way is required before the public beta), lot 1b
+and the external review of the protocol.
 
 ## Lot 9. Publication
 
@@ -371,50 +395,22 @@ Decided by the maintainer as later work, not to be made impossible: reading a we
 (format 3) in the app; an Android build without Google services (UnifiedPush, F-Droid), after
 1.0; a home shared with someone outside the family (a second space on one phone).
 
-Proposed as later work by [ADR 0010](adr/0010-three-ways-to-use-the-app.md), for the maintainer
-to confirm ([open questions](#open-questions)): merging the homes of a phone with those
-of a server when both have data; a direct move between family sync and a server, without going
-through Alone; a phone in two ways at once.
+Decided as later work by the maintainer on 2026-11-14 ([ADR 0010](adr/0010-three-ways-to-use-the-app.md)):
+merging the homes of a phone with those of a server when both have data (in v1 the person keeps
+one side); a direct move between family sync and a server, without going through Alone.
+A phone in two ways at once is not planned at all: one way at a time.
 
 A Housecairn instance acting as the relay, listed here before, is replaced by lot 4b, which
 means something else: the server reads the data, where the relay never can.
 
 ## Open questions
 
-Choices of the maintainer, still open. Nothing in these documents sets a price.
+Choices of the maintainer, still open. Nothing in these documents sets a price. The questions
+raised by [ADR 0010](adr/0010-three-ways-to-use-the-app.md) (numbered 4 to 14) were answered on
+2026-11-14 and are written in that record, in the lots above and in the section After v1.
 
 1. **Price** of the hosted family sync, monthly and yearly.
 2. **Free trial**: whether there is one, and how long.
 3. **End of a subscription**: proposed in [ADR 0006](adr/0006-subscription.md), 30 days during
    which the space is read only, then deletion, with notices at 7 days and 1 day; to confirm
    or change.
-
-Raised by [ADR 0010](adr/0010-three-ways-to-use-the-app.md), the three ways to use the app:
-
-4. **Two ways at once**: may a phone connected to a Housecairn server also join a family on the
-   relay? May a phone keep homes that stay on the phone only, next to the homes of a server?
-   ADR 0010 proposes neither in v1.
-5. **What the token opens**: the homes chosen when it is made, as web tokens are today, or every
-   home of the account, those created later included?
-6. **Which credential**: the API token the maintainer named, or the OAuth 2 flow with PKCE that
-   web ADR 0007 planned for the mobile app? With a token, its lifetime (90 days by default on
-   the web) and how the phone renews it.
-7. **Sending a home the server does not have**: is the home first made on the web, empty, and
-   bound to the token, or may the phone create homes on the server (a token right that does not
-   exist today)?
-8. **Plain HTTP and the Home Assistant add-on**: is `http://` accepted on a local network, or
-   HTTPS only? The add-on's ingress page needs a sign-in to Home Assistant, which a Housecairn
-   token cannot give: does the add-on expose a port of its own for the app?
-9. **Price of the third way**: free, since no service of the publisher is used, or part of a
-   subscription?
-10. **v1.0 or after**: is lot 4b required before the beta (lot 8) and the publication (lot 9), or
-    may it ship after 1.0?
-11. **Later moves**: merging a phone's homes with a server's when both have data, and a direct
-    move between family sync and a server: after v1, as ADR 0010 proposes?
-12. **Archiving a home with a server**: add `archived_at` to the web model, or hide archiving in
-    the third way?
-13. **Members with a server**: the server's accounts of each home stand for the members; which
-    of them does a phone remind, and is a phone always the account of its token?
-14. **The web lot**: when is the sync API of the web opened as a lot, and is its shape (one feed
-    of operations as in [protocol.md](protocol.md#22-operations), or the REST resources of
-    `/api/v1/` extended) decided there, as ADR 0010 assumes?

@@ -1,8 +1,10 @@
 # 0010. Three ways to use the app: alone, family sync through the relay, a Housecairn server
 
-- Status: proposed. The three ways and their order of arrival are the maintainer's decision of
-  2026-11-14; what each guarantees, the moves between them and the architecture are the
-  choices this record proposes.
+- Status: accepted. The three ways and their order of arrival are the maintainer's decision of
+  2026-11-14, and so are the answers to the questions this record raised (questions 4 to 14,
+  same day), written in [Decisions of the maintainer](#decisions-of-the-maintainer-2026-11-14).
+  What each way guarantees, the moves between them and the architecture were proposed here and
+  are accepted with them.
 - Date: 2026-11-14
 - Amends: [ADR 0003](0003-sync-protocol.md) and [ADR 0005](0005-relay-server.md), which left
   "a Housecairn instance acting as the relay" for after v1. That idea is replaced by the third
@@ -24,7 +26,8 @@ The maintainer decided on 2026-11-14:
   2. **Family sync through the hosted relay**, with a subscription (lots 4 to 7 of the
      [plan](../plan.md));
   3. **My Housecairn server**: the address of an instance (the Home Assistant add-on or the
-     self-hosted web application) and a Housecairn **API token**. The data is **shared with
+     self-hosted web application) and a sign-in to it (OAuth 2 with PKCE, decided below; the
+     first wording of the decision said an API token). The data is **shared with
      the server**: what is typed on the phone appears in the web application and the other way
      round; the server reads the data, it is not an end-to-end encrypted relay;
 - the screen and the architecture are **planned now**, and each way is plugged in when its lot
@@ -36,6 +39,42 @@ commits), not at the commit `a6953f3` of the other records: the API was read for
 
 ## Decision
 
+### Decisions of the maintainer (2026-11-14)
+
+The maintainer answered the open questions of this record the same day. The sections below
+are written with these answers; this list is the short form, and wins over any older wording.
+
+- **One way at a time, and everything on the server (questions 4 and 11).** A phone is in
+  one way at a time: alone, on the relay, or on a server. In the third way **everything is on
+  the server**: no mix of homes kept on the phone and homes on the server, and no relay in
+  addition. In v1, going to the third way while both the phone and the server hold data
+  forces an explicit choice: **keep the phone's homes or keep the server's**. Merging the two
+  comes after v1.
+- **The access and the homes (questions 5 and 7).** The access covers **the homes chosen at
+  the sign-in**. The phone **may create new homes** on the server, under a right of the access
+  made for that (see [the web needs](#what-the-web-api-lacks-for-the-third-way), need 8).
+- **Sign-in (question 6).** **OAuth 2 with PKCE in the browser**, as web ADR 0007 planned for
+  the mobile app. The access is **revocable per device**. There is **no API token to copy**
+  and paste.
+- **Network (question 8).** HTTPS everywhere. `http://` only towards a local address (private
+  networks, `.local`), with a clear warning. The Home Assistant add-on will **open a port of
+  its own** for the app, since its Ingress needs a Home Assistant sign-in; that change is
+  made in the add-on, not here.
+- **Business model (question 9).** The app is free, with the first way complete. The hosted
+  relay is a subscription. **The third way is unlocked by a single in-app purchase.** This is
+  the principle only: no price here, and nothing about store accounts. The AGPL licence
+  ([ADR 0007](0007-license.md)) lets anyone build the app without that lock; the maintainer
+  accepts it.
+- **Order (question 10).** The third way (lot 4b) is **required before the public beta
+  (lot 8)**.
+- **Archiving (question 12).** Archiving a home will be **added to the web** (`archived_at`),
+  so the third way does not hide it.
+- **Members (question 13).** The phone always stands for **the signed-in account**. Its
+  reminders cover **its tasks and those with no assignee**.
+- **The web lot (question 14).** The lot of the web application for the sync API **starts
+  now**, in parallel with the mobile lots, as a card of its own in the web repository. Lot 4b
+  depends on it.
+
 ### The three ways, and what each guarantees
 
 | | 1. Alone on this phone | 2. Family sync (relay) | 3. My Housecairn server |
@@ -45,13 +84,24 @@ commits), not at the commit `a6953f3` of the other records: the API was read for
 | Who decides a conflict | No conflict | Each phone, by the same merge rules ([ADR 0003](0003-sync-protocol.md)) | The same field rules, applied by the server, which keeps the order ([Architecture](#architecture-one-sync-layer-two-transports)) |
 | Offline | Everything works; no network call, ever | Everything works; changes are sent and merged when the relay is reachable | Everything works on the copy of the phone; changes wait in the log and are sent when the server is reachable; edits made on the web meanwhile arrive then |
 | Network peers | None | The relay the person chose, and the push services | The server the person typed, and nothing else (no push in v1: the phone syncs when opened and in the background) |
-| Account | None | None (device keys, [ADR 0004](0004-encryption-and-family-keys.md)) | The account of the server that issued the token |
-| Cost | Free | Subscription for the hosted relay; free on a self-hosted relay ([ADR 0006](0006-subscription.md)) | No subscription is needed by design: the publisher's relay is not used ([question](../plan.md#open-questions)) |
+| Account | None | None (device keys, [ADR 0004](0004-encryption-and-family-keys.md)) | The account of the server that the person signed in with |
+| Cost | Free | Subscription for the hosted relay; free on a self-hosted relay ([ADR 0006](0006-subscription.md)) | No subscription, since the publisher's relay is not used; a **single in-app purchase unlocks** the way ([business model](#business-model)) |
 
-**One way at a time per phone in v1.** A phone is alone, or in a family on a relay, or connected
-to one server. Mixing them (a phone on a server that also joins a family on the relay, or
-homes of one phone split between local and server) is not in v1, and is an open question for
-the maintainer ([plan](../plan.md#open-questions)).
+**One way at a time per phone.** A phone is alone, or in a family on a relay, or connected to
+one server, and in the third way **all its homes are on the server**. Mixing them (a phone on
+a server that also joins a family on the relay, or homes of one phone split between local and
+server) is not offered: the maintainer decided it so, not only for v1.
+
+### Business model
+
+The principle, decided on 2026-11-14; it sets no price and says nothing of store accounts.
+
+- The app is **free**, and the first way is **complete** in it.
+- The hosted relay (second way) is a **subscription** ([ADR 0006](0006-subscription.md)).
+- The third way is **unlocked by a single in-app purchase**.
+- The licence is AGPL ([ADR 0007](0007-license.md)): anyone may build the app from the source
+  without that lock. The maintainer accepts this; the purchase pays for convenience and for
+  the maintenance, it does not stop anyone.
 
 ### Why the third way is not end-to-end encrypted
 
@@ -66,15 +116,16 @@ household runs itself, that operator is the household.
 
 What the app still guarantees in the third way:
 
-- **HTTPS only**, with the system's certificate checks; the app never offers to skip them
-  (whether plain HTTP is accepted on a local network is an
-  [open question](../plan.md#open-questions));
-- the **token is kept in the Keychain or the Android Keystore** (`Store`,
+- **HTTPS**, with the system's certificate checks; the app never offers to skip them. The one
+  exception is `http://` towards a **local address** (private networks, `.local`), shown with
+  a clear warning that the traffic can be read on that network;
+- the **credential of the sign-in is kept in the Keychain or the Android Keystore** (`Store`,
   [ADR 0002](0002-local-storage-and-migrations.md)), never in the database, never in an
   export, never in a log;
-- the app sends to the server nothing but the homes bound to the token, and calls no other
+- the app sends to the server nothing but the homes the access covers, and calls no other
   address;
-- disconnecting deletes the token from the phone at once.
+- disconnecting deletes the credential from the phone at once, and the access can be revoked
+  on the server, per device.
 
 ### What the screen says
 
@@ -89,10 +140,12 @@ strings go in the ARB files with the lot that builds the screen.
   on your phones before it leaves them: our server cannot read it. Needs a subscription."
 - **My Housecairn server**: "Use the homes of your own Housecairn, the web application or the
   Home Assistant add-on. **Your server stores your homes and can read them**, like its web
-  pages do."
+  pages do. Everything of this phone is kept on the server; a one-time purchase unlocks it."
 
-Choosing the third way leads to a second screen, address and token, then a confirmation
-before anything is sent or received, which names the server and lists what it gets:
+Choosing the third way leads to a second screen, the server's address, then the sign-in in the
+browser (OAuth 2 with PKCE) where the person picks the homes the access covers, then a
+confirmation before anything is sent or received, which names the server and lists what it
+gets:
 
 > **This server will see everything in these homes**: tasks, rooms, notes, amounts and
 > photos. So can the people who run it, the people who are members of these homes on it, and
@@ -108,13 +161,14 @@ choices.
 | From → to | v1 | How |
 | --- | --- | --- |
 | Alone → family sync | **Yes** | Turning sync on creates the space; every home of the phone becomes its first snapshot ([ADR 0004](0004-encryption-and-family-keys.md), lot 5). Nothing to choose: the space is new and empty. |
-| Alone → my server, **send this phone's homes** | **Yes, into homes that are empty on the server** | The phone uploads every row and file of the homes it sends, with its own ids, then syncs. The server must accept ids made by the phone and, for a home it does not have yet, a way to create it ([what the web lacks](#what-the-web-api-lacks-for-the-third-way)). |
-| Alone → my server, **take the server's homes** | **Yes** | The phone downloads the homes bound to the token. Its local homes are not merged: the app offers an encrypted export first, then removes them from the phone, after the person types "remove" (the same care as deleting a home, [spec](../spec.md#homes)). |
-| Alone → my server, both sides not empty, **merge** | No, after v1 | Two histories of the same house, written without common ids, cannot be merged field by field; matching rooms and tasks by name is a guess. The app offers the two choices above, never a silent merge. |
+| Alone → my server, **keep this phone's homes** | **Yes, into homes that are empty on the server** | The phone uploads every row and file of the homes it sends, with its own ids, then syncs. The phone creates the homes the server does not have yet, under the right of its access ([what the web lacks](#what-the-web-api-lacks-for-the-third-way)). |
+| Alone → my server, **keep the server's homes** | **Yes** | The phone downloads the homes the access covers. Its local homes are not merged: the app offers an encrypted export first, then removes them from the phone, after the person types "remove" (the same care as deleting a home, [spec](../spec.md#homes)). |
+| Alone → my server, data on both sides | **Yes, with an explicit choice** | The app makes the person **choose** between keeping the phone's homes and keeping the server's (the two rows above), never a silent merge. |
+| Alone → my server, both sides not empty, **merge** | No, after v1 | Two histories of the same house, written without common ids, cannot be merged field by field; matching rooms and tasks by name is a guess. The merge comes after v1. |
 | Family sync → alone | **Yes** | Leaving the family, or being removed: the phone keeps what it had, as a removed member does ([ADR 0004](0004-encryption-and-family-keys.md)); its keys of the space are deleted. |
-| My server → alone | **Yes** | Disconnect: changes not yet sent are listed and sent first when the server is reachable, or dropped after a confirmation that names them; the token is deleted; the phone keeps a local copy of the homes as they were at the last sync, which no longer syncs. |
-| Family sync ↔ my server, directly | No, after v1 | In v1 a phone goes through the first way: leave the family, then connect to the server and send its homes into empty homes there (or the reverse). A direct move would have to decide what the other members of the family get, which is the maintainer's call. |
-| A phone in two ways at once | No in v1 | [Open question](../plan.md#open-questions). |
+| My server → alone | **Yes** | Disconnect: changes not yet sent are listed and sent first when the server is reachable, or dropped after a confirmation that names them; the credential is deleted; the phone keeps a local copy of the homes as they were at the last sync, which no longer syncs. |
+| Family sync ↔ my server, directly | No, after v1 (maintainer's decision) | In v1 a phone goes through the first way: leave the family, then connect to the server and send its homes into empty homes there (or the reverse). A direct move would have to decide what the other members of the family get, which is the maintainer's call. |
+| A phone in two ways at once | No | Decided by the maintainer: one way at a time, no relay next to a server, no local homes next to server homes. |
 
 Whatever the move, nothing is erased from the phone without a confirmation, and an export is
 offered before any removal.
@@ -132,7 +186,7 @@ SyncTransport         lot 2c: the interface below, nothing else knows the networ
   ├── RelayTransport  lots 5 and 6: sealed batches, snapshots, blobs, membership log,
   │                   device keys
   └── ServerTransport lot 4b: the same operations in clear, over HTTPS, to the sync API of a
-                      Housecairn server, with the token from Store
+                      Housecairn server, with the access from Store
 ```
 
 **What is shared by the second and third ways**, and written once: the operation of
@@ -151,7 +205,7 @@ phone, so neither way needs a migration of the data to start.
 | `push(operations)` | one sealed batch | one request applied as a whole; the answer gives, for each field that lost, the value that won |
 | `pull(after: cursor)` | batches after `pos`; "start again" on 410, from the snapshot | changes after the server's cursor; "start again" when the cursor is too old, from a full download of the homes |
 | `putFile`, `getFile`, `deleteFile` | blobs, encrypted with their own key | the files of the server's photos and attachments, in clear |
-| `homesGone()` | `purge` records of the membership log | homes deleted on the server, or no longer bound to the token |
+| `homesGone()` | `purge` records of the membership log | homes deleted on the server, or no longer covered by the access |
 
 Members, invitations, epochs and the recovery code exist only with the relay: they stay outside
 the interface (lot 5). With a server, the members are the server's accounts of each home, read
@@ -166,7 +220,7 @@ other.
 
 **The way of the phone** is a row of `local_settings` (schema 2, key and value, never synced):
 `sync_mode` = `alone`, `relay` or `server`, absent meaning `alone`; the server's address in the
-same table; the token in `Store`. No migration.
+same table; the credential of the access in `Store`. No migration.
 
 **Files.** The file reference of protocol section 2.9 names a blob and its key. With a server it
 names a file of the server; the exact form is decided by lot 4b with the web lot, since it
@@ -226,21 +280,22 @@ additive changes). These are needs, not a design of the web: the web lot decides
    already computed and written those effects as fields. Needed: either the sync API accepts the
    resulting fields and the server checks them, or it replays the action exactly once for an
    operation id.
-8. **Token bound to homes, but none to make or receive a home.** A token is bound to existing
+8. **An access bound to homes, with the right to create a home.** A token is bound to existing
    homes of its user (`apitokens/models.py:17-37`, `homes/scoping.py:27-38`), which fits the
    third way. But a token may not create a home (`homes/api.py:169-171`) nor restore one
    (`homes/api.py:379-381`), so a phone cannot send a home the server does not have; tokens
    expire after 90 days by default (web ADR 0007) with no renewal by the token itself; scopes
    are only `read`, `write` and `events` (`apitokens/models.py:11-14`), so a token lent to the
-   phone is the same as one lent to any integration. Needed: a way to bind a new home of the
-   phone (a home made on the web for it, or creation by the phone), a token kind for a device,
-   or the OAuth 2 flow with PKCE that web ADR 0007 planned for "the iOS app" (`/o/`). Token
-   management by a person signed in stays as it is (`apitokens/permissions.py:74-80`).
+   phone is the same as one lent to any integration. Decided: the sign-in is the OAuth 2 flow
+   with PKCE that web ADR 0007 planned for "the iOS app" (`/o/`); the access is revocable per
+   device, covers the homes chosen at the sign-in, and carries a **right to create homes**
+   that the web must add. Token management by a person signed in stays as it is
+   (`apitokens/permissions.py:74-80`).
 9. **Fields the app has and the web does not.** A home has no `archived_at` on the web
    (`homes/models.py:31-58`; [protocol](../protocol.md#22-operations) section 2.2); assignee and
    `completed_by` are accounts (`tasks/models.py:187-194`), not members of a family. Needed:
-   the field on the web, or the app hides archiving in the third way; the members of a home in
-   the feed, for assignment.
+   the field on the web (decided: archiving is added to the web); the members of a home in the
+   feed, for assignment, the phone standing for the signed-in account.
 10. **Files with the client's id.** Photos and attachments are uploaded as multipart with an id
     made by the server, then re-encoded (`rooms/api.py:474-500`, `rooms/images.py:75-101`,
     `tasks/api/attachments.py:153-160`); the same for the label of an article
@@ -257,8 +312,8 @@ additive changes). These are needs, not a design of the web: the web lot decides
 ## Consequences
 
 - The spec's principle "the only network peer is the relay the person chose" becomes "the relay
-  or the server the person chose"; the web API is no longer out of scope of the app, only
-  token management is, which stays on the web ([spec](../spec.md)).
+  or the server the person chose"; the web API is no longer out of scope of the app, only the
+  management of accesses is, which stays on the web ([spec](../spec.md)).
 - The first way stays complete on its own: an app that never leaves it has no network code
   running and no server to trust.
 - The third way depends on work on the web repository. It cannot be built against the API of
@@ -266,6 +321,11 @@ additive changes). These are needs, not a design of the web: the web lot decides
   lot of the web application, which the maintainer decides and which comes before the lot of
   the app.
 - A family that wants both, the web for some members and phones for others, uses the third
-  way for every phone; the second way is for families with no server. The two never mix in v1.
+  way for every phone; the second way is for families with no server. The two never mix.
+- The app needs a purchase flow before the third way can be turned on ([business
+  model](#business-model)), and the web needs the OAuth flow, the right to create homes and
+  `archived_at`, in the lot that starts now.
+- The Home Assistant add-on opens a port of its own for the app; that is a change in the
+  add-on's repository, tracked there.
 - The threat model gains an adversary for the third way, the server, which can read and change
   everything in its homes; the lot that plugs the third way in adds that section.

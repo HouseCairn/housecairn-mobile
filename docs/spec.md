@@ -97,7 +97,7 @@ vectors, [ADR 0001](adr/0001-flutter-stack-and-packages.md)):
 | What | Source | Why |
 | --- | --- | --- |
 | Sign-in, passkeys, single sign-on, provider required by a home | `accounts/`, `homes/models.py:53-58` | No accounts. |
-| Managing API tokens, instance settings, administrator, demonstration mode | `apitokens/`, `instance/`, `demo/` | No server in the app. A token made on the web is what the third way uses ([ADR 0010](adr/0010-three-ways-to-use-the-app.md)); it is made and revoked on the web. |
+| Managing API tokens, instance settings, administrator, demonstration mode | `apitokens/`, `instance/`, `demo/` | No server in the app. The third way signs in with OAuth 2 and PKCE ([ADR 0010](adr/0010-three-ways-to-use-the-app.md)); the accesses are listed and revoked on the web. |
 | Audit log | `audit/models.py:19-34` | A family log of who did what is the history of occurrences; the relay must not keep one. |
 | Events received from Home Assistant | `events/models.py:10-16` | Home Assistant is not in v1. |
 | Notification channels (Apprise) and web push devices | `notifications/models.py:30-50`, `:153-192` | Replaced by local notifications. |
@@ -113,9 +113,10 @@ At the first start the app offers three ways, one at a time per phone
 ([ADR 0010](adr/0010-three-ways-to-use-the-app.md), maintainer's decision of 2026-11-14):
 **alone on this phone** (the default, no network), **family sync** through the end-to-end
 encrypted relay (with a subscription on the hosted relay), and **my Housecairn server** (an
-instance and an API token; the server stores and reads the homes, which then also appear in its
-web pages). A way whose lot is not merged yet is shown, disabled. What each way guarantees, the
-moves between them and what the screen says are in ADR 0010.
+instance and a sign-in to it by OAuth 2 with PKCE; the server stores and reads all the homes of
+the phone, which then also appear in its web pages; unlocked by a single in-app purchase). A
+way whose lot is not merged yet is shown, disabled. What each way guarantees, the moves between
+them and what the screen says are in ADR 0010.
 
 ## Homes
 

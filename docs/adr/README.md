@@ -16,4 +16,4 @@ repository (`docs/adr/` there).
 | [0007](0007-license.md) | License: AGPL-3.0-only, with the NOTICE and CLA of the project | accepted |
 | [0008](0008-several-homes-one-family-space.md) | Several homes in v1: one encrypted space per family | proposed |
 | [0009](0009-early-testflight-builds.md) | TestFlight builds from `main`, from lot 1b on | proposed |
-| [0010](0010-three-ways-to-use-the-app.md) | Three ways to use the app: alone, family sync through the relay, a Housecairn server | proposed |
+| [0010](0010-three-ways-to-use-the-app.md) | Three ways to use the app: alone, family sync through the relay, a Housecairn server | accepted |
