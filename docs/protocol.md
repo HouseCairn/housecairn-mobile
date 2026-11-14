@@ -39,7 +39,6 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
 | Epoch key `E[e]` | 32 bytes | random, per epoch `e` ≥ 1 |
 | Batch key | 32 bytes | `kdf(E[e], id=1, ctx="hcbatch_")` |
 | Snapshot key | 32 bytes | `kdf(E[e], id=2, ctx="hcsnap__")` |
-| Settings key | 32 bytes | `kdf(E[e], id=3, ctx="hcconf__")` |
 | Blob key | 32 bytes | random, per blob, carried in the operation |
 | Recovery seed | 32 bytes | random; signing and box keys = `kdf(seed, 1, "hcrecov_")`, `kdf(seed, 2, "hcrecov_")` used as seeds |
 

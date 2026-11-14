@@ -1,0 +1,153 @@
+# Checks, tests and builds of the app (lot 1 of docs/plan.md), on every pull
+# request, every merge queue entry and every push to `main`. Job names are the
+# status checks a ruleset of `main` may require: rename them only together.
+#
+# No third-party action: Flutter is installed from its official archive by
+# .github/scripts/install-flutter.sh (pinned version, SHA-256 checked on every
+# run); actions/cache only keeps the downloads between runs. Every action is
+# pinned to a full commit SHA.
+name: CI
+
+on:
+  pull_request:
+  merge_group:
+    types: [checks_requested]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    name: Format, analyze, tests and licences
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Cache the Flutter archive
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/housecairn-ci/flutter-archives
+          key: flutter-archive-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/scripts/install-flutter.sh') }}
+      - name: Install Flutter (pinned, checksum verified)
+        run: .github/scripts/install-flutter.sh "$HOME/.cache/housecairn-ci/flutter-archives"
+      - name: Cache the pub packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+      - name: Get the locked packages (flutter pub get --enforce-lockfile)
+        run: flutter pub get --enforce-lockfile
+      - name: Generated files are up to date (gen-l10n, drift)
+        run: |
+          flutter gen-l10n
+          dart run build_runner build
+          dart run drift_dev schema generate drift_schemas/housecairn/ test/drift/housecairn/generated/
+          dart run drift_dev make-migrations
+          git status --porcelain
+          test -z "$(git status --porcelain)" || { git diff; echo "::error::Generated files differ from the committed ones: regenerate them."; exit 1; }
+      - name: Format (dart format)
+        run: dart format --output=none --set-exit-if-changed lib test tool
+      - name: Analyze (flutter analyze)
+        run: flutter analyze --fatal-infos
+      - name: Unit and widget tests (flutter test)
+        run: flutter test --reporter expanded
+      - name: Licences of every dependency (tool/check_licenses.dart)
+        run: dart run tool/check_licenses.dart
+      - name: CLA workflow script tests (node --test, no network)
+        # Node.js is preinstalled on the runner image; the tests use only
+        # Node's built-in modules.
+        run: node --test .github/scripts/cla.test.js
+
+  android:
+    name: Android build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Cache the Flutter archive
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/housecairn-ci/flutter-archives
+          key: flutter-archive-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/scripts/install-flutter.sh') }}
+      - name: Install Flutter (pinned, checksum verified)
+        run: .github/scripts/install-flutter.sh "$HOME/.cache/housecairn-ci/flutter-archives"
+      - name: Cache the pub packages and Gradle
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.pub-cache
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: android-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'android/**/*.gradle.kts', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Get the locked packages
+        run: flutter pub get --enforce-lockfile
+      - name: Build the APK (release mode, signed with the debug key)
+        # Not for distribution: the release signing key comes with lot 8. The
+        # debug signature lets the maintainer install it on a phone (Device).
+        run: flutter build apk --release
+      - name: The Android package is app.housecairn.mobile (from the APK)
+        run: |
+          apk=build/app/outputs/flutter-apk/app-release.apk
+          aapt2=$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f | sort -V | tail -n 1)
+          "$aapt2" dump badging "$apk" > "$RUNNER_TEMP/badging.txt"
+          grep -E "^(package|application-label|sdkVersion|targetSdkVersion|uses-permission|locales)" "$RUNNER_TEMP/badging.txt"
+          package=$(sed -n "s/^package: name='\([^']*\)'.*/\1/p" "$RUNNER_TEMP/badging.txt")
+          echo "Android package: $package"
+          test "$package" = "app.housecairn.mobile"
+          sha256sum "$apk"
+      - name: Keep the APK (14 days)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: housecairn-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 14
+          if-no-files-found: error
+
+  ios:
+    name: iOS build (unsigned)
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Cache the Flutter archive
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/housecairn-ci/flutter-archives
+          key: flutter-archive-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/scripts/install-flutter.sh') }}
+      - name: Install Flutter (pinned, checksum verified)
+        run: .github/scripts/install-flutter.sh "$HOME/.cache/housecairn-ci/flutter-archives"
+      - name: Cache the pub packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+      - name: Get the locked packages
+        run: flutter pub get --enforce-lockfile
+      - name: Build for iOS without signing
+        # No certificate, no secret: the build is not installable on an
+        # iPhone (see the Device steps of the pull request of lot 1).
+        run: |
+          xcodebuild -version
+          flutter build ios --release --no-codesign
+      - name: The iOS bundle id is app.housecairn.mobile (from the .app)
+        run: |
+          plist=build/ios/iphoneos/Runner.app/Info.plist
+          bundle=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$plist")
+          echo "iOS bundle id: $bundle"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleLocalizations' "$plist"
+          test "$bundle" = "app.housecairn.mobile"

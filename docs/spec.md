@@ -217,7 +217,7 @@ all homes together, counting photos, files and the sync data.
 - **Export**: one file, `.hcbackup`, with every row (deleted ones included, so that an import
   cannot resurrect them), every photo and file of **every home** of the phone, archived ones
   included, and the members, encrypted with a passphrase (Argon2id,
-  then XChaCha20-Poly1305 secretstream; format in [protocol.md](protocol.md#backup-file)).
+  then XChaCha20-Poly1305 secretstream; format in [protocol.md](protocol.md#5-backup-file)).
   The app proposes a generated passphrase of six words and says that a lost passphrase loses
   the file. Shared through the system share sheet; the app never uploads it.
 - **Import**: into an empty app (everything back as it was), or **as a copy** of the homes

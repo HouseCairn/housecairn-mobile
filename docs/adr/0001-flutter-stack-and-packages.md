@@ -22,6 +22,7 @@ Dart 3, Material 3 widgets with the Housecairn design tokens. No web or desktop 
 
 | Need | Package | Version, date | Publisher | License | Platforms | Page |
 | --- | --- | --- | --- | --- | --- | --- |
+| Material and Cupertino widgets, outside the SDK since Flutter 3.47 | material_ui (with cupertino_ui) | 1.11.0, 2026-11-09; 1.1.6, 2026-11-03 | flutter.dev | BSD-3-Clause | all | <https://pub.dev/packages/material_ui> |
 | Typed SQLite, migrations | drift | 2.35.4, 2026-11-08 | simonbinder.eu (verified), Flutter Favorite | MIT | Android, iOS, others | <https://pub.dev/packages/drift> |
 | Opening the database in Flutter | drift_flutter | 0.3.1, 2026-07-11 | simonbinder.eu | MIT | Android, iOS, others | <https://pub.dev/packages/drift_flutter> |
 | SQLite itself, bundled by build hooks | sqlite3 | 3.9.1, 2026-11-08 | simonbinder.eu | MIT | Android, iOS, others | <https://pub.dev/packages/sqlite3> |
@@ -92,5 +93,9 @@ Dart 3, Material 3 widgets with the Housecairn design tokens. No web or desktop 
 - Native code is built by hooks (`sqlite3`, `sodium`): CI needs the Android NDK and, for iOS,
   a macOS runner.
 - A package that loses its maintainer is replaced behind the app's own interfaces
-  (`Db`, `Crypto`, `Notifier`, `Store`), which the lots define first.
+  (`Db`, `Crypto`, `Notifier`, `Store`), which the lots define first. Lot 1 defines them in
+  `lib/core/`: `Db` the local database (drift), `Crypto` the primitives of
+  [protocol.md](../protocol.md) section 1 (sodium), `Notifier` the local notifications
+  (flutter_local_notifications), `Store` the secrets at rest in the Keychain or Keystore
+  (flutter_secure_storage); and `Clock`, the time of the phone, so that tests choose it.
 - `firebase_messaging` brings Google Play services on Android; the store listing says so.

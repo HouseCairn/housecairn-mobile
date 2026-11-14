@@ -1,0 +1,34 @@
+name: housecairn_mobile
+description: "Housecairn for iOS and Android: home upkeep and works, on the phone."
+publish_to: 'none'
+version: 0.0.1+1
+
+environment:
+  sdk: ^3.14.0
+  flutter: 3.50.0
+
+# Every package here is listed in docs/adr/0001-flutter-stack-and-packages.md.
+# Lot 1 takes only what it uses; the others come with their lots. Every
+# dependency, direct or transitive, is checked against tool/licenses/allowed-licenses.txt
+# (tool/check_licenses.dart, run in CI).
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  material_ui: ^1.1.0
+  drift: ^2.35.4
+  drift_flutter: ^0.3.1
+  sqlite3: ^3.9.1
+  intl: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  drift_dev: ^2.35.0
+  build_runner: ^2.4.0
+
+flutter:
+  uses-material-design: true
+  generate: true
