@@ -268,7 +268,8 @@ on the sync API of a Housecairn server (the web application or the Home Assistan
 screens address, sign-in and confirmation, with the sentence that the server reads the homes;
 the **sign-in by OAuth 2 with PKCE in the browser**, the homes covered by the access chosen
 there, an access revocable per device, the credential in `Store`; **HTTPS**, and `http://` only
-towards a local address (private networks, `.local`) with a clear warning; the moves alone to
+towards a local IP literal (the rule of [protocol section 2.10](protocol.md#210-with-a-housecairn-server),
+never a name, not even `.local`) with a clear warning; the moves alone to
 server (**keep this phone's homes** into empty homes the phone creates under its access's right,
 or **keep the server's homes** after an export is offered; with data on both sides the person
 must choose one, never a merge) and server to alone; the files of photos and attachments; the
@@ -292,8 +293,14 @@ is on the server in this way: no relay next to it, no home kept only on the phon
   repeated creates no duplicate. Take: the local homes are removed only after the export was
   offered and the confirmation typed; cancelling leaves the phone as it was.
 - Disconnect removes the credential of the access from `Store`; unsent changes are listed first.
+- After a 410 the phone reconciles by the rule of
+  [protocol section 2.10](protocol.md#210-with-a-housecairn-server), each case a named test: a
+  row created offline and never seen by the server is sent again, a row deleted by someone else
+  during the absence and purged is deleted on the phone, a waiting change to a purged row is
+  dropped and listed, a waiting change to a row still there is decided field by field.
 - No request goes to another host than the address typed; `http://` is refused unless the host
-  is a local address (private ranges, `.local`), and then a warning is shown first; a
+  is a local IP literal (protocol section 2.10; a name, `.local` included, is refused), and
+  then a warning is shown first; a
   certificate error is shown and cannot be skipped; the credential is never in a log, the
   database or an export (tests).
 - The sign-in uses the system browser with PKCE, and no token is typed or pasted; revoking the

@@ -4,7 +4,11 @@
   2026-11-14, and so are the answers to the questions this record raised (questions 4 to 14,
   same day), written in [Decisions of the maintainer](#decisions-of-the-maintainer-2026-11-14).
   What each way guarantees, the moves between them and the architecture were proposed here and
-  are accepted with them.
+  are accepted with them. The rules of the third way that the web decided with the maintainer
+  on 2026-11-14 (web ADR 0077 to 0079,
+  [HouseCairn/housecairn#140](https://github.com/HouseCairn/housecairn/pull/140)) are in
+  [The third way, as the web decided it](#the-third-way-as-the-web-decided-it) and in
+  [protocol section 2.10](../protocol.md#210-with-a-housecairn-server).
 - Date: 2026-11-14
 - Amends: [ADR 0003](0003-sync-protocol.md) and [ADR 0005](0005-relay-server.md), which left
   "a Housecairn instance acting as the relay" for after v1. That idea is replaced by the third
@@ -56,10 +60,14 @@ are written with these answers; this list is the short form, and wins over any o
 - **Sign-in (question 6).** **OAuth 2 with PKCE in the browser**, as web ADR 0007 planned for
   the mobile app. The access is **revocable per device**. There is **no API token to copy**
   and paste.
-- **Network (question 8).** HTTPS everywhere. `http://` only towards a local address (private
-  networks, `.local`), with a clear warning. The Home Assistant add-on will **open a port of
-  its own** for the app, since its Ingress needs a Home Assistant sign-in; that change is
-  made in the add-on, not here.
+- **Network (question 8).** HTTPS everywhere. `http://` only towards a local address, with a
+  clear warning. "Local" is the rule of web ADR 0078, written once and applied by both sides
+  ([protocol section 2.10](../protocol.md#210-with-a-housecairn-server)): an IP literal that
+  is not a public address; **a name, `.local` included, needs HTTPS**, since a `.local` answer
+  can be forged by anyone on the network. The Home Assistant add-on will **open a port of its
+  own** for the app, since its Ingress needs a Home Assistant sign-in, with HTTPS on it as an
+  option (the certificate Home Assistant keeps in `/ssl`); that change is made in the add-on,
+  not here.
 - **Business model (question 9).** The app is free, with the first way complete. The hosted
   relay is a subscription. **The third way is unlocked by a single in-app purchase.** This is
   the principle only: no price here, and nothing about store accounts. The AGPL licence
@@ -68,7 +76,9 @@ are written with these answers; this list is the short form, and wins over any o
 - **Order (question 10).** The third way (lot 4b) is **required before the public beta
   (lot 8)**.
 - **Archiving (question 12).** Archiving a home will be **added to the web** (`archived_at`),
-  so the third way does not hide it.
+  so the third way does not hide it. On a server, **only the owners** of a home archive it, as
+  on the web; the app offers it to owners only in the third way, and the server refuses it
+  from anyone else (`forbidden`).
 - **Members (question 13).** The phone always stands for **the signed-in account**. Its
   reminders cover **its tasks and those with no assignee**.
 - **The web lot (question 14).** The lot of the web application for the sync API **starts
@@ -117,8 +127,9 @@ household runs itself, that operator is the household.
 What the app still guarantees in the third way:
 
 - **HTTPS**, with the system's certificate checks; the app never offers to skip them. The one
-  exception is `http://` towards a **local address** (private networks, `.local`), shown with
-  a clear warning that the traffic can be read on that network;
+  exception is `http://` towards a **local address** (an IP literal that is not public, by the
+  rule of [protocol section 2.10](../protocol.md#210-with-a-housecairn-server); never a name,
+  not even `.local`), shown with a clear warning that the traffic can be read on that network;
 - the **credential of the sign-in is kept in the Keychain or the Android Keystore** (`Store`,
   [ADR 0002](0002-local-storage-and-migrations.md)), never in the database, never in an
   export, never in a log;
@@ -203,7 +214,7 @@ phone, so neither way needs a migration of the data to start.
 | --- | --- | --- |
 | `capabilities()` | `GET /v1/info` | the server's version and sync capabilities |
 | `push(operations)` | one sealed batch | one request applied as a whole; the answer gives, for each field that lost, the value that won |
-| `pull(after: cursor)` | batches after `pos`; "start again" on 410, from the snapshot | changes after the server's cursor; "start again" when the cursor is too old, from a full download of the homes |
+| `pull(after: cursor)` | batches after `pos`; "start again" on 410, from the snapshot | changes after the server's `pos`; on 410, the server's snapshot and the reconciliation rule of [protocol section 2.10](../protocol.md#210-with-a-housecairn-server), by the mark "seen by the server" |
 | `putFile`, `getFile`, `deleteFile` | blobs, encrypted with their own key | the files of the server's photos and attachments, in clear |
 | `homesGone()` | `purge` records of the membership log | homes deleted on the server, or no longer covered by the access |
 
@@ -223,10 +234,35 @@ other.
 same table; the credential of the access in `Store`. No migration.
 
 **Files.** The file reference of protocol section 2.9 names a blob and its key. With a server it
-names a file of the server; the exact form is decided by lot 4b with the web lot, since it
-depends on how the server stores files. A photo is re-encoded on the phone before anything
+names a file of the server, in the form web ADR 0077 decided and
+[protocol section 2.10](../protocol.md#210-with-a-housecairn-server) states: a UUID made by the
+phone, the SHA-256 of the bytes, no key. A photo is re-encoded on the phone before anything
 else in every way ([spec](../spec.md#photos-and-files)); a server that re-encodes again keeps its
 own copy, and the phone keeps its own.
+
+### The third way, as the web decided it
+
+Web ADR 0077 to 0079 ([HouseCairn/housecairn#140](https://github.com/HouseCairn/housecairn/pull/140))
+answer the needs listed below, with decisions of the maintainer of 2026-11-14 that change what
+the app does in the third way. They are written in
+[protocol section 2.10](../protocol.md#210-with-a-housecairn-server); in short:
+
+- **Deletions are kept 400 days** on the server, not forever as on the relay. A phone away
+  longer starts again from the server's snapshot and reconciles each row by a mark "seen by
+  the server" that it keeps per row: a row the server saw and the snapshot lacks is deleted,
+  a row the server never saw is sent again, waiting changes are pushed and decided field by
+  field. The promise of [ADR 0003](0003-sync-protocol.md) that nobody resurrects what others
+  deleted holds with that rule.
+- **The server keeps the fields it does not know** and gives them to the other phones, as every
+  receiver of the protocol must.
+- **The server writes as a device** with an id of 16 bytes, given by `info` as `server_device`,
+  so ties of clocks are broken the same way on both sides.
+- **Row ids are unique on the server**: a phone never gives one id to two rows, in two homes
+  or two types (`id_taken` otherwise).
+- **Only owners archive** a home (above).
+- **`http://` only to a local IP literal**, by the web's rule (above).
+- The words of the transport: `pos` is the server's cursor, `push` numbers a push to the
+  server, `seq` stays the relay's number of a device's batches.
 
 ## What the web API lacks for the third way
 

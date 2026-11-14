@@ -50,7 +50,10 @@ the settings of the space are family-wide and have no home.
 another field never brings a row back; only an explicit *restore* with a later clock does.
 Children of a deleted row are hidden on read and come back with it. Tombstones are never
 dropped from snapshots (a row id and a clock: a few dozen bytes), so a phone that was offline
-for a year cannot resurrect what others deleted.
+for a year cannot resurrect what others deleted. A Housecairn server (the third way of
+[ADR 0010](0010-three-ways-to-use-the-app.md)) keeps them 400 days instead, and a phone away
+longer keeps the same promise by the reconciliation rule of
+[protocol section 2.10](../protocol.md#210-with-a-housecairn-server).
 
 **Deleting a home is a purge**, final like the web's (`homes/services.py:239-252`), not a soft
 delete: a record `purge` in the membership log, signed by an admin
@@ -70,7 +73,16 @@ namespace of the home the row belongs to (`h`), so the same name in two homes gi
 - material line: `uuid5(home, "material:" + task_id + ":" + article_id)`;
 - material draw: `uuid5(home, "draw:" + occurrence_id + ":" + article_id)`;
 - annual envelope: `uuid5(home, "envelope:" + year)`;
-- link rows: `uuid5(home, "<table>:" + a + ":" + b)`.
+- rooms of a project: `uuid5(home, "projects.project_rooms:" + project_id + ":" + room_id)`;
+- rooms of an article: `uuid5(home, "stock.article_rooms:" + article_id + ":" + room_id)`;
+- compatible items of an article:
+  `uuid5(home, "stock.article_compatible_items:" + article_id + ":" + item_id)`.
+
+The names are UTF-8, ids in the lower-case canonical text of a UUID, the year in four decimal
+digits; a link row is named by its entity type `t` (protocol section 2.2), then the id of the
+row that owns the link, then the other one. The web computes the same ids (web ADR 0077) and
+publishes vectors of them, which this repository pins and compares as it does the recurrence
+vectors.
 
 **Invariants across rows are checked on read, repaired deterministically, never enforced by
 refusing a merge.** After applying a batch the phone runs repair rules whose result depends

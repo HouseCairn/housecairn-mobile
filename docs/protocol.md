@@ -7,7 +7,9 @@
 - Words: **space** = the encrypted copy of one family's data on a relay, every home of the
   family included ([ADR 0008](adr/0008-several-homes-one-family-space.md)); **home** = a row
   `homes.home` inside the space; **device** = one install of the app on one phone; **relay** =
-  any server that implements section 3.
+  any server that implements section 3; **server mode** = the third way of
+  [ADR 0010](adr/0010-three-ways-to-use-the-app.md), the same operations in clear to the sync
+  API of a Housecairn server (section 2.10).
 
 The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
 
@@ -63,7 +65,10 @@ An operation is a JSON object:
 - `h`: id of the home the row belongs to. REQUIRED for every type except `family.*`, where it
   is absent; for `homes.home`, `h` equals `id`. A row never changes home. Rows are keyed by
   `(t, h, id)`: the same `id` in two homes is two rows. A foreign key to a row of another home is
-  invalid: receivers keep it and read it as empty.
+  invalid: receivers keep it and read it as empty. **In the server mode** the server keys rows
+  by `id` alone: a phone MUST NOT give one `id` to two rows, in two homes or in two types (a
+  random UUID version 4, or `uuid5` in the namespace of the home, never collides), and a `put`
+  that would create such a row is rejected with `id_taken` (section 2.10).
 - `id`: row id: random UUID version 4, or deterministic (ADR 0003): `uuid5(h, name)`, so that
   deterministic ids never collide across homes.
 - `k`: `put` (set the fields in `f`), `delete` (sets `deleted_at`), `restore` (clears it).
@@ -72,8 +77,10 @@ An operation is a JSON object:
   Values: string, number, boolean, `null`; amounts and quantities as decimal strings (`"12.50"`);
   dates `"YYYY-MM-DD"`; instants as HLC strings. A photo or file field holds a **file
   reference** `{"blob": b64, "key": b64, "size": n, "type": "image/jpeg", "width": n,
-  "height": n}` (section 2.9); `width` and `height` only for images.
-- A receiver MUST keep fields it does not know and MUST NOT drop the operation.
+  "height": n}` (section 2.9); `width` and `height` only for images. In the server mode the
+  reference has another form, given in section 2.10.
+- A receiver MUST keep fields it does not know and MUST NOT drop the operation. A Housecairn
+  server does too: it keeps them in `extra` and gives them to the other phones (web ADR 0077).
 
 **Apply** (every phone, same result in any order): for each field of `f`, write the value if
 `(c, device)` is greater than the stored clock of that field, and store the new clock. `delete`
@@ -89,7 +96,11 @@ read is erased with the rest, so the result does not depend on the order. There 
 `restore` of a purged home.
 
 `homes.home` has one field of the app that the web model does not have: `archived_at` (HLC
-string or `null`), last writer wins.
+string or `null`), last writer wins. **In the server mode only an owner of the home may set
+it**, as on the web: the app offers archiving to owners only, and an operation that sets it,
+pushed by the phone of a member who is not an owner, is rejected with `forbidden`, the whole
+operation. The server stores the time of the HLC for its pages and gives back the HLC string
+exactly as it was sent.
 
 ### 2.3 Batch
 
@@ -221,6 +232,74 @@ label photo, `reports.report`, `projects.projectfile`, `tasks.attachment`).
   blobs older than 7 days that no row of any home references, live or deleted less than 30
   days ago. A purged home has no row left, so its blobs are orphans too: a phone that finds
   some (the purging phone died before deleting them) deletes them at once.
+
+### 2.10 With a Housecairn server
+
+The server mode ([ADR 0010](adr/0010-three-ways-to-use-the-app.md)) sends the operations of
+section 2.2, in clear, to the sync API of a Housecairn server: web ADR 0077 for the API and its
+merge, web ADR 0078 for the sign-in, both in
+[HouseCairn/housecairn#140](https://github.com/HouseCairn/housecairn/pull/140). Everything of
+sections 1 and 2.2 holds; the differences are these.
+
+- **The server's device id.** The server writes the edits made on the web as one device: 16
+  random bytes, made once per instance, given by its `GET /api/v1/sync/info` as
+  `server_device` in `b64`. Ties of HLC are broken by device id bytes (section 1), the server's
+  included, the same on both sides.
+- **Three numbers.** `seq` (section 2.3) numbers the batches of a device on a relay and is not
+  used with a server. The server's position in the change feed of a home is `pos`, the phone's
+  cursor, as `pos` is on a relay (section 3.3). The phone numbers each push to the server with
+  `push`, per connection, so that a push sent twice runs once.
+- **Ids** are unique on the server (section 2.2, `id_taken`). The deterministic ids are those
+  of [ADR 0003](adr/0003-sync-protocol.md), with the exact names of its table, and the web
+  computes the same ones.
+- **File reference**: `{"file": uuid, "sha256": hex, "size": n, "type": "image/jpeg",
+  "width": n, "height": n}`. `file` is a UUID made by the phone (instead of the 16 bytes of
+  `blob`), there is no `key` since the server stores the file in clear, and `sha256` in
+  lower-case hexadecimal names the bytes so that an upload sent twice is recognised. The file
+  is uploaded before the push that references it, as with the relay. A phone keeps the form of
+  the way it is in.
+- **`archived_at`**: owners only (section 2.2).
+- **Tombstones are kept 400 days**, not forever as on the relay ([ADR 0003](adr/0003-sync-protocol.md)),
+  and the changes of the feed as long. A cursor older than that gets 410 `cursor_expired`,
+  and the phone starts again from the server's snapshot by the rule below.
+- **An erased home** answers 410 `home_gone` on every route of that home: the phone erases it as
+  a purge (section 2.2) and drops every operation of it.
+
+**Starting again after 410.** The phone keeps, per row and outside the row's fields (in its sync
+tables, never synced), a mark **seen by the server**. It sets the mark when the row arrives in
+the feed or in a snapshot, and when the result of a push for an operation of that row is
+`applied`, `ignored` or `repaired`; a `rejected` result, or a push whose answer never came,
+does not set it (sending the same push again with the same number gets the first answer, and
+sets it then). After 410 the phone reads the snapshot, then for every row of the home it holds:
+
+1. a row in the snapshot is merged field by field, as any incoming change, and gets the mark;
+2. a row absent from the snapshot that has the mark was deleted, then purged, on the server: the
+   phone deletes it, its children and its local files, and drops the operations of it still
+   waiting to be sent, a `restore` included; a long text so dropped goes to the "other version"
+   list, and the app lists what it dropped;
+3. a row absent from the snapshot without the mark was made on the phone and never reached the
+   server: the phone keeps it and sends it again as a `put` of every field with its clock;
+4. operations still waiting for the rows of rules 1 and 3 are pushed as usual, and the server
+   decides each field;
+5. rows of the snapshot the phone did not have are added, tombstones included, and the cursor
+   becomes the snapshot's `covers`.
+
+So a phone back after more than 400 days cannot bring back what others deleted, and loses
+nothing it made that the server never had. The one case the rule gets wrong: a push the server
+applied whose answer was lost, never sent again within the 30 days the server keeps a push
+number, and whose row someone else deleted and the purge then removed, comes back once by rule
+3, and the person deletes it again.
+
+**Plain HTTP between local addresses.** The rule is written once, in web ADR 0078 (section
+"HTTPS, and plain HTTP between local addresses"), and this app applies the part it can see
+before it sends anything: `http://` is allowed only when the address the person typed is an IP
+literal that is not a public address by the rule of the web's `core.netguard.is_public`
+(loopback, private networks, unique local IPv6, link-local, the shared space 100.64.0.0/10, the
+documentation ranges; an IPv6 address that carries an IPv4 one judged by the IPv4 address).
+A name, `.local` and `.home.arpa` included, needs `https://`: a name says nothing of where the
+request goes, and a `.local` answer can be forged by anyone on the network. The server checks
+the rest (the peer's address, through trusted proxies only). Every plain HTTP connection is
+shown with the warning of ADR 0010.
 
 ## 3. Relay HTTP API
 
