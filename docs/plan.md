@@ -388,3 +388,33 @@ Choices of the maintainer, still open. Nothing in these documents sets a price.
 3. **End of a subscription**: proposed in [ADR 0006](adr/0006-subscription.md), 30 days during
    which the space is read only, then deletion, with notices at 7 days and 1 day; to confirm
    or change.
+
+Raised by [ADR 0010](adr/0010-three-ways-to-use-the-app.md), the three ways to use the app:
+
+4. **Two ways at once**: may a phone connected to a Housecairn server also join a family on the
+   relay? May a phone keep homes that stay on the phone only, next to the homes of a server?
+   ADR 0010 proposes neither in v1.
+5. **What the token opens**: the homes chosen when it is made, as web tokens are today, or every
+   home of the account, those created later included?
+6. **Which credential**: the API token the maintainer named, or the OAuth 2 flow with PKCE that
+   web ADR 0007 planned for the mobile app? With a token, its lifetime (90 days by default on
+   the web) and how the phone renews it.
+7. **Sending a home the server does not have**: is the home first made on the web, empty, and
+   bound to the token, or may the phone create homes on the server (a token right that does not
+   exist today)?
+8. **Plain HTTP and the Home Assistant add-on**: is `http://` accepted on a local network, or
+   HTTPS only? The add-on's ingress page needs a sign-in to Home Assistant, which a Housecairn
+   token cannot give: does the add-on expose a port of its own for the app?
+9. **Price of the third way**: free, since no service of the publisher is used, or part of a
+   subscription?
+10. **v1.0 or after**: is lot 4b required before the beta (lot 8) and the publication (lot 9), or
+    may it ship after 1.0?
+11. **Later moves**: merging a phone's homes with a server's when both have data, and a direct
+    move between family sync and a server: after v1, as ADR 0010 proposes?
+12. **Archiving a home with a server**: add `archived_at` to the web model, or hide archiving in
+    the third way?
+13. **Members with a server**: the server's accounts of each home stand for the members; which
+    of them does a phone remind, and is a phone always the account of its token?
+14. **The web lot**: when is the sync API of the web opened as a lot, and is its shape (one feed
+    of operations as in [protocol.md](protocol.md#22-operations), or the REST resources of
+    `/api/v1/` extended) decided there, as ADR 0010 assumes?
