@@ -35,6 +35,20 @@ on:
     types: [checks_requested]
   push:
     branches: [main]
+    # Only what changes the delivered app sends a build: a merge of
+    # documentation, issue forms or tests uploads nothing. Keep in step with
+    # .github/scripts/app-changed.sh. A manual run is never filtered.
+    paths:
+      - lib/**
+      - ios/**
+      - assets/**
+      - fonts/**
+      - pubspec.yaml
+      - pubspec.lock
+      - l10n.yaml
+      - build.yaml
+      - .github/scripts/install-flutter.sh
+      - .github/workflows/ios-testflight.yml
   workflow_dispatch:
 
 permissions:
