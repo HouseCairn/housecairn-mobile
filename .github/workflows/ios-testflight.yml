@@ -42,8 +42,9 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  # An upload in progress is never cancelled; uploads of `main` run one after
-  # the other.
+  # An upload in progress is never cancelled. A run of `main` waiting behind it is
+  # replaced by a newer one, so some merges send no build; the newest run always
+  # has the highest build number.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
