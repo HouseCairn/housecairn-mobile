@@ -4,17 +4,35 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
 import '../core/db.dart';
+import 'database.steps.dart';
+import 'tables.dart';
+
+export 'tables.dart';
 
 part 'database.g.dart';
 
 /// The one SQLite database of the app (docs/adr/0002-local-storage-and-migrations.md).
 ///
-/// Schema 1 has no table yet: the tables of homes, rooms, items and tasks,
-/// and `field_clock`, come with lot 2. Migrations are drift's guided
-/// migrations: `dart run drift_dev make-migrations` keeps one schema file per
-/// version in `drift_schemas/` and generates the migration tests under
-/// `test/drift/`.
-@DriftDatabase(tables: [])
+/// Schema 1 had no table. Schema 2 (lot 2a) has the homes, rooms, items,
+/// photos, contractors, tasks and occurrences, `field_clock` and the local
+/// settings of the phone (lib/data/tables.dart). Migrations are drift's
+/// guided migrations: `dart run drift_dev make-migrations` keeps one schema
+/// file per version in `drift_schemas/` and generates the step-by-step code
+/// (`database.steps.dart`) and the migration tests under `test/drift/`.
+/// Every write goes through the repository (lib/data/repository.dart).
+@DriftDatabase(
+  tables: [
+    Homes,
+    Rooms,
+    Items,
+    Photos,
+    Contractors,
+    Tasks,
+    Occurrences,
+    FieldClock,
+    LocalSettings,
+  ],
+)
 class AppDatabase extends _$AppDatabase implements Db {
   AppDatabase(super.executor);
 
@@ -24,17 +42,32 @@ class AppDatabase extends _$AppDatabase implements Db {
       AppDatabase(driftDatabase(name: 'housecairn'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
     onUpgrade: (m, from, to) async {
-      // Schema 1 is the first: a file at another version (one written by a
-      // newer app, as a downgrade is also an upgrade call) is refused, never
-      // opened as if it were schema 1. Lot 2 adds the generated `stepByStep`
-      // of database.steps.dart for its own versions.
-      throw StateError('No migration from schema $from to $to.');
+      // A file of a newer app (a downgrade is also an upgrade call) is
+      // refused, never opened as if it were of this schema.
+      if (from > to || to != schemaVersion) {
+        throw StateError('No migration from schema $from to $to.');
+      }
+      await m.runMigrationSteps(
+        from: from,
+        to: to,
+        steps: migrationSteps(
+          from1To2: (m, schema) async {
+            for (final table
+                in schema.entities.whereType<TableInfo<Table, dynamic>>()) {
+              await m.createTable(table);
+            }
+            for (final index in schema.entities.whereType<Index>()) {
+              await m.create(index);
+            }
+          },
+        ),
+      );
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
