@@ -69,7 +69,9 @@ page). The job runs on `macos-26` and selects `/Applications/Xcode_26.6.app` by 
 checks the major version.
 
 **Build number** = `github.run_number` of this workflow, given to
-`flutter build ios --config-only --build-number`; the job checks it in the archive, with the
+`flutter build ios --config-only --no-codesign --build-number` (the runner has no signing
+certificate, and without `--no-codesign` Flutter looks for one before writing the project
+configuration); the job checks it in the archive, with the
 bundle id `app.housecairn.mobile`. The version name is the one of `pubspec.yaml`. The run number
 is counted per workflow file: renaming or recreating `ios-testflight.yml` restarts it at 1,
 below the builds already sent for the same version, and App Store Connect then refuses the

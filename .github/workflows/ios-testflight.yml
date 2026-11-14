@@ -142,7 +142,7 @@ jobs:
       - name: Get the locked packages
         run: flutter pub get --enforce-lockfile
       - name: Configure the Xcode project (build number from the run number)
-        run: flutter build ios --release --config-only --build-number "$BUILD_NUMBER"
+        run: flutter build ios --release --config-only --no-codesign --build-number "$BUILD_NUMBER"
       - name: Archive, unsigned (signing happens at export)
         run: |
           xcodebuild archive \
