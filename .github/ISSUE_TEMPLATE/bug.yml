@@ -1,0 +1,61 @@
+name: Something does not work
+description: Tell us what went wrong with the Housecairn mobile app.
+labels:
+  - bug
+assignees:
+  - Robvred
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for telling us. Short answers are fine.
+        For a security problem, do not use this form: see the security policy and report it privately.
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened?
+      description: Tell us what you did and what you saw.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we see it ourselves?
+      description: The steps, one per line.
+  - type: input
+    id: version
+    attributes:
+      label: "App version"
+      description: "The version number of the app. Write \"not sure\" if you do not know."
+    validations:
+      required: true
+  - type: dropdown
+    id: phone
+    attributes:
+      label: "Phone"
+      options:
+        - "iPhone"
+        - "Android phone"
+        - "Other"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: "Phone system version"
+      description: "For example: iOS 19 or Android 16."
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot (optional)
+      description: Drag a picture here. Hide anything private first.
+  - type: textarea
+    id: log
+    attributes:
+      label: "Error message (optional)"
+      description: "If the app showed an error message, copy it here. Remove addresses and names before you paste."
+      render: text
