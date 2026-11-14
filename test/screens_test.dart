@@ -344,8 +344,15 @@ void main() {
           await tester.tap(find.text('Second home'));
           await tester.pumpAndSettle();
           check('Home');
+          // The undo bar of "Skip this time" covers the Delete button at the
+          // large scale: close it so the tap really opens the dialog.
+          ScaffoldMessenger.of(
+            tester.element(find.byType(Scaffold).first),
+          ).removeCurrentSnackBar();
+          await tester.pumpAndSettle();
           await tester.tap(find.text(t('Delete', 'Supprimer')));
           await tester.pumpAndSettle();
+          expect(find.byType(AlertDialog), findsOneWidget);
           check('Delete a home');
           expect(offending, isEmpty);
         },
