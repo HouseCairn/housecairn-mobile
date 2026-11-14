@@ -6,7 +6,9 @@ plugins {
 
 android {
     namespace = "app.housecairn.mobile"
-    compileSdk = flutter.compileSdkVersion
+    // androidx.core 1.19 and flutter_local_notifications ask for API 37 or later
+    // to compile against (the check of the AAR metadata fails below it).
+    compileSdk = maxOf(flutter.compileSdkVersion, 37)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
