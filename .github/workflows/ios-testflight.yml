@@ -48,6 +48,8 @@ on:
       - l10n.yaml
       - build.yaml
       - .github/scripts/install-flutter.sh
+      - .github/scripts/app-changed.sh
+      - .github/scripts/check_testflight_config.py
       - .github/workflows/ios-testflight.yml
   workflow_dispatch:
 
