@@ -476,7 +476,7 @@ class Repository {
       }
     });
     final directory = homeDirectory(id);
-    if (directory.existsSync()) await directory.delete(recursive: true);
+    if (directory.existsSync()) directory.deleteSync(recursive: true);
   }
 
   // ---------- current home (this phone, `homes/current.py`) ----------

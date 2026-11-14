@@ -187,6 +187,474 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open source licences'**
   String get aboutLicences;
+
+  /// Heading of the group Household of the More screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Household'**
+  String get moreHouseholdGroup;
+
+  /// Entry of More and title of the Homes screen. Web catalogue: Logements.
+  ///
+  /// In en, this message translates to:
+  /// **'Homes'**
+  String get homes;
+
+  /// Tooltip of the home selector of the app bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a home'**
+  String get homeSelectorTooltip;
+
+  /// Choice of the home selector on Today: the tasks of every active home. Web catalogue: Tous les logements.
+  ///
+  /// In en, this message translates to:
+  /// **'All homes'**
+  String get allHomes;
+
+  /// Group of Today: tasks whose date has passed. Web catalogue: En retard.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get todayOverdue;
+
+  /// Group of Today: tasks due within the coming week. Web catalogue: À venir.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming up'**
+  String get todayComingUp;
+
+  /// Group of Today, and the date of a task that has none. Web catalogue: Sans date.
+  ///
+  /// In en, this message translates to:
+  /// **'No date'**
+  String get todayNoDate;
+
+  /// Shown on Today when no task is due.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to do for now.'**
+  String get todayEmpty;
+
+  /// Date of an open task on Today.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {date}'**
+  String dueOn(String date);
+
+  /// Date of a postponed task on Today, and message after postponing. Web catalogue: Reportée.
+  ///
+  /// In en, this message translates to:
+  /// **'Postponed to {date}'**
+  String postponedTo(String date);
+
+  /// Second line of a task on Today with All homes: the name of its home, then its date.
+  ///
+  /// In en, this message translates to:
+  /// **'{home} · {when}'**
+  String rowInHome(String home, String when);
+
+  /// Button that marks a task done in one tap. Web catalogue: Fait.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get actionDone;
+
+  /// Tooltip of the menu of a task on Today.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get actionMore;
+
+  /// Closes a task without doing it this time. Web catalogue: Ignorer cette fois.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip this time'**
+  String get actionSkip;
+
+  /// Moves a task to a later day. Web catalogue: Reporter.
+  ///
+  /// In en, this message translates to:
+  /// **'Postpone'**
+  String get actionPostpone;
+
+  /// Message of the undo bar after a task was marked done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done: {title}'**
+  String doneMessage(String title);
+
+  /// Message of the undo bar after a task was skipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped: {title}'**
+  String skippedMessage(String title);
+
+  /// Action of the undo bar: takes back the last done or skip. Web catalogue: Annuler.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// Button and title of the screen that creates a task. Web catalogue: Nouvelle tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'New task'**
+  String get newTask;
+
+  /// Title of the screen of an existing task. Web catalogue: Tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'Task'**
+  String get task;
+
+  /// Field of the task form, the only one required. Web catalogue: Titre.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get taskTitle;
+
+  /// Field of the task form. Web catalogue: Échéance.
+  ///
+  /// In en, this message translates to:
+  /// **'Due date'**
+  String get taskDueDate;
+
+  /// Button of the task form that opens the calendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a date'**
+  String get taskChooseDate;
+
+  /// Button of the task form that removes the due date.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the date'**
+  String get taskClearDate;
+
+  /// Field of the task form. Web catalogue: Répétition.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get repeat;
+
+  /// Choice of Repeat. Web catalogue: Une fois.
+  ///
+  /// In en, this message translates to:
+  /// **'Once'**
+  String get repeatOnce;
+
+  /// Choice of Repeat. Web catalogue: Date fixe.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed date'**
+  String get repeatFixed;
+
+  /// Choice of Repeat. Web catalogue: Après la dernière fois.
+  ///
+  /// In en, this message translates to:
+  /// **'After the last time'**
+  String get repeatAfterLast;
+
+  /// Field of the task form: the interval of the repetition. Web catalogue: tous les.
+  ///
+  /// In en, this message translates to:
+  /// **'Every'**
+  String get repeatEvery;
+
+  /// Unit of the repetition. Web catalogue: jours.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get unitDays;
+
+  /// Unit of the repetition. Web catalogue: semaines.
+  ///
+  /// In en, this message translates to:
+  /// **'weeks'**
+  String get unitWeeks;
+
+  /// Unit of the repetition. Web catalogue: mois.
+  ///
+  /// In en, this message translates to:
+  /// **'months'**
+  String get unitMonths;
+
+  /// Unit of the repetition. Web catalogue: ans.
+  ///
+  /// In en, this message translates to:
+  /// **'years'**
+  String get unitYears;
+
+  /// Field of the task form. Web catalogue: Saison.
+  ///
+  /// In en, this message translates to:
+  /// **'Season'**
+  String get season;
+
+  /// Choice of Season: no season.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole year'**
+  String get seasonWholeYear;
+
+  /// Choice of Season. Web catalogue: Printemps.
+  ///
+  /// In en, this message translates to:
+  /// **'Spring'**
+  String get seasonSpring;
+
+  /// Choice of Season. Web catalogue: Été.
+  ///
+  /// In en, this message translates to:
+  /// **'Summer'**
+  String get seasonSummer;
+
+  /// Choice of Season. Web catalogue: Automne.
+  ///
+  /// In en, this message translates to:
+  /// **'Autumn'**
+  String get seasonAutumn;
+
+  /// Choice of Season. Web catalogue: Hiver.
+  ///
+  /// In en, this message translates to:
+  /// **'Winter'**
+  String get seasonWinter;
+
+  /// Choice of Season, for a task whose season has its own months. Web catalogue: Mois personnalisés.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom months'**
+  String get seasonCustom;
+
+  /// Field of the task form. Web catalogue: Notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get taskNotes;
+
+  /// Heading of the preview of the next five dates of a task that repeats.
+  ///
+  /// In en, this message translates to:
+  /// **'Next dates'**
+  String get taskNextDates;
+
+  /// Heading of the past occurrences of a task. Web catalogue: Historique.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get taskHistory;
+
+  /// A past occurrence that was done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done on {date}'**
+  String historyDone(String date);
+
+  /// A past occurrence that was skipped. Web catalogue: Ignorée.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get historySkipped;
+
+  /// Button that saves a form. Web catalogue: Enregistrer.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// Button that closes a dialog without change. Web catalogue: Annuler.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// Heading of the archived homes on the Homes screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get homesArchived;
+
+  /// Button and title of the screen that creates a home.
+  ///
+  /// In en, this message translates to:
+  /// **'New home'**
+  String get newHome;
+
+  /// Field of the home form. Web catalogue: Nom.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get homeName;
+
+  /// Field of the home form. Web catalogue: Devise.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get homeCurrency;
+
+  /// Field of the home form: it drives the predefined seasons. Web catalogue: Hémisphère.
+  ///
+  /// In en, this message translates to:
+  /// **'Hemisphere'**
+  String get homeHemisphere;
+
+  /// Choice of Hemisphere. Web catalogue: Nord.
+  ///
+  /// In en, this message translates to:
+  /// **'Northern'**
+  String get hemisphereNorth;
+
+  /// Choice of Hemisphere. Web catalogue: Sud.
+  ///
+  /// In en, this message translates to:
+  /// **'Southern'**
+  String get hemisphereSouth;
+
+  /// Button that archives a home: hidden from Today and the selector, read only.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get homeArchive;
+
+  /// Button that brings an archived home back.
+  ///
+  /// In en, this message translates to:
+  /// **'Unarchive'**
+  String get homeUnarchive;
+
+  /// Shown on the settings of an archived home.
+  ///
+  /// In en, this message translates to:
+  /// **'This home is archived: it is read only.'**
+  String get homeArchivedNotice;
+
+  /// Button that deletes a home, after its name is typed. Web catalogue: Supprimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get homeDelete;
+
+  /// Title of the dialog that deletes a home.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {home}?'**
+  String homeDeleteTitle(String home);
+
+  /// Body of the dialog that deletes a home.
+  ///
+  /// In en, this message translates to:
+  /// **'Every task, room, item and photo of this home is deleted from this phone, for good. Type the name of the home to confirm.'**
+  String get homeDeleteBody;
+
+  /// Button of the dialog that deletes a home.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete for good'**
+  String get homeDeleteConfirm;
+
+  /// Name of the home made at the first start; the person can rename it.
+  ///
+  /// In en, this message translates to:
+  /// **'My home'**
+  String get firstHomeName;
+
+  /// Error: the name of a home or the title of a task is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Give it a name or a title.'**
+  String get errTitleRequired;
+
+  /// Error: a text is longer than allowed.
+  ///
+  /// In en, this message translates to:
+  /// **'This text is too long.'**
+  String get errTooLong;
+
+  /// Error of the task form. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'This interval is out of range.'**
+  String get errIntervalOutOfRange;
+
+  /// Error of the task form. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the first and the last month of the season.'**
+  String get errSeasonMonths;
+
+  /// Error of the task form. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'A task that repeats on a fixed date needs a date.'**
+  String get errFixedNeedsDate;
+
+  /// Error: a date too far away. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a date within 100 years of today.'**
+  String get errDateOutOfRange;
+
+  /// Error: a completion date in the future. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'The date cannot be in the future.'**
+  String get errFutureDate;
+
+  /// Error: a postponement to a past day. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a date that is not in the past.'**
+  String get errPastDate;
+
+  /// Error. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'This occurrence is already closed.'**
+  String get errAlreadyClosed;
+
+  /// Error. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Only a task that was marked done or skipped can be undone.'**
+  String get errNotClosed;
+
+  /// Error of undo. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'The next occurrence has been changed since: it cannot be undone any more.'**
+  String get errNextChanged;
+
+  /// Error: a change in an archived home.
+  ///
+  /// In en, this message translates to:
+  /// **'This home is archived: it is read only.'**
+  String get errHomeArchived;
+
+  /// Error of archive and delete.
+  ///
+  /// In en, this message translates to:
+  /// **'The last active home can be neither archived nor deleted.'**
+  String get errLastActiveHome;
+
+  /// Error of the dialog that deletes a home.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the exact name of the home.'**
+  String get errNameMismatch;
+
+  /// Error of the home form. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Use an ISO 4217 code, such as EUR.'**
+  String get errCurrencyInvalid;
+
+  /// Error: the row was deleted meanwhile.
+  ///
+  /// In en, this message translates to:
+  /// **'This no longer exists.'**
+  String get errNotFound;
 }
 
 class _AppLocalizationsDelegate

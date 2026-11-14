@@ -4,9 +4,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:housecairn_mobile/app.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'support/app.dart';
 import 'support/arb.dart';
 
 const locales = ['en', 'fr'];
@@ -84,8 +84,7 @@ void main() {
   group('Strings shown to people', () {
     for (final locale in locales) {
       testWidgets('every one is in the ARB file ($locale)', (tester) async {
-        await tester.pumpWidget(HousecairnApp(locale: Locale(locale)));
-        await tester.pumpAndSettle();
+        await pumpApp(tester, locale: locale);
         final offending = <String>[];
         await visitEveryScreen(tester, (screen) async {
           offending.addAll(

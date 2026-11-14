@@ -53,10 +53,18 @@ List<String> shownTexts(WidgetTester tester) {
 }
 
 /// The shown texts that are no message of the ARB file of [locale]: a string
-/// written in the code instead of the ARB files.
-List<String> textsNotInArb(WidgetTester tester, String locale) {
+/// written in the code instead of the ARB files. [data] are the texts typed
+/// by the person in the test (names of homes, titles of tasks), shown as
+/// they are.
+List<String> textsNotInArb(
+  WidgetTester tester,
+  String locale, {
+  Iterable<String> data = const [],
+}) {
   final patterns = arbMessages(locale).values.map(messagePattern).toList();
+  final typed = data.toSet();
   return shownTexts(tester)
+      .where((text) => !typed.contains(text))
       .where((text) => !patterns.any((pattern) => pattern.hasMatch(text)))
       .toList();
 }

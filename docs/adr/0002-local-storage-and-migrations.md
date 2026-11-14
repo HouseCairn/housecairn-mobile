@@ -67,6 +67,33 @@ Each file belongs to the home of its row; deleting a home erases its files
 backups. A backup by the system would be a copy outside the person's control, not encrypted
 end to end; the encrypted export ([spec](../spec.md#export-and-import)) is the backup.
 
+## Schema 2 (lot 2a)
+
+Schema 2 (`lib/data/tables.dart`) holds `homes`, `rooms`, `items`, `photos`, `contractors`,
+`tasks`, `occurrences`, `field_clock` and `local_settings`, created by the guided step from
+schema 1 (`lib/data/database.steps.dart`). What lot 2a settled within the rules above:
+
+- **No SQL foreign key** between tables of the model: references are UUID columns checked on
+  read, as [ADR 0003](0003-sync-protocol.md) requires ("Invariants across rows"); sync may
+  bring a row before the row it points to. Deleting a home therefore deletes, table by table,
+  every row whose `home_id` is that home and their `field_clock` rows, then the home and the
+  directory `homes/<home id>/` of its files.
+- **`field_clock` is written by `lib/data/repository.dart`** for every field a change sets
+  (and `created_at` and `deleted_at` on creation), with one clock per change, as one operation
+  of [protocol.md](../protocol.md) section 2.2. The clock of lot 2a only sends: it never goes
+  back, even when the phone's time does, and restarts from the last clock of this phone found
+  in `field_clock`; receiving clocks of other phones comes with lot 4. `op_log`, `extra` and
+  `pending` come with lot 4 too: without sync they stay empty.
+- **Instants** (`created_at`, `updated_at`, `deleted_at`, `archived_at`) are UTC milliseconds
+  in the database; the operations of lot 4 carry them as HLC strings.
+- **`local_settings`** holds what belongs to this phone and is never synced: the device id
+  (16 random bytes), the current home and whether Today shows all homes
+  ([spec](../spec.md#homes)).
+- **Amounts** (budgets, real cost) and the members (`assignee`, `completed_by`) are not in
+  schema 2: they come with lots 3 and 5, as nullable columns.
+- **Photos**: the table only; the file reference is the JSON of protocol section 2.9, and the
+  re-encoding and thumbnails come with lot 2b.
+
 ## Consequences
 
 - Every write goes through one repository layer that updates the row, `field_clock` and

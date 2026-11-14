@@ -27,9 +27,10 @@ Future<Repository> openRepository({
 }) async {
   // Tests open a new database for each repository, on purpose.
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
-  final dir =
-      files ?? await Directory.systemTemp.createTemp('housecairn-files-');
-  if (files == null) addTearDown(() => dir.delete(recursive: true));
+  // Synchronous file calls only: widget tests run in a fake zone where the
+  // asynchronous ones of dart:io never complete.
+  final dir = files ?? Directory.systemTemp.createTempSync('housecairn-files-');
+  if (files == null) addTearDown(() => dir.deleteSync(recursive: true));
   final db = AppDatabase(
     file == null ? NativeDatabase.memory() : NativeDatabase(file),
   );
