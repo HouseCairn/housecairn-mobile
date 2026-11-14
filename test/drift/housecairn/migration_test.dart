@@ -2,9 +2,9 @@
 
 // Migration tests of drift's guided migrations
 // (docs/adr/0002-local-storage-and-migrations.md): from every schema version
-// in drift_schemas/housecairn/ to the current one. With one version only, the
-// test migrates from 1 to 1 and checks that the schema of AppDatabase is the
-// one of drift_schema_v1.json. Regenerate `generated/` with:
+// in drift_schemas/housecairn/ to the current one (schema 2): 1 to 2 runs the
+// migration of lot 2a, and 2 to 2 checks that the schema of AppDatabase is the
+// one of drift_schema_v2.json. Regenerate `generated/` with:
 //   dart run drift_dev make-migrations
 //   dart run drift_dev schema generate drift_schemas/housecairn/ test/drift/housecairn/generated/
 
