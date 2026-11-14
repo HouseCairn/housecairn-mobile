@@ -9,7 +9,7 @@ environment:
 
 # Every package here is listed in docs/adr/0001-flutter-stack-and-packages.md.
 # Lot 1 takes only what it uses; the others come with their lots. Every
-# dependency, direct or transitive, is checked against tool/licenses/allowed.yaml
+# dependency, direct or transitive, is checked against tool/licenses/allowed-licenses.txt
 # (tool/check_licenses.dart, run in CI).
 dependencies:
   flutter:
