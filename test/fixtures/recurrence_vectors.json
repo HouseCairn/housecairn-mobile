@@ -1,6 +1,6 @@
 {
   "generated_by": "tool/recurrence_vectors.py",
-  "source": {"commit": "82313d39f88bee4a66946ac980aad62415771958", "module": "housecairn.tasks.recurrence", "python": "3.13.18", "python-dateutil": "4.0.0", "repository": "HouseCairn/housecairn"},
+  "source": {"commit": "f4e732b98f6fab896be9308b20d548dbcb309aa5", "module": "housecairn.tasks.recurrence", "python": "3.13.18", "python-dateutil": "4.0.0", "repository": "HouseCairn/housecairn"},
   "seed": 20261114,
   "next_due": [
     {"anchor": "1995-03-29", "done_on": "1996-01-11", "due_on": "1995-03-29", "expected": null, "rule": {"interval": 1, "mode": "once", "season_end": null, "season_start": null, "unit": "month"}},

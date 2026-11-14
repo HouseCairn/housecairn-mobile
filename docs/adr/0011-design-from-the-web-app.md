@@ -1,4 +1,4 @@
-# 0010. The look of the web application, adapted to the phone
+# 0011. The look of the web application, adapted to the phone
 
 - Status: proposed. A design lot before lot 2b is the maintainer's decision of 2026-11-14; what
   is taken and what is adapted is the choice this record proposes.

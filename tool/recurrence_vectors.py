@@ -17,7 +17,9 @@ HouseCairn/housecairn, for example:
         --source-commit "$(git rev-parse HEAD)" ../housecairn-mobile/test/fixtures/recurrence_vectors.json
 
 The cases are fixed or drawn from a seeded generator: the same module gives the same
-file, byte for byte.
+file, byte for byte. The committed file is the one of the web release pinned in
+tool/web_alignment.json: regenerate it with `tool/web_alignment.py update`, which runs this
+script at that release, and CI checks it with `tool/web_alignment.py check`.
 """
 
 import argparse

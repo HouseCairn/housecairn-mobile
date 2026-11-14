@@ -63,6 +63,25 @@ dart run drift_dev make-migrations
 dart run drift_dev schema generate drift_schemas/housecairn/ test/drift/housecairn/generated/
 ```
 
+The recurrence vectors (`test/fixtures/recurrence_vectors.json`), the task templates
+(`assets/task_templates.yaml`) and the web values of `design/tokens.json` come from a release of
+the web application, pinned in `tool/web_alignment.json`
+([plan](docs/plan.md#alignment-with-the-web-application)); CI fails when they are not what that
+release gives. Never edit them by hand: move the pin, which regenerates them. This needs git, a
+clone of the web repository and [uv](https://docs.astral.sh/uv/) 0.13.7 (the version of
+`.github/scripts/install-uv.sh`):
+
+```sh
+git clone https://github.com/HouseCairn/housecairn ../housecairn
+python3 tool/web_alignment.py check --web ../housecairn                    # what CI runs
+python3 tool/web_alignment.py update --web ../housecairn --release vX.Y.Z  # move the pin
+flutter test                                                               # a red test: port the rule in Dart
+```
+
+The `Web alignment` workflow does the same every day and opens the pull request itself, only
+when a file the app carries differs: a release without effect on them is reported in the run
+summary and moves nothing, not even the pin. `python3 tool/test_web_alignment.py` tests the tool.
+
 Every string shown to people goes in `lib/l10n/app_en.arb` (with a description) and
 `lib/l10n/app_fr.arb`; a test fails when a screen shows a string that is in neither. A new
 dependency must have a licence listed in `tool/licenses/allowed-licenses.txt`, and no
@@ -74,7 +93,7 @@ App icons are generated, not edited: change `design/brand/housecairn-icone-app.s
 [design/brand/README.md](design/brand/README.md)); CI checks that the committed files match.
 
 The look of the app is the one of the web application
-([ADR 0010](docs/adr/0010-design-from-the-web-app.md)): a screen uses the components of
+([ADR 0011](docs/adr/0011-design-from-the-web-app.md)): a screen uses the components of
 `lib/design/` and the themed Material widgets, and writes no colour, text style or size of its
 own (`test/design_rules_test.dart` fails otherwise). Values come from `design/tokens.json`,
 whose web groups are a copy of the web file. After a deliberate change of look, regenerate the

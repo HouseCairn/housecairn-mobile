@@ -76,7 +76,7 @@ class _ShellState extends State<Shell> {
           ),
           // The labels of the bar keep their size whatever the text size of
           // the phone, as the tab bar of iOS does: five labels must stay side
-          // by side on 360 px (docs/adr/0010).
+          // by side on 360 px (docs/adr/0011).
           child: MediaQuery.withNoTextScaling(
             child: NavigationBar(
               selectedIndex: _current.index,

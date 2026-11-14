@@ -2,7 +2,7 @@
 
 // Golden files of the screens of lot 2a (Today, Task, Homes) at 360 px, in
 // English and French, at text scale 1 and 2, drawn with the app's own fonts
-// (docs/adr/0010-design-from-the-web-app.md). The web application has no dark
+// (docs/adr/0011-design-from-the-web-app.md). The web application has no dark
 // theme, so neither has the app. Regenerate after a deliberate change of look:
 //   flutter test --update-goldens test/goldens_test.dart
 // and review every changed image in the pull request.

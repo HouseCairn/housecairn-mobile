@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-// Rules of the visual system (docs/adr/0010-design-from-the-web-app.md), as on
+// Rules of the visual system (docs/adr/0011-design-from-the-web-app.md), as on
 // the web (design guide, "Visual system"): a screen takes its colours and
 // sizes from the tokens (lib/design/tokens.dart) and its look from the
 // components (lib/design/widgets.dart, the theme), never from a value of its

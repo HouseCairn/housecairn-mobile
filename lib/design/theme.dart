@@ -116,7 +116,7 @@ abstract final class HcText {
 }
 
 /// The theme of Housecairn, built from the design tokens: the light look of
-/// the web application, adapted to a phone (docs/adr/0010). The web
+/// the web application, adapted to a phone (docs/adr/0011). The web
 /// application has no dark theme (`color-scheme: light`), so neither has the
 /// app.
 ThemeData housecairnTheme() {

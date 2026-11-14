@@ -199,7 +199,7 @@ abstract final class HcShadow {
 abstract final class HcLayout {
   /// Smallest touch target of the web, `2.75rem`. The app uses
   /// [touchTargetLg] everywhere: 48 is the minimum of Android and the
-  /// size Material's own widgets keep (docs/adr/0010).
+  /// size Material's own widgets keep (docs/adr/0011).
   static const touchTarget = 44.0;
 
   /// Large touch target, `3rem`: every target of the app.
