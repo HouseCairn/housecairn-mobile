@@ -62,6 +62,20 @@ jobs:
         run: flutter test --reporter expanded
       - name: Licences of every dependency (tool/check_licenses.dart)
         run: dart run tool/check_licenses.dart
+      - name: App icons (tests, generated files up to date, preview)
+        # Python standard library only. The preview is a contact sheet of the iOS and
+        # Android icons at three sizes, generated from the committed files' source.
+        run: |
+          python3 tool/test_generate_icons.py
+          python3 tool/generate_icons.py --preview "$RUNNER_TEMP/app-icons-preview.png"
+          cp "$RUNNER_TEMP/app-icons-preview.png" app-icons-preview.png
+      - name: Keep the icon preview (14 days)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: housecairn-app-icons-preview
+          path: app-icons-preview.png
+          retention-days: 14
+          if-no-files-found: error
       - name: CLA workflow script tests (node --test, no network)
         # Node.js is preinstalled on the runner image; the tests use only
         # Node's built-in modules.
@@ -127,6 +141,14 @@ jobs:
           echo "Android package: $package"
           test "$package" = "app.housecairn.mobile"
           sha256sum "$apk"
+      - name: The APK carries the Housecairn icon (adaptive, from the APK)
+        run: |
+          apk=build/app/outputs/flutter-apk/app-release.apk
+          aapt2=$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f | sort -V | tail -n 1)
+          "$aapt2" dump badging "$apk" | grep -E "^(application-icon|application:)"
+          "$aapt2" dump badging "$apk" | grep -q "^application-icon-65534:'res/.*\.xml'"
+          # 65534 is the "any density" entry: the adaptive icon is an XML resource
+          # (its path is obfuscated by resource shrinking, hence not matched by name).
       - name: Keep the APK (14 days)
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -171,3 +193,11 @@ jobs:
           echo "iOS bundle id: $bundle"
           /usr/libexec/PlistBuddy -c 'Print :CFBundleLocalizations' "$plist"
           test "$bundle" = "app.housecairn.mobile"
+      - name: The .app carries the Housecairn icon (Assets.car, CFBundleIcons)
+        run: |
+          app=build/ios/iphoneos/Runner.app
+          test -f "$app/Assets.car"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIcons' "$app/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconName' "$app/Info.plist" | grep -qx AppIcon
+          xcrun assetutil --info "$app/Assets.car" | grep -E '"Name" : "AppIcon"' | sort | uniq -c
+          xcrun assetutil --info "$app/Assets.car" | grep -q '"Name" : "AppIcon"'

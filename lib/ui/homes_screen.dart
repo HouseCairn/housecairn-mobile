@@ -279,6 +279,8 @@ class _DeleteDialogState extends State<_DeleteDialog> {
     final l10n = AppLocalizations.of(context);
     final matches = _typed.text == widget.home.name;
     return AlertDialog(
+      // Scrolls at large text scales, name field and buttons stay reachable.
+      scrollable: true,
       title: Text(l10n.homeDeleteTitle(widget.home.name)),
       content: Column(
         mainAxisSize: MainAxisSize.min,

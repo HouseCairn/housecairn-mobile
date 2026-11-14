@@ -86,6 +86,10 @@ dependency must have a licence listed in `tool/licenses/allowed-licenses.txt`, a
 analytics, crash reporting or advertising package may enter the tree
 (`tool/licenses/forbidden-packages.txt`).
 
+App icons are generated, not edited: change `design/brand/housecairn-icone-app.svg` or
+`tool/generate_icons.py`, run `python3 tool/generate_icons.py`, commit the result (see
+[design/brand/README.md](design/brand/README.md)); CI checks that the committed files match.
+
 ## Conventions
 
 - English is the language of the repository: code, documents, commit messages.
