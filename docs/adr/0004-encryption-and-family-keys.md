@@ -19,6 +19,10 @@ an Ed25519 key pair to sign, an X25519 key pair to receive sealed keys. Private 
 Keychain (iOS, *after first unlock, this device only*) or wrapped by the Android Keystore,
 through `flutter_secure_storage`. The device id is 16 random bytes.
 
+**One space per family, every home inside it** ([ADR 0008](0008-several-homes-one-family-space.md)):
+the keys below cover all the homes of the family; there is no key per home. A phone that joins
+the family reads every home; a phone removed loses every home.
+
 **Key of the family (space key)**: 32 random bytes per **epoch**, starting at epoch 1. Subkeys
 are derived by `crypto_kdf` (BLAKE2b): one for batches, one for snapshots, one per photo
 (a random key per blob, carried inside the operation that references it). Each epoch key is
@@ -27,7 +31,8 @@ the phone that made it. The relay stores these envelopes; it cannot open them.
 
 **Membership log**: an append-only list of records, each signed by an admin phone and holding
 the hash of the previous one: genesis (space id, first phone), add phone, remove phone, new
-epoch, new recovery key, admin granted or withdrawn. Every phone verifies the whole chain from
+epoch, new recovery key, admin granted or withdrawn, and purge of a home (the deletion of a home,
+[ADR 0008](0008-several-homes-one-family-space.md)). Every phone verifies the whole chain from
 the genesis before trusting a public key or an envelope. The relay keeps the log and checks the
 signatures too, to decide whom it lets in, but it cannot write a valid record.
 
@@ -78,10 +83,11 @@ At least one admin must remain; the recovery key acts as admin.
 ## Consequences
 
 - The relay sees public keys, device ids, sizes and times, never a name, a title or an
-  amount ([threat model](../threat-model.md)).
+  amount ([threat model](../threat-model.md)); nor how many homes a family has, since every
+  home is inside the same ciphertext.
 - No forward secrecy inside an epoch: a stolen epoch key reads every batch of that epoch.
   Epochs rotate on every removal and, by default, every 90 days.
-- Each removal re-encrypts a snapshot of the home: with many photos this is the cost of a
+- Each removal re-encrypts a snapshot of the family's homes: with many photos this is the cost of a
   removal, not of every sync, because photos keep their own random keys and are re-sealed,
   not re-uploaded. A removed phone that kept a photo key can still read that photo if it gets
   the blob from the relay; the relay refuses it, which is the only protection there.

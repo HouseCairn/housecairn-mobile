@@ -52,11 +52,16 @@ schema file per version and generates step-by-step migration code and tests
 Android file-based encryption. Keys of sync are not in the database but in the Keychain or
 Keystore (`flutter_secure_storage`). Database encryption with SQLite3MultipleCiphers stays
 possible through the `sqlite3` hook option ([ADR 0001](0001-flutter-stack-and-packages.md))
-without changing package; it is an open question whether v1 needs it.
+without changing package; v1 does not use it (maintainer's decision), nor an app lock of its
+own; an optional lock may come in lot 8.
 
 **Photos and PDF** are files in the app's private directory, named by their UUID, never by
-the name chosen by the person (as the web, `rooms/models.py:205-207`), re-encoded on import:
-longest side 2560 px, JPEG, metadata (location) removed; a thumbnail of 400 px.
+the name chosen by the person (as the web, `rooms/models.py:205-207`), re-encoded on import
+as the web does (`rooms/images.py:75-101`): turned upright, every metadata but the colour
+profile removed (location included), longest side at most 2560 px (`rooms/conf.py:17`), JPEG
+quality 85; a thumbnail of 360 px (`rooms/conf.py:18`), made on each phone and never synced.
+Each file belongs to the home of its row; deleting a home erases its files
+([ADR 0008](0008-several-homes-one-family-space.md)).
 
 **Backups by the OS**: the database and the files are excluded from iCloud and Google
 backups. A backup by the system would be a copy outside the person's control, not encrypted
@@ -68,5 +73,5 @@ end to end; the encrypted export ([spec](../spec.md#export-and-import)) is the b
   `op_log` together; no screen writes SQL.
 - A phone lost without sync and without export loses the data. The app says so after the
   first ten tasks and offers the export.
-- Excluding OS backups is a choice against convenience; it is an open question for the
-  maintainer.
+- Excluding OS backups is a choice against convenience, accepted by the maintainer: the
+  encrypted export is the backup.

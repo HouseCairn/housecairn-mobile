@@ -73,7 +73,7 @@ Dart 3, Material 3 widgets with the Housecairn design tokens. No web or desktop 
   the token, wake the sync), so that Google does not see iOS tokens; `push` (MIT, last release
   2025-01-14) and `flutter_apns_only` (discontinued) were rejected. A build for phones without
   Google services would use `unifiedpush` (6.2.0, Apache-2.0, Android only,
-  <https://pub.dev/packages/unifiedpush>) in a later lot.
+  <https://pub.dev/packages/unifiedpush>) after version 1.0 (maintainer's decision).
 - **Local notifications**: the plugin README says iOS keeps only 64 pending notifications, and
   that Android 14 restricts exact alarms
   (<https://github.com/MaikuB/flutter_local_notifications/tree/master/flutter_local_notifications>):

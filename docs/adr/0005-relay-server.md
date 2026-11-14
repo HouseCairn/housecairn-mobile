@@ -13,6 +13,9 @@ play the same role ([ADR 0003](0003-sync-protocol.md)). The protocol is in
 
 ## Decision
 
+**A separate public repository, `HouseCairn/housecairn-relay`, from lot 6** (maintainer's
+decision); until then the relay exists only as this record and [protocol.md](../protocol.md).
+
 **Python 3.13 and Django 5.2 LTS, with Django REST framework**, the stack of the web
 application (its `pyproject.toml` pins `django>=5.2.8,<5.3` and `djangorestframework>=3.16`).
 Django 5.2 LTS has extended support until April 2028
@@ -52,7 +55,8 @@ a bearer token valid one hour, stored hashed. No e-mail, no password, no name. A
 created by its first phone with its public keys and the genesis record.
 
 **Quotas** (defaults of the hosted relay, all settings of a self-hosted one): 12 phones per
-space, 2 GiB per space (batches, snapshots and photos), 256 KiB per batch, 20 MiB per photo,
+space, **2 GiB per space, that is per family and all its homes together** (batches, snapshots,
+photos and PDF; maintainer's decision), 256 KiB per batch, 20 MiB per file,
 50 MiB per snapshot, 600 requests an hour per phone, 10 invitations a day per space. Over a
 quota the relay answers 413 or 429 with the limit in the body; the app shows it in words.
 
@@ -65,7 +69,12 @@ Android: an FCM data message with no field. The payload never holds a space id, 
 title. Push credentials (APNs key, FCM service account) belong to the publisher of the app: a
 **self-hosted relay** either runs without push (the phones sync on opening and in the
 background), or forwards wake-ups to the publisher's **push gateway**, which receives only a
-push token and returns nothing.
+push token and returns nothing. The gateway is **open to self-hosted relays at no cost, with a
+rate limit** per relay and per push token (maintainer's decision); the limits are announced
+by the gateway, as a relay announces its own.
+
+**Hosting of the paid relay**: in the European Union (maintainer's decision), with its data,
+its backups and the push gateway.
 
 **Docker image** for self-hosting: one container, amd64 and arm64, a non-root user, the
 database and the files in one volume, configuration by environment variables
@@ -78,7 +87,8 @@ digest with provenance and SBOM, as the web image (web ADR 0015).
   relay unless the protocol's major version changes.
 - A compromised relay can withhold, delay or delete data, and read the metadata; it cannot read
   or forge content, nor add a phone ([threat model](../threat-model.md)).
-- The publisher's push gateway is a shared service with a cost; whether self-hosted relays may
-  use it is an open question.
+- The publisher's push gateway is a shared service with a cost, open to self-hosted relays:
+  its rate limit is what keeps that cost bounded, and it must be abuse-proof without knowing
+  who runs a relay.
 - A conformance test suite, in the relay repository, drives the HTTP API from the outside; a
   Housecairn instance that wants to be a relay passes the same suite.

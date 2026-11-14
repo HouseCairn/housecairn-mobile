@@ -1,6 +1,7 @@
 # Scope of v1
 
-- Status: proposed (lot 0, framing)
+- Status: proposed (lot 0, framing), with the maintainer's decisions of 2026-11-14: several
+  homes and synced photos in v1
 - Source model: `HouseCairn/housecairn`, `main` at commit `a6953f3` (2026-11-12). Every
   reference `file:line` below is a path under `src/housecairn/` at that commit.
 
@@ -21,14 +22,16 @@
 
 Every table has a UUID key, `created_at`, `updated_at`, and soft deletion by `deleted_at`
 (`core/models.py:28-38`); every business table belongs to one home (`homes/models.py:161-164`).
-The app keeps both. In the app, a **home is the unit of sync**: one home, one encrypted space
-on the relay ([ADR 0003](adr/0003-sync-protocol.md)).
+The app keeps both, and **several homes** in v1 (a main home, a second home, a rented flat). The
+**family is the unit of sync**: one encrypted space on the relay holds every home of the family,
+and each operation names its home ([ADR 0008](adr/0008-several-homes-one-family-space.md),
+[ADR 0003](adr/0003-sync-protocol.md)).
 
 ### Taken as they are
 
 | Entity | Source | Notes |
 | --- | --- | --- |
-| Home: name, currency (ISO 4217), hemisphere | `homes/models.py:31-52` | Hemisphere drives the predefined seasons. |
+| Home: name, currency (ISO 4217), hemisphere | `homes/models.py:31-52` | Hemisphere drives the predefined seasons. Several homes per family. One app field more, `archived_at` ([Homes](#homes)); `required_provider` (`:53-58`) is left out with sign-in. |
 | Room, with its memory (paint, coverings, notes) | `rooms/models.py:67-91` | `kind` from `RoomKind` (`:52-64`). `paint_article` links to stock (`:81-88`). |
 | Item (equipment or surface): brand, model, serial, installation, warranty, contract, links | `rooms/models.py:124-157` | Contract provider is a contractor (`:140-148`). Links: at most 10, `http(s)` only (`:15`, `:35-49`). |
 | Photo of a room or an item, with category | `rooms/models.py:189-196`, `:210-245` | Exactly one of room or item (`:238-245`). Re-encoded on the phone, as on the server. |
@@ -76,15 +79,16 @@ vectors, [ADR 0001](adr/0001-flutter-stack-and-packages.md)):
 
 | What | Web application | App v1 | Why |
 | --- | --- | --- | --- |
-| People | Accounts, memberships with roles owner, member, read only (`homes/models.py:17-23`, `:68-87`) | **Members** of the family: a display name and a colour, synced; each phone belongs to one member. One flag, *admin*, for who may add and remove phones. | No accounts by design. A read-only role needs every peer to reject writes; possible, but not needed for a family (see open questions). |
+| People | Accounts, memberships of one home with roles owner, member, read only (`homes/models.py:17-23`, `:68-87`) | **Members** of the family: a display name and a colour, synced; each phone belongs to one member; every member belongs to every home of the family. One flag, *admin*, family-wide, for who may add and remove phones and delete a home. | No accounts by design. A read-only role needs every peer to reject writes; not needed for a family (maintainer's decision: no read-only role in v1). |
 | Invitations | E-mailed link with a hashed secret (`homes/models.py:90-145`) | QR code shown on a phone of the family, confirmed by a short code ([ADR 0004](adr/0004-encryption-and-family-keys.md)) | No e-mail, no server-side identity. |
 | Display preferences | Per person, server side (`tasks/models.py:414-451`) | Per phone, local, not synced | A setting of the screen, not of the home. |
 | Reminder preferences | Per person, server side, sent by a worker | Per phone, local; scheduled by the phone ([Reminders](#reminders)) | No server sends anything. |
-| Attachments | Any file type on tasks, projects, quotes (`tasks/models.py:463-494`, `projects/models.py:273-300`) | Photos and PDF only | What a phone produces; keeps the encrypted blobs small. |
+| Attachments | Any file type on tasks, projects, quotes (`tasks/models.py:463-494`, `projects/models.py:273-300`) | Photos and PDF only, synced ([Photos and files](#photos-and-files)) | What a phone produces; keeps the encrypted blobs small. |
 | Project links | Address, title and picture read by a worker (`projects/models.py:303-337`, web ADR 0070) | Address and a title typed by the person; the page is never fetched | Principle 4. |
 | Report limits | 20 open reports per reporter (`reports/models.py:21-23`) | No limit | It protects the home from a tenant with the read-only role, which the app does not have. |
 | Stock draws | `drawn` limited to the stock held at closing (`tasks/models.py:378-381`) | Same on the phone that closes; after a merge of two phones the stock may show below zero, shown as a shortfall | Two offline phones can each take the last tin; no automatic correction is right. |
 | Time zone | Of the instance (web ADR 0032) | Of the phone | Each phone has its own "today". |
+| Deleting a home | Definitive, by an owner who types the name (`homes/services.py:239-252`) | Same, by an admin; or **archive** it, which the web does not have | A family keeps the history of a sold home without seeing it every day. |
 
 ### Left out of v1
 
@@ -98,23 +102,54 @@ vectors, [ADR 0001](adr/0001-flutter-stack-and-packages.md)):
 | Calendar feeds (secret ICS address) | `calendar/models.py:10-26` | Needs a server. A one-shot `.ics` export is possible later. |
 | QR labels of rooms, items, articles | `labels/models.py:33-53` | Labels printed by the web point to web addresses; app links are a later lot. |
 | Paperless-ngx fields of a quote | `projects/models.py:236-240` | Connectors are not in v1. Kept if they come from a later import (unknown fields are preserved, [ADR 0003](adr/0003-sync-protocol.md)). |
-| CSV import and export, export jobs, archive of a home in format 3 | `homes/models.py:172-226`, web ADR 0048 | Replaced by the encrypted export below. Reading a web archive is an open question. |
-| Several homes on one phone | `homes/models.py:68-87` | The model keeps `home_id` everywhere; the v1 screens show one home (open question). |
+| CSV import and export, export jobs, archive of a home in format 3 | `homes/models.py:172-226`, web ADR 0048 | Replaced by the encrypted export below. Reading a web archive in the app comes after v1 (maintainer's decision). |
+| Invitations to one home by e-mail, with a role | `homes/models.py:90-145` | A phone joins the family, hence every home ([ADR 0008](adr/0008-several-homes-one-family-space.md)); a home shared outside the family is after v1. |
+
+## Homes
+
+Several homes from v1, as on the web, where most households have one home and some have two or
+more (`homes/current.py:3-6`).
+
+- **Create**: name, currency, hemisphere; the first home is made at the first start. Any member
+  may create one; it is synced to every phone of the family.
+- **Rename**, change currency or hemisphere: any member, from the home's settings. A change of
+  hemisphere moves the predefined seasons of its tasks, as the web does
+  (`homes/services.py:148-152`).
+- **Archive**: any member. An archived home leaves the selector, Today and the reminders; it
+  stays readable from the list of homes, read only, synced and counted in the quota.
+  Unarchive brings it back as it was.
+- **Delete**: an admin (without sync, the owner of the phone), after typing the exact name, as
+  the web (`homes/services.py:239-252`); the app offers an export first. Final on every phone:
+  rows and photos of that home are erased, and its photos are deleted from the relay
+  ([ADR 0008](adr/0008-several-homes-one-family-space.md)).
+- The last active home can be neither archived nor deleted: the app always has a home to open.
+
+**Current home**, as the web defines it (`homes/current.py:1-13`, `:106-118`): the home last
+chosen in the selector, or of the last screen of a home opened, **kept on the phone, not
+synced**. At start the app opens on it; if it was archived or deleted meanwhile, on the first
+active home by name (`homes/current.py:73-79`). The selector appears in the app bar from two
+active homes on (`homes/current.py:31-32`). Today also offers **All homes**, and shows it until a
+home is chosen (`homes/current.py:81-82`); the other sections show one home at a time.
+Switching home keeps the screen when it needs only a home (a section root), else opens the
+section's root: a room of one home does not exist in the other.
 
 ## Members and assignment
 
-A **member** is a name and a colour; the member who creates the home is admin. A task's
-assignee and an occurrence's `completed_by` point to a member (they point to a user on the web,
-`tasks/models.py:187-194`, `:338-340`). Without sync there is one member, the owner of the
-phone, and assignment is hidden.
+A **member** is a name and a colour, and belongs to every home of the family; the member who
+turns on sync is admin. A task's assignee and an occurrence's `completed_by` point to a member
+(they point to a user on the web, `tasks/models.py:187-194`, `:338-340`). Without sync there is
+one member, the owner of the phone, and assignment is hidden.
 
 ## Screens of v1
 
-Mobile first, one hand, 360 px wide and up, system font size respected.
+Mobile first, one hand, 360 px wide and up, system font size respected. From two active homes
+on, the app bar shows the **home selector** ([Homes](#homes)); every screen below except Today,
+Homes and Settings shows the current home.
 
 1. **Today**: overdue, coming up within the horizon (1 week by default, `tasks/models.py:421-426`),
-   in season, and open reports. Grouped by urgency or room (or person, with sync). Done is
-   one tap, with an undo bar; skip and postpone from the same row.
+   in season, and open reports, of the current home or of **All homes**; with All homes each row
+   names its home. Grouped by urgency, room or home (or person, with sync). Done is one tap,
+   with an undo bar; skip and postpone from the same row.
 2. **Task**: form with only the title required; repetition with a preview of the next five
    dates (`tasks/recurrence.py:341-351`); materials; history of occurrences; photos.
 3. **Add from a template**: the bundled library, filtered by the equipment ticked.
@@ -124,11 +159,16 @@ Mobile first, one hand, 360 px wide and up, system font size respected.
    movements and suppliers, add an entry, an exit or an inventory.
 7. **Projects**: list by status (`projects/models.py:61-67`); a project with its budget lines,
    quotes, tasks, links and photos.
-8. **Budget**: the year against its envelope, by room, by project, upkeep (read only).
+8. **Budget**: the year of the current home against its envelope, by room, by project, upkeep
+   (read only). Each home has its own currency and envelopes (`homes/models.py:33-39`,
+   `projects/models.py:355-377`), so homes are never added together.
 9. **Report a problem**: title, place, photo; the list, make a task from a report, close it.
 10. **Contractors**: list and card, call and e-mail from the card.
-11. **Settings**: home (name, currency, hemisphere), language, reminders, export and import,
-    family sync (subscribe, invite a phone, phones, recovery code, relay address), licences.
+11. **Homes**: the list of homes, active then archived; create, rename, change currency or
+    hemisphere, archive, unarchive, delete ([Homes](#homes)).
+12. **Settings**: language, reminders, export and import, family sync (subscribe, invite a
+    phone, phones, recovery code, relay address, space used against the quota), licences and
+    the attribution of `NOTICE`.
 
 ## Reminders
 
@@ -139,21 +179,50 @@ Local notifications only, scheduled by the phone from its own data
   `notifications/reminders.py:56`), in the phone's time zone.
 - With sync, each phone reminds only its own member when the task is assigned to them, else
   every member, as the web does for members who may write (`notifications/reminders.py:4-7`).
+- Reminders cover every **active** home, not only the current one; none for an archived home.
+  When the family has two active homes or more, each reminder **names its home** in its title
+  ("Second home: change the smoke alarm battery") and the daily summary groups by home.
+  Opening a reminder makes its home the current one.
 - iOS keeps 64 pending local notifications per app (documented by the plugin, see ADR 0001):
   the phone schedules the nearest 60 and a daily summary for the rest, and reschedules on
   every start, every sync and on a background refresh.
 - Android 14 and later restrict exact alarms: reminders use inexact scheduling, which is
   enough for a day-level reminder; no exact-alarm permission is asked.
 
+## Photos and files
+
+Photos are synced from v1 (maintainer's decision), with PDF, in a quota of **2 GiB per family**,
+all homes together, counting photos, files and the sync data.
+
+- **Where**: photos of a room or an item with their category (`rooms/models.py:210-245`), the
+  label photo of a stock article (`stock/models.py:119`), the photo of a report
+  (`reports/models.py:71-84`), and photos or PDF attached to a task, a
+  project or a quote (`tasks/models.py:463-494`, `projects/models.py:273-300`).
+- **Taken** with the camera or picked from the gallery; PDF from the Files app or the document
+  picker. At most 20 MiB a file.
+- **Re-encoded on the phone before anything is stored**, as the web does
+  (`rooms/images.py:75-101`): turned upright, every metadata removed but the colour profile,
+  location included; longest side at most 2560 px (`rooms/conf.py:17`), JPEG at quality 85; a
+  thumbnail of 360 px (`rooms/conf.py:18`) made on each phone. A PDF is kept as it is.
+- **Synced** as an encrypted blob with its own key, uploaded before the change that shows it
+  ([protocol](protocol.md#29-files-photos-and-pdf)). Other phones download photos in the
+  background on Wi-Fi, and at once when one is opened; until then they show a placeholder.
+- **Quota full**: the photo stays on the phone that took it, marked "not synced", and the others
+  show "photo on another phone"; Settings shows the space used and what takes it, by home.
+- **Deleted**: a deleted photo can be restored for 30 days, then its blob is deleted from the
+  relay; deleting a home deletes its photos from the relay at once.
+
 ## Export and import
 
 - **Export**: one file, `.hcbackup`, with every row (deleted ones included, so that an import
-  cannot resurrect them) and every photo of the home, encrypted with a passphrase (Argon2id,
+  cannot resurrect them), every photo and file of **every home** of the phone, archived ones
+  included, and the members, encrypted with a passphrase (Argon2id,
   then XChaCha20-Poly1305 secretstream; format in [protocol.md](protocol.md#backup-file)).
   The app proposes a generated passphrase of six words and says that a lost passphrase loses
   the file. Shared through the system share sheet; the app never uploads it.
-- **Import**: into an empty app, or as a copy with new identifiers (the rule of web ADR 0069),
-  never merged into a synced home.
+- **Import**: into an empty app (everything back as it was), or **as a copy** of the homes
+  chosen in the file, with new identifiers (the rule of web ADR 0069), never merged into an
+  existing home. A copy is how a home moves from one family to another.
 - The inner layout follows the archive of the web (manifest, one document per table, files,
   web ADR 0048); reading it by the web application is a later lot, not a promise of v1.
 
@@ -167,5 +236,6 @@ application, so that both say the same words.
 ## Not in v1
 
 Home Assistant, Paperless-ngx, Sure, Apprise, calendar feeds, QR labels, widgets, a watch
-app, a tablet layout, a web or desktop build, several homes in the screens, roles other than
-admin.
+app, a tablet layout, a web or desktop build, roles other than admin, a home shared with
+someone outside the family, reading a web archive, a build without Google services (after
+1.0).

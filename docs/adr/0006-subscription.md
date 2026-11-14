@@ -13,7 +13,9 @@ more: not who paid, not what the family stores. A family on a self-hosted relay 
 
 **One subscription product, "Family sync"**, monthly and yearly, on both stores, bought through
 `in_app_purchase` ([ADR 0001](0001-flutter-stack-and-packages.md)). One purchase covers one
-space, that is one home, whatever the number of phones within the quota.
+space, that is one family and **every home** of it
+([ADR 0008](0008-several-homes-one-family-space.md)), whatever the number of phones and homes
+within the quota.
 
 **The relay verifies the purchase, never the app alone.**
 
@@ -39,9 +41,10 @@ amount. The app sets neither `appAccountToken` (Apple) nor `obfuscatedAccountId`
 the stores never learn the space id. The one link that exists, transaction to space, is held by
 the relay only, as a hash. Unlinkable tokens (blind signatures) would remove it too; not in v1.
 
-**End of a subscription**: the space stays readable 30 days (phones can download, not upload),
-then the relay deletes it, after a notice in the app at 7 days and at 1 day. Local data on the
-phones is never touched.
+**End of a subscription** (proposal, **not decided**: see the open questions of the
+[plan](../plan.md#open-questions)): the space stays readable 30 days (phones can download, not
+upload), then the relay deletes it, after a notice in the app at 7 days and at 1 day. Local data
+on the phones is never touched, whatever is decided.
 
 **Self-hosted relay**: no entitlement check; the app lets the person type a relay address in
 Settings at no cost, and the hosted relay is the default.
@@ -53,6 +56,8 @@ Settings at no cost, and the hosted relay is the default.
 - Restoring a purchase on a new phone re-sends the transaction; the relay recognises the hash
   and attaches the same space.
 - Whether pointing a free app at a self-hosted relay meets the App Store rules on unlocking
-  features is not verified (see open questions).
-- Price, trial and family sharing of the subscription are product choices left to the
-  maintainer.
+  features is not verified; it is checked before lot 7.
+- Price, trial and the end of a subscription are open questions of the maintainer
+  ([plan](../plan.md#open-questions)); no price is set in these documents.
+- The products are created from the organisation developer accounts, opened before lot 8
+  ([ADR 0007](0007-license.md)).

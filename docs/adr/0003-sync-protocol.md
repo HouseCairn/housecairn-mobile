@@ -5,7 +5,8 @@
 
 ## Context
 
-Two to six phones of one family edit the same home, often offline (a cellar, a garden), and
+Two to six phones of one family edit the same homes (a family may have several,
+[ADR 0008](0008-several-homes-one-family-space.md)), often offline (a cellar, a garden), and
 meet again later through a relay that cannot read anything. There is no server to decide
 who wins, so the merge must be decided by the phones, the same way on each, whatever order
 the changes arrive in. The model has rules that a naive merge breaks: one open occurrence
@@ -17,7 +18,7 @@ The full wire format is in [protocol.md](../protocol.md).
 ## Decision
 
 **State-based on fields, carried by an operation log.** Each local write produces an
-operation: entity type, row id, the fields set, a hybrid logical clock, the device. Phones
+operation: entity type, home, row id, the fields set, a hybrid logical clock, the device. Phones
 upload batches of operations and download those of the others; applying an operation is
 idempotent and commutative, so every phone that has seen the same operations has the same
 data. Periodic encrypted **snapshots** let a new phone start without the whole history and
@@ -40,14 +41,29 @@ cannot push every other phone into the future.
 | Append-only ledger | stock movements (`stock/models.py:175`: never changed, a mistake is corrected by a new line) | Insert only, union of all phones. Never edited. |
 | Derived | stock level, budget figures, committed, `visible_from`, delta of an inventory | Never synced; recomputed on read. An inventory line stores the count; its delta is the count minus the sum before it in HLC order. |
 
+**Every row belongs to one home**, as on the web (`homes/models.py:161-164`), and every
+operation names it (`h`). A row never moves to another home; rows are keyed by home and id, so
+two homes never collide, and a reference to a row of another home is read as empty. Members and
+the settings of the space are family-wide and have no home.
+
 **Deletion**: a soft delete sets `deleted_at` like any field (last writer wins), so an edit of
 another field never brings a row back; only an explicit *restore* with a later clock does.
 Children of a deleted row are hidden on read and come back with it. Tombstones are never
 dropped from snapshots (a row id and a clock: a few dozen bytes), so a phone that was offline
 for a year cannot resurrect what others deleted.
 
+**Deleting a home is a purge**, final like the web's (`homes/services.py:239-252`), not a soft
+delete: a record `purge` in the membership log, signed by an admin
+([ADR 0004](0004-encryption-and-family-keys.md)). The log, not the batches, carries it because
+the log has one verified order: whether the signer was admin is the same answer on every phone.
+It wins over every clock: each phone erases the home's rows and files, keeps the home id in its
+list of purged homes, and drops any later operation of that home, even one written offline
+with a later clock. Because a purge erases whatever was applied before it and blocks whatever
+comes after, the result is the same in any order. **Archiving** a home is not a deletion: a field `archived_at`, last writer
+wins, that hides the home and stops its reminders; rows stay and keep syncing.
+
 **Deterministic identifiers where the model has a uniqueness rule**, UUID version 5 in the
-namespace of the home:
+namespace of the home the row belongs to (`h`), so the same name in two homes gives two ids:
 
 - successor of an occurrence: `uuid5(home, "next:" + occurrence_id)`. Two phones that close the
   same occurrence offline create **the same** next occurrence, whose fields then merge;
@@ -91,7 +107,10 @@ types, new optional fields, new choice values), the rule of [ADR 0002](0002-loca
 - Every model rule of the web application that involves two rows needs a line in this ADR
   before a lot implements it; a reviewer checks it.
 - The merge is a pure function of a set of operations: lot 4 tests it by property tests
-  (random histories applied in random orders give identical databases).
+  (random histories of at least two homes, applied in random orders, give identical
+  databases), purges of a home included.
+- A purge cannot be undone, by anyone: the app asks for the exact name and offers an export
+  first, as the web does.
 - Any server that stores and returns batches in order can be the relay; it needs no knowledge
   of the model. A Housecairn instance can implement the relay API without understanding the
   ciphertext, and a later lot can let an instance join the space as a phone would.

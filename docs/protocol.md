@@ -4,8 +4,10 @@
 - Decisions behind it: [ADR 0003](adr/0003-sync-protocol.md) (operations, clock, merge),
   [ADR 0004](adr/0004-encryption-and-family-keys.md) (keys), [ADR 0005](adr/0005-relay-server.md)
   (relay), [ADR 0006](adr/0006-subscription.md) (entitlement).
-- Words: **space** = the encrypted copy of one home on a relay; **device** = one install of the
-  app on one phone; **relay** = any server that implements section 3.
+- Words: **space** = the encrypted copy of one family's data on a relay, every home of the
+  family included ([ADR 0008](adr/0008-several-homes-one-family-space.md)); **home** = a row
+  `homes.home` inside the space; **device** = one install of the app on one phone; **relay** =
+  any server that implements section 3.
 
 The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
 
@@ -46,7 +48,7 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
 An operation is a JSON object:
 
 ```json
-{"t": "tasks.task", "id": "8f0c…", "k": "put", "c": "0193a1b2c3d40001",
+{"t": "tasks.task", "h": "5b7e…", "id": "8f0c…", "k": "put", "c": "0193a1b2c3d40001",
  "f": {"title": "Change the smoke alarm battery", "repeat_mode": "fixed", "room_id": "1c2d…"}}
 ```
 
@@ -55,21 +57,40 @@ An operation is a JSON object:
   `tasks.taskmaterial`, `tasks.occurrence`, `tasks.materialdraw`, `stock.article`,
   `stock.supplier`, `stock.movement`, `projects.project`, `projects.budgetline`,
   `projects.quote`, `projects.projectfile`, `projects.projectlink`, `projects.projecttask`,
-  `projects.annualenvelope`, `reports.report`), the link tables `projects.project_rooms`,
+  `projects.annualenvelope`, `reports.report`, `tasks.attachment`), the link tables
+  `projects.project_rooms`,
   `stock.article_rooms`, `stock.article_compatible_items`, and the types of the app
   `family.member` and `family.settings`.
-- `id`: row id. Deterministic ids (ADR 0003) are `uuid5(home_id, name)`.
+- `h`: id of the home the row belongs to. REQUIRED for every type except `family.*`, where it
+  is absent; for `homes.home`, `h` equals `id`. A row never changes home. Rows are keyed by
+  `(t, h, id)`: the same `id` in two homes is two rows. A foreign key to a row of another home is
+  invalid: receivers keep it and read it as empty.
+- `id`: row id: random UUID version 4, or deterministic (ADR 0003): `uuid5(h, name)`, so that
+  deterministic ids never collide across homes.
 - `k`: `put` (set the fields in `f`), `delete` (sets `deleted_at`), `restore` (clears it).
 - `c`: HLC of the operation; it is the clock of every field it sets.
 - `f`: field names are those of the web model, foreign keys by their column name (`room_id`).
   Values: string, number, boolean, `null`; amounts and quantities as decimal strings (`"12.50"`);
-  dates `"YYYY-MM-DD"`; instants as HLC strings. A photo or file field holds
-  `{"blob": b64, "key": b64, "size": n, "type": "image/jpeg", "w": n, "h": n}`.
+  dates `"YYYY-MM-DD"`; instants as HLC strings. A photo or file field holds a **file
+  reference** `{"blob": b64, "key": b64, "size": n, "type": "image/jpeg", "width": n,
+  "height": n}` (section 2.9); `width` and `height` only for images.
 - A receiver MUST keep fields it does not know and MUST NOT drop the operation.
 
 **Apply** (every phone, same result in any order): for each field of `f`, write the value if
 `(c, device)` is greater than the stored clock of that field, and store the new clock. `delete`
 and `restore` are the field `deleted_at`. Then run the repair rules of ADR 0003.
+
+**Purge of a home**: deleting a home is not an operation but a record `purge` of the
+membership log (section 2.5), so that who may purge is decided by the verified order of the log
+and not by when a phone happens to apply a batch. It is **final and wins over every clock**:
+a phone that reads a valid `purge` of home `H` erases every row with `h = H` and the local files
+they reference, keeps `H` in its list of purged homes forever, and drops every operation with
+`h = H` it receives afterwards, whatever its clock. An operation applied before the purge was
+read is erased with the rest, so the result does not depend on the order. There is no
+`restore` of a purged home.
+
+`homes.home` has one field of the app that the web model does not have: `archived_at` (HLC
+string or `null`), last writer wins.
 
 ### 2.3 Batch
 
@@ -86,7 +107,8 @@ signature                      64 bytes, sign(device signing key, everything abo
 
 `header` = `{"v": 1, "space": b64, "epoch": e, "device": b64, "seq": n, "sv": n}`; `seq`
 starts at 1 and grows by one per batch of that device; `sv` is the writer's schema version.
-`plaintext` = `{"ops": [operation, …]}`. A batch holds at most 256 KiB after padding.
+`plaintext` = `{"ops": [operation, …]}`. A batch holds at most 256 KiB after padding, and may
+mix operations of several homes; its header names no home.
 
 A receiver MUST verify the signature against the device key in the membership log, MUST
 reject a batch of a removed device whose `seq` is above the `last_seq` of its `remove` record
@@ -104,8 +126,9 @@ The merged state of the space, so that a new phone need not replay every batch.
 `header` = `{"v": 1, "space", "epoch", "device", "covers": pos, "vv": {device_b64: seq}, "sv"}`:
 `covers` is the last relay position merged; `vv` the last `seq` merged per device. Stream key =
 snapshot key; additional data of the first chunk = the bytes before it. Plaintext is JSON lines,
-one per row: `{"t", "id", "f": {field: [value, hlc, device_b64]}}`, tombstones included, then
-the space settings. Chunks of 64 KiB, last chunk tagged `FINAL`.
+one per row: `{"t", "h", "id", "f": {field: [value, hlc, device_b64]}}`, tombstones included,
+then the space settings. Rows of a purged home are not written; the purged homes are those of
+the membership log. Chunks of 64 KiB, last chunk tagged `FINAL`.
 
 ### 2.5 Membership log
 
@@ -125,6 +148,7 @@ record = `{"v": 1, "space", "n": index, "prev": b64(hash(previous payload, 32)),
 | `epoch` | `epoch`: e | an admin |
 | `recovery` | `recovery`: {id, sign_pk, box_pk} (replaces the previous one) | an admin |
 | `admin` | `device`: id, `admin`: bool | an admin |
+| `purge` | `home`: the home's UUID | an admin |
 
 The genesis device and the recovery key are admins. A record is valid if its signer is an
 admin according to the records before it, `n` follows, and `prev` matches. Phones verify the
@@ -151,7 +175,53 @@ QR code text: `hcinvite:1:` followed by `b64` of the JSON
 ### 2.8 Settings of the space
 
 A row `family.settings` holds, among others, `min_sv` (ADR 0003) and the epoch rotation period;
-it is synced as any row.
+it is synced as any row. Settings and members (`family.member`) are family-wide: they have no
+`h`.
+
+### 2.9 Files: photos and PDF
+
+A file (photo or PDF) is a **blob** on the relay, encrypted under its own random key, and a
+file reference in the operation of the row that holds it (`rooms.photo`, `stock.article`
+label photo, `reports.report`, `projects.projectfile`, `tasks.attachment`).
+
+- **Before upload**: a photo is re-encoded on the phone, as the
+  [spec](spec.md#photos-and-files) says; a PDF is sent as it is. At most 20 MiB of plaintext.
+- **Blob id**: 16 random bytes. **Blob key**: 32 random bytes, made for that blob only; a new
+  version of a photo is a new blob with a new key.
+- **Format**:
+
+  ```
+  "HCF1"                4 bytes, magic and wire version
+  stream header         24 bytes, crypto_secretstream_xchacha20poly1305 under the blob key
+  chunks                encrypted chunks of 64 KiB of plaintext (+ 17 bytes each)
+  ```
+
+  Plaintext = `pad(file bytes, 65536)`; the true size is `size` in the file reference.
+  Additional data of the first chunk = `"HCF1" || space || blob_id`, of the others empty; the
+  last chunk is tagged `FINAL`. A receiver MUST reject a blob whose last chunk is not `FINAL`,
+  whose decrypted length is not `size` after unpadding, or whose first chunk fails with that
+  additional data (a relay that swaps two blobs is caught).
+- **Order**: the blob is uploaded (`PUT …/blobs/{id}`) **before** the batch whose operation
+  references it. A receiver that finds a reference to a blob it cannot fetch yet shows a
+  placeholder and retries; it never drops the field. A phone that sends a batch more than
+  7 days after uploading the blobs it references uploads them again first (the same bytes:
+  the relay answers as for a repeated upload), so the orphan rule below cannot remove them.
+- **Download**: lazily. Phones fetch blobs in the background on an unmetered network, and on
+  demand when a photo is opened. The thumbnail is made by each phone from the photo; it is not
+  synced.
+- **Quota**: blobs count in the space's quota with batches and snapshots (`usage` in
+  `GET …/head`). When an upload answers 413, the file stays on the phone, marked "not
+  synced", and the operation is still sent: other phones show "photo on another phone"
+  until the upload succeeds.
+- **Deletion**: when a row holding a file reference is deleted, or the field is changed to
+  another file, the previous blob is kept 30 days (a `restore` brings it back), then any phone
+  that has merged that deletion sends `DELETE …/blobs/{id}`; 404 counts as done. The device
+  that purges a home deletes every blob of that home at once.
+- **Orphans**: a blob uploaded but never referenced (the phone died between the upload and the
+  batch) is found by `GET …/blobs`; a phone whose state covers the latest snapshot deletes
+  blobs older than 7 days that no row of any home references, live or deleted less than 30
+  days ago. A purged home has no row left, so its blobs are orphans too: a phone that finds
+  some (the purging phone died before deleting them) deletes them at once.
 
 ## 3. Relay HTTP API
 
@@ -187,9 +257,10 @@ callbacks need `Authorization: Bearer <token>`; the token names one device of on
 | `GET /v1/spaces/{s}/batches?after=pos&limit=n` | | `{"batches": [{"pos", "data": b64}], "more": bool}`; 410 if `after < oldest_pos`: load the snapshot |
 | `PUT /v1/spaces/{s}/snapshot` | octet-stream snapshot | 201 |
 | `GET /v1/spaces/{s}/snapshot` | | octet-stream, the latest |
-| `PUT /v1/spaces/{s}/blobs/{id}` | octet-stream blob | 201; 409 if it exists with other bytes |
+| `PUT /v1/spaces/{s}/blobs/{id}` | octet-stream blob | 201; 200 if the same bytes exist; 409 if it exists with other bytes; 413 over the quota |
 | `GET /v1/spaces/{s}/blobs/{id}` | | octet-stream |
-| `DELETE /v1/spaces/{s}/blobs/{id}` | | 204 |
+| `GET /v1/spaces/{s}/blobs?after=id&limit=n` | | `{"blobs": [{"id", "size", "created": unix}], "more": bool}`, in id order |
+| `DELETE /v1/spaces/{s}/blobs/{id}` | | 204; 404 if unknown |
 
 The relay checks on a batch: magic and `v`, `space` matches the route, `device` matches the
 token and is not removed, `epoch` is the current one or the one before it (rotation in
@@ -199,9 +270,10 @@ of a space and never repeats.
 Retention: the relay keeps the two latest snapshots, and every batch with `pos` greater than the
 `covers` of the older one; it MAY drop older batches 30 days after a newer snapshot arrives.
 
-Blob format: `"HCF1"`, stream header (24 bytes), chunks of 64 KiB under the blob key, the
-size padded with `pad` to a multiple of 64 KiB. Phones delete a blob 30 days after the row that
-referenced it was deleted.
+Blob format, upload order and deletion: section 2.9. The relay checks the magic and the size of
+a blob, never its content. `usage` in `GET …/head` is `{"bytes": n, "limit": n}`, the sum of
+the stored batches, snapshots and blobs of the space; the default limit is 2 GiB per space,
+that is per family, all homes together ([ADR 0005](adr/0005-relay-server.md)).
 
 ### 3.4 Invitations
 
@@ -256,6 +328,7 @@ Not sent to the relay; defined here to be readable by other tools.
 
 Key = `pwhash(32, passphrase, salt, opslimit, memlimit, Argon2id13)`; defaults are libsodium's
 `MODERATE` limits. Plaintext: a ZIP with `manifest.json` (format `housecairn-mobile-backup`,
-version, app version, date, home id, SHA-256 and size of each entry), `data/<app>.json` (rows
-with every field and its clock, tombstones included) and `files/<blob id>`. Chunks of 64 KiB,
-the last one tagged `FINAL`.
+version, app version, date, the list of homes with their id, name and archived state, SHA-256
+and size of each entry), `data/<app>.json` (rows with `h`, every field and its clock,
+tombstones included; `family.member` and `family.settings` without `h`) and
+`files/<blob id>` (plaintext of each file). Chunks of 64 KiB, the last one tagged `FINAL`.

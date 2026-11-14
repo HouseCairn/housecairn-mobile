@@ -1,6 +1,6 @@
-# 0007. License: AGPL-3.0-only proposed, to confirm
+# 0007. License: AGPL-3.0-only, with the NOTICE and CLA of the project
 
-- Status: proposed, decision of the maintainer due
+- Status: accepted (maintainer's decision, 2026-11-14)
 - Date: 2026-11-14
 
 ## Context
@@ -12,8 +12,9 @@ their own. The app will be distributed through the App Store and Google Play.
 
 ## Decision
 
-**Proposed: `AGPL-3.0-only` for the app and the relay**, with the same `NOTICE` and CLA as the
-web application.
+**`AGPL-3.0-only` for the app and the relay**, with the same `NOTICE` (copyright of the
+pseudonym, attribution "Housecairn, by Robvred" under section 7(b), no trademark grant under
+section 7(e)) and the same CLA as the web application.
 
 - **Relay**: the AGPL is the licence made for a network service: whoever runs a modified relay
   for others must offer its source. It also lets the relay app later move into a Housecairn
@@ -29,11 +30,19 @@ the copyright holder, who may distribute under other terms, and the CLA gives th
 so for contributions. This is the reason to keep the CLA for this repository; it is not legal
 advice, and the CLA is still a draft until a lawyer reads it.
 
-Alternatives: `MPL-2.0` for the app (file-level copyleft, no store question, but code no longer
-moves freely to the web application), `GPL-3.0-only` for the app and AGPL for the relay.
+**Publisher accounts**: the apps are published from **organisation** developer accounts at
+Apple and Google, opened before the beta (lot 8), so that the store listing names the project
+and not a person.
+
+Alternatives rejected: `MPL-2.0` for the app (file-level copyleft, no store question, but code
+no longer moves freely to the web application); `GPL-3.0-only` for the app and AGPL for the
+relay (two rules for one project, for no gain).
 
 ## Consequences
 
-- No `LICENSE` file is published until the maintainer confirms.
-- If confirmed, the README, `NOTICE` and CLA come in lot 1, copied from the web repository with
-  the name of this repository.
+- `LICENSE` is the text of the web repository, byte for byte; `NOTICE` is the web one with the
+  name of this repository. The relay repository (lot 6) gets the same two files.
+- `CONTRIBUTING.md` points to the CLA of the web repository, which covers every repository of
+  the project. Its automatic check is not set up here yet: no external contribution is merged
+  before it is, and before the CLA's legal review.
+- The "About" screen of the app (lot 1) shows the attribution required by `NOTICE`.
