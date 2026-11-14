@@ -61,7 +61,11 @@ class TwoHomes {
     );
     for (final (home, prefix) in [(main, 'Main'), (second, 'Second')]) {
       final kitchen = await repo.createRoom(home, name: '$prefix kitchen');
-      final cellar = await repo.createRoom(home, name: '$prefix cellar');
+      final cellar = await repo.createRoom(
+        home,
+        name: '$prefix cellar',
+        position: 1,
+      );
       final boiler = await repo.createItem(
         home,
         roomId: cellar,

@@ -34,6 +34,12 @@ enum HcIcons {
   chevron([_P('M9 6l6 6-6 6')]),
   info([_C(12, 12, 9), _P('M12 11v5.5'), _C(12, 7.8, 0.6)]),
 
+  /// Not in the web set, which has no icon for these three entries of More: the
+  /// same 24 px grid and 2 px stroke, in the same simple shapes.
+  contractors([_C(12, 8, 3.5), _P('M5 20l2.5-5h9L19 20Z')]),
+  templates([_R(5, 4, 14, 17, 2), _P('M9 9h6'), _P('M9 13h6'), _P('M9 17h4')]),
+  reminders([_P('M6 17.5V11l2.5-5h7L18 11v6.5Z'), _P('M10 21h4')]),
+
   /// Not in the web set, which writes "+" in text: the same stroke.
   add([_P('M12 5v14'), _P('M5 12h14')]);
 

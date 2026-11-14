@@ -141,6 +141,28 @@ Set<String> identifyLicences(String text) {
   return found;
 }
 
+/// The licences granted to one package beyond the allowed list, from
+/// tool/licenses/exceptions.txt: one line `package: LICENCE LICENCE # reason`.
+/// A line without a reason, or with no licence, is refused: an exception says
+/// why it is one.
+Map<String, Set<String>> parseExceptions(String text) {
+  final granted = <String, Set<String>>{};
+  for (final raw in const LineSplitter().convert(text)) {
+    final line = raw.trim();
+    if (line.isEmpty || line.startsWith('#')) continue;
+    final match = RegExp(
+      r'^([A-Za-z0-9_]+):\s*([A-Za-z0-9. -]+?)\s*#\s*(\S.*)$',
+    ).firstMatch(line);
+    if (match == null) {
+      throw FormatException(
+        'exceptions.txt: "$line" is not "package: LICENCE # reason"',
+      );
+    }
+    granted[match.group(1)!] = match.group(2)!.split(RegExp(r'\s+')).toSet();
+  }
+  return granted;
+}
+
 /// Reads a list file of tool/licenses: one entry per line, `#` comments.
 List<String> readList(String path) =>
     File(path)
@@ -190,6 +212,7 @@ List<PackageResult> check({
   required Directory? flutterRoot,
   required Set<String> allowed,
   required List<String> forbidden,
+  Map<String, Set<String>> exceptions = const {},
 }) {
   final sdkLicences = flutterRoot == null
       ? <String>{}
@@ -223,7 +246,9 @@ List<PackageResult> check({
             }
           }
         }
-        final refused = licences.difference(allowed);
+        final refused = licences
+            .difference(allowed)
+            .difference(exceptions[package.name] ?? const {});
         if (refused.isNotEmpty) {
           problems.add('licence not allowed: ${refused.join(', ')}');
         }
@@ -270,6 +295,9 @@ List<PackageResult> checkProject(Directory projectDir) {
     flutterRoot: findFlutterRoot(),
     allowed: readList('$p/tool/licenses/allowed-licenses.txt').toSet(),
     forbidden: readList('$p/tool/licenses/forbidden-packages.txt'),
+    exceptions: parseExceptions(
+      File('$p/tool/licenses/exceptions.txt').readAsStringSync(),
+    ),
   );
 }
 

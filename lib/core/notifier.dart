@@ -3,10 +3,19 @@
 /// Local notifications, behind an interface
 /// (docs/adr/0001-flutter-stack-and-packages.md, "Consequences").
 ///
-/// Lot 2 implements it with `flutter_local_notifications` and schedules the
-/// rolling window of reminders of docs/spec.md ("Reminders"). Lot 1 defines
-/// the interface only.
+/// Implemented by `LocalNotifier` (`flutter_local_notifications`,
+/// lib/core/local_notifier.dart); lot 2b schedules the rolling window of
+/// reminders of docs/spec.md ("Reminders") through it. Nothing is ever sent
+/// from the phone: a notification is a local alarm.
 abstract interface class Notifier {
+  /// Whether the person allowed notifications. Does not ask.
+  Future<bool> permitted();
+
+  /// Asks the person to allow notifications, at the moment they turn
+  /// reminders on (never at start). `false` when they refuse; the app then
+  /// leaves reminders off and says so.
+  Future<bool> requestPermission();
+
   /// Schedules a notification [id] at [at] (an instant), inexactly: Android
   /// may deliver it a little later (no exact-alarm permission is asked).
   Future<void> schedule({

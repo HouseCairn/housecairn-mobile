@@ -27,6 +27,16 @@ String refusalMessage(AppLocalizations l10n, Refusal reason) =>
       Refusal.nameMismatch => l10n.errNameMismatch,
       Refusal.currencyInvalid => l10n.errCurrencyInvalid,
       Refusal.notFound => l10n.errNotFound,
+      Refusal.phoneInvalid => l10n.errPhoneInvalid,
+      Refusal.emailInvalid => l10n.errEmailInvalid,
+      Refusal.urlInvalid => l10n.errUrlInvalid,
+      Refusal.tooManyLinks => l10n.errTooManyLinks,
+      Refusal.tradeOtherRequired => l10n.errTradeOther,
+      Refusal.choiceInvalid => l10n.errChoiceInvalid,
+      Refusal.notInHome => l10n.errNotInHome,
+      Refusal.tooManyPhotos => l10n.errTooManyPhotos,
+      Refusal.photoUnreadable => l10n.errPhotoUnreadable,
+      Refusal.photoTooLarge => l10n.errPhotoTooLarge,
     };
 
 /// Shows a refusal in a bar at the bottom of the screen.

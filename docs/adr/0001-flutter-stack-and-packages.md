@@ -41,7 +41,9 @@ Dart 3, Material 3 widgets with the Housecairn design tokens. No web or desktop 
 | Identifiers (v4, v5) | uuid | 4.6.0, 2026-07-15 | yuli.dev | MIT | all | <https://pub.dev/packages/uuid> |
 | Procedure in Markdown | flutter_markdown_plus | 1.0.12, 2026-07-10 | foresightmobile.com | BSD-3-Clause | all | <https://pub.dev/packages/flutter_markdown_plus> |
 | Photos from camera and gallery | image_picker | 1.2.4, 2026-10-06 | flutter.dev | Apache-2.0, BSD-3-Clause | Android, iOS, others | <https://pub.dev/packages/image_picker> |
-| Re-encoding photos (size, metadata) | flutter_image_compress | 2.5.1, 2026-07-25 | fluttercandies.com | MIT | Android, iOS, macOS, web | <https://pub.dev/packages/flutter_image_compress> |
+| Re-encoding photos (size, metadata), in Dart | image | 4.12.0, 2026-10-11 | taosengine.com | MIT | all | <https://pub.dev/packages/image> |
+| The library of task templates (YAML) | yaml | 3.1.4, 2026-08-28 | tools.dart.dev | MIT | all | <https://pub.dev/packages/yaml> |
+| Opening a link, a phone number, an address | url_launcher | 6.3.3, 2026-10-02 | flutter.dev | BSD-3-Clause | Android, iOS, others | <https://pub.dev/packages/url_launcher> |
 | PDF picking, export file | file_picker, share_plus | 13.3.3, 2026-11-10; 13.3.1, 2026-10-01 | victorcarreras.dev; fluttercommunity.dev | MIT; BSD-3-Clause | Android, iOS, others | <https://pub.dev/packages/file_picker>, <https://pub.dev/packages/share_plus> |
 | Backup archive (zip) | archive | 4.7.1, 2026-11-13 | taosengine.com | MIT | all | <https://pub.dev/packages/archive> |
 
@@ -85,6 +87,17 @@ Dart 3, Material 3 widgets with the Housecairn design tokens. No web or desktop 
   path; background and push only shorten the wait.
 - **No analytics, crash reporting or advertising SDK.** Of Firebase, only messaging is a
   dependency, on Android; lot 1 checks that no analytics package enters the dependency tree.
+
+**Lot 2b, changes to the table.** `flutter_image_compress` is replaced by `image`, pure Dart:
+the rule (upright, no metadata, 2560 px, quality 85, a 360 px thumbnail) is then the same on
+the phone and in the tests, which run it on a fixture with GPS data; a native encoder would
+only run on a device, and cannot be shown to strip the location. The cost is speed, so the
+work runs in an isolate. `image` is pinned at 4.12.0 and not 4.13.x: the versions of
+2026-11-14 are younger than the seven days of the rule below. `yaml` and `url_launcher` are
+added. `dbus`, a transitive package of the Linux part of `flutter_local_notifications` that no
+iOS or Android build contains, is MPL-2.0 and gets one named exception in
+`tool/licenses/exceptions.txt`; the maintainer is asked to confirm it
+([plan](../plan.md)).
 
 ## Consequences
 

@@ -29,7 +29,7 @@ application (Paperless-ngx, Sure, Apprise), calendar feeds.
 
 ## Status
 
-**Foundations.** The documents below frame the app; the code has its foundations (lot 1 of
+**Early.** Lot 2b adds the rooms, items, contractors, task templates, photos and local reminders to the foundations. The documents below frame the app; the code has its foundations (lot 1 of
 the [plan](docs/plan.md)): the Flutter project for Android and iOS, the app shell with its
 five sections and an About screen, English and French, the empty database, and the
 continuous integration (checks, tests, licences of every dependency, an Android APK and an

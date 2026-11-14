@@ -167,7 +167,10 @@ recurrence port and its vectors (`tool/recurrence_vectors.py`,
 `test/fixtures/recurrence_vectors.json`), done, skip, postpone, undo, several homes, and the
 screens Today, Task and Homes; **2d**, the look of the web application (below); **2b**, the
 screens Rooms, Room, Item, Contractors and Add from a template, photos, reminders and the
-Device steps. **The new screens of 2b use the components of `lib/design/`** and write no
+Device steps (**2b**, delivered after 2d: Rooms, Room, Room form, Item, Item form, Contractors,
+Contractor, Contractor form, Add from a template, the photo screen and the reminders switch of
+More; `test/screens_2b_test.dart`, `test/photos_test.dart`, `test/reminders_test.dart`,
+`test/repository_rooms_test.dart`, `test/accessibility_test.dart`, `test/goldens_2b_test.dart`). **The new screens of 2b use the components of `lib/design/`** and write no
 colour, text style or size of their own (`test/design_rules_test.dart`), with their golden
 files at 360 px.
 
@@ -498,3 +501,10 @@ raised by [ADR 0010](adr/0010-three-ways-to-use-the-app.md) (numbered 4 to 14) w
 3. **End of a subscription**: proposed in [ADR 0006](adr/0006-subscription.md), 30 days during
    which the space is read only, then deletion, with notices at 7 days and 1 day; to confirm
    or change.
+4. **A licence exception for `dbus`** (lot 2b): the Linux part of `flutter_local_notifications`
+   pulls `dbus` (MPL-2.0, a file-level weak copyleft) into `pubspec.lock`; no iOS or Android
+   build contains it and the app changes none of its files. The check reads the GNU licences
+   that the MPL text names as secondary licences as if they applied, so the package has one
+   named exception in `tool/licenses/exceptions.txt`, with its reason. To confirm, or to
+   replace the notification package.
+
