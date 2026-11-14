@@ -4,11 +4,14 @@ import 'package:material_ui/material_ui.dart';
 
 /// Design tokens of Housecairn, from `design/tokens.json`.
 ///
-/// `design/tokens.json` is a copy of the file of the web application
-/// (HouseCairn/housecairn, `design/tokens.json`), the single source of the
-/// colours, radii and spacing of both. test/design_tokens_test.dart fails when
-/// a value here differs from the JSON file. Sizes in `rem` are converted at
-/// 16 logical pixels, the base size of the web application.
+/// Every group of `design/tokens.json` but `component` is a copy of the file
+/// of the web application (HouseCairn/housecairn, `design/tokens.json`), the
+/// single source of the colours, type, spacing, radii and shadows of both;
+/// `component` holds the few sizes the web components write in their own CSS.
+/// `$sources` in the JSON file names the web path of every value.
+/// test/design_tokens_test.dart fails when a value here differs from the JSON
+/// file. Sizes in `rem` are converted at 16 logical pixels, the base size of
+/// the web application; the text size of the phone then scales the text.
 abstract final class HcColors {
   static const slate = Color(0xFF1F3A3D);
   static const slateDeep = Color(0xFF162B2D);
@@ -78,6 +81,57 @@ abstract final class HcColors {
   };
 }
 
+/// Type (`font` of the tokens): the family, the sizes in logical pixels
+/// before the text size of the phone, the weights and the line heights.
+abstract final class HcFont {
+  /// Manrope, bundled with the app (assets/fonts/README.md). The web falls
+  /// back on system fonts; the app always has Manrope.
+  static const family = 'Manrope';
+
+  static const size2xs = 12.0;
+  static const sizeXs = 13.0;
+  static const sizeSm = 14.0;
+  static const sizeBase = 16.0;
+  static const sizeMd = 17.0;
+  static const sizeLg = 20.0;
+  static const sizeXl = 24.0;
+  static const size2xl = 32.0;
+
+  static const regular = FontWeight.w400;
+  static const medium = FontWeight.w600;
+  static const bold = FontWeight.w700;
+  static const heavy = FontWeight.w800;
+
+  /// Line height, as a multiple of the size.
+  static const lineHeight = 1.5;
+  static const lineHeightTight = 1.25;
+
+  /// Letter spacing of the headings in capitals, as a multiple of the size
+  /// (`0.08em`).
+  static const trackingCaps = 0.08;
+
+  static const Map<String, double> sizeByName = {
+    'size-2xs': size2xs,
+    'size-xs': sizeXs,
+    'size-sm': sizeSm,
+    'size-base': sizeBase,
+    'size-md': sizeMd,
+    'size-lg': sizeLg,
+    'size-xl': sizeXl,
+    'size-2xl': size2xl,
+  };
+
+  static const Map<String, FontWeight> weightByName = {
+    'weight-regular': regular,
+    'weight-medium': medium,
+    'weight-bold': bold,
+    'weight-heavy': heavy,
+  };
+
+  /// Every weight the app draws: the only weights bundled (pubspec.yaml).
+  static const weights = [regular, medium, bold, heavy];
+}
+
 /// Spacing, in logical pixels (`space` of the tokens).
 abstract final class HcSpace {
   static const s1 = 4.0;
@@ -118,20 +172,86 @@ abstract final class HcRadius {
   };
 }
 
+/// Shadows (`shadow` of the tokens).
+abstract final class HcShadow {
+  /// `0 1px 2px rgba(0, 0, 0, 0.08)`.
+  static const sm = [
+    BoxShadow(
+      offset: Offset(0, 1),
+      blurRadius: 2,
+      color: Color.fromRGBO(0, 0, 0, 0.08),
+    ),
+  ];
+
+  /// `0 8px 20px rgba(31, 58, 61, 0.35)`.
+  static const lg = [
+    BoxShadow(
+      offset: Offset(0, 8),
+      blurRadius: 20,
+      color: Color.fromRGBO(31, 58, 61, 0.35),
+    ),
+  ];
+
+  static const Map<String, List<BoxShadow>> byName = {'sm': sm, 'lg': lg};
+}
+
 /// Sizes of the layout used by the app, in logical pixels (`layout`).
 abstract final class HcLayout {
-  /// Smallest touch target, `2.75rem`.
+  /// Smallest touch target of the web, `2.75rem`. The app uses
+  /// [touchTargetLg] everywhere: 48 is the minimum of Android and the
+  /// size Material's own widgets keep (docs/adr/0010).
   static const touchTarget = 44.0;
 
-  /// Large touch target, `3rem`.
+  /// Large touch target, `3rem`: every target of the app.
   static const touchTargetLg = 48.0;
 
   /// Height of the bottom bar, `4rem`.
   static const tabbarHeight = 64.0;
 
+  /// The brand icon in the bar, `2.5rem`.
+  static const logoIcon = 40.0;
+
   static const Map<String, double> byName = {
     'touch-target': touchTarget,
     'touch-target-lg': touchTargetLg,
     'tabbar-height': tabbarHeight,
+    'logo-icon': logoIcon,
+  };
+}
+
+/// Sizes the web components write in their own CSS (`component`).
+abstract final class HcComponent {
+  static const borderWidth = 1.0;
+  static const focusRing = 3.0;
+  static const iconSize = 22.0;
+  static const iconStroke = 2.0;
+  static const chevronSize = 18.0;
+  static const appbarMinHeight = 56.0;
+  static const rowMinHeight = 56.0;
+  static const rowLineHeight = 1.3;
+  static const rowTextGap = 2.0;
+  static const pillPaddingY = 3.0;
+  static const pillPaddingX = 8.0;
+  static const buttonLineHeight = 1.2;
+
+  /// Letter spacing of the page titles, as a multiple of the size.
+  static const headingTracking = -0.01;
+  static const navLabelGap = 3.0;
+
+  static const Map<String, double> byName = {
+    'border-width': borderWidth,
+    'focus-ring': focusRing,
+    'icon-size': iconSize,
+    'icon-stroke': iconStroke,
+    'chevron-size': chevronSize,
+    'appbar-min-height': appbarMinHeight,
+    'row-min-height': rowMinHeight,
+    'row-line-height': rowLineHeight,
+    'row-text-gap': rowTextGap,
+    'pill-padding-y': pillPaddingY,
+    'pill-padding-x': pillPaddingX,
+    'button-line-height': buttonLineHeight,
+    'heading-tracking': headingTracking,
+    'nav-label-gap': navLabelGap,
   };
 }
