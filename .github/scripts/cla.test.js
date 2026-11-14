@@ -161,6 +161,13 @@ test('the maintainer and bots are exempt', async () => {
   assert.equal(cla.isExempt('alice'), false);
 });
 
+test('the project GitHub App is exempt, under a placeholder to replace with its login', () => {
+  assert.match(cla.APP_BOT, /^[A-Za-z0-9-]+\[bot\]$/, 'a <slug>[bot] login');
+  assert.equal(cla.isExempt(cla.APP_BOT), true);
+  assert.equal(cla.isExempt(cla.APP_BOT.toLowerCase()), true);
+  assert.equal(cla.isExempt('REPLACE-WITH-APP-SLUG'), false, 'a person with that name is not the bot');
+});
+
 test('an unsigned author fails the check and gets one comment, updated not repeated', async () => {
   const { github, state } = fakeGitHub({ signatures: [], commits: [commitBy(users.alice)] });
   const core = fakeCore();

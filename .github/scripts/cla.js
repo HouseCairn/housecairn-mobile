@@ -23,9 +23,13 @@ const crypto = require('node:crypto');
 // The exact comment a contributor posts to sign, also quoted in CONTRIBUTING.md.
 const PHRASE = 'I have read the CLA Document and I hereby sign the CLA';
 const RECHECK = 'recheck';
-// Accounts that never sign: the maintainer and GitHub's bots. Logins are
+// Accounts that never sign: the maintainer, GitHub's bots and the project's App. Logins are
 // compared case-insensitively, as GitHub does.
-const EXEMPT = ['Robvred', 'dependabot[bot]', 'github-actions[bot]'];
+// The project's GitHub App opens the alignment pull request (web-alignment.yml) and never
+// signs. TO REPLACE with its real login, `<slug>[bot]`, once the maintainer has created the
+// App; until then this placeholder matches no account.
+const APP_BOT = 'REPLACE-WITH-APP-SLUG[bot]';
+const EXEMPT = ['Robvred', 'dependabot[bot]', 'github-actions[bot]', APP_BOT];
 const BRANCH = 'cla-signatures';
 // The signed document: CLA.md on the default branch of the web repository.
 const CLA_REPO = { owner: 'HouseCairn', repo: 'housecairn' };
@@ -384,6 +388,7 @@ async function run({ github, context, core }, options = {}) {
 }
 
 module.exports = {
+  APP_BOT,
   BRANCH,
   CLA_PATH,
   CLA_REPO,

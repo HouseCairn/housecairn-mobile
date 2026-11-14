@@ -38,6 +38,8 @@ without depending on anyone's memory:
   included. When the tests fail, a rule changed on the web: the pull request says that Dart code
   is needed, and stays red until it is ported on that branch. It is opened with the project's
   GitHub App (environment `app-update`), as the app update of the Home Assistant add-on.
+  Its bot login, `<slug>[bot]`, is exempt from the `CLA` check (`APP_BOT` in
+  `.github/scripts/cla.js`, a placeholder until the App exists).
 - What no script ports, the data model and the rules of the spec, is read by a person: the
   report lists the web files cited by the spec that changed since the commit the spec names.
 
