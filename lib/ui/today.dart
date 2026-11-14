@@ -3,7 +3,9 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../data/repository.dart';
+import '../design/icons.dart';
 import '../design/tokens.dart';
+import '../design/widgets.dart';
 import '../domain/day.dart';
 import '../l10n/app_localizations.dart';
 import 'home_selector.dart';
@@ -142,38 +144,38 @@ class _TodayScreenState extends State<TodayScreen> {
                   builder: (_) => TaskScreen(homeId: state.current!.id),
                 ),
               ),
-              icon: const Icon(Icons.add),
+              icon: const HcIcon(HcIcons.add),
               label: Text(l10n.newTask),
             ),
       body: entries == null
           ? const SizedBox.shrink()
-          : entries.isEmpty
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(HcSpace.s6),
-                child: Text(
-                  l10n.todayEmpty,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge
-                      ?.copyWith(color: HcColors.textMuted),
-                ),
-              ),
-            )
-          : ListView(
-              padding: const EdgeInsets.only(bottom: 88),
+          : HcScreenList(
               children: [
+                if (entries.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: HcSpace.s4),
+                    child: HcEmpty(l10n.todayEmpty),
+                  ),
                 for (final MapEntry(key: heading, value: rows)
                     in groups.entries)
                   if (rows.isNotEmpty) ...[
-                    _Heading(heading),
-                    for (final entry in rows)
-                      _TodayRow(
-                        entry: entry,
-                        namesHome: named,
-                        onDone: () => _done(entry),
-                        onSkip: () => _skip(entry),
-                        onPostpone: () => _postpone(entry),
-                      ),
+                    HcSectionHeading(
+                      heading,
+                      danger: heading == l10n.todayOverdue,
+                    ),
+                    HcCardList(
+                      children: [
+                        for (final entry in rows)
+                          _TodayRow(
+                            entry: entry,
+                            today: today,
+                            namesHome: named,
+                            onDone: () => _done(entry),
+                            onSkip: () => _skip(entry),
+                            onPostpone: () => _postpone(entry),
+                          ),
+                      ],
+                    ),
                   ],
               ],
             ),
@@ -181,35 +183,14 @@ class _TodayScreenState extends State<TodayScreen> {
   }
 }
 
-class _Heading extends StatelessWidget {
-  const _Heading(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(
-      HcSpace.s4,
-      HcSpace.s4,
-      HcSpace.s4,
-      HcSpace.s2,
-    ),
-    child: Semantics(
-      header: true,
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.titleSmall
-            ?.copyWith(color: HcColors.textMuted),
-      ),
-    ),
-  );
-}
-
 enum _RowAction { skip, postpone }
 
+/// A row of Today: the task, its home on All homes, its date in a pill, Done
+/// in one tap, and skip and postpone in its menu.
 class _TodayRow extends StatelessWidget {
   const _TodayRow({
     required this.entry,
+    required this.today,
     required this.namesHome,
     required this.onDone,
     required this.onSkip,
@@ -217,6 +198,7 @@ class _TodayRow extends StatelessWidget {
   });
 
   final TodayEntry entry;
+  final Day today;
   final bool namesHome;
   final VoidCallback onDone;
   final VoidCallback onSkip;
@@ -226,22 +208,28 @@ class _TodayRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final due = entry.dueOn;
-    final when = due == null
-        ? l10n.todayNoDate
-        : entry.occurrence.status == 'postponed'
-        ? l10n.postponedTo(formatDay(context, due))
-        : l10n.dueOn(formatDay(context, due));
-    return ListTile(
+    return HcTaskRow(
       key: Key('today-${entry.occurrence.id}'),
-      leading: IconButton(
-        icon: const Icon(Icons.check_circle_outline),
-        tooltip: l10n.actionDone,
-        onPressed: onDone,
+      title: entry.task.title,
+      text: namesHome ? entry.home.name : null,
+      pill: duePill(
+        context,
+        due,
+        today,
+        postponed: entry.occurrence.status == 'postponed',
       ),
-      title: Text(entry.task.title),
-      subtitle: Text(namesHome ? l10n.rowInHome(entry.home.name, when) : when),
-      trailing: PopupMenuButton<_RowAction>(
+      overdue: due != null && due < today,
+      doneLabel: l10n.actionDone,
+      onDone: onDone,
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) =>
+              TaskScreen(homeId: entry.home.id, taskId: entry.task.id),
+        ),
+      ),
+      more: PopupMenuButton<_RowAction>(
         tooltip: l10n.actionMore,
+        icon: const HcIcon(HcIcons.more, color: HcColors.textMuted),
         onSelected: (action) => switch (action) {
           _RowAction.skip => onSkip(),
           _RowAction.postpone => onPostpone(),
@@ -253,12 +241,6 @@ class _TodayRow extends StatelessWidget {
             child: Text(l10n.actionPostpone),
           ),
         ],
-      ),
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) =>
-              TaskScreen(homeId: entry.home.id, taskId: entry.task.id),
-        ),
       ),
     );
   }

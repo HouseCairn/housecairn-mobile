@@ -248,12 +248,6 @@ abstract class AppLocalizations {
   /// **'Postponed to {date}'**
   String postponedTo(String date);
 
-  /// Second line of a task on Today with All homes: the name of its home, then its date.
-  ///
-  /// In en, this message translates to:
-  /// **'{home} · {when}'**
-  String rowInHome(String home, String when);
-
   /// Button that marks a task done in one tap. Web catalogue: Fait.
   ///
   /// In en, this message translates to:
@@ -655,6 +649,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This no longer exists.'**
   String get errNotFound;
+
+  /// Pill of a task due today, on Today and on its screen (web: the pill "Today" of tasks/_due.html).
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get dueToday;
+
+  /// Pill of a task due yesterday (web: "%(counter)s day late").
+  ///
+  /// In en, this message translates to:
+  /// **'1 day late'**
+  String get dayLate;
+
+  /// Pill of a task due two days ago or more (web: "%(counter)s days late").
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days late'**
+  String daysLate(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -2,6 +2,9 @@
 
 import 'package:material_ui/material_ui.dart';
 
+import '../design/icons.dart';
+import '../design/theme.dart';
+import '../design/tokens.dart';
 import '../l10n/app_localizations.dart';
 import 'state.dart';
 
@@ -43,17 +46,36 @@ class HomeSelector extends StatelessWidget {
             child: Text(home.name),
           ),
       ],
+      // The selector of the web (`.home-switcher-toggle`): the name in
+      // bold, a chevron, at most half the bar.
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 160),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.sizeOf(context).width / 2,
+          minHeight: HcLayout.touchTargetLg,
+        ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: HcSpace.s2),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.home_outlined),
-              const SizedBox(width: 4),
-              Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
-              const Icon(Icons.arrow_drop_down),
+              const HcIcon(HcIcons.home, color: HcColors.primary),
+              const SizedBox(width: HcSpace.s1),
+              Flexible(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: HcText.rowTitle.copyWith(fontWeight: HcFont.bold),
+                ),
+              ),
+              const SizedBox(width: HcSpace.s1),
+              const RotatedBox(
+                quarterTurns: 1,
+                child: HcIcon(
+                  HcIcons.chevron,
+                  size: HcComponent.chevronSize,
+                  color: HcColors.text,
+                ),
+              ),
             ],
           ),
         ),

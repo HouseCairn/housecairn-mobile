@@ -61,7 +61,13 @@ List<String> textsNotInArb(
   String locale, {
   Iterable<String> data = const [],
 }) {
-  final patterns = arbMessages(locale).values.map(messagePattern).toList();
+  final patterns = [
+    for (final message in arbMessages(locale).values) ...[
+      messagePattern(message),
+      // Headings of groups show in capitals, as on the web (HcSectionHeading).
+      messagePattern(message.toUpperCase()),
+    ],
+  ];
   final typed = data.toSet();
   return shownTexts(tester)
       .where((text) => !typed.contains(text))

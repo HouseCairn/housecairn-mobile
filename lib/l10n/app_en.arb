@@ -50,8 +50,6 @@
   "@dueOn": {"description": "Date of an open task on Today.", "placeholders": {"date": {"type": "String", "example": "14 Nov 2026"}}},
   "postponedTo": "Postponed to {date}",
   "@postponedTo": {"description": "Date of a postponed task on Today, and message after postponing. Web catalogue: Reportée.", "placeholders": {"date": {"type": "String", "example": "14 Nov 2026"}}},
-  "rowInHome": "{home} · {when}",
-  "@rowInHome": {"description": "Second line of a task on Today with All homes: the name of its home, then its date.", "placeholders": {"home": {"type": "String", "example": "Second home"}, "when": {"type": "String", "example": "Due 14 Nov 2026"}}},
   "actionDone": "Done",
   "@actionDone": {"description": "Button that marks a task done in one tap. Web catalogue: Fait."},
   "actionMore": "More actions",
@@ -185,5 +183,11 @@
   "errCurrencyInvalid": "Use an ISO 4217 code, such as EUR.",
   "@errCurrencyInvalid": {"description": "Error of the home form. Web catalogue."},
   "errNotFound": "This no longer exists.",
-  "@errNotFound": {"description": "Error: the row was deleted meanwhile."}
+  "@errNotFound": {"description": "Error: the row was deleted meanwhile."},
+  "dueToday": "Today",
+  "@dueToday": {"description": "Pill of a task due today, on Today and on its screen (web: the pill \"Today\" of tasks/_due.html)."},
+  "dayLate": "1 day late",
+  "@dayLate": {"description": "Pill of a task due yesterday (web: \"%(counter)s day late\")."},
+  "daysLate": "{count} days late",
+  "@daysLate": {"description": "Pill of a task due two days ago or more (web: \"%(counter)s days late\").", "placeholders": {"count": {"type": "int", "example": "3"}}}
 }

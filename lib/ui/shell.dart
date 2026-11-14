@@ -3,6 +3,8 @@
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../design/icons.dart';
+import '../design/tokens.dart';
 import '../l10n/app_localizations.dart';
 import 'sections.dart';
 
@@ -66,35 +68,31 @@ class _ShellState extends State<Shell> {
               ),
           ],
         ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _current.index,
-          onDestinationSelected: _select,
-          destinations: [
-            NavigationDestination(
-              icon: const Icon(Icons.today_outlined),
-              selectedIcon: const Icon(Icons.today),
-              label: l10n.navToday,
+        // The bar of the web (`.nav`): white, a line above, the five
+        // sections with the icons of the web, the current one in bold.
+        bottomNavigationBar: DecoratedBox(
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: HcColors.border)),
+          ),
+          // The labels of the bar keep their size whatever the text size of
+          // the phone, as the tab bar of iOS does: five labels must stay side
+          // by side on 360 px (docs/adr/0010).
+          child: MediaQuery.withNoTextScaling(
+            child: NavigationBar(
+              selectedIndex: _current.index,
+              onDestinationSelected: _select,
+              destinations: [
+                for (final (icon, label) in [
+                  (HcIcons.today, l10n.navToday),
+                  (HcIcons.rooms, l10n.navRooms),
+                  (HcIcons.projects, l10n.navProjects),
+                  (HcIcons.budget, l10n.navBudget),
+                  (HcIcons.more, l10n.navMore),
+                ])
+                  NavigationDestination(icon: HcIcon(icon), label: label),
+              ],
             ),
-            NavigationDestination(
-              icon: const Icon(Icons.meeting_room_outlined),
-              selectedIcon: const Icon(Icons.meeting_room),
-              label: l10n.navRooms,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.construction_outlined),
-              selectedIcon: const Icon(Icons.construction),
-              label: l10n.navProjects,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.account_balance_wallet_outlined),
-              selectedIcon: const Icon(Icons.account_balance_wallet),
-              label: l10n.navBudget,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.more_horiz),
-              label: l10n.navMore,
-            ),
-          ],
+          ),
         ),
       ),
     );

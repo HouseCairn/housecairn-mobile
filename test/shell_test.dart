@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:housecairn_mobile/design/icons.dart';
 import 'package:housecairn_mobile/version.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -43,7 +44,7 @@ void main() {
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull, reason: label);
         }
-        await tester.tap(find.byIcon(Icons.info_outline));
+        await tester.tap(hcIcon(HcIcons.info));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull, reason: 'About');
       });

@@ -93,11 +93,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String rowInHome(String home, String when) {
-    return '$home · $when';
-  }
-
-  @override
   String get actionDone => 'Fait';
 
   @override
@@ -315,4 +310,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get errNotFound => 'Cela n\'existe plus.';
+
+  @override
+  String get dueToday => 'Aujourd\'hui';
+
+  @override
+  String get dayLate => '1 jour de retard';
+
+  @override
+  String daysLate(int count) {
+    return '$count jours de retard';
+  }
 }

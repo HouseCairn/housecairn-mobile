@@ -3,6 +3,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/app.dart';
 import 'package:housecairn_mobile/data/repository.dart';
+import 'package:housecairn_mobile/design/icons.dart';
+import 'package:housecairn_mobile/design/widgets.dart';
 import 'package:housecairn_mobile/ui/state.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -44,3 +46,11 @@ Future<void> back(WidgetTester tester) async {
   );
   await tester.pumpAndSettle();
 }
+
+/// An icon of the app's own set ([HcIcons]).
+Finder hcIcon(HcIcons icon) =>
+    find.byWidgetPredicate((w) => w is HcIcon && w.icon == icon);
+
+/// A heading of a group of rows, by its text (it shows in capitals).
+Finder heading(String text) =>
+    find.byWidgetPredicate((w) => w is HcSectionHeading && w.text == text);

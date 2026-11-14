@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:housecairn_mobile/design/icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'support/app.dart';
@@ -35,7 +36,7 @@ Future<void> visitEveryScreen(
     await check('section ${i + 1}');
   }
   // More (the last section) is open: its entry About.
-  await tester.tap(find.byIcon(Icons.info_outline));
+  await tester.tap(hcIcon(HcIcons.info));
   await tester.pumpAndSettle();
   await check('About');
 }

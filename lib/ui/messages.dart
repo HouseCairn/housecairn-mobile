@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../data/repository.dart';
+import '../design/widgets.dart';
 import '../domain/day.dart';
 import '../l10n/app_localizations.dart';
 
@@ -47,3 +48,26 @@ String formatDay(BuildContext context, Day day) {
 
 /// [Day] as the date pickers of Material take it.
 DateTime asDateTime(Day day) => DateTime(day.year, day.month, day.day);
+
+/// The state of an open occurrence in a pill, as the web shows it
+/// (`tasks/_due.html`): late, today, postponed, the date, or no date.
+Widget duePill(
+  BuildContext context,
+  Day? due,
+  Day today, {
+  bool postponed = false,
+}) {
+  final l10n = AppLocalizations.of(context);
+  if (due == null) return HcPill(l10n.todayNoDate, tone: HcPillTone.ghost);
+  final late = today.daysSince(due);
+  if (late == 1) return HcPill(l10n.dayLate, tone: HcPillTone.danger);
+  if (late > 1) return HcPill(l10n.daysLate(late), tone: HcPillTone.danger);
+  if (late == 0) return HcPill(l10n.dueToday, tone: HcPillTone.warning);
+  if (postponed) {
+    return HcPill(
+      l10n.postponedTo(formatDay(context, due)),
+      tone: HcPillTone.info,
+    );
+  }
+  return HcPill(l10n.dueOn(formatDay(context, due)), tone: HcPillTone.sand);
+}
