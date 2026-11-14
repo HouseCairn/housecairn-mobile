@@ -109,6 +109,12 @@ metadata.
 **Device**: a reminder appears at the set time on Android (screen off) and iOS (app killed);
 camera capture; a change of time zone moves "today" and not the due dates.
 
+**Delivered in two pull requests**: **2a**, the tables, the repository, the recurrence port
+and its vectors (`tool/recurrence_vectors.py`, `test/fixtures/recurrence_vectors.json`), done,
+skip, postpone, undo, several homes, and the screens Today, Task and Homes; **2b**, the
+screens Rooms, Room, Item, Contractors and Add from a template, photos, reminders and the
+Device steps.
+
 **Depends on**: lot 1.
 
 ## Lot 3. Budget, stock, projects, reports

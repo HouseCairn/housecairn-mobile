@@ -1,21 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:housecairn_mobile/app.dart';
 import 'package:housecairn_mobile/version.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// A phone of 360 logical pixels by 760, the narrowest width of the spec.
-Future<void> onPhone(WidgetTester tester, {double textScale = 1}) async {
-  tester.view.physicalSize = const Size(360 * 3, 760 * 3);
-  tester.view.devicePixelRatio = 3;
-  tester.platformDispatcher.textScaleFactorTestValue = textScale;
-  addTearDown(tester.view.reset);
-  addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-}
-
-Finder destination(String label) =>
-    find.descendant(of: find.byType(NavigationBar), matching: find.text(label));
+import 'support/app.dart';
 
 void main() {
   const sections = {
@@ -28,8 +17,7 @@ void main() {
       tester,
     ) async {
       await onPhone(tester);
-      await tester.pumpWidget(HousecairnApp(locale: Locale(locale)));
-      await tester.pumpAndSettle();
+      await pumpApp(tester, locale: locale);
       final shown = tester
           .widgetList<NavigationDestination>(find.byType(NavigationDestination))
           .map((d) => d.label)
@@ -49,8 +37,7 @@ void main() {
         tester,
       ) async {
         await onPhone(tester, textScale: scale);
-        await tester.pumpWidget(HousecairnApp(locale: Locale(locale)));
-        await tester.pumpAndSettle();
+        await pumpApp(tester, locale: locale);
         for (final label in labels) {
           await tester.tap(destination(label));
           await tester.pumpAndSettle();
@@ -67,8 +54,7 @@ void main() {
     'About shows the attribution of NOTICE, the version and the licences',
     (tester) async {
       await onPhone(tester);
-      await tester.pumpWidget(const HousecairnApp(locale: Locale('en')));
-      await tester.pumpAndSettle();
+      await pumpApp(tester);
       await tester.tap(destination('More'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('About'));
@@ -94,8 +80,7 @@ void main() {
     tester,
   ) async {
     await onPhone(tester);
-    await tester.pumpWidget(const HousecairnApp(locale: Locale('en')));
-    await tester.pumpAndSettle();
+    await pumpApp(tester);
     await tester.tap(destination('More'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('About'));
