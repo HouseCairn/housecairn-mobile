@@ -104,18 +104,50 @@ metadata.
   - deleting a home is refused until its exact name is typed, refused for the last active home,
     and then leaves no row and no file of it, while a dump of the other home's tables is
     unchanged byte for byte.
-- Golden-free widget tests for each screen at 360 px; no screenshot in the repository.
+- Widget tests for each screen at 360 px. Lot 2a had no golden file; from lot 2d on, each screen
+  has its golden files (see lot 2d).
 
 **Device**: a reminder appears at the set time on Android (screen off) and iOS (app killed);
 camera capture; a change of time zone moves "today" and not the due dates.
 
-**Delivered in two pull requests**: **2a**, the tables, the repository, the recurrence port
-and its vectors (`tool/recurrence_vectors.py`, `test/fixtures/recurrence_vectors.json`), done,
-skip, postpone, undo, several homes, and the screens Today, Task and Homes; **2b**, the
+**Delivered in three pull requests, in this order**: **2a**, the tables, the repository, the
+recurrence port and its vectors (`tool/recurrence_vectors.py`,
+`test/fixtures/recurrence_vectors.json`), done, skip, postpone, undo, several homes, and the
+screens Today, Task and Homes; **2d**, the look of the web application (below); **2b**, the
 screens Rooms, Room, Item, Contractors and Add from a template, photos, reminders and the
-Device steps.
+Device steps. **The new screens of 2b use the components of `lib/design/`** and write no
+colour, text style or size of their own (`test/design_rules_test.dart`), with their golden
+files at 360 px.
 
 **Depends on**: lot 1.
+
+## Lot 2d. Design: the look of the web application
+
+**Scope**: the look of the web application, adapted to the phone
+([ADR 0010](adr/0010-design-from-the-web-app.md)), before lot 2b so that its screens are built in
+it: the tokens of the web with the source of every value (`design/tokens.json`), Manrope
+bundled in the weights the web uses, the full theme and the shared components in `lib/design/`
+(card list, row, task row with Done, pill, empty state, field with its label above, buttons,
+bar with the web's icons, home selector, undo bar), used by the screens Today, Task and Homes.
+Maintainer's decision of 2026-11-14, after the first TestFlight build.
+
+**Acceptance**:
+- Every web token is in `design/tokens.json` with its value, and every value names its web
+  source; `lib/design/tokens.dart` matches the file (test).
+- Manrope's files are those of the official repository, their SHA-256 recorded and checked by
+  `tool/check_licenses.dart`, the OFL in `NOTICE` and on the licence page of About; the text
+  follows the text size of the phone.
+- Golden files of Today, Task and Homes at 360 px, in English and French, at text scale 1 and 2;
+  light only, as the web.
+- A test fails when a screen writes a colour, a text style or a size outside the tokens, and
+  checks AA contrast (4.5:1) for every pair of text and background the components draw.
+- Every target is 48 px at least; safe areas, the system back of Android and the back gesture
+  of iOS work as before.
+
+**Device**: the TestFlight build of `main` shows Manrope and the look of the web on an iPhone,
+at the default text size and at the largest.
+
+**Depends on**: lot 2a. Lot 2b waits for it.
 
 ## Lot 3. Budget, stock, projects, reports
 

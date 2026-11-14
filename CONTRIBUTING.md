@@ -73,6 +73,20 @@ App icons are generated, not edited: change `design/brand/housecairn-icone-app.s
 `tool/generate_icons.py`, run `python3 tool/generate_icons.py`, commit the result (see
 [design/brand/README.md](design/brand/README.md)); CI checks that the committed files match.
 
+The look of the app is the one of the web application
+([ADR 0010](docs/adr/0010-design-from-the-web-app.md)): a screen uses the components of
+`lib/design/` and the themed Material widgets, and writes no colour, text style or size of its
+own (`test/design_rules_test.dart` fails otherwise). Values come from `design/tokens.json`,
+whose web groups are a copy of the web file. After a deliberate change of look, regenerate the
+golden files and review every changed image in the pull request:
+
+```sh
+flutter test --update-goldens test/goldens_test.dart
+```
+
+The font Manrope is bundled from its official repository (`assets/fonts/README.md`); a new
+font file needs its row there, with its SHA-256, or the licence check fails.
+
 ## Conventions
 
 - English is the language of the repository: code, documents, commit messages.
