@@ -9,7 +9,8 @@ Checks:
 - ios/ExportOptions-testflight.plist parses, uploads to App Store Connect with
   automatic signing, and holds no teamID (it is added at run time);
 - ios/Runner/Info.plist takes its build number and version from Flutter, so the
-  number given by the workflow reaches the build.
+  number given by the workflow reaches the build, and declares
+  ITSAppUsesNonExemptEncryption (export compliance, see ADR 0009).
 
 Usage: check_testflight_config.py [repository root]   (default: current directory)
 """
@@ -48,6 +49,9 @@ def check(root: Path) -> list[str]:
     for key, value in EXPECTED_INFO.items():
         if info.get(key) != value:
             errors.append(f"Info.plist: {key} is {info.get(key)!r}, expected {value!r}")
+    # Presence only: the value is the maintainer's decision, revisited in lot 5.
+    if not isinstance(info.get("ITSAppUsesNonExemptEncryption"), bool):
+        errors.append("Info.plist: ITSAppUsesNonExemptEncryption must be declared (true or false)")
     return errors
 
 

@@ -72,10 +72,12 @@ checks the major version.
 `flutter build ios --config-only --build-number`; the job checks it in the archive, with the
 bundle id `app.housecairn.mobile`. The version name is the one of `pubspec.yaml`.
 
-**Export compliance**: `ITSAppUsesNonExemptEncryption` is **not set** in `Info.plist`. Its value
-depends on how the encryption of lot 5 is classified, which is the maintainer's decision; until
-it is set, App Store Connect asks the export compliance questions for each uploaded build
-([ITSAppUsesNonExemptEncryption](https://developer.apple.com/documentation/bundleresources/information-property-list/itsappusesnonexemptencryption),
+**Export compliance**: `ITSAppUsesNonExemptEncryption` is `false` in `Info.plist`, the
+maintainer's decision: until lot 5 no data leaves the phone and the stored data is encrypted by
+the system ([ADR 0002](0002-local-storage-and-migrations.md)). **The value must be revisited
+before lot 5 is merged**, when the app gets its own cryptography. With the key set, App Store
+Connect does not ask the export compliance questions for each uploaded build; without it, it
+does ([ITSAppUsesNonExemptEncryption](https://developer.apple.com/documentation/bundleresources/information-property-list/itsappusesnonexemptencryption),
 [Provide export compliance information for beta builds](https://developer.apple.com/help/app-store-connect/test-a-beta-version/provide-export-compliance-information-for-beta-builds)).
 
 **What testers receive**: the build of a commit of `main`, with the app's data on the phone

@@ -179,6 +179,8 @@ removal and rotation; recovery code; members and assignment; encrypted export an
 - Export with two homes, then import into a fresh install, gives the same rows and files; import
   as a copy of one home of the file adds that home with new ids next to the existing ones; a
   wrong passphrase gives a clear error and no partial data.
+- Export compliance revisited: `ITSAppUsesNonExemptEncryption` and the store declarations match
+  the cryptography of this lot ([ADR 0009](adr/0009-early-testflight-builds.md)).
 
 **Device**: QR invitation between an Android phone and an iPhone; keys survive an app update and
 are gone after uninstall; the export file is shared to and imported from the Files app.
