@@ -9,12 +9,14 @@
 
 1. **Same model, same words.** The app keeps the entities, fields, choices and rules of the
    web application, so that a household that moves between the two finds the same things, and
-   so that a Housecairn instance can one day act as the relay without translation.
+   so that the app can sync with a Housecairn server without translation
+   ([ADR 0010](adr/0010-three-ways-to-use-the-app.md)).
 2. **One phone is enough.** Nothing in v1 needs a network. Sync is an addition.
 3. **Only the title is required**, done is one tap with undo, as on the web
    (`tasks/models.py:162`, ADR 0033 of the web application).
 4. **No outbound call that the person did not configure**: no telemetry, no link preview, no
-   remote image. The only network peer is the relay the person chose.
+   remote image. The only network peer is the relay, or the Housecairn server, the person chose
+   ([Ways to use the app](#ways-to-use-the-app)).
 5. **Derived figures are computed, never stored or synced**: stock levels, budget figures,
    committed amounts, visibility dates.
 
@@ -95,7 +97,7 @@ vectors, [ADR 0001](adr/0001-flutter-stack-and-packages.md)):
 | What | Source | Why |
 | --- | --- | --- |
 | Sign-in, passkeys, single sign-on, provider required by a home | `accounts/`, `homes/models.py:53-58` | No accounts. |
-| API tokens, web API, instance settings, administrator, demonstration mode | `apitokens/`, `instance/`, `demo/` | No server in the app. |
+| Managing API tokens, instance settings, administrator, demonstration mode | `apitokens/`, `instance/`, `demo/` | No server in the app. A token made on the web is what the third way uses ([ADR 0010](adr/0010-three-ways-to-use-the-app.md)); it is made and revoked on the web. |
 | Audit log | `audit/models.py:19-34` | A family log of who did what is the history of occurrences; the relay must not keep one. |
 | Events received from Home Assistant | `events/models.py:10-16` | Home Assistant is not in v1. |
 | Notification channels (Apprise) and web push devices | `notifications/models.py:30-50`, `:153-192` | Replaced by local notifications. |
@@ -104,6 +106,16 @@ vectors, [ADR 0001](adr/0001-flutter-stack-and-packages.md)):
 | Paperless-ngx fields of a quote | `projects/models.py:236-240` | Connectors are not in v1. Kept if they come from a later import (unknown fields are preserved, [ADR 0003](adr/0003-sync-protocol.md)). |
 | CSV import and export, export jobs, archive of a home in format 3 | `homes/models.py:172-226`, web ADR 0048 | Replaced by the encrypted export below. Reading a web archive in the app comes after v1 (maintainer's decision). |
 | Invitations to one home by e-mail, with a role | `homes/models.py:90-145` | A phone joins the family, hence every home ([ADR 0008](adr/0008-several-homes-one-family-space.md)); a home shared outside the family is after v1. |
+
+## Ways to use the app
+
+At the first start the app offers three ways, one at a time per phone
+([ADR 0010](adr/0010-three-ways-to-use-the-app.md), maintainer's decision of 2026-11-14):
+**alone on this phone** (the default, no network), **family sync** through the end-to-end
+encrypted relay (with a subscription on the hosted relay), and **my Housecairn server** (an
+instance and an API token; the server stores and reads the homes, which then also appear in its
+web pages). A way whose lot is not merged yet is shown, disabled. What each way guarantees, the
+moves between them and what the screen says are in ADR 0010.
 
 ## Homes
 
@@ -166,7 +178,8 @@ Homes and Settings shows the current home.
 10. **Contractors**: list and card, call and e-mail from the card.
 11. **Homes**: the list of homes, active then archived; create, rename, change currency or
     hemisphere, archive, unarchive, delete ([Homes](#homes)).
-12. **Settings**: language, reminders, export and import, family sync (subscribe, invite a
+12. **Settings**: language, reminders, export and import, the way the app is used and the move
+    to another ([Ways to use the app](#ways-to-use-the-app)), family sync (subscribe, invite a
     phone, phones, recovery code, relay address, space used against the quota), licences and
     the attribution of `NOTICE`.
 

@@ -11,6 +11,10 @@
 - Application id (decided): `app.housecairn.mobile`, as iOS bundle id and Android package.
 - **Several homes in v1** ([ADR 0008](adr/0008-several-homes-one-family-space.md)): every lot
   from 2 on tests with **at least two homes**.
+- **Three ways to use the app** ([ADR 0010](adr/0010-three-ways-to-use-the-app.md)): alone on
+  the phone, family sync through the relay, a Housecairn server. The first-start screen and the
+  transport interface come early (lot 2c); each way is turned on by its own lot (lot 7 for the
+  family sync, lot 4b for a server).
 - Each lot updates the documents it changes (spec, ADR, protocol) in the same pull request.
 - **Device** below means a test that needs a real phone or a macOS machine, which CI cannot run;
   the maintainer runs it, and the lot lists the exact steps.
@@ -117,6 +121,44 @@ Device steps.
 
 **Depends on**: lot 1.
 
+## Lot 2c. First start: three ways to use the app
+
+**Scope**: the first-start screen of [ADR 0010](adr/0010-three-ways-to-use-the-app.md), with
+the three ways: **Alone on this phone**, selected and the only one active; **Family sync** and
+**My Housecairn server** shown, disabled, with "Coming later". The way is stored in
+`local_settings` (`sync_mode`, no migration). Settings shows the way in use and the other two,
+disabled. The interface `SyncTransport` of ADR 0010 in `lib/sync/transport.dart`, **defined
+only**, as lot 1 did for `Store`, with a fake in the tests. The texts of ADR 0010 in the EN and
+FR ARB files, the sentence that the server reads the homes included. No network code, no
+package added.
+
+**Why a lot of its own, and why here**: lot 2b is already the larger half of lot 2 (five
+screens, photos, reminders, Device steps), and this lot is reviewed on other grounds (what the
+screen promises, an interface the sync engine will be written against). It needs only what lot
+2a brings (`local_settings`, the first start of the repository), it touches new files and only
+adds to the shared ones (app start, ARB files), so it can run next to lot 2b or lot 3 without
+changing the order 2a, 2b, 3. Earlier than the sync lots because the TestFlight builds of lot 1b
+put the app in people's hands before any sync exists: the screen says from the first builds
+what is coming and what each way shows to whom, and the interface is settled before lot 4.
+
+**Acceptance**:
+- First start on an empty database: the screen shows the three ways, Alone selected; the two
+  others are disabled, say "Coming later", and a tap on them opens nothing (widget test).
+- Choosing Alone stores `sync_mode = alone`, then the first home is made as in lot 2a; after a
+  restart the app opens on that home and the screen is not shown again.
+- An install of a lot 2 build, with homes and no `sync_mode`, opens on its homes without the
+  screen, and Settings shows it as Alone.
+- The texts of the three ways exist in both ARB files; the server's text says that the server
+  stores and can read the homes (a test on the keys, in both languages).
+- `SyncTransport` has the members of ADR 0010 and no implementation in `lib/`; nothing in
+  `lib/` opens a socket or an HTTP client (a test lists the imports of `lib/`).
+- Widget tests of the screen at 360 px and with the largest system text size.
+
+**Device**: first start on an Android phone and an iPhone, in English and French, with large
+text; a phone that ran a lot 2 build is updated and does not see the screen.
+
+**Depends on**: lot 2a (the first pull request of lot 2).
+
 ## Lot 3. Budget, stock, projects, reports
 
 **Scope**: stock articles, suppliers, movements, task materials and draws; projects, budget
@@ -141,7 +183,8 @@ upkeep); reports and "make a task".
 ## Lot 4. Sync engine (without network, without crypto)
 
 **Scope**: operations, HLC, apply and merge rules, deterministic ids, repair rules, schema
-versions (`sv`, `extra`, `pending`, `min_sv`), snapshots, against an in-memory relay double.
+versions (`sv`, `extra`, `pending`, `min_sv`), snapshots, behind the `SyncTransport` of lot 2c,
+against in-memory doubles of it.
 
 **Acceptance**:
 - Property tests: random histories of 2 to 5 devices **over at least two homes**, applied in
@@ -159,10 +202,50 @@ versions (`sv`, `extra`, `pending`, `min_sv`), snapshots, against an in-memory r
 - A new device that starts from a snapshot and the batches after it equals one that replayed
   everything.
 - HLC: a device whose clock is a day ahead does not move the others' clocks.
+- The engine knows no transport: the same property tests pass with a double of the relay
+  (batches and positions) and a double of a server (a cursor, and an answer that gives the value
+  that won for each field), as [ADR 0010](adr/0010-three-ways-to-use-the-app.md) describes.
 
 **Device**: none.
 
-**Depends on**: lot 3 (every entity exists).
+**Depends on**: lot 3 (every entity exists) and lot 2c (the transport interface).
+
+## Lot 4b. Sync with a Housecairn server
+
+**Scope**: the third way of [ADR 0010](adr/0010-three-ways-to-use-the-app.md): `ServerTransport`
+on the sync API of a Housecairn server (the web application or the Home Assistant add-on); the
+screens address, token and confirmation, with the sentence that the server reads the homes; the
+token in `Store`, HTTPS only; the moves alone to server (send this phone's homes into empty
+homes, or take the server's homes after an export is offered) and server to alone; the files of
+photos and attachments; the server's members of each home, read only, for assignment; the
+choice **My Housecairn server** of the first-start screen turned on; the threat model gains the
+server as an adversary.
+
+**Acceptance**:
+- Against a Housecairn instance started in CI from its image, at the web release that brings the
+  sync API: a change made on the phone is read through the web API, and a change made through
+  the web API reaches the phone.
+- The cases of [ADR 0003](adr/0003-sync-protocol.md) each have a named test with one side on the
+  phone offline and the other on the web: the phone and the server end equal, field by field.
+- Deletions made on the web reach the phone, those that the web makes without `updated_at` or
+  without a row left included (the list of ADR 0010); an erased home is erased from the phone as
+  a purge.
+- Send with **two homes**: every id on the server is the phone's; a send cut in the middle and
+  repeated creates no duplicate. Take: the local homes are removed only after the export was
+  offered and the confirmation typed; cancelling leaves the phone as it was.
+- Disconnect removes the token from `Store`; unsent changes are listed first.
+- No request goes to another host than the address typed; `http://` is refused (unless the
+  maintainer decides otherwise, [open questions](#open-questions)); a certificate error is shown
+  and cannot be skipped; the token is never in a log, the database or an export (tests).
+- A server too old for the sync API is refused with a message that names the version needed.
+
+**Device**: a phone against the Home Assistant add-on and against the web application on a home
+server; a day in airplane mode with edits on both sides, then sync.
+
+**Depends on**: lot 4; and a lot of the web repository, `HouseCairn/housecairn`, that brings the
+sync API with the needs listed in ADR 0010, merged and released. Not on lots 5 to 7: no crypto,
+no relay, no subscription. Whether lot 8 waits for it is the maintainer's call
+([open questions](#open-questions)).
 
 ## Lot 5. Encryption and family
 
@@ -200,7 +283,8 @@ experience is requested (it may run in parallel with lot 5, it must end before l
 of [protocol.md](protocol.md) section 3; storage on SQLite or PostgreSQL and files; quotas;
 challenge and token; push to APNs and FCM and the gateway mode; Docker image (amd64, arm64,
 non-root, one volume), published by digest with provenance and SBOM; conformance suite; the
-app's network client and background sync.
+app's network client (`RelayTransport`, [ADR 0010](adr/0010-three-ways-to-use-the-app.md)) and
+background sync.
 
 **Acceptance**:
 - The conformance suite, run against the relay in CI, covers every route, error code and quota.
@@ -229,7 +313,7 @@ offline.
 and restore in the app; `entitlement` route, Apple JWS verification, Google
 `subscriptionsv2`, App Store Server Notifications V2 and Real-time developer notifications;
 states active, grace, expired, refunded; read-only period and deletion; relay address field for
-self-hosting.
+self-hosting; the choice **Family sync** of the first-start screen (lot 2c) turned on.
 
 **Acceptance**:
 - Unit tests with Apple's and Google's sample payloads: valid, wrong bundle, expired, refunded,
@@ -285,8 +369,15 @@ subscribe, remove the second phone.
 
 Decided by the maintainer as later work, not to be made impossible: reading a web archive
 (format 3) in the app; an Android build without Google services (UnifiedPush, F-Droid), after
-1.0; a home shared with someone outside the family (a second space on one phone); a Housecairn
-instance acting as the relay.
+1.0; a home shared with someone outside the family (a second space on one phone).
+
+Proposed as later work by [ADR 0010](adr/0010-three-ways-to-use-the-app.md), for the maintainer
+to confirm ([open questions](#open-questions)): merging the homes of a phone with those
+of a server when both have data; a direct move between family sync and a server, without going
+through Alone; a phone in two ways at once.
+
+A Housecairn instance acting as the relay, listed here before, is replaced by lot 4b, which
+means something else: the server reads the data, where the relay never can.
 
 ## Open questions
 
