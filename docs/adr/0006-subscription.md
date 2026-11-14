@@ -59,5 +59,4 @@ Settings at no cost, and the hosted relay is the default.
   features is not verified; it is checked before lot 7.
 - Price, trial and the end of a subscription are open questions of the maintainer
   ([plan](../plan.md#open-questions)); no price is set in these documents.
-- The products are created from the organisation developer accounts, opened before lot 8
-  ([ADR 0007](0007-license.md)).
+- The products are created by the maintainer before lot 7 ([plan](../plan.md)).

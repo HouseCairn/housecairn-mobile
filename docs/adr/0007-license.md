@@ -30,10 +30,6 @@ the copyright holder, who may distribute under other terms, and the CLA gives th
 so for contributions. This is the reason to keep the CLA for this repository; it is not legal
 advice, and the CLA is still a draft until a lawyer reads it.
 
-**Publisher accounts**: the apps are published from **organisation** developer accounts at
-Apple and Google, opened before the beta (lot 8), so that the store listing names the project
-and not a person.
-
 Alternatives rejected: `MPL-2.0` for the app (file-level copyleft, no store question, but code
 no longer moves freely to the web application); `GPL-3.0-only` for the app and AGPL for the
 relay (two rules for one project, for no gain).
