@@ -1,0 +1,40 @@
+{
+  "$comment": "The release and commit of HouseCairn/housecairn each rule carried by the app was aligned on. Written by `python3 tool/web_alignment.py update`, checked on every pull request by `check` (docs/plan.md, Alignment with the web application). Never edit a commit by hand.",
+  "repository": "HouseCairn/housecairn",
+  "elements": {
+    "recurrence": {
+      "release": "v0.3.1",
+      "commit": "f4e732b98f6fab896be9308b20d548dbcb309aa5",
+      "python": "3.13.18",
+      "web": [
+        "src/housecairn/tasks/recurrence.py"
+      ],
+      "mobile": [
+        "test/fixtures/recurrence_vectors.json"
+      ],
+      "how": "tool/recurrence_vectors.py, run in the web environment of the commit (uv sync --frozen --no-dev, this Python); compared byte for byte"
+    },
+    "task_templates": {
+      "release": "v0.3.1",
+      "commit": "f4e732b98f6fab896be9308b20d548dbcb309aa5",
+      "web": [
+        "src/housecairn/tasks/task_templates.yaml"
+      ],
+      "mobile": [
+        "assets/task_templates.yaml"
+      ],
+      "how": "copy of the web file; compared byte for byte"
+    },
+    "design_tokens": {
+      "release": "v0.3.1",
+      "commit": "f4e732b98f6fab896be9308b20d548dbcb309aa5",
+      "web": [
+        "design/tokens.json"
+      ],
+      "mobile": [
+        "design/tokens.json"
+      ],
+      "how": "every token of the web file is in the app's file with the same value; the app may add its own"
+    }
+  }
+}
