@@ -96,6 +96,8 @@ jobs:
           persist-credentials: false
       - name: Clone the web application
         run: git clone --quiet --filter=blob:none https://github.com/HouseCairn/housecairn "$RUNNER_TEMP/web"
+      - name: Tests of tool/web_alignment.py (no release without a gap, patch limited to its files, pin errors)
+        run: python3 tool/test_web_alignment.py
       - name: Install uv (pinned, checksum verified)
         run: .github/scripts/install-uv.sh "$RUNNER_TEMP/uv-archive"
       - name: The app carries what its pinned web release gives (tool/web_alignment.py check)

@@ -30,14 +30,26 @@ without depending on anyone's memory:
   values of the design tokens (the app may add its own tokens, never change a web one).
 - **A check on every pull request.** The `Web alignment` job of CI regenerates every element at
   its pin and compares: the vectors and templates byte for byte, the tokens value by value. A
-  vector edited by hand, a token that is not the web's or a missing pin fails it.
-- **A pull request when the web moves.** The daily `Web alignment` workflow compares with the
-  latest web release; when something differs, it runs `flutter test` on the regenerated files
-  and opens, or updates, the one pull request of the branch `web-alignment/housecairn`, with the
-  new pin and a report of the web files that changed, those cited by the [spec](spec.md)
-  included. When the tests fail, a rule changed on the web: the pull request says that Dart code
-  is needed, and stays red until it is ported on that branch. It is opened with the project's
-  GitHub App (environment `app-update`), as the app update of the Home Assistant add-on.
+  vector edited by hand, a token that is not the web's or a missing pin fails it. The tool has
+  its own tests (`tool/test_web_alignment.py`, run by the same job): a release without effect, a
+  real gap, a missing or modified token, a missing pin, a file outside the list.
+- **A pull request when the web moves, and only then.** The daily `Web alignment` workflow
+  compares with the latest web release. It opens, or updates, a pull request only when a file the
+  app carries would differ: a recurrence vector, a task template or a design token (the source
+  header of the vectors, which names the commit, does not count). A release that changes none of
+  them is "checked, nothing to port": the run says so in its summary, writes nothing and opens
+  nothing, and the pin stays on the last release that mattered (`check` compares each element
+  with its own pinned commit, so the app stays consistent; the pin moves with the next release
+  that changes a ported file). When something differs, the workflow runs `flutter test` on the
+  regenerated files and opens, or updates, the one pull request of the branch
+  `web-alignment/housecairn`, with the new pin and a report of the web files that changed, those
+  cited by the [spec](spec.md) included. When the tests fail, a rule changed on the web: the pull
+  request says that Dart code is needed, and stays red until it is ported on that branch. It is
+  opened with the project's GitHub App (environment `app-update`), as the app update of the Home
+  Assistant add-on. The job that runs the web code makes a patch; the patch may hold only the four
+  files the update writes (the three ported files and `tool/web_alignment.json`), checked by
+  `tool/web_alignment.py verify-patch` in that job and again in the job that holds the App's
+  token. Another path fails the run and lists the paths.
   Its bot login, `<slug>[bot]`, is exempt from the `CLA` check (`APP_BOT` in
   `.github/scripts/cla.js`, a placeholder until the App exists).
 - What no script ports, the data model and the rules of the spec, is read by a person: the

@@ -78,7 +78,9 @@ python3 tool/web_alignment.py update --web ../housecairn --release vX.Y.Z  # mov
 flutter test                                                               # a red test: port the rule in Dart
 ```
 
-The `Web alignment` workflow does the same every day and opens the pull request itself.
+The `Web alignment` workflow does the same every day and opens the pull request itself, only
+when a file the app carries differs: a release without effect on them is reported in the run
+summary and moves nothing, not even the pin. `python3 tool/test_web_alignment.py` tests the tool.
 
 Every string shown to people goes in `lib/l10n/app_en.arb` (with a description) and
 `lib/l10n/app_fr.arb`; a test fails when a screen shows a string that is in neither. A new
