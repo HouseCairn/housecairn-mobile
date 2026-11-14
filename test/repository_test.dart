@@ -42,6 +42,69 @@ Map<String, Object?> fieldsOf(OccurrenceRow row) {
   return json;
 }
 
+String _hex(List<int> bytes) =>
+    bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+
+/// The key of a row in [changedClocks]: entity and id.
+String rowKey(String entity, String id) => '$entity/${_hex(uuidBytes(id))}';
+
+/// Every clock of the database: `entity/row/field` to the clock.
+Future<Map<String, String>> allClocks(Repository repo) async {
+  final rows = await repo.db
+      .customSelect('SELECT entity, row_id, field, hlc FROM field_clock')
+      .get();
+  return {
+    for (final r in rows)
+      '${r.data['entity']}/${_hex(r.data['row_id'] as List<int>)}/${r.data['field']}':
+          r.data['hlc'] as String,
+  };
+}
+
+/// The fields whose clock is new or moved between two snapshots, by row.
+Map<String, Set<String>> changedClocks(
+  Map<String, String> before,
+  Map<String, String> after,
+) {
+  final out = <String, Set<String>>{};
+  for (final MapEntry(:key, :value) in after.entries) {
+    if (before[key] == value) continue;
+    final cut = key.lastIndexOf('/');
+    out
+        .putIfAbsent(key.substring(0, cut), () => {})
+        .add(key.substring(cut + 1));
+  }
+  return out;
+}
+
+/// What a change must have clocked, exactly: the clock of each field it
+/// wrote moved, and no other clock of the database did.
+Future<void> expectClocked(
+  Repository repo,
+  Future<void> Function() change,
+  Map<String, Set<String>> expected,
+) async {
+  final before = await allClocks(repo);
+  await change();
+  final after = await allClocks(repo);
+  expect(after.keys.toSet().containsAll(before.keys), isTrue);
+  expect(changedClocks(before, after), expected);
+}
+
+/// The fields every new occurrence is created with.
+const newOccurrenceFields = {
+  'task_id',
+  'due_on',
+  'visible_from',
+  'status',
+  'status_before',
+  'postponed_from',
+  'completed_on',
+  'completion_note',
+  'follows',
+  'deleted_at',
+  'created_at',
+};
+
 void main() {
   group('field_clock', () {
     test('every field of a new row has a clock, one per change', () async {
@@ -75,6 +138,116 @@ void main() {
         reason: 'an unchanged field keeps its clock',
       );
     });
+
+    test('every change clocks the fields it writes and no others', () async {
+      final repo = await openRepository();
+      final homes = await TwoHomes.create(repo);
+      String occ(String id) => rowKey('tasks.occurrence', id);
+
+      final repeating = await repo.createTask(
+        homes.main,
+        TaskInput(
+          title: 'Filter',
+          dueOn: testToday,
+          repeatMode: 'after_last',
+          repeatUnit: 'week',
+        ),
+      );
+      final first = (await repo.openOccurrencesOf(repeating)).single.id;
+      final second = Repository.successorId(homes.main, first);
+
+      // complete: the occurrence, and the successor in full.
+      await expectClocked(repo, () => repo.complete(first, note: 'Done'), {
+        occ(first): {
+          'status_before',
+          'status',
+          'completed_on',
+          'completion_note',
+        },
+        occ(second): newOccurrenceFields,
+      });
+      // undo: the occurrence is open again, the successor is deleted.
+      await expectClocked(repo, () => repo.undo(first), {
+        occ(first): {
+          'status',
+          'status_before',
+          'completed_on',
+          'completion_note',
+        },
+        occ(second): {'deleted_at'},
+      });
+      // skip: the status and its former value; the successor, deleted by the
+      // undo, is written again in full (all but created_at).
+      await expectClocked(repo, () => repo.skip(first), {
+        occ(first): {'status_before', 'status'},
+        occ(second): newOccurrenceFields.difference({'created_at'}),
+      });
+      await repo.undo(first);
+
+      // postpone: the first date is kept the first time only.
+      await expectClocked(
+        repo,
+        () => repo.postpone(first, testToday.addDays(2)),
+        {
+          occ(first): {'postponed_from', 'due_on', 'status', 'visible_from'},
+        },
+      );
+      await expectClocked(
+        repo,
+        () => repo.postpone(first, testToday.addDays(4)),
+        {
+          occ(first): {'due_on', 'status', 'visible_from'},
+        },
+      );
+
+      // archive and unarchive: the one field of the home.
+      await expectClocked(repo, () => repo.archiveHome(homes.second), {
+        rowKey('homes.home', homes.second): {'archived_at'},
+      });
+      await expectClocked(repo, () => repo.unarchiveHome(homes.second), {
+        rowKey('homes.home', homes.second): {'archived_at'},
+      });
+
+      // delete: the deleted_at of the task and of each of its occurrences.
+      final doomed = (await repo.occurrencesOf(repeating)).map((o) => o.id);
+      await expectClocked(repo, () => repo.deleteTask(repeating), {
+        for (final id in doomed) occ(id): {'deleted_at'},
+        rowKey('tasks.task', repeating): {'deleted_at'},
+      });
+    });
+
+    test(
+      'a change of hemisphere clocks the seasons of its tasks only',
+      () async {
+        final repo = await openRepository();
+        final home = await repo.createHome(name: 'Main home');
+        final autumn = await repo.createTask(
+          home,
+          const TaskInput(title: 'Gutters', season: 'autumn'),
+        );
+        await repo.createTask(
+          home,
+          const TaskInput(
+            title: 'Own',
+            season: 'custom',
+            seasonStartMonth: 2,
+            seasonEndMonth: 4,
+          ),
+        );
+        await repo.createTask(home, const TaskInput(title: 'All year'));
+        await expectClocked(
+          repo,
+          () => repo.updateHome(home, hemisphere: 'south'),
+          {
+            rowKey('homes.home', home): {'hemisphere'},
+            rowKey('tasks.task', autumn): {
+              'season_start_month',
+              'season_end_month',
+            },
+          },
+        );
+      },
+    );
 
     test(
       'clocks only grow, even when the time of the phone goes back',
