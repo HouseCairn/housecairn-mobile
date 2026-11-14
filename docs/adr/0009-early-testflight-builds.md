@@ -13,14 +13,14 @@ screens of lot 2, can be tried on a phone without Xcode. Lot 8 keeps the wider b
 
 Constraints of the project that apply: no third-party action in CI, every action pinned to a
 full commit SHA, `GITHUB_TOKEN` read only, zizmor clean
-([ADR 0001](0001-flutter-stack-and-packages.md), lot 1); nothing of the maintainer's accounts in
+([ADR 0001](0001-flutter-stack-and-packages.md), lot 1); no account identifier is committed to
 this public repository; a pull request never reaches a secret.
 
 ## Decision
 
 **A separate lot, 1b**, between lots 1 and 2: it touches only CI, ships no app code, and is
 reviewed as supply chain work, while lot 2 is already the largest lot of the plan. Merged before
-lot 2 or alongside it, it makes lot 2's screens reach testers as soon as lot 2 is merged.
+lot 2 or alongside it, it puts lot 2's screens in a TestFlight build as soon as lot 2 is merged.
 
 **One workflow, `.github/workflows/ios-testflight.yml`, two jobs**:
 
@@ -80,7 +80,7 @@ Connect does not ask the export compliance questions for each uploaded build; wi
 does ([ITSAppUsesNonExemptEncryption](https://developer.apple.com/documentation/bundleresources/information-property-list/itsappusesnonexemptencryption),
 [Provide export compliance information for beta builds](https://developer.apple.com/help/app-store-connect/test-a-beta-version/provide-export-compliance-information-for-beta-builds)).
 
-**What testers receive**: the build of a commit of `main`, with the app's data on the phone
+**What a TestFlight build contains**: the build of a commit of `main`, with the app's data on the phone
 only. Before lot 6 there is no relay, and the app makes no network call. A TestFlight build
 never points at a hosted relay before lot 8 puts one in production.
 
@@ -89,12 +89,9 @@ never points at a hosted relay before lot 8 puts one in production.
 - Every merge on `main` costs one macOS run once uploads are enabled; pull requests cost one
   short Linux job.
 - A build is a pre-release: the database is migrated by the tested migrations of
-  [ADR 0002](0002-local-storage-and-migrations.md), but testers should keep nothing they cannot
-  lose before 1.0.
-- TestFlight builds expire after 90 days; a tester who stops updating loses the app, not the
-  data of a later build.
-- The first build of a version for external testers waits for Apple's beta review; later builds
-  of the same version usually do not.
+  [ADR 0002](0002-local-storage-and-migrations.md), but the data of a pre-release build may be
+  lost before 1.0.
+- TestFlight builds expire after 90 days.
 - Cloud signing needs an API key with a broad role. It lives only in the environment of the
   upload job, which runs only on `main`; its exposure is the main risk of this lot.
 - A rerun of an upload that already reached App Store Connect is refused for its duplicate build
