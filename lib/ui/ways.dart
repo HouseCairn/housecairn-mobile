@@ -7,6 +7,7 @@ import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../l10n/app_localizations.dart';
 import '../sync/mode.dart';
+import 'server_screens.dart';
 import 'state.dart';
 
 /// The words of one way to use the app (docs/adr/0010), from the ARB files.
@@ -33,8 +34,19 @@ class _WaysScreenState extends State<WaysScreen> {
   /// until then, so that two quick taps make one home.
   bool _starting = false;
 
+  /// The way selected; Alone until another available one is tapped.
+  SyncMode _selected = SyncMode.alone;
+
   Future<void> _continue(AppState state, String firstHomeName) async {
     if (_starting) return;
+    if (_selected == SyncMode.server) {
+      // The address, the sign-in and the confirmation (lot 4b): nothing is
+      // stored before the confirmation.
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const ServerAddressScreen()),
+      );
+      return;
+    }
     setState(() => _starting = true);
     try {
       await state.startAlone(firstHomeName);
@@ -70,8 +82,10 @@ class _WaysScreenState extends State<WaysScreen> {
                     WayCard(
                       key: Key('way-${way.name}'),
                       way: way,
-                      selected: way == SyncMode.alone,
-                      onTap: wayAvailable(way) ? () {} : null,
+                      selected: way == _selected,
+                      onTap: wayAvailable(way)
+                          ? () => setState(() => _selected = way)
+                          : null,
                     ),
                     const SizedBox(height: HcSpace.s3),
                   ],

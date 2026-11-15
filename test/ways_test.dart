@@ -14,6 +14,7 @@ import 'package:housecairn_mobile/domain/photos.dart';
 import 'package:housecairn_mobile/domain/templates.dart';
 import 'package:housecairn_mobile/sync/mode.dart';
 import 'package:housecairn_mobile/ui/state.dart';
+import 'package:housecairn_mobile/ui/server_screens.dart';
 import 'package:housecairn_mobile/ui/ways.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -105,8 +106,9 @@ void main() {
         final cards = tester.widgetList<WayCard>(find.byType(WayCard)).toList();
         expect(cards.map((c) => c.way), SyncMode.values);
         expect(cards.map((c) => c.selected), [true, false, false]);
-        expect(cards.map((c) => c.onTap != null), [true, false, false]);
-        expect(find.text(w.later), findsNWidgets(2));
+        // My Housecairn server is available from lot 4b.
+        expect(cards.map((c) => c.onTap != null), [true, false, true]);
+        expect(find.text(w.later), findsOneWidget);
       });
 
       testWidgets('a tap on a way that is coming later opens nothing', (
@@ -115,7 +117,7 @@ void main() {
         // Tall, so that the three cards are built together.
         await onPhone(tester, height: 1600);
         final state = await pumpApp(tester, locale: locale, firstStart: true);
-        for (final way in ['relay', 'server']) {
+        for (final way in ['relay']) {
           await tester.ensureVisible(find.byKey(Key('way-$way')));
           await tester.pumpAndSettle();
           await tester.tap(find.byKey(Key('way-$way')));
@@ -129,6 +131,22 @@ void main() {
         expect(await state.repository.storedSyncMode(), isNull);
         expect(state.homes, isEmpty);
         expect(state.firstStart, isTrue);
+      });
+
+      testWidgets('My Housecairn server is chosen, and Continue asks the '
+          'address; nothing is stored before the confirmation', (tester) async {
+        await onPhone(tester, height: 1600);
+        final state = await pumpApp(tester, locale: locale, firstStart: true);
+        await tester.ensureVisible(find.byKey(const Key('way-server')));
+        await tester.tap(find.byKey(const Key('way-server')));
+        await tester.pumpAndSettle();
+        final cards = tester.widgetList<WayCard>(find.byType(WayCard)).toList();
+        expect(cards.map((c) => c.selected), [false, false, true]);
+        await tester.tap(find.byKey(const Key('ways-continue')));
+        await tester.pumpAndSettle();
+        expect(find.byType(ServerAddressScreen), findsOneWidget);
+        expect(await state.repository.storedSyncMode(), isNull);
+        expect(state.homes, isEmpty);
       });
 
       testWidgets('choosing Alone stores the way and makes the first home', (
@@ -357,10 +375,17 @@ void main() {
           await repository.setSyncMode(mode);
           expect(
             await repository.storedSyncMode(),
-            wayAvailable(mode) ? mode : isNull,
+            // The third way needs its server's address (lot 4b).
+            wayAvailable(mode) && mode != SyncMode.server ? mode : isNull,
           );
         }
-        expect(SyncMode.values.where(wayAvailable), [SyncMode.alone]);
+        await repository.setServerAddress('https://housecairn.example.com');
+        await repository.setSyncMode(SyncMode.server);
+        expect(await repository.storedSyncMode(), SyncMode.server);
+        expect(SyncMode.values.where(wayAvailable), [
+          SyncMode.alone,
+          SyncMode.server,
+        ]);
         expect(SyncMode.parse('mesh'), isNull, reason: 'unknown value');
       },
     );

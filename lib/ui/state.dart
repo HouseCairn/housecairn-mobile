@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../core/document_source.dart';
 import '../core/notifier.dart';
 import '../core/photo_source.dart';
+import '../core/store.dart';
 import '../data/database.dart';
 import '../data/repository.dart';
 import '../domain/day.dart';
@@ -16,7 +17,13 @@ import '../domain/photos.dart';
 import '../domain/reminders.dart';
 import '../domain/templates.dart';
 import '../l10n/app_localizations.dart';
+import '../sync/engine.dart';
 import '../sync/mode.dart';
+import '../sync/server_address.dart';
+import '../sync/server_connection.dart';
+import '../sync/server_http.dart';
+import '../sync/server_http_io.dart';
+import '../sync/server_transport.dart';
 
 /// Re-encodes a photo off the main isolate (a photo of 12 megapixels takes a
 /// second or two); tests give [processPhoto] itself.
@@ -58,6 +65,9 @@ class AppState extends ChangeNotifier {
     this.photoProcessor = processInIsolate,
     this.loadTemplates = loadBundledTemplates,
     this.openUrl = openInSystem,
+    this.store,
+    this.serverHttp = IoServerHttp.new,
+    this.signInCallbacks,
   });
 
   final Repository repository;
@@ -74,6 +84,18 @@ class AppState extends ChangeNotifier {
   final PhotoProcessor photoProcessor;
   final Future<TemplateLibrary> Function() loadTemplates;
   final UrlOpener openUrl;
+
+  /// The secrets at rest (the Keychain or the Android Keystore): the access
+  /// to a server in the third way; `null` where there is none (tests that
+  /// never connect).
+  final Store? store;
+
+  /// The connection to the address typed, in the third way.
+  final ServerHttp Function(ServerAddress address) serverHttp;
+
+  /// The redirects of the browser back to the app; the app's
+  /// [SignInCallbacks] when `null`.
+  final Stream<Uri>? signInCallbacks;
 
   /// Whether the data was read once; until then the app shows nothing.
   bool loaded = false;
@@ -133,6 +155,71 @@ class AppState extends ChangeNotifier {
   Future<void> startAlone(String firstHomeName) async {
     await repository.setSyncMode(SyncMode.alone);
     await refresh(firstHomeName: firstHomeName);
+  }
+
+  // ---------- the third way: a Housecairn server (lot 4b) ----------
+
+  Store get _store =>
+      store ?? (throw StateError('No secure store on this build.'));
+
+  ServerTransport _transport(ServerAddress address) => ServerTransport(
+    address: address,
+    http: serverHttp(address),
+    store: _store,
+    state: repository.serverState,
+    device: repository.deviceB64,
+    schemaVersion: repository.schemaVersion,
+  );
+
+  /// Signs in to [address] in the system browser (OAuth 2 with PKCE); the
+  /// access is then in [store], nothing of the homes was sent or received.
+  Future<void> signInToServer(ServerAddress address) => ServerConnector(
+    http: serverHttp,
+    store: _store,
+    openBrowser: openUrl,
+    deviceName: l10n?.serverDeviceName ?? 'Housecairn',
+    callbacks: signInCallbacks,
+  ).signIn(address);
+
+  /// The homes the access chosen in the browser covers, and their members.
+  Future<List<ServerHome>> serverHomesOffered(ServerAddress address) async {
+    final transport = _transport(address);
+    await transport.capabilities();
+    return transport.homes();
+  }
+
+  /// Forgets an access signed in but not confirmed: revoked on the server
+  /// when it answers, deleted from [store] whatever happens.
+  Future<void> forgetServer(ServerAddress address) =>
+      _transport(address).disconnect();
+
+  /// The confirmation of the third way at the first start: the phone has no
+  /// home, so it keeps the server's (docs/adr/0010, "Moving from one way to
+  /// another"): the way and the address are stored, then the first sync
+  /// brings the homes of the access.
+  Future<void> startServer(ServerAddress address) async {
+    await repository.setServerAddress(address.display);
+    await repository.setSyncMode(SyncMode.server);
+    await syncWithServer();
+  }
+
+  /// The address of the server in use, in the third way.
+  Future<ServerAddress?> serverAddress() async =>
+      ServerAddress.stored(await repository.serverAddress());
+
+  /// One round of sync with the server; nothing outside the third way.
+  Future<SyncReport?> syncWithServer() async {
+    if (syncMode != SyncMode.server &&
+        await repository.storedSyncMode() != SyncMode.server) {
+      return null;
+    }
+    final address = await serverAddress();
+    if (address == null) return null;
+    try {
+      return await SyncEngine(repository, _transport(address)).sync();
+    } finally {
+      await refresh();
+    }
   }
 
   Future<void> choose(String homeId) async {

@@ -9,9 +9,11 @@ import 'core/clock.dart';
 import 'core/document_source.dart';
 import 'core/local_notifier.dart';
 import 'core/photo_source.dart';
+import 'core/secure_store.dart';
 import 'data/database.dart';
 import 'data/repository.dart';
 import 'design/fonts.dart';
+import 'sync/server_connection.dart';
 import 'ui/state.dart';
 
 Future<void> main() async {
@@ -42,6 +44,10 @@ Future<void> main() async {
     photoSource: ImagePickerSource(),
     documentSource: const FilePickerSource(),
     notifier: notifier,
+    store: SecureStore(),
   );
+  // Before the app's navigator: the end of a sign-in in the browser comes
+  // back as a link to the app, which is not a route (lot 4b).
+  SignInCallbacks.instance.listen();
   runApp(HousecairnApp(state: state));
 }

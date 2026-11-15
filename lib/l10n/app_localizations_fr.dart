@@ -2455,4 +2455,102 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get saved => 'Enregistré';
+
+  @override
+  String get serverAddressHelp =>
+      'Saisissez l\'adresse de votre Housecairn : l\'application web, ou le port du module Home Assistant. Vous vous connectez ensuite sur la page de votre serveur, dans le navigateur.';
+
+  @override
+  String get serverAddressLabel => 'Adresse du serveur';
+
+  @override
+  String get serverAddressInvalid =>
+      'Ce n\'est pas l\'adresse d\'un serveur. Saisissez-la sous la forme https://housecairn.example.com.';
+
+  @override
+  String get serverHttpNeedsLocalIp =>
+      'Utilisez https://. Le simple http:// ne marche qu\'avec l\'adresse IP d\'un serveur de votre réseau, jamais avec un nom, même terminé par .local.';
+
+  @override
+  String get serverHttpWarning =>
+      'Cette connexion n\'est pas chiffrée : toute personne sur ce réseau peut lire ce que le téléphone envoie, et l\'accès à votre serveur. Ne l\'utilisez que sur votre propre réseau.';
+
+  @override
+  String get serverHttpContinue => 'Continuer sans chiffrement';
+
+  @override
+  String get serverSignIn => 'Se connecter';
+
+  @override
+  String get serverSigningIn =>
+      'Connectez-vous sur la page de votre serveur dans le navigateur, puis revenez ici.';
+
+  @override
+  String get serverConfirmTitle => 'Confirmation';
+
+  @override
+  String get serverSeesEverything =>
+      'Ce serveur verra tout de ces logements : tâches, pièces, notes, montants et photos. Tout comme les personnes qui l\'administrent, les membres de ces logements sur ce serveur, et ses sauvegardes. Ne continuez qu\'avec un serveur de confiance.';
+
+  @override
+  String get serverHomesHeading => 'Logements de cet accès';
+
+  @override
+  String get serverNoHomes =>
+      'Cet accès ne couvre aucun logement. Choisissez-en au moins un sur la page de votre serveur.';
+
+  @override
+  String get serverReadOnly => 'Lecture seule';
+
+  @override
+  String get serverNotEncrypted => 'Non chiffré';
+
+  @override
+  String get serverConnect => 'Se connecter';
+
+  @override
+  String get serverCancel => 'Annuler';
+
+  @override
+  String serverTooOld(String version) {
+    return 'Ce serveur est trop ancien pour l\'application. Mettez-le à jour vers Housecairn $version ou plus récent.';
+  }
+
+  @override
+  String get serverMobileAppOff =>
+      'Ce serveur n\'autorise pas l\'application mobile. Son administrateur peut l\'activer dans les réglages de l\'instance.';
+
+  @override
+  String get serverSignInCancelled =>
+      'La connexion a été annulée sur la page du serveur.';
+
+  @override
+  String get serverSignInFailed => 'La connexion n\'a pas abouti. Réessayez.';
+
+  @override
+  String get serverInsecureRefused =>
+      'Le serveur refuse cette connexion sans chiffrement. Utilisez son adresse en https://.';
+
+  @override
+  String get serverDisconnected =>
+      'Ce téléphone a été déconnecté du serveur. Reconnectez-vous pour reprendre la synchronisation ; vos logements restent sur ce téléphone.';
+
+  @override
+  String get serverUpdateApp =>
+      'Le serveur demande une version plus récente de l\'application avant que ce téléphone puisse envoyer ses modifications.';
+
+  @override
+  String get serverCertificate =>
+      'Le certificat de ce serveur n\'est pas valide. L\'application ne s\'y connecte pas.';
+
+  @override
+  String get serverOtherHost =>
+      'Le serveur a renvoyé l\'application vers une autre adresse. L\'application ne parle qu\'à l\'adresse que vous avez saisie.';
+
+  @override
+  String get serverUnreachable =>
+      'Le serveur est injoignable. Vérifiez l\'adresse et le réseau.';
+
+  @override
+  String get serverDeviceName => 'Application mobile Housecairn';
 }

@@ -4003,6 +4003,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved'**
   String get saved;
+
+  /// Help text of the screen where the person types the address of their Housecairn server.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the address of your Housecairn: the web application, or the port of the Home Assistant add-on. You then sign in on your server\'s own page, in the browser.'**
+  String get serverAddressHelp;
+
+  /// Label of the field of the server's address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address of the server'**
+  String get serverAddressLabel;
+
+  /// Error: the typed text is not an address (no host, a user name, a query).
+  ///
+  /// In en, this message translates to:
+  /// **'This is not the address of a server. Type it as https://housecairn.example.com.'**
+  String get serverAddressInvalid;
+
+  /// Error: http:// was typed with a name or a public address (docs/protocol.md section 2.10).
+  ///
+  /// In en, this message translates to:
+  /// **'Use https://. Plain http:// works only with the IP address of a server on your own network, never with a name, not even one ending in .local.'**
+  String get serverHttpNeedsLocalIp;
+
+  /// Warning shown before connecting by plain http:// to a local IP address.
+  ///
+  /// In en, this message translates to:
+  /// **'This connection is not encrypted: anyone on this network can read what the phone sends, and the access to your server. Use it only on your own network.'**
+  String get serverHttpWarning;
+
+  /// Button after the warning: connect by plain http:// all the same.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue without encryption'**
+  String get serverHttpContinue;
+
+  /// Button: opens the sign-in page of the server in the browser.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get serverSignIn;
+
+  /// Shown while the browser is open for the sign-in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in on your server\'s page in the browser, then come back here.'**
+  String get serverSigningIn;
+
+  /// Title of the confirmation screen, before anything is sent or received.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to this server'**
+  String get serverConfirmTitle;
+
+  /// The sentence of ADR 0010 shown before connecting to a server. Must keep every point.
+  ///
+  /// In en, this message translates to:
+  /// **'This server will see everything in these homes: tasks, rooms, notes, amounts and photos. So can the people who run it, the people who are members of these homes on it, and its backups. Continue only with a server you trust.'**
+  String get serverSeesEverything;
+
+  /// Heading of the list of the homes the access chosen in the browser covers.
+  ///
+  /// In en, this message translates to:
+  /// **'Homes of this access'**
+  String get serverHomesHeading;
+
+  /// Shown when the sign-in gave an access to no home.
+  ///
+  /// In en, this message translates to:
+  /// **'This access covers no home. Choose at least one on your server\'s page.'**
+  String get serverNoHomes;
+
+  /// Pill of a home where the signed-in account is a read-only member.
+  ///
+  /// In en, this message translates to:
+  /// **'Read only'**
+  String get serverReadOnly;
+
+  /// Pill next to a server reached by plain http://.
+  ///
+  /// In en, this message translates to:
+  /// **'Not encrypted'**
+  String get serverNotEncrypted;
+
+  /// Button of the confirmation: the way is turned on and the homes of the server come to the phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get serverConnect;
+
+  /// Button of the confirmation: the access is forgotten, nothing was sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get serverCancel;
+
+  /// Error: the server has no sync API. {version} is the first version with it.
+  ///
+  /// In en, this message translates to:
+  /// **'This server is too old for the app. Update it to Housecairn {version} or later.'**
+  String serverTooOld(String version);
+
+  /// Error: the instance turned the mobile app off.
+  ///
+  /// In en, this message translates to:
+  /// **'This server does not allow the mobile app. Its administrator can turn it on in the instance settings.'**
+  String get serverMobileAppOff;
+
+  /// Error: the person pressed Cancel on the consent page.
+  ///
+  /// In en, this message translates to:
+  /// **'The sign-in was cancelled on the server\'s page.'**
+  String get serverSignInCancelled;
+
+  /// Error: the answer of the browser did not match, or the server refused the code.
+  ///
+  /// In en, this message translates to:
+  /// **'The sign-in did not finish. Try again.'**
+  String get serverSignInFailed;
+
+  /// Error: the server answered insecure_transport.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refuses this connection without encryption. Use its https:// address.'**
+  String get serverInsecureRefused;
+
+  /// Error: the access was revoked on the server or expired.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone was disconnected from the server. Sign in again to go on syncing; your homes stay on this phone.'**
+  String get serverDisconnected;
+
+  /// Error: the server answered sync_version.
+  ///
+  /// In en, this message translates to:
+  /// **'The server asks for a newer version of the app before this phone can send changes.'**
+  String get serverUpdateApp;
+
+  /// Error: the TLS certificate was refused by the system; there is no way to skip it.
+  ///
+  /// In en, this message translates to:
+  /// **'The certificate of this server is not valid. The app does not connect to it.'**
+  String get serverCertificate;
+
+  /// Error: a redirect, or an address of another host.
+  ///
+  /// In en, this message translates to:
+  /// **'The server sent the app to another address. The app talks only to the address you typed.'**
+  String get serverOtherHost;
+
+  /// Error: no connection.
+  ///
+  /// In en, this message translates to:
+  /// **'The server cannot be reached. Check the address and the network.'**
+  String get serverUnreachable;
+
+  /// Name the phone gives itself on the server's consent page.
+  ///
+  /// In en, this message translates to:
+  /// **'Housecairn mobile app'**
+  String get serverDeviceName;
 }
 
 class _AppLocalizationsDelegate

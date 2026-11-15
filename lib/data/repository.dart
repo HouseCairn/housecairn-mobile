@@ -669,7 +669,13 @@ class Repository {
   /// of a later build) reads as none: it cannot be put in use.
   Future<SyncMode?> storedSyncMode() async {
     final mode = SyncMode.parse(await _setting('sync_mode'));
-    return mode != null && wayAvailable(mode) ? mode : null;
+    if (mode == null || !wayAvailable(mode)) return null;
+    // The third way needs its server: without an address it was never
+    // confirmed (lot 4b), and reads as none.
+    if (mode == SyncMode.server && await _setting('server_address') == null) {
+      return null;
+    }
+    return mode;
   }
 
   /// The way the phone is used: alone when none is written
