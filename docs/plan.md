@@ -273,6 +273,9 @@ was split): **3a**, the stock: articles, suppliers, movements and inventory, the
 task and the draws taken by Done and given back by Undo, and their screens, with the criteria of
 this lot on the stock, on amounts without `double` and on two homes in two currencies; **3b**,
 projects, budget lines, quotes, the annual envelope, the budget views and reports.
+The budget figures are compared with the web's by `test/budget_web_test.dart`, on the figures
+`tool/budget_figures.py` computes in the web of the pinned release (`tool/web_alignment.py`,
+element `budget`, checked in CI).
 
 **Depends on**: lot 2.
 

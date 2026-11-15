@@ -91,7 +91,10 @@ class MoreScreen extends StatelessWidget {
               if (AppScope.of(context).current case final home?)
                 HcRow(
                   key: const Key('more-reports'),
-                  leading: const HcIcon(HcIcons.info, color: HcColors.primary),
+                  leading: const HcIcon(
+                    HcIcons.reports,
+                    color: HcColors.primary,
+                  ),
                   title: l10n.reports,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(

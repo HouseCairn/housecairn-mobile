@@ -247,5 +247,8 @@ class YearChoice extends StatelessWidget {
 /// A small line of text under a table.
 Widget smallNote(String text) => Padding(
   padding: const EdgeInsets.only(top: HcSpace.s2),
-  child: Text(text, style: HcText.bodySmall.copyWith(color: HcColors.textMuted)),
+  child: Text(
+    text,
+    style: HcText.bodySmall.copyWith(color: HcColors.textMuted),
+  ),
 );

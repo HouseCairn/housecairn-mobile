@@ -16,6 +16,7 @@ import 'messages.dart';
 import 'parts.dart';
 import 'photos.dart';
 import 'state.dart';
+import 'stock_format.dart';
 import 'stock_screens.dart';
 import 'task_screen.dart';
 import 'templates_screen.dart';
@@ -204,10 +205,22 @@ class RoomScreen extends StatelessWidget {
     final state = AppScope.of(context);
     final home = state.homes.where((h) => h.id == homeId).firstOrNull;
     final writable = home != null && home.archivedAt == null;
-    return DataView<(RoomRow?, List<ItemRow>)>(
-      load: (r) async => (await r.room(roomId), await r.itemsOf(roomId)),
+    return DataView<(RoomRow?, List<ItemRow>, ArticleEntry?)>(
+      load: (r) async {
+        final room = await r.room(roomId);
+        final paint = room?.paintArticleId == null
+            ? null
+            : await r.article(room!.paintArticleId!);
+        return (
+          room,
+          await r.itemsOf(roomId),
+          paint == null
+              ? null
+              : ArticleEntry(paint, await r.stockLevel(paint.id)),
+        );
+      },
       builder: (context, data) {
-        final (room, items) = data;
+        final (room, items, paint) = data;
         if (room == null) {
           // Deleted meanwhile (here or on another phone): back to the list.
           return Scaffold(
@@ -258,13 +271,36 @@ class RoomScreen extends StatelessWidget {
               ),
               HcSectionHeading(l10n.roomMemory),
               HcCard(
-                child: memory.isEmpty
+                child: memory.isEmpty && paint == null
                     ? Text(l10n.roomMemoryEmpty, style: HcText.rowText)
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           for (final (label, value) in memory)
                             HcFact(label, factText(value)),
+                          // The paint left over, from the stock (lot 3b).
+                          if (paint != null)
+                            HcFact(
+                              l10n.paintArticle,
+                              InkWell(
+                                key: const Key('room-paint'),
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => ArticleScreen(
+                                      homeId: homeId,
+                                      articleId: paint.article.id,
+                                    ),
+                                  ),
+                                ),
+                                child: Text(
+                                  '${paint.article.name} · ${amountOf(l10n, localeOf(context), paint.article, paint.level)}',
+                                  style: HcText.body.copyWith(
+                                    color: HcColors.primary,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
               ),
@@ -349,15 +385,26 @@ class _RoomFormScreenState extends State<RoomFormScreen> {
   String _kind = 'other';
   bool _loaded = false;
 
+  /// The stock article of the paint left over (`paint_article`), and the
+  /// articles of the home to choose it from.
+  String? _paintArticle;
+  List<ArticleEntry> _articles = const [];
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_loaded || widget.roomId == null) return;
+    if (_loaded) return;
     _loaded = true;
-    AppScope.of(context).repository.room(widget.roomId!).then((room) {
+    final repository = AppScope.of(context).repository;
+    repository.articles(widget.homeId).then((articles) {
+      if (mounted) setState(() => _articles = articles);
+    });
+    if (widget.roomId == null) return;
+    repository.room(widget.roomId!).then((room) {
       if (room == null || !mounted) return;
       final input = RoomInput.of(room);
       setState(() {
+        _paintArticle = room.paintArticleId;
         _name.text = input.name;
         _kind = input.kind;
         _notes.text = input.notes;
@@ -417,8 +464,10 @@ class _RoomFormScreenState extends State<RoomFormScreen> {
           position: position,
         );
         await r.updateRoom(id, input);
+        await r.setPaintArticle(id, _paintArticle);
       } else {
         await r.updateRoom(widget.roomId!, _input());
+        await r.setPaintArticle(widget.roomId!, _paintArticle);
       }
     });
     if (saved) navigator.pop();
@@ -486,6 +535,20 @@ class _RoomFormScreenState extends State<RoomFormScreen> {
                   hcText(l10n.paintBrand, _paintBrand),
                   hcText(l10n.paintReference, _paintReference),
                   hcText(l10n.paintBatch, _paintBatch),
+                  if (_articles.isNotEmpty)
+                    hcChoice<String?>(
+                      l10n.paintArticle,
+                      _articles.any((a) => a.article.id == _paintArticle)
+                          ? _paintArticle
+                          : null,
+                      [
+                        (null, l10n.paintArticleNone),
+                        for (final a in _articles)
+                          (a.article.id, a.article.name),
+                      ],
+                      (v) => setState(() => _paintArticle = v),
+                      key: const Key('room-paint-article'),
+                    ),
                   hcText(l10n.floorCovering, _floor),
                   hcText(l10n.wallCovering, _wall),
                   hcText(

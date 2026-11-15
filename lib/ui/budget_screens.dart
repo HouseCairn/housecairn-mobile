@@ -128,7 +128,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       child: LinearProgressIndicator(
                         key: const Key('envelope-gauge'),
                         value: e.gaugeValue / 100,
-                        minHeight: 8,
+                        minHeight: HcSpace.s2,
                       ),
                     ),
                     const SizedBox(height: HcSpace.s1),
@@ -142,10 +142,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 ),
               ),
             const SizedBox(height: HcSpace.s2),
-            ExpansionTile(
+            _Details(
               key: const Key('envelope-details'),
-              tilePadding: EdgeInsets.zero,
-              title: Text(l10n.detailsOfYear, style: HcText.body),
+              title: l10n.detailsOfYear,
               children: [
                 if (e.envelope != null) ...[
                   HcFact(l10n.plannedAll, factText(m(e.total.planned))),
@@ -391,4 +390,47 @@ class _BudgetScreenState extends State<BudgetScreen> {
       smallNote(l10n.costAYearExplained),
     ];
   }
+}
+
+/// A part that unfolds, as the web's `<details>`: its title is a button
+/// that says whether it is open.
+class _Details extends StatefulWidget {
+  const _Details({super.key, required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  State<_Details> createState() => _DetailsState();
+}
+
+class _DetailsState extends State<_Details> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Semantics(
+        button: true,
+        expanded: _open,
+        child: InkWell(
+          onTap: () => setState(() => _open = !_open),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: HcLayout.touchTargetLg,
+            ),
+            child: Row(
+              children: [
+                Icon(_open ? Icons.expand_less : Icons.expand_more),
+                const SizedBox(width: HcSpace.s2),
+                Expanded(child: Text(widget.title, style: HcText.body)),
+              ],
+            ),
+          ),
+        ),
+      ),
+      if (_open) ...widget.children,
+    ],
+  );
 }
