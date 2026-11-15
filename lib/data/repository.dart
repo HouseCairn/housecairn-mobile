@@ -1913,6 +1913,7 @@ class Repository {
       final untouched =
           next.status == 'planned' &&
           next.postponedFrom == null &&
+          next.actualCost == null &&
           next.completionNote.isEmpty;
       if (!untouched) throw const Refused(Refusal.nextChanged);
     }
@@ -1921,12 +1922,17 @@ class Repository {
       // (`tasks/services.py:635`).
       await _returnDraws(found);
       for (final next in following) {
-        await _put('occurrences', next.id, {'deleted_at': _now()});
+        // Detached before it goes, as the web does (`_withdraw`).
+        await _put('occurrences', next.id, {
+          'follows': null,
+          'deleted_at': _now(),
+        });
       }
       await _put('occurrences', id, {
         'status': found.statusBefore.isEmpty ? 'planned' : found.statusBefore,
         'status_before': '',
         'completed_on': null,
+        'actual_cost': null,
         'completion_note': '',
       });
     });

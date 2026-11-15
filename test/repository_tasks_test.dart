@@ -7,7 +7,9 @@
 // is in one is never in the other.
 
 import 'package:decimal/decimal.dart';
+import 'package:drift/drift.dart' show Variable;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:housecairn_mobile/data/database.dart';
 import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/domain/day.dart';
 
@@ -303,6 +305,89 @@ void main() {
         r.updateOccurrence(data.doneOccurrence, note: 'late'),
         throwsA(isA<Refused>()),
       );
+    });
+  });
+
+  group('undo of a done occurrence', () {
+    Future<void> refused(Future<void> call, Refusal reason) => expectLater(
+      call,
+      throwsA(isA<Refused>().having((e) => e.reason, 'reason', reason)),
+    );
+
+    test(
+      'empties the real cost, which a new done does not bring back',
+      () async {
+        final id = await r.createTask(
+          data.main,
+          TaskInput(title: 'Clean the gutters', dueOn: testToday),
+        );
+        final occ = (await r.openOccurrencesOf(id)).single.id;
+        await r.complete(occ);
+        await r.updateOccurrence(occ, actualCost: '50');
+        expect((await r.occurrence(occ))!.actualCost, '50.00');
+
+        await r.undo(occ);
+        final open = (await r.occurrence(occ))!;
+        expect(open.actualCost, isNull, reason: 'as the web: actual_cost=None');
+        expect(open.status, 'planned');
+
+        await r.complete(occ);
+        final page = await r.history(data.main, const HistoryFilter());
+        expect(page.cost.total, Decimal.parse('12.50'), reason: 'not 62.50');
+        expect(page.cost.withCost, 1);
+      },
+    );
+
+    test('is refused when the next occurrence has a real cost', () async {
+      final id = await r.createTask(
+        data.main,
+        TaskInput(
+          title: 'Bleed the radiators',
+          dueOn: testToday,
+          repeatMode: 'after_last',
+          repeatUnit: 'week',
+        ),
+      );
+      final first = (await r.openOccurrencesOf(id)).single.id;
+      final next = (await r.complete(first)).nextId!;
+      await r.db.customUpdate(
+        'UPDATE occurrences SET actual_cost = ? WHERE id = ?',
+        variables: [
+          Variable<String>('5.00'),
+          Variable<Object>(uuidBytes(next)),
+        ],
+        updates: {r.db.occurrences},
+      );
+      await refused(r.undo(first), Refusal.nextChanged);
+      expect((await r.occurrence(first))!.status, 'done');
+    });
+
+    test('detaches the withdrawn occurrence before deleting it', () async {
+      final id = await r.createTask(
+        data.main,
+        TaskInput(
+          title: 'Check the chimney cap',
+          dueOn: testToday,
+          repeatMode: 'after_last',
+          repeatUnit: 'week',
+        ),
+      );
+      final first = (await r.openOccurrencesOf(id)).single.id;
+      final next = (await r.complete(first)).nextId!;
+      expect(
+        (await r.occurrence(next))!.follows,
+        first,
+        reason: 'attached while it lives',
+      );
+      await r.undo(first);
+      final row = await (r.db.select(
+        r.db.occurrences,
+      )..where((o) => o.id.equalsValue(next))).getSingle();
+      expect(row.deletedAt, isNotNull);
+      expect(row.follows, isNull);
+      // Done again: the same successor comes back, attached once more.
+      expect((await r.complete(first)).nextId, next);
+      expect((await r.occurrence(next))!.follows, first);
     });
   });
 

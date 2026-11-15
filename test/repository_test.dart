@@ -172,9 +172,10 @@ void main() {
           'status',
           'status_before',
           'completed_on',
+          'actual_cost',
           'completion_note',
         },
-        occ(second): {'deleted_at'},
+        occ(second): {'follows', 'deleted_at'},
       });
       // skip: the status and its former value; the successor, deleted by the
       // undo, is written again in full (all but created_at).
