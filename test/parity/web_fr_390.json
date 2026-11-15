@@ -2,8 +2,8 @@
  "$comment": "Measures of the web application at 390 x 844 CSS px, factor 3, in French, with its demonstration data, written by tool/web_parity.py; read by test/web_parity_test.dart. Regenerate when the web reference of tool/web_alignment.json changes.",
  "web": {
   "repository": "HouseCairn/housecairn",
-  "release": "v0.3.1",
-  "commit": "f4e732b98f6fab896be9308b20d548dbcb309aa5"
+  "release": "v0.3.2",
+  "commit": "a76837fe30b5a313980184703454654a45b1f031"
  },
  "viewport": {
   "width": 390,
@@ -11,6 +11,7 @@
   "device_scale_factor": 3,
   "locale": "fr-FR"
  },
+ "today": "2026-11-15",
  "screens": {
   "today": {
    "h1_font": 24,
@@ -21,8 +22,64 @@
     "h": 30
    },
    "h2_font": 13,
+   "h2_weight": 700,
    "row_title_font": 16,
    "row_text_font": 13,
+   "row_title_weight": 600,
+   "row_text_weight": 400,
+   "row_title_line": 20.8,
+   "row_text_line": 17.55,
+   "pill_font": 13,
+   "pill_weight": 700,
+   "sections": [
+    {
+     "heading": "EN RETARD (1)",
+     "rows": [
+      {
+       "title": "Tester le détecteur de fumée",
+       "text": "Entrée",
+       "pills": [
+        "3 jours de retard"
+       ],
+       "height": 90.84375
+      }
+     ]
+    },
+    {
+     "heading": "AUJOURD'HUI (2)",
+     "rows": [
+      {
+       "title": "Nettoyer le filtre de la VMC",
+       "text": "Salle de bain",
+       "pills": [
+        "Aujourd'hui"
+       ],
+       "height": 90.84375
+      },
+      {
+       "title": "Détartrer la bouilloire",
+       "text": "Cuisine",
+       "pills": [
+        "Aujourd'hui"
+       ],
+       "height": 91.84375
+      }
+     ]
+    },
+    {
+     "heading": "À VENIR (1)",
+     "rows": [
+      {
+       "title": "Entretien annuel de la chaudière",
+       "text": "Buanderie",
+       "pills": [
+        "21 nov. 2026"
+       ],
+       "height": 90.84375
+      }
+     ]
+    }
+   ],
    "body_font": 16,
    "row_height": 90.84375,
    "done_button": {
@@ -60,8 +117,16 @@
     "h": 60
    },
    "h2_font": 13,
+   "h2_weight": 700,
    "row_title_font": null,
    "row_text_font": null,
+   "row_title_weight": null,
+   "row_text_weight": null,
+   "row_title_line": null,
+   "row_text_line": null,
+   "pill_font": 13,
+   "pill_weight": 700,
+   "sections": [],
    "body_font": 16,
    "row_height": null,
    "done_button": null,
@@ -89,8 +154,16 @@
     "h": 30
    },
    "h2_font": null,
+   "h2_weight": null,
    "row_title_font": null,
    "row_text_font": null,
+   "row_title_weight": null,
+   "row_text_weight": null,
+   "row_title_line": null,
+   "row_text_line": null,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
    "body_font": 16,
    "row_height": null,
    "done_button": null,
@@ -118,8 +191,16 @@
     "h": 30
    },
    "h2_font": null,
+   "h2_weight": null,
    "row_title_font": 16,
    "row_text_font": 13,
+   "row_title_weight": 600,
+   "row_text_weight": 400,
+   "row_title_line": 20.8,
+   "row_text_line": 17.55,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
    "body_font": 16,
    "row_height": null,
    "done_button": null,
@@ -137,7 +218,7 @@
    "done_font": null,
    "appbar_height": 60,
    "nav_height": 64,
-   "content_left": null,
+   "content_left": 16,
    "field_height": null,
    "label_font": null,
    "doc_height": 844,
@@ -152,8 +233,16 @@
     "h": 30
    },
    "h2_font": null,
+   "h2_weight": null,
    "row_title_font": 16,
    "row_text_font": 13,
+   "row_title_weight": 600,
+   "row_text_weight": 400,
+   "row_title_line": 20.8,
+   "row_text_line": 17.55,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
    "body_font": 16,
    "row_height": null,
    "done_button": null,
@@ -171,7 +260,7 @@
    "done_font": null,
    "appbar_height": 60,
    "nav_height": 64,
-   "content_left": null,
+   "content_left": 16,
    "field_height": null,
    "label_font": 14,
    "doc_height": 844,
@@ -186,8 +275,16 @@
     "h": 30
    },
    "h2_font": 13,
+   "h2_weight": 700,
    "row_title_font": 16,
    "row_text_font": 13,
+   "row_title_weight": 600,
+   "row_text_weight": 400,
+   "row_title_line": 20.8,
+   "row_text_line": 17.55,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
    "body_font": 16,
    "row_height": null,
    "done_button": null,
@@ -220,8 +317,16 @@
     "h": 30
    },
    "h2_font": null,
+   "h2_weight": null,
    "row_title_font": null,
    "row_text_font": null,
+   "row_title_weight": null,
+   "row_text_weight": null,
+   "row_title_line": null,
+   "row_text_line": null,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
    "body_font": 16,
    "row_height": null,
    "done_button": null,
@@ -249,14 +354,22 @@
     "h": 30
    },
    "h2_font": 13,
+   "h2_weight": 700,
    "row_title_font": null,
    "row_text_font": null,
+   "row_title_weight": null,
+   "row_text_weight": null,
+   "row_title_line": null,
+   "row_text_line": null,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
    "body_font": 16,
    "row_height": null,
    "done_button": null,
    "add_button": {
     "x": 16,
-    "y": 689.796875,
+    "y": 611.1875,
     "w": 358,
     "h": 45.1875
    },
@@ -283,8 +396,16 @@
     "h": 30
    },
    "h2_font": null,
+   "h2_weight": null,
    "row_title_font": null,
    "row_text_font": null,
+   "row_title_weight": null,
+   "row_text_weight": null,
+   "row_title_line": null,
+   "row_text_line": null,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
    "body_font": 16,
    "row_height": null,
    "done_button": null,
@@ -312,8 +433,16 @@
     "h": 30
    },
    "h2_font": null,
+   "h2_weight": null,
    "row_title_font": 16,
    "row_text_font": 13,
+   "row_title_weight": 600,
+   "row_text_weight": 400,
+   "row_title_line": 20.8,
+   "row_text_line": 17.55,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
    "body_font": 16,
    "row_height": null,
    "done_button": null,
@@ -331,7 +460,7 @@
    "done_font": null,
    "appbar_height": 60,
    "nav_height": 64,
-   "content_left": null,
+   "content_left": 16,
    "field_height": null,
    "label_font": null,
    "doc_height": 844,
@@ -346,8 +475,16 @@
     "h": 30
    },
    "h2_font": null,
+   "h2_weight": null,
    "row_title_font": null,
    "row_text_font": null,
+   "row_title_weight": null,
+   "row_text_weight": null,
+   "row_title_line": null,
+   "row_text_line": null,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
    "body_font": 16,
    "row_height": null,
    "done_button": null,
@@ -375,8 +512,16 @@
     "h": 30
    },
    "h2_font": 13,
+   "h2_weight": 700,
    "row_title_font": 16,
    "row_text_font": 13,
+   "row_title_weight": 600,
+   "row_text_weight": 400,
+   "row_title_line": 20.8,
+   "row_text_line": 17.55,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
    "body_font": 16,
    "row_height": null,
    "done_button": null,
@@ -392,7 +537,7 @@
    "content_left": 16,
    "field_height": null,
    "label_font": null,
-   "doc_height": 1460,
+   "doc_height": 1478,
    "url": "/more/"
   },
   "reminders": {
@@ -404,8 +549,16 @@
     "h": 30
    },
    "h2_font": 13,
+   "h2_weight": 700,
    "row_title_font": null,
    "row_text_font": null,
+   "row_title_weight": null,
+   "row_text_weight": null,
+   "row_title_line": null,
+   "row_text_line": null,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
    "body_font": 16,
    "row_height": null,
    "done_button": null,
@@ -421,7 +574,7 @@
    "content_left": 16,
    "field_height": 50,
    "label_font": 14,
-   "doc_height": 1343,
+   "doc_height": 1256,
    "url": "/me/notifications/"
   },
   "contractor": {
@@ -433,8 +586,16 @@
     "h": 30
    },
    "h2_font": 13,
+   "h2_weight": 700,
    "row_title_font": null,
    "row_text_font": null,
+   "row_title_weight": null,
+   "row_text_weight": null,
+   "row_title_line": null,
+   "row_text_line": null,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
    "body_font": 16,
    "row_height": null,
    "done_button": null,
@@ -462,8 +623,16 @@
     "h": 30
    },
    "h2_font": null,
+   "h2_weight": null,
    "row_title_font": null,
    "row_text_font": null,
+   "row_title_weight": null,
+   "row_text_weight": null,
+   "row_title_line": null,
+   "row_text_line": null,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
    "body_font": 16,
    "row_height": null,
    "done_button": null,

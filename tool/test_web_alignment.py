@@ -27,6 +27,8 @@ import web_alignment as wa  # noqa: E402
 TEMPLATES = "src/housecairn/tasks/task_templates.yaml"
 RECURRENCE = "src/housecairn/tasks/recurrence.py"
 TOKENS = "design/tokens.json"
+CSS = "src/housecairn/static/css/components.css"
+PARITY = "test/parity/web_fr_390.json"
 GIT_ENV = {
     "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@example.com",
     "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@example.com",
@@ -60,6 +62,7 @@ class Case(unittest.TestCase):
         self.web_write(RECURRENCE, "# recurrence\n")
         self.web_write(TOKENS, json.dumps({"color": {"slate": "#1F3A3D"}}, indent=2) + "\n")
         self.web_write("README.md", "web\n")
+        self.web_write(CSS, ".row { }\n")
         self.first = self.web_release("v0.1.0")
 
         # The app, aligned on v0.1.0.
@@ -69,6 +72,7 @@ class Case(unittest.TestCase):
         self.app_write("assets/task_templates.yaml", "templates: one\n")
         self.app_write("test/fixtures/recurrence_vectors.json", vectors(self.first).decode())
         self.app_write(TOKENS, json.dumps({"color": {"slate": "#1F3A3D", "app-only": "#000000"}}, indent=2) + "\n")
+        self.app_write(PARITY, json.dumps({"web": {"release": "v0.1.0", "commit": self.first}}) + "\n")
         pin = {"release": "v0.1.0", "commit": self.first}
         element = lambda web, mobile, **extra: {**pin, "web": [web], "mobile": [mobile], **extra}  # noqa: E731
         self.reference = {
@@ -77,6 +81,7 @@ class Case(unittest.TestCase):
                 "recurrence": element(RECURRENCE, "test/fixtures/recurrence_vectors.json", python="3.13.0"),
                 "task_templates": element(TEMPLATES, "assets/task_templates.yaml"),
                 "design_tokens": element(TOKENS, TOKENS),
+                "web_parity": element("src/housecairn/static/css", PARITY),
             },
         }
         self.write_reference()
@@ -155,8 +160,10 @@ class Update(Case):
         self.assertIn("changed=true", out)
         self.assertEqual((self.app / "assets/task_templates.yaml").read_text(), "templates: one\ntemplates: two\n")
         reference = json.loads((self.app / "tool" / "web_alignment.json").read_text())
-        for element in reference["elements"].values():
-            self.assertEqual((element["release"], element["commit"]), ("v0.2.0", second))
+        for name, element in reference["elements"].items():
+            # The measure of the rendering keeps its pin: no file that draws the screens changed.
+            expected = ("v0.1.0", self.first) if name == "web_parity" else ("v0.2.0", second)
+            self.assertEqual((element["release"], element["commit"]), expected)
         # The vectors follow the pin: only their header changed.
         self.assertIn(second, (self.app / "test/fixtures/recurrence_vectors.json").read_text())
         self.assertIn("regenerated, changed", report)
@@ -180,6 +187,34 @@ class Update(Case):
         self.assertIn("changed=true", out)
         tokens = json.loads((self.app / TOKENS).read_text())
         self.assertEqual(tokens["color"], {"slate": "#222222", "app-only": "#000000"})
+
+    def test_a_change_of_the_drawing_files_moves_the_pin_and_leaves_the_measure_stale(self):
+        self.web_write(CSS, ".row { padding: 1px }\n")
+        self.web_release("v0.2.0")
+        out, report = self.update("v0.2.0")
+        self.assertIn("changed=true", out)
+        self.assertIn("stale until it is measured again", report)
+        self.assertIn(f"web file changed: `{CSS}`", report)
+        # Not regenerated: the measure still says v0.1.0, and `check` fails on it.
+        self.assertEqual(json.loads((self.app / PARITY).read_text())["web"]["release"], "v0.1.0")
+        code, out, _ = self.cli("check", "--web", str(self.web))
+        self.assertEqual(code, 1)
+        self.assertIn("web_parity", out)
+        self.assertIn("measure again", out)
+
+    def test_a_measure_taken_again_passes(self):
+        self.web_write(CSS, ".row { padding: 1px }\n")
+        second = self.web_release("v0.2.0")
+        self.update("v0.2.0")
+        self.app_write(PARITY, json.dumps({"web": {"release": "v0.2.0", "commit": second}}) + "\n")
+        code, out, _ = self.cli("check", "--web", str(self.web))
+        self.assertEqual(code, 0, out)
+
+    def test_a_measure_of_another_commit_fails(self):
+        self.app_write(PARITY, json.dumps({"web": {"release": "v0.1.0", "commit": "0" * 40}}) + "\n")
+        code, out, _ = self.cli("check", "--web", str(self.web))
+        self.assertEqual(code, 1)
+        self.assertIn("web_parity: test/parity/web_fr_390.json was measured at v0.1.0", out)
 
     def test_unknown_release_fails(self):
         code, _, err = self.cli("update", "--web", str(self.web), "--release", "v9.9.9")
@@ -265,7 +300,10 @@ class Patch(Case):
         self.assertEqual(code, 0, out + err)
 
     def test_the_allowed_paths_are_the_files_of_the_pin(self):
-        carried = {m for e in self.reference["elements"].values() for m in e["mobile"]} | {"tool/web_alignment.json"}
+        # The measure of the rendering is taken in a browser: `update` never writes it.
+        carried = {
+            m for n, e in self.reference["elements"].items() if n != "web_parity" for m in e["mobile"]
+        } | {"tool/web_alignment.json"}
         self.assertEqual(set(wa.ALLOWED_PATHS), carried)
         code, out, _ = self.cli("allowed-paths")
         self.assertEqual(out.split(), list(wa.ALLOWED_PATHS))

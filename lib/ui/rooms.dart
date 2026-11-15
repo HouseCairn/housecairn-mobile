@@ -110,7 +110,6 @@ class TaskRows extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final repository = AppScope.of(context).repository;
     return DataView<List<TaskEntry>>(
       load: (r) => r.tasksOf(roomId: roomId, itemId: itemId),
       builder: (context, entries) => Column(
@@ -125,15 +124,13 @@ class TaskRows extends StatelessWidget {
                 for (final entry in entries)
                   HcRow(
                     title: entry.task.title,
-                    pills: [
-                      if (entry.occurrence != null)
-                        duePill(
-                          context,
-                          entry.dueOn,
-                          repository.today(),
-                          postponed: entry.occurrence!.status == 'postponed',
-                        ),
-                    ],
+                    // The date as plain text under the title, as the web's
+                    // rows of a room and of an item (`rooms/room_detail.html`).
+                    text: entry.occurrence == null
+                        ? null
+                        : entry.dueOn == null
+                        ? l10n.todayNoDate
+                        : formatDay(context, entry.dueOn!),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) =>
@@ -150,6 +147,7 @@ class TaskRows extends StatelessWidget {
               key: const Key('task-add'),
               label: l10n.addTask,
               primary: false,
+              gap: entries.isEmpty ? HcSpace.s2 : HcSpace.s3,
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => TaskScreen(

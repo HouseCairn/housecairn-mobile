@@ -75,13 +75,37 @@ smaller and laid out differently from the web opened on the same phone. The test
 screen at 390 x 844 logical pixels (an iPhone) in French, with the web's demonstration data,
 and compares what it measures on the render tree with what `tool/web_parity.py` measured in a
 headless browser on the web at 390 x 844 CSS pixels (`test/parity/web_fr_390.json`): the
-drawn size of the page title, row titles, labels and buttons, the left margin, the height of
-the bar, of the fields and of the buttons, the place, width, height and gap of the add button
-and that it scrolls with the list. A CSS pixel and a logical pixel are the same unit on a
-phone (a point on iOS, a dp on Android), and the app applies no scale of its own: the text
-scaler is the phone's, untouched except in the bottom bar and the Save action (above). The
-differences kept on purpose are listed in the test (`adaptations`) with their reason; every
-other measure must equal the web's, within 0.01 px for a text size and 1.5 px for a box.
+drawn size and weight of the page title, section headings, row titles, row texts, pills,
+labels and buttons, the line height of rows, the left margin, the height of the bar, of the
+fields, of the buttons and of the rows, the place, width, height and gap of the add button and
+that it scrolls with the list. On Today it also compares the words: each section's heading with
+its count, and for each row its title, its place, its pills and its height. A CSS pixel and a
+logical pixel are the same unit on a phone (a point on iOS, a dp on Android), and the app
+applies no scale of its own: the text scaler is the phone's, untouched except in the bottom
+bar and the Save action (above). The differences kept on purpose are listed in the test with
+their reason (`adaptations`: a value the app has instead; `absences`: a measure one side lacks;
+`menuWraps`: a row whose title takes a second line); every other measure must equal the web's,
+within 0.01 px for a text size and 1.5 px for a box, and a measure taken on one side only fails.
+The web's measures carry the release and commit they were taken at (`web` of the file), which
+`tool/web_alignment.py check` compares with the pin `web_parity`: when a web release changes a
+file that draws these screens, `update` moves the pin, and `check` fails until the measure is
+taken again with `tool/web_parity.py`.
+
+**Today, as the web's v0.3.2.** Sections *Overdue*, *Today*, *Coming up* (and *No date*), each
+heading followed by its count in brackets; under each title the room, then the item
+(`Room · Item`; on All homes the home first); the date as a pill in the web's format
+(`21 nov. 2026`), not "Due ..."; the lines of the row at 1.3 (title) and 1.35 (place), as the
+web's CSS. Kept apart from the web, with the reason:
+
+| Web (v0.3.2) | App | Why |
+| --- | --- | --- |
+| Offer to receive the reminders on this device (`_device_banner.html`, Web Push) | None | The app's reminders are local notifications, asked by the switch in More; there is no Web Push subscription to offer |
+| *Photo* pill on a task born from a report with a photo; "Report a problem" | None | Reports are a web feature that the app does not have; its tasks carry no report |
+| Undated tasks only when in season, under *In season* | Undated tasks under *No date* | The app has no seasons on Today yet; showing them is the safer error |
+| A postponed task shows its date | A postponed task shows an info pill "Postponed to ..." | The state is useful on a phone and a test pins it; a later lot may drop it |
+| Order of one day: priority, then creation | Creation | Not measured by the demonstration data (every task is of normal priority but one, alone in its section) |
+| A row has Done and nothing else | Done and a menu of skip and postpone (48 dp) | The app has no other place for them; a long title therefore wraps one line sooner (`menuWraps`, the height is the web's plus one line) |
+| Rows of a room and of an item: the date as plain text under the title | The same | Was a pill until this change |
 
 **Rules for the next screens** (lot 2b on): a screen uses the components of `lib/design/` and
 the themed Material widgets, and writes no colour, text style or size of its own;

@@ -218,6 +218,12 @@ abstract class AppLocalizations {
   /// **'Overdue'**
   String get todayOverdue;
 
+  /// Group of Today: tasks due today. Web catalogue: Aujourd'hui.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todayToday;
+
   /// Group of Today: tasks due within the coming week. Web catalogue: À venir.
   ///
   /// In en, this message translates to:
@@ -236,7 +242,7 @@ abstract class AppLocalizations {
   /// **'Nothing to do for now.'**
   String get todayEmpty;
 
-  /// Date of an open task on Today.
+  /// Date of a task on its screen and in its reminder (not on Today, where the pill is the date alone).
   ///
   /// In en, this message translates to:
   /// **'Due {date}'**

@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 
 /// The messages of an ARB file of lib/l10n, by key (metadata left out).
 Map<String, String> arbMessages(String locale) {
@@ -103,11 +104,29 @@ List<String> textsNotInArb(
       messagePattern(message),
       // Headings of groups show in capitals, as on the web (HcSectionHeading).
       messagePattern(message.toUpperCase()),
+      // ... followed by the count of their rows, as the web writes it.
+      RegExp(
+        '^${_icuPattern(message.toUpperCase())} \\(\\d+\\)\$',
+        dotAll: true,
+      ),
     ],
   ];
   final typed = data.toSet();
   return shownTexts(tester)
-      .where((text) => !typed.contains(text))
+      // A place under a task is the names of a home, a room and an item, `A · B`.
+      .where((text) => !text.split(' · ').every(typed.contains))
       .where((text) => !patterns.any((pattern) => pattern.hasMatch(text)))
+      // The date of a task, alone in its pill as on the web: formatted, no message.
+      .where((text) => !_isDate(text, locale))
       .toList();
+}
+
+/// A date as the app writes it (`yMMMd` of [locale]).
+bool _isDate(String text, String locale) {
+  try {
+    DateFormat.yMMMd(locale).parseStrict(text);
+    return true;
+  } on FormatException {
+    return false;
+  }
 }
