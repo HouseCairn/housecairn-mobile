@@ -15,6 +15,7 @@ import 'rooms.dart';
 import 'shell.dart';
 import 'templates_screen.dart';
 import 'today.dart';
+import 'ways.dart';
 
 /// The root screen of a section.
 Widget sectionRoot(Section section) => switch (section) {
@@ -48,7 +49,7 @@ class EmptySection extends StatelessWidget {
 }
 
 /// More: everything that is not in the four other sections, by groups: the
-/// household (Homes) and Help (About).
+/// household (Homes), Help (About) and the way the app is used.
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
 
@@ -112,6 +113,8 @@ class MoreScreen extends StatelessWidget {
               ),
             ],
           ),
+          HcSectionHeading(l10n.waysGroup),
+          const WaysRows(),
         ],
       ),
     );
