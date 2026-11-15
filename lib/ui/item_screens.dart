@@ -15,6 +15,7 @@ import '../domain/warranty.dart';
 import '../l10n/app_localizations.dart';
 import 'budget_parts.dart';
 import 'choices.dart';
+import 'autosave.dart';
 import 'contractor_screens.dart';
 import 'messages.dart';
 import 'parts.dart';
@@ -291,8 +292,19 @@ class ItemFormScreen extends StatefulWidget {
   State<ItemFormScreen> createState() => _ItemFormScreenState();
 }
 
-class _ItemFormScreenState extends State<ItemFormScreen> {
+class _ItemFormScreenState extends State<ItemFormScreen>
+    with AutosaveSheet<ItemFormScreen> {
   final _form = GlobalKey<FormState>();
+
+  @override
+  GlobalKey<FormState> get sheetForm => _form;
+
+  @override
+  bool get existing => widget.itemId != null;
+
+  @override
+  Future<void> writeSheet(Repository repository) =>
+      repository.updateItem(widget.itemId!, _input());
   final _name = TextEditingController();
   final _brand = TextEditingController();
   final _model = TextEditingController();
@@ -367,6 +379,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
         ));
       }
     });
+    sheetLoaded();
   }
 
   @override
@@ -414,6 +427,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
   );
 
   Future<void> _save() async {
+    cancelAutosave();
     if (!_form.currentState!.validate()) return;
     final navigator = Navigator.of(context);
     final saved = await runChange(
@@ -497,7 +511,10 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
           label: l10n.warrantyStartsOn,
           value: _warrantyStartsOn,
           noDate: l10n.todayNoDate,
-          onChanged: (d) => setState(() => _warrantyStartsOn = d),
+          onChanged: (d) {
+            setState(() => _warrantyStartsOn = d);
+            sheetChanged(now: true);
+          },
         ),
         fieldHelp(l10n.warrantyStartsOnHelp),
         if (computed != null)
@@ -514,7 +531,10 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
             label: l10n.itemWarrantyEndsOn,
             value: _warrantyEndsOn,
             noDate: l10n.todayNoDate,
-            onChanged: (d) => setState(() => _warrantyEndsOn = d),
+            onChanged: (d) {
+              setState(() => _warrantyEndsOn = d);
+              sheetChanged(now: true);
+            },
           ),
         fieldHelp(l10n.warrantyEndsOnHelp),
       ],
@@ -527,10 +547,14 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.itemId == null ? l10n.newItem : l10n.editItem),
-        actions: [HcBarAction(label: l10n.save, onPressed: _save)],
+        actions: [
+          Center(child: savedStatus()),
+          HcBarAction(label: l10n.save, onPressed: _save),
+        ],
       ),
       body: Form(
         key: _form,
+        onChanged: sheetChanged,
         child: HcScreenList(
           children: [
             const SizedBox(height: HcSpace.s2),
@@ -559,13 +583,19 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
                     label: l10n.itemPurchasedOn,
                     value: _purchasedOn,
                     noDate: l10n.todayNoDate,
-                    onChanged: (d) => setState(() => _purchasedOn = d),
+                    onChanged: (d) {
+                      setState(() => _purchasedOn = d);
+                      sheetChanged(now: true);
+                    },
                   ),
                   HcDateField(
                     label: l10n.itemInstalledOn,
                     value: _installedOn,
                     noDate: l10n.todayNoDate,
-                    onChanged: (d) => setState(() => _installedOn = d),
+                    onChanged: (d) {
+                      setState(() => _installedOn = d);
+                      sheetChanged(now: true);
+                    },
                   ),
                   hcText(l10n.fieldNotes, _notes, minLines: 2, maxLines: 6),
                 ],
@@ -619,11 +649,14 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
                     Align(
                       alignment: AlignmentDirectional.centerStart,
                       child: TextButton(
-                        onPressed: () => setState(() {
-                          final removed = _links.removeAt(i);
-                          removed.$1.dispose();
-                          removed.$2.dispose();
-                        }),
+                        onPressed: () {
+                          setState(() {
+                            final removed = _links.removeAt(i);
+                            removed.$1.dispose();
+                            removed.$2.dispose();
+                          });
+                          sheetChanged(now: true);
+                        },
                         child: Text(l10n.removeLink),
                       ),
                     ),

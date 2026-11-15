@@ -9,6 +9,7 @@ import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/choices.dart';
 import '../l10n/app_localizations.dart';
+import 'autosave.dart';
 import 'choices.dart';
 import 'equipment_screen.dart';
 import 'home_selector.dart';
@@ -383,8 +384,22 @@ class RoomFormScreen extends StatefulWidget {
   State<RoomFormScreen> createState() => _RoomFormScreenState();
 }
 
-class _RoomFormScreenState extends State<RoomFormScreen> {
+class _RoomFormScreenState extends State<RoomFormScreen>
+    with AutosaveSheet<RoomFormScreen> {
   final _form = GlobalKey<FormState>();
+
+  @override
+  GlobalKey<FormState> get sheetForm => _form;
+
+  @override
+  bool get existing => widget.roomId != null;
+
+  @override
+  Future<void> writeSheet(Repository repository) async {
+    await repository.updateRoom(widget.roomId!, _input());
+    await repository.setPaintArticle(widget.roomId!, _paintArticle);
+  }
+
   final _name = TextEditingController();
   final _notes = TextEditingController();
   final _paintColour = TextEditingController();
@@ -428,6 +443,7 @@ class _RoomFormScreenState extends State<RoomFormScreen> {
         _wall.text = input.wallCovering;
         _memoryNotes.text = input.memoryNotes;
       });
+      sheetLoaded();
     });
   }
 
@@ -463,6 +479,7 @@ class _RoomFormScreenState extends State<RoomFormScreen> {
   );
 
   Future<void> _save() async {
+    cancelAutosave();
     if (!_form.currentState!.validate()) return;
     final navigator = Navigator.of(context);
     final saved = await runChange(context, (r) async {
@@ -509,10 +526,14 @@ class _RoomFormScreenState extends State<RoomFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.roomId == null ? l10n.newRoom : l10n.editRoom),
-        actions: [HcBarAction(label: l10n.save, onPressed: _save)],
+        actions: [
+          Center(child: savedStatus()),
+          HcBarAction(label: l10n.save, onPressed: _save),
+        ],
       ),
       body: Form(
         key: _form,
+        onChanged: sheetChanged,
         child: HcScreenList(
           children: [
             const SizedBox(height: HcSpace.s2),

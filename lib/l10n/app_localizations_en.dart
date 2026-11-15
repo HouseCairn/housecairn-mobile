@@ -2413,4 +2413,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get warrantyEndsOnHelp =>
       'Worked out from the start and the duration. Type it only when you do not know them.';
+
+  @override
+  String get saved => 'Saved';
 }

@@ -2428,4 +2428,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get warrantyEndsOnHelp =>
       'Calculée à partir du départ et de la durée. Ne la saisissez que si vous ne les connaissez pas.';
+
+  @override
+  String get saved => 'Enregistré';
 }

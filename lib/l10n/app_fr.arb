@@ -797,5 +797,6 @@
   "warrantyDurationHelp": "La garantie du fabricant ou du magasin, en mois ou en années.",
   "warrantyProviderNameHelp": "Exemple : Acme, ou le magasin où vous l'avez acheté.",
   "warrantyStartsOnHelp": "Vide : à partir de la date d'achat.",
-  "warrantyEndsOnHelp": "Calculée à partir du départ et de la durée. Ne la saisissez que si vous ne les connaissez pas."
+  "warrantyEndsOnHelp": "Calculée à partir du départ et de la durée. Ne la saisissez que si vous ne les connaissez pas.",
+  "saved": "Enregistré"
 }

@@ -3955,6 +3955,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Worked out from the start and the duration. Type it only when you do not know them.'**
   String get warrantyEndsOnHelp;
+
+  /// Discreet status of a sheet saved as it is changed, said by the screen reader. Web catalogue (core): Enregistré.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get saved;
 }
 
 class _AppLocalizationsDelegate

@@ -1285,5 +1285,7 @@
   "warrantyStartsOnHelp": "Empty: from the purchase date.",
   "@warrantyStartsOnHelp": {"description": "Help of the item form. Web catalogue."},
   "warrantyEndsOnHelp": "Worked out from the start and the duration. Type it only when you do not know them.",
-  "@warrantyEndsOnHelp": {"description": "Help of the item form. Web catalogue."}
+  "@warrantyEndsOnHelp": {"description": "Help of the item form. Web catalogue."},
+  "saved": "Saved",
+  "@saved": {"description": "Discreet status of a sheet saved as it is changed, said by the screen reader. Web catalogue (core): Enregistré."}
 }
