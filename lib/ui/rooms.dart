@@ -10,6 +10,7 @@ import '../design/widgets.dart';
 import '../domain/choices.dart';
 import '../l10n/app_localizations.dart';
 import 'choices.dart';
+import 'equipment_screen.dart';
 import 'home_selector.dart';
 import 'item_screens.dart';
 import 'messages.dart';
@@ -22,9 +23,10 @@ import 'task_screen.dart';
 import 'templates_screen.dart';
 
 /// Rooms (docs/spec.md, "Screens of v1"): the rooms of the current home in the
-/// household's order, each with its kind and how many items it holds; and
-/// its second tab, the stock of the home (lib/ui/stock_screens.dart), as the
-/// web's section Rooms has the tabs Rooms and Stock.
+/// household's order, each with its kind and how many items it holds; its
+/// second tab, every item of the home (lib/ui/equipment_screen.dart), and its
+/// third, the stock of the home (lib/ui/stock_screens.dart), as the web's
+/// section Rooms has the tabs Rooms, Equipment and Stock.
 class RoomsScreen extends StatefulWidget {
   const RoomsScreen({super.key});
 
@@ -47,12 +49,22 @@ class _RoomsScreenState extends State<RoomsScreen> {
     );
     return Scaffold(
       appBar: AppBar(
-        title: Text(_tab == 0 ? l10n.navRooms : l10n.stock),
+        title: Text(switch (_tab) {
+          0 => l10n.navRooms,
+          1 => l10n.equipmentTab,
+          _ => l10n.stock,
+        }),
         actions: const [HomeSelector()],
       ),
       body: home == null
           ? const SizedBox.shrink()
           : _tab == 1
+          ? EquipmentList(
+              key: ValueKey('equipment-${home.id}'),
+              home: home,
+              tabs: tabs,
+            )
+          : _tab == 2
           ? StockList(key: ValueKey('stock-${home.id}'), home: home, tabs: tabs)
           : DataView<(List<RoomRow>, Map<String, int>)>(
               key: ValueKey(home.id),

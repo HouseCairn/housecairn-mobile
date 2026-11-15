@@ -19,6 +19,13 @@
   complete, the relay is a subscription, the third way is unlocked by a single in-app
   purchase (principle only; the AGPL licence lets anyone build without the lock, accepted).
 - Each lot updates the documents it changes (spec, ADR, protocol) in the same pull request.
+- **The phone follows the web** (maintainer's rule of 2026-11-15): every change of the web
+  site or of the server is followed by a change of the app, in a lot of its own that starts
+  once the web pull request is merged and carries the same field names and values. The first
+  is the lot of the maintainer's feedback of 2026-11-15 (web pull request
+  [#160](https://github.com/HouseCairn/housecairn/pull/160)): the list of every item, the
+  manufacturer's warranty (schema 5), the millilitre, one line of materials, the material
+  budget worked out from the stock and sheets saved as they are changed.
 - **Device** below means a test that needs a real phone or a macOS machine, which CI cannot run;
   the maintainer runs it, and the lot lists the exact steps.
 

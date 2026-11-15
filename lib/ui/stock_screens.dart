@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
+import '../design/icons.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/values.dart';
@@ -37,7 +38,8 @@ class RoomsTabs extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return HcTabs(
       key: const Key('rooms-tabs'),
-      labels: [l10n.navRooms, l10n.stock],
+      // Rooms, Equipment and Stock, in the web's order (`tab_bar "rooms"`).
+      labels: [l10n.navRooms, l10n.equipmentTab, l10n.stock],
       current: current,
       onSelect: onSelect,
     );
@@ -1119,8 +1121,14 @@ class _TaskMaterialsState extends State<TaskMaterialsSection> {
                       ),
                       Align(
                         alignment: AlignmentDirectional.centerStart,
-                        child: OutlinedButton(
+                        // One line to fill, and « + » for the next one, as
+                        // the web's form has it since its lot of 2026-11-15.
+                        child: OutlinedButton.icon(
                           key: const Key('material-add'),
+                          icon: const HcIcon(
+                            HcIcons.add,
+                            color: HcColors.primary,
+                          ),
                           onPressed: () async {
                             if (await runChange(
                               context,
@@ -1133,7 +1141,7 @@ class _TaskMaterialsState extends State<TaskMaterialsSection> {
                               _quantity.text = '1';
                             }
                           },
-                          child: Text(l10n.addMaterial),
+                          label: Text(l10n.addMaterial),
                         ),
                       ),
                     ],

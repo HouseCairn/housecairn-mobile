@@ -2,13 +2,15 @@
 
 // Migration tests of drift's guided migrations
 // (docs/adr/0002-local-storage-and-migrations.md): from every schema version
-// in drift_schemas/housecairn/ to the current one (schema 4): 1 to 4 runs the
-// migrations of lots 2a, 3a and 3b, 2 to 4 those of the stock and of the
-// projects, 3 to 4 the one of lot 3b (projects, budget, reports), and 4 to 4
-// checks that the schema of AppDatabase is the one of drift_schema_v4.json.
-// The steps from schemas 2 and 3 also run on a file with data: every row is
-// there after them, every column it had unchanged, the four new columns empty
-// and the new tables empty. Regenerate `generated/` with:
+// in drift_schemas/housecairn/ to the current one (schema 5): 1 to 5 runs the
+// migrations of lots 2a, 3a, 3b and of the warranty, 2 to 5 those of the
+// stock, the projects and the warranty, 3 to 5 those of lot 3b (projects,
+// budget, reports) and of the warranty, 4 to 5 the one of the manufacturer's
+// warranty (six columns of `items`), and 5 to 5 checks that the schema of
+// AppDatabase is the one of drift_schema_v5.json. The steps from schemas 2, 3
+// and 4 also run on a file with data: every row is there after them, every
+// column it had unchanged, the new columns empty or at their default and the
+// new tables empty. Regenerate `generated/` with:
 //   dart run drift_dev make-migrations
 //   dart run drift_dev schema generate drift_schemas/housecairn/ test/drift/housecairn/generated/
 
@@ -38,7 +40,7 @@ void main() {
   }
 
   for (final from in [2, 3]) {
-    test('migrates a schema $from file with data to schema 4, keeping every '
+    test('migrates a schema $from file with data to schema 5, keeping every '
         'row', () async {
       final schema = await verifier.schemaAt(from);
       final raw = schema.rawDatabase;
@@ -99,7 +101,7 @@ void main() {
       expect(dumped, contains('Second gutters'));
 
       final db = AppDatabase(schema.newConnection());
-      await verifier.migrateAndValidate(db, 4);
+      await verifier.migrateAndValidate(db, 5);
       expect(dump(), dumped);
       for (final (table, column) in [
         ('rooms', 'paint_article_id'),
@@ -137,4 +139,76 @@ void main() {
       await db.close();
     });
   }
+
+  test('migrates a schema 4 file with items to schema 5: the end of a '
+      'warranty typed before stays, the new columns are empty', () async {
+    final schema = await verifier.schemaAt(4);
+    final raw = schema.rawDatabase;
+    Uint8List id(int n) => Uint8List.fromList(List.filled(16, n));
+    raw.execute(
+      'INSERT INTO homes (id, created_at, updated_at, name, currency, '
+      'hemisphere) VALUES (?, 1, 1, ?, ?, ?), (?, 1, 1, ?, ?, ?)',
+      [
+        id(1),
+        'Main home',
+        'EUR',
+        'north',
+        id(2),
+        'Second home',
+        'CHF',
+        'south',
+      ],
+    );
+    raw.execute(
+      'INSERT INTO rooms (id, created_at, updated_at, home_id, name) '
+      'VALUES (?, 1, 1, ?, ?), (?, 1, 1, ?, ?)',
+      [id(3), id(1), 'Main kitchen', id(4), id(2), 'Second kitchen'],
+    );
+    raw.execute(
+      'INSERT INTO items (id, created_at, updated_at, home_id, room_id, name, '
+      'warranty_ends_on) VALUES (?, 2, 2, ?, ?, ?, ?), (?, 2, 2, ?, ?, ?, ?)',
+      [
+        id(5),
+        id(1),
+        id(3),
+        'Main coffee machine',
+        '2027-03-01',
+        id(6),
+        id(2),
+        id(4),
+        'Second fridge',
+        null,
+      ],
+    );
+    final columns = [
+      for (final c in raw.select('PRAGMA table_info(items)'))
+        c['name'] as String,
+    ];
+    String dump() => [
+      for (final table in ['homes', 'rooms'])
+        for (final row in raw.select('SELECT * FROM $table ORDER BY id'))
+          '$table $row',
+      for (final row in raw.select(
+        'SELECT ${columns.join(', ')} FROM items ORDER BY id',
+      ))
+        'items $row',
+    ].join('\n');
+    final dumped = dump();
+    expect(dumped, contains('2027-03-01'));
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 5);
+    expect(dump(), dumped);
+    final rows = raw.select(
+      'SELECT purchased_on, warranty_duration, warranty_duration_unit, '
+      'warranty_provider, warranty_provider_name, warranty_starts_on, '
+      'warranty_ends_on FROM items ORDER BY id',
+    );
+    expect(rows.map((r) => r.values).toList(), [
+      [null, null, 'year', '', '', null, '2027-03-01'],
+      [null, null, 'year', '', '', null, null],
+    ]);
+    expect(await db.integrityCheck(), 'ok');
+    await db.close();
+  });
 }
