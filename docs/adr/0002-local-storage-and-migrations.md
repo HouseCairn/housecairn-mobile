@@ -144,10 +144,34 @@ schemas 2 and 3 with data). What lot 3b settled within the rules above:
   repository refuses it otherwise, and any other status clears the line.
 - **Deterministic ids**: a room of a project (`projects.project_rooms:<project>:<room>`), the
   project of a task (`projects.projecttask:<task>`: a task is in one project at most) and the
-  envelope of a year (`projects.annualenvelope:<year>`), in the home's namespace.
+  envelope of a year (`projects.annualenvelope:<year>`, `envelope:<year>` in four digits since schema 6, as ADR 0003 and the web name it), in the home's namespace.
 - **Files**: the file of a project's photo or of a quote is in the home's directory, named by
   the id of its row; its name as the person saw it is kept for the screens only. A link of
   inspiration is kept as typed: the app never reads the page (no network in `lib/`).
+
+## Schema 6 (lot 4)
+
+Schema 6 adds the tables of sync, new and empty; the guided step from schema 5 creates them and
+no row of schema 5 changes (`test/drift/housecairn/migration_test.dart`, from a schema 5 file
+with homes, tasks, an occurrence, clocks and local settings):
+
+- `op_log(seq, device, hlc, home_id, body)`: each local change, as the operation of
+  [protocol.md](../protocol.md) section 2.2 in JSON, written by `Repository._put` in the same
+  transaction as the row and its `field_clock`; removed once the transport took it. `home_id`
+  lets a purge drop what was not sent.
+- `extra(entity, row_id, home_id, json)`: the fields this version does not know, one JSON object
+  per row, their clocks in `field_clock`. The rows of `family.settings` and `family.member`,
+  which have no table before lot 5, live there whole; `min_sv` is read from it.
+- `pending(key, entity, home_id, body)`: operations on unknown entity types; `key` (type, home,
+  row, clock, device) makes a duplicate one row.
+- `purged_homes(home_id)`: the homes purged on this phone, kept for ever.
+- `other_versions(entity, row_id, home_id, field, value, hlc, device, kept_until)`: the long
+  texts that lost a merge, kept 30 days on this phone, never synced.
+
+`updated_at` is the time of the newest clock of the row (`hlc >> 16`), on the phone that writes
+and on those that merge, so that two phones with the same operations hold the same value. Deleting
+a home without sync is the purge of lot 4 (`purgeHome`), so its id is kept in `purged_homes`.
+
 ## Consequences
 
 - Every write goes through one repository layer that updates the row, `field_clock` and

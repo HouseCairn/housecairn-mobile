@@ -22,7 +22,9 @@ part 'database.g.dart';
 /// tasks, the annual envelopes and the reports, and four nullable columns:
 /// the two budgets of a task, the real cost of an occurrence, the paint left
 /// of a room. Schema 5 adds the manufacturer's warranty of an item, six
-/// columns (web ADR 0080). Migrations are drift's
+/// columns (web ADR 0080). Schema 6 (lot 4) adds the tables of sync:
+/// `op_log`, `extra`, `pending`, `purged_homes` and `other_versions`.
+/// Migrations are drift's
 /// guided migrations: `dart run drift_dev make-migrations` keeps one schema
 /// file per version in `drift_schemas/` and generates the step-by-step code
 /// (`database.steps.dart`) and the migration tests under `test/drift/`.
@@ -54,6 +56,11 @@ part 'database.g.dart';
     Reports,
     FieldClock,
     LocalSettings,
+    OpLog,
+    Extra,
+    Pending,
+    PurgedHomes,
+    OtherVersions,
   ],
 )
 class AppDatabase extends _$AppDatabase implements Db {
@@ -65,7 +72,7 @@ class AppDatabase extends _$AppDatabase implements Db {
       AppDatabase(driftDatabase(name: 'housecairn'));
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -155,6 +162,50 @@ class AppDatabase extends _$AppDatabase implements Db {
               schema.items.warrantyStartsOn,
             ]) {
               await m.addColumn(schema.items, column);
+            }
+          },
+          from5To6: (m, schema) async {
+            // The tables of sync (lot 4), new and empty: no row moves.
+            for (final table in [
+              schema.opLog,
+              schema.extra,
+              schema.pending,
+              schema.purgedHomes,
+              schema.otherVersions,
+            ]) {
+              await m.createTable(table);
+            }
+            // The id of an annual envelope becomes the one of ADR 0003 and of
+            // the web (`envelope:` and four digits, was
+            // `projects.annualenvelope:<year>`): the rows and their clocks
+            // take it, nothing else moves. No other phone had them: sync did
+            // not exist before this schema.
+            final envelopes = await customSelect(
+              'SELECT id, home_id, year FROM annual_envelopes',
+            ).get();
+            for (final row in envelopes) {
+              final old = row.data['id'] as Uint8List;
+              final home = const UuidConverter().fromSql(
+                row.data['home_id'] as Uint8List,
+              );
+              final String newId;
+              try {
+                newId = envelopeIdOf(home, row.data['year'] as int);
+              } on FormatException {
+                // A home id that is not an RFC 4122 UUID (never made by the
+                // app): the row keeps the id it has.
+                continue;
+              }
+              final id = uuidBytes(newId);
+              await customStatement(
+                'UPDATE annual_envelopes SET id = ? WHERE id = ?',
+                [id, old],
+              );
+              await customStatement(
+                'UPDATE field_clock SET row_id = ? WHERE entity = '
+                "'projects.annualenvelope' AND row_id = ?",
+                [id, old],
+              );
             }
           },
         ),

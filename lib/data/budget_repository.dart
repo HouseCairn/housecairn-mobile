@@ -150,9 +150,11 @@ extension BudgetRepository on Repository {
   static String projectTaskId(String home, String task) =>
       Repository._uuid.v5(home, 'projects.projecttask:$task');
 
-  /// One envelope per year and home.
-  static String envelopeId(String home, int year) =>
-      Repository._uuid.v5(home, 'projects.annualenvelope:$year');
+  /// One envelope per year and home: `envelope:` and the year in four
+  /// decimal digits (docs/adr/0003-sync-protocol.md, web ADR 0077). Schema 5
+  /// named it `projects.annualenvelope:<year>`; the step to schema 6 gives
+  /// the rows of then this id.
+  static String envelopeId(String home, int year) => envelopeIdOf(home, year);
 
   // ---------- money ----------
 

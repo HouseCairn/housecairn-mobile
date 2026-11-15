@@ -2,15 +2,14 @@
 
 // Migration tests of drift's guided migrations
 // (docs/adr/0002-local-storage-and-migrations.md): from every schema version
-// in drift_schemas/housecairn/ to the current one (schema 5): 1 to 5 runs the
-// migrations of lots 2a, 3a, 3b and of the warranty, 2 to 5 those of the
-// stock, the projects and the warranty, 3 to 5 those of lot 3b (projects,
-// budget, reports) and of the warranty, 4 to 5 the one of the manufacturer's
-// warranty (six columns of `items`), and 5 to 5 checks that the schema of
-// AppDatabase is the one of drift_schema_v5.json. The steps from schemas 2, 3
-// and 4 also run on a file with data: every row is there after them, every
-// column it had unchanged, the new columns empty or at their default and the
-// new tables empty. Regenerate `generated/` with:
+// in drift_schemas/housecairn/ to the current one (schema 6). Each step runs
+// in turn: 1 to 2 (lot 2a), 2 to 3 (stock), 3 to 4 (lot 3b: projects, budget,
+// reports), 4 to 5 (the manufacturer's warranty, six columns of `items`) and
+// 5 to 6 (the tables of sync of lot 4, new and empty); 6 to 6 checks that the
+// schema of AppDatabase is the one of drift_schema_v6.json. The steps from
+// schemas 2, 3, 4 and 5 also run on a file with data: every row is there
+// after them, every column it had unchanged, the new columns empty or at
+// their default and the new tables empty. Regenerate `generated/` with:
 //   dart run drift_dev make-migrations
 //   dart run drift_dev schema generate drift_schemas/housecairn/ test/drift/housecairn/generated/
 
@@ -19,6 +18,7 @@ import 'dart:typed_data';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/data/database.dart';
+import 'package:uuid/uuid.dart';
 
 import 'generated/schema.dart';
 
@@ -40,7 +40,7 @@ void main() {
   }
 
   for (final from in [2, 3]) {
-    test('migrates a schema $from file with data to schema 5, keeping every '
+    test('migrates a schema $from file with data to schema 6, keeping every '
         'row', () async {
       final schema = await verifier.schemaAt(from);
       final raw = schema.rawDatabase;
@@ -101,7 +101,7 @@ void main() {
       expect(dumped, contains('Second gutters'));
 
       final db = AppDatabase(schema.newConnection());
-      await verifier.migrateAndValidate(db, 5);
+      await verifier.migrateAndValidate(db, 6);
       expect(dump(), dumped);
       for (final (table, column) in [
         ('rooms', 'paint_article_id'),
@@ -140,7 +140,7 @@ void main() {
     });
   }
 
-  test('migrates a schema 4 file with items to schema 5: the end of a '
+  test('migrates a schema 4 file with items to schema 6: the end of a '
       'warranty typed before stays, the new columns are empty', () async {
     final schema = await verifier.schemaAt(4);
     final raw = schema.rawDatabase;
@@ -197,7 +197,7 @@ void main() {
     expect(dumped, contains('2027-03-01'));
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 5);
+    await verifier.migrateAndValidate(db, 6);
     expect(dump(), dumped);
     final rows = raw.select(
       'SELECT purchased_on, warranty_duration, warranty_duration_unit, '
@@ -208,6 +208,145 @@ void main() {
       [null, null, 'year', '', '', null, '2027-03-01'],
       [null, null, 'year', '', '', null, null],
     ]);
+    expect(await db.integrityCheck(), 'ok');
+    await db.close();
+  });
+
+  test('migrates a schema 5 file with data to schema 6: every row and clock '
+      'stays, the tables of sync are new and empty', () async {
+    final schema = await verifier.schemaAt(5);
+    final raw = schema.rawDatabase;
+    Uint8List id(int n) => Uint8List.fromList(List.filled(16, n));
+    raw.execute(
+      'INSERT INTO homes (id, created_at, updated_at, name, currency, '
+      'hemisphere, archived_at) VALUES (?, 1, 1, ?, ?, ?, NULL), '
+      '(?, 1, 1, ?, ?, ?, 9)',
+      [
+        id(1),
+        'Main home',
+        'EUR',
+        'north',
+        id(2),
+        'Second home',
+        'CHF',
+        'south',
+      ],
+    );
+    raw.execute(
+      'INSERT INTO tasks (id, created_at, updated_at, home_id, title, '
+      'material_budget) VALUES (?, 2, 2, ?, ?, ?), (?, 2, 2, ?, ?, NULL)',
+      [id(3), id(1), 'Main gutters', '12.50', id(4), id(2), 'Second gutters'],
+    );
+    raw.execute(
+      'INSERT INTO occurrences (id, created_at, updated_at, home_id, '
+      'task_id, due_on, follows) VALUES (?, 3, 3, ?, ?, ?, NULL)',
+      [id(5), id(1), id(3), '2026-11-14'],
+    );
+    raw.execute(
+      'INSERT INTO field_clock (entity, row_id, field, hlc, device) '
+      'VALUES (?, ?, ?, ?, ?), (?, ?, ?, ?, ?)',
+      [
+        'tasks.task',
+        id(3),
+        'title',
+        '0193a1b2c3d40001',
+        id(9),
+        'homes.home',
+        id(2),
+        'archived_at',
+        '0193a1b2c3d40002',
+        id(9),
+      ],
+    );
+    raw.execute(
+      "INSERT INTO local_settings (key, value) VALUES ('device_id', ?)",
+      ['09090909090909090909090909090909'],
+    );
+    // An envelope under the id of schema 5, and its clock.
+    const home1 = '6f1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d';
+    raw.execute(
+      'INSERT INTO homes (id, created_at, updated_at, name, currency, '
+      'hemisphere) VALUES (?, 1, 1, ?, ?, ?)',
+      [Uint8List.fromList(Uuid.parse(home1)), 'Third home', 'EUR', 'north'],
+    );
+    final oldEnvelope = Uint8List.fromList(
+      Uuid.parse(const Uuid().v5(home1, 'projects.annualenvelope:2027')),
+    );
+    raw.execute(
+      'INSERT INTO annual_envelopes (id, created_at, updated_at, home_id, '
+      'year, amount) VALUES (?, 4, 4, ?, 2027, ?)',
+      [oldEnvelope, Uint8List.fromList(Uuid.parse(home1)), '1250.50'],
+    );
+    raw.execute(
+      'INSERT INTO field_clock (entity, row_id, field, hlc, device) '
+      'VALUES (?, ?, ?, ?, ?)',
+      [
+        'projects.annualenvelope',
+        oldEnvelope,
+        'amount',
+        '0193a1b2c3d40003',
+        id(9),
+      ],
+    );
+    const before = [
+      'homes',
+      'tasks',
+      'occurrences',
+      'field_clock',
+      'local_settings',
+    ];
+    String dump() => [
+      for (final table in before)
+        for (final row in raw.select(
+          'SELECT * FROM $table '
+          '${table == 'field_clock' ? "WHERE entity != 'projects.annualenvelope' " : ''}'
+          'ORDER BY 1, 2',
+        ))
+          '$table $row',
+    ].join('\n');
+    final dumped = dump();
+    expect(dumped, contains('Second gutters'));
+    expect(dumped, contains('0193a1b2c3d40002'));
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 6);
+    expect(dump(), dumped);
+    for (final table in [
+      'op_log',
+      'extra',
+      'pending',
+      'purged_homes',
+      'other_versions',
+    ]) {
+      expect(
+        raw.select('SELECT COUNT(*) AS n FROM $table').first['n'],
+        0,
+        reason: table,
+      );
+    }
+    // The envelope takes the id of ADR 0003 and of the web, with its
+    // clock; its fields are unchanged.
+    final envelope = raw
+        .select(
+          'SELECT id, home_id, year, amount, updated_at FROM annual_envelopes',
+        )
+        .single;
+    expect(
+      Uuid.unparse(envelope['id'] as Uint8List),
+      const Uuid().v5(home1, 'envelope:2027'),
+    );
+    expect(
+      [envelope['year'], envelope['amount'], envelope['updated_at']],
+      [2027, '1250.50', 4],
+    );
+    final clock = raw
+        .select(
+          'SELECT row_id, hlc FROM field_clock '
+          "WHERE entity = 'projects.annualenvelope'",
+        )
+        .single;
+    expect(clock['row_id'], envelope['id']);
+    expect(clock['hlc'], '0193a1b2c3d40003');
     expect(await db.integrityCheck(), 'ok');
     await db.close();
   });
