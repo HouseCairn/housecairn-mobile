@@ -79,5 +79,6 @@ Widget duePill(
       tone: HcPillTone.info,
     );
   }
-  return HcPill(l10n.dueOn(formatDay(context, due)), tone: HcPillTone.sand);
+  // The date alone, as the web writes it (`|day`, "21 nov. 2026").
+  return HcPill(formatDay(context, due), tone: HcPillTone.sand);
 }

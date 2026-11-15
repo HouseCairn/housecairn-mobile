@@ -51,7 +51,7 @@ abstract final class HcText {
     fontFamily: HcFont.family,
     fontSize: HcFont.sizeXs,
     fontWeight: HcFont.regular,
-    height: HcComponent.rowLineHeight,
+    height: HcComponent.rowTextLineHeight,
     color: HcColors.textMuted,
   );
 

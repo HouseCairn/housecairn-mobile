@@ -84,8 +84,10 @@ abstract final class HcColors {
 /// Type (`font` of the tokens): the family, the sizes in logical pixels
 /// before the text size of the phone, the weights and the line heights.
 abstract final class HcFont {
-  /// Manrope, bundled with the app (assets/fonts/README.md). The web falls
-  /// back on system fonts; the app always has Manrope.
+  /// Manrope, bundled with the app (assets/fonts/README.md). The web serves
+  /// the same Manrope (a variable font, `Manrope-latin-variable.woff2`) and
+  /// names system fonts only as a fallback: both draw Manrope, the app with
+  /// static weights.
   static const family = 'Manrope';
 
   static const size2xs = 12.0;
@@ -229,6 +231,9 @@ abstract final class HcComponent {
   static const appbarMinHeight = 56.0;
   static const rowMinHeight = 56.0;
   static const rowLineHeight = 1.3;
+
+  /// `.row-text { line-height }`: 1.35, not a token of the web.
+  static const rowTextLineHeight = 1.35;
   static const rowTextGap = 2.0;
   static const pillPaddingY = 3.0;
   static const pillPaddingX = 8.0;

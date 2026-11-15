@@ -400,12 +400,17 @@ class HcAddButton extends StatelessWidget {
     required this.onPressed,
     this.primary = true,
     this.block = true,
+    this.gap = HcSpace.s3,
   });
 
   final String label;
   final VoidCallback onPressed;
   final bool primary;
   final bool block;
+
+  /// The space above: 12 after a list, 8 after an empty state (the web's
+  /// margins, measured in test/web_parity_test.dart).
+  final double gap;
 
   @override
   Widget build(BuildContext context) {
@@ -414,7 +419,7 @@ class HcAddButton extends StatelessWidget {
         ? FilledButton(onPressed: onPressed, child: child)
         : OutlinedButton(onPressed: onPressed, child: child);
     return Padding(
-      padding: const EdgeInsets.only(top: HcSpace.s3),
+      padding: EdgeInsets.only(top: gap),
       child: block
           ? button
           : Align(alignment: AlignmentDirectional.centerStart, child: button),

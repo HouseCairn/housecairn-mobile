@@ -45,6 +45,8 @@ const fixtureTexts = [
   'Main boiler service',
   'Main gutters',
   'Main kitchen',
+  'Main boiler',
+  'Second boiler',
   'Main cellar',
   'Second kitchen',
   'Second cellar',
@@ -155,12 +157,14 @@ void main() {
             .toList();
         expect(named, isNotEmpty);
         expect(
-          named.every((s) => s == 'Main home' || s == 'Second home'),
+          named.every(
+            (s) => s!.startsWith('Main home') || s.startsWith('Second home'),
+          ),
           isTrue,
           reason: '$named',
         );
-        expect(named, contains('Main home'));
-        expect(named, contains('Second home'));
+        expect(named.where((s) => s!.startsWith('Main home')), isNotEmpty);
+        expect(named.where((s) => s!.startsWith('Second home')), isNotEmpty);
         final rows = await state.repository.todayEntries();
         expect(rows, hasLength(6));
         expect(rows.where((e) => e.home.id == homes.second), hasLength(3));
@@ -177,7 +181,7 @@ void main() {
         expect(
           tester
               .widgetList<HcTaskRow>(find.byType(HcTaskRow))
-              .every((row) => row.text == null),
+              .every((row) => !(row.text ?? '').contains('home')),
           isTrue,
         );
         expect(state.current!.id, homes.second);

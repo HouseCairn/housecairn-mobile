@@ -20,10 +20,14 @@ import 'dart:io';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/data/repository.dart';
+import 'package:housecairn_mobile/design/theme.dart';
+import 'package:housecairn_mobile/design/tokens.dart';
 import 'package:housecairn_mobile/design/widgets.dart';
 import 'package:housecairn_mobile/ui/contractor_screens.dart';
 import 'package:housecairn_mobile/ui/homes_screen.dart';
+import 'package:housecairn_mobile/core/clock.dart';
 import 'package:housecairn_mobile/ui/item_screens.dart';
+import 'package:housecairn_mobile/ui/messages.dart';
 import 'package:housecairn_mobile/ui/rooms.dart';
 import 'package:housecairn_mobile/ui/task_screen.dart';
 import 'package:material_ui/material_ui.dart';
@@ -43,7 +47,20 @@ class Demo {
   late String boiler;
   late String plumber;
 
+  /// The day the web was measured on: the rows' dates are relative to it
+  /// (`today` of test/parity/web_fr_390.json).
+  Demo(this.webToday);
+
+  final DateTime webToday;
+
   Future<void> seed(Repository r) async {
+    // The clock of the tests stands on the day of the web's measure, and
+    // moves a second between two tasks, as the web's demonstration creates
+    // them one after the other (rows of one day come in the order created).
+    final clock = r.clock as FixedClock;
+    clock.advance(
+      Duration(days: webToday.difference(asDateTime(r.today())).inDays),
+    );
     home = await r.createHome(name: "Maison d'exemple");
     final rooms = <String, String>{};
     for (final (i, (kind, name)) in [
@@ -84,6 +101,7 @@ class Demo {
           roomId: rooms[room],
         ),
       );
+      clock.advance(const Duration(seconds: 1));
     }
   }
 }
@@ -104,6 +122,116 @@ double drawnSize(WidgetTester tester, Finder text) {
   return paragraph.textScaler.scale(size);
 }
 
+/// The text style a drawn text has: weight and size through the text scaler.
+({double size, int weight, double line}) drawnStyle(
+  WidgetTester tester,
+  Finder text,
+) {
+  final paragraph = tester.renderObject<RenderParagraph>(
+    find.descendant(of: text, matching: find.byType(RichText)).first,
+  );
+  final style =
+      paragraph.text.style ??
+      (paragraph.text as TextSpan).children!.first.style!;
+  final size = paragraph.textScaler.scale(style.fontSize!);
+  return (
+    size: size,
+    weight: (style.fontWeight ?? FontWeight.w400).value,
+    line: size * (style.height ?? 1),
+  );
+}
+
+/// A text drawn with one of the app's row styles.
+Finder withStyle(TextStyle style) =>
+    find.byWidgetPredicate((w) => w is Text && w.style == style);
+
+/// What a list shows, section by section, as `tool/web_parity.py` reads the
+/// web's `section` elements: the heading (in capitals, with its count), then
+/// for each row its title, its place, its pills and its height.
+List<Map<String, Object?>> sectionsOf(WidgetTester tester) {
+  String text(Finder f) => tester.widget<Text>(f.first).data ?? '';
+  final headings = find.byType(HcSectionHeading).evaluate().toList();
+  final lists = find
+      .byType(HcCardList)
+      .evaluate()
+      .where(
+        (l) => find
+            .descendant(
+              of: find.byWidget(l.widget),
+              matching: find.byType(HcTaskRow),
+            )
+            .evaluate()
+            .isNotEmpty,
+      )
+      .toList();
+  if (lists.isEmpty) return [];
+  return [
+    for (var i = 0; i < headings.length && i < lists.length; i++)
+      {
+        'heading': text(
+          find.descendant(
+            of: find.byWidget(headings[i].widget),
+            matching: find.byType(Text),
+          ),
+        ),
+        'rows': [
+          for (final row
+              in find
+                  .descendant(
+                    of: find.byWidget(lists[i].widget),
+                    matching: find.byType(HcTaskRow),
+                  )
+                  .evaluate())
+            {
+              'title': text(
+                find.descendant(
+                  of: find.byWidget(row.widget),
+                  matching: withStyle(HcText.rowTitle),
+                ),
+              ),
+              'text':
+                  find
+                      .descendant(
+                        of: find.byWidget(row.widget),
+                        matching: withStyle(HcText.rowText),
+                      )
+                      .evaluate()
+                      .isEmpty
+                  ? ''
+                  : text(
+                      find.descendant(
+                        of: find.byWidget(row.widget),
+                        matching: withStyle(HcText.rowText),
+                      ),
+                    ),
+              'pills': [
+                for (final pill
+                    in find
+                        .descendant(
+                          of: find.byWidget(row.widget),
+                          matching: find.byType(HcPill),
+                        )
+                        .evaluate())
+                  tester.widget<HcPill>(find.byWidget(pill.widget)).label,
+              ],
+              'height': tester.getRect(find.byWidget(row.widget)).height,
+              'title_lines':
+                  (tester
+                              .getSize(
+                                find.descendant(
+                                  of: find.byWidget(row.widget),
+                                  matching: withStyle(HcText.rowTitle),
+                                ),
+                              )
+                              .height /
+                          (HcFont.sizeBase * HcComponent.rowLineHeight))
+                      .round(),
+            },
+        ],
+      },
+  ];
+}
+
 Measures measure(
   WidgetTester tester, {
   String? rowTitle,
@@ -121,9 +249,42 @@ Measures measure(
   if (rowTitle != null) {
     m['row_title_font'] = drawnSize(tester, find.text(rowTitle).first);
   }
+  // The styles of the rows, of the headings and of the pills, wherever the
+  // screen has them: the size, the weight and the line height are the web's.
+  for (final (name, finder) in [
+    ('row_title', withStyle(HcText.rowTitle)),
+    ('row_text', withStyle(HcText.rowText)),
+    (
+      'pill',
+      find.descendant(of: find.byType(HcPill), matching: find.byType(Text)),
+    ),
+    (
+      'h2',
+      find.descendant(
+        of: find.byType(HcSectionHeading),
+        matching: find.byType(Text),
+      ),
+    ),
+  ]) {
+    if (finder.evaluate().isEmpty) continue;
+    final style = drawnStyle(tester, finder.first);
+    m['${name}_font'] = style.size;
+    m['${name}_weight'] = style.weight;
+    if (name.startsWith('row_')) m['${name}_line'] = style.line;
+  }
+  final taskRows = find.byType(HcTaskRow);
+  if (taskRows.evaluate().isNotEmpty) {
+    m['row_height'] = rectOf(tester, taskRows.first).height;
+  }
+  m['sections'] = sectionsOf(tester);
   final cards = find.byType(HcCardList);
   if (cards.evaluate().isNotEmpty) {
     m['content_left'] = rectOf(tester, cards.first).left;
+  } else if (find.byType(HcCard).evaluate().isNotEmpty) {
+    m['content_left'] = rectOf(tester, find.byType(HcCard).first).left;
+  } else if (find.byType(HcField).evaluate().isNotEmpty) {
+    // A form: the web's `.card` holds the fields, the app has them on the page.
+    m['content_left'] = rectOf(tester, find.byType(HcField).first).left;
   }
   if (done) {
     final button = find.widgetWithText(FilledButton, 'Fait').first;
@@ -164,7 +325,7 @@ Measures measure(
             .isNotEmpty;
     // The gap to the list above it, as the web's margin between the two.
     final above = [
-      for (final e in cards.evaluate())
+      for (final e in [...cards.evaluate(), ...find.byType(HcEmpty).evaluate()])
         if (tester.getRect(find.byElementPredicate((x) => x == e)).bottom <=
             r.top + 0.5)
           tester.getRect(find.byElementPredicate((x) => x == e)).bottom,
@@ -284,11 +445,33 @@ const adaptations = <String, ({double app, String why})>{
   'field_height': (app: 48, why: 'touch target of 48 dp'),
 };
 
+/// Measures one side lacks on purpose, `<screen>.<measure>`, with the reason.
+const absences = <String, String>{
+  'rooms.label_font':
+      'the web has a search field above the rooms; the app has no search yet',
+  'room_form.h2_font':
+      'the memory of the room is in this form, a screen of its own on the web',
+  'room_form.h2_weight':
+      'the memory of the room is in this form, a screen of its own on the web',
+  'item_form.h2_font': 'the links and the contract are in this form, screens of their own on the web',
+  'item_form.h2_weight': 'the links and the contract are in this form, screens of their own on the web',
+  'item.row_text_font': 'the card of the item writes its room and kind in the style of a row text, the web as `.small` (same size and weight)',
+  'item.row_text_weight': 'the card of the item writes its room and kind in the style of a row text, the web as `.small` (same size and weight)',
+  'item.row_text_line': 'the card of the item writes its room and kind in the style of a row text, the web as `.small` (same size and weight)',
+};
+
+/// Rows whose title takes a second line in the app, with the reason: the
+/// row has the menu of skip and postpone (48 dp, the touch target) that the
+/// web's row does not have, so the title has 36 dp less. The height must be
+/// the web's plus one line of the title.
+const menuWraps = <String>{'Entretien annuel de la chaudière'};
+
 void main() {
-  final web =
-      (jsonDecode(File('test/parity/web_fr_390.json').readAsStringSync())
-              as Map<String, dynamic>)['screens']
-          as Map<String, dynamic>;
+  final reference = jsonDecode(
+    File('test/parity/web_fr_390.json').readAsStringSync(),
+  ) as Map<String, dynamic>;
+  final web = reference['screens'] as Map<String, dynamic>;
+  final webToday = DateTime.parse(reference['today'] as String);
   final results = <String, Measures>{};
 
   setUpAll(() async {
@@ -305,7 +488,7 @@ void main() {
   for (final screen in screens) {
     testWidgets('${screen.name} renders as the web at 390 px', (tester) async {
       await onPhone(tester, width: 390, height: 844);
-      final demo = Demo();
+      final demo = Demo(webToday);
       final state = await pumpApp(
         tester,
         locale: 'fr',
@@ -324,8 +507,26 @@ void main() {
       }
       final w = web[screen.name] as Map<String, dynamic>;
       final failures = <String>[];
+      // A measure taken on one side only is a failure, unless `absences`
+      // names it with its reason: a screen that lacks what the web has, or
+      // has what the web lacks, is not the same screen.
       void compare(String key, Object? appValue, Object? webValue, double tol) {
-        if (appValue == null || webValue == null) return;
+        if (appValue == null && webValue == null) return;
+        final absent = absences['${screen.name}.$key'];
+        if (appValue == null || webValue == null) {
+          if (absent == null) {
+            failures.add(
+              '$key: measured on one side only (app $appValue, web $webValue)',
+            );
+          }
+          return;
+        }
+        if (absent != null) {
+          failures.add(
+            '$key: listed in `absences` ($absent) but measured on both sides',
+          );
+          return;
+        }
         final expected = adaptations[key]?.app ?? (webValue as num).toDouble();
         final actual = (appValue as num).toDouble();
         if ((actual - expected).abs() > tol) {
@@ -335,14 +536,33 @@ void main() {
 
       for (final key in [
         'h1_font',
+        'h2_font',
         'row_title_font',
+        'row_text_font',
+        'pill_font',
         'done_font',
         'add_font',
         'label_font',
       ]) {
         compare(key, app[key], w[key], fontTolerance);
       }
-      for (final key in ['nav_height', 'content_left', 'field_height']) {
+      for (final key in [
+        'h2_weight',
+        'row_title_weight',
+        'row_text_weight',
+        'pill_weight',
+      ]) {
+        compare(key, app[key], w[key], 0);
+      }
+      for (final key in ['row_title_line', 'row_text_line']) {
+        compare(key, app[key], w[key], fontTolerance);
+      }
+      for (final key in [
+        'nav_height',
+        'content_left',
+        'field_height',
+        'row_height',
+      ]) {
         compare(key, app[key], w[key], boxTolerance);
       }
       if (w['done_button'] != null) {
@@ -363,6 +583,60 @@ void main() {
         compare('add_gap', app['add_gap'], w['add_gap'], boxTolerance);
         if (app['add_in_flow'] != true) {
           failures.add('add_button: floating, the web has it after the list');
+        }
+      }
+      // What the list shows, section by section: the words and the heights.
+      final webSections = w['sections'] as List<dynamic>;
+      final appSections = app['sections']! as List<Map<String, Object?>>;
+      if (webSections.length != appSections.length) {
+        failures.add(
+          'sections: ${appSections.length} in the app, ${webSections.length} on the web',
+        );
+      } else {
+        for (final (i, ws) in webSections.indexed) {
+          final as = appSections[i];
+          if (as['heading'] != ws['heading']) {
+            failures.add(
+              'section $i heading: app "${as['heading']}", web "${ws['heading']}"',
+            );
+          }
+          final webRows = ws['rows'] as List<dynamic>;
+          final appRows = as['rows']! as List<Map<String, Object?>>;
+          if (webRows.length != appRows.length) {
+            failures.add(
+              'section $i: ${appRows.length} rows in the app, ${webRows.length} on the web',
+            );
+            continue;
+          }
+          for (final (k, wr) in webRows.indexed) {
+            final ar = appRows[k];
+            for (final field in ['title', 'text']) {
+              if (ar[field] != wr[field]) {
+                failures.add(
+                  'section $i row $k $field: app "${ar[field]}", web "${wr[field]}"',
+                );
+              }
+            }
+            if (ar['pills'].toString() != (wr['pills'] as List).toString()) {
+              failures.add(
+                'section $i row $k pills: app ${ar['pills']}, web ${wr['pills']}',
+              );
+            }
+            final wraps = menuWraps.contains(wr['title']);
+            if (wraps && ar['title_lines'] != 2) {
+              failures.add(
+                'section $i row $k: listed in `menuWraps`, but its title has ${ar['title_lines']} line(s)',
+              );
+            }
+            // Rows after the first have the border of the list above them.
+            compare(
+              'section $i row $k height',
+              ar['height'],
+              (wr['height'] as num) +
+                  (wraps ? HcFont.sizeBase * HcComponent.rowLineHeight : 0),
+              boxTolerance,
+            );
+          }
         }
       }
       expect(failures, isEmpty, reason: failures.join('\n'));

@@ -13,8 +13,8 @@ import 'messages.dart';
 import 'state.dart';
 import 'task_screen.dart';
 
-/// Today (docs/spec.md, "Screens of v1"): overdue, coming up within a week,
-/// and without a date, of the current home or of All homes, where each row
+/// Today (docs/spec.md, "Screens of v1"): overdue, today, coming up within a
+/// week, and without a date, each with its count as the web's headings, of the current home or of All homes, where each row
 /// names its home. Done is one tap, with an undo bar; skip and postpone from
 /// the menu of the same row.
 class TodayScreen extends StatefulWidget {
@@ -119,6 +119,7 @@ class _TodayScreenState extends State<TodayScreen> {
     final named = state.todayAllHomes;
     final groups = <String, List<TodayEntry>>{
       l10n.todayOverdue: [],
+      l10n.todayToday: [],
       l10n.todayComingUp: [],
       l10n.todayNoDate: [],
     };
@@ -128,6 +129,8 @@ class _TodayScreenState extends State<TodayScreen> {
           ? l10n.todayNoDate
           : due < today
           ? l10n.todayOverdue
+          : due == today
+          ? l10n.todayToday
           : l10n.todayComingUp;
       groups[group]!.add(entry);
     }
@@ -148,8 +151,9 @@ class _TodayScreenState extends State<TodayScreen> {
                 for (final MapEntry(key: heading, value: rows)
                     in groups.entries)
                   if (rows.isNotEmpty) ...[
+                    // The count after the title, as the web's `h2`.
                     HcSectionHeading(
-                      heading,
+                      '$heading (${rows.length})',
                       danger: heading == l10n.todayOverdue,
                     ),
                     HcCardList(
@@ -208,10 +212,17 @@ class _TodayRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final due = entry.dueOn;
+    final place = [
+      if (namesHome) entry.home.name,
+      ?entry.roomName,
+      ?entry.itemName,
+    ];
     return HcTaskRow(
       key: Key('today-${entry.occurrence.id}'),
       title: entry.task.title,
-      text: namesHome ? entry.home.name : null,
+      // The room and the item under the title, as the web's row; on All
+      // homes, the home first.
+      text: place.isEmpty ? null : place.join(' · '),
       pill: duePill(
         context,
         due,

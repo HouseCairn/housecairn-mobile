@@ -293,11 +293,18 @@ class TodayEntry {
     required this.occurrence,
     required this.task,
     required this.home,
+    this.roomName,
+    this.itemName,
   });
 
   final OccurrenceRow occurrence;
   final TaskRow task;
   final HomeRow home;
+
+  /// The room of the task and the item it is about, as the web's row names
+  /// them under the title (`tasks/_occurrence_row.html`).
+  final String? roomName;
+  final String? itemName;
 
   Day? get dueOn =>
       occurrence.dueOn == null ? null : Day.parse(occurrence.dueOn!);
@@ -1819,6 +1826,22 @@ class Repository {
             OrderingTerm.asc(db.occurrences.id),
           ]);
     final rows = await query.get();
+    final rooms = {
+      for (final r
+          in await (db.select(db.rooms)..where(
+                (t) => t.homeId.isInValues(homes.keys) & t.deletedAt.isNull(),
+              ))
+              .get())
+        r.id: r.name,
+    };
+    final items = {
+      for (final i
+          in await (db.select(db.items)..where(
+                (t) => t.homeId.isInValues(homes.keys) & t.deletedAt.isNull(),
+              ))
+              .get())
+        i.id: i.name,
+    };
     return [
       for (final row in rows)
         if (homes[row.readTable(db.tasks).homeId] != null)
@@ -1826,6 +1849,8 @@ class Repository {
             occurrence: row.readTable(db.occurrences),
             task: row.readTable(db.tasks),
             home: homes[row.readTable(db.tasks).homeId]!,
+            roomName: rooms[row.readTable(db.tasks).roomId],
+            itemName: items[row.readTable(db.tasks).itemId],
           ),
     ];
   }

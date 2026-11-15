@@ -74,6 +74,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todayOverdue => 'Overdue';
 
   @override
+  String get todayToday => 'Today';
+
+  @override
   String get todayComingUp => 'Coming up';
 
   @override

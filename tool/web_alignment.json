@@ -3,8 +3,8 @@
   "repository": "HouseCairn/housecairn",
   "elements": {
     "recurrence": {
-      "release": "v0.3.1",
-      "commit": "f4e732b98f6fab896be9308b20d548dbcb309aa5",
+      "release": "v0.3.2",
+      "commit": "a76837fe30b5a313980184703454654a45b1f031",
       "python": "3.13.18",
       "web": [
         "src/housecairn/tasks/recurrence.py"
@@ -15,8 +15,8 @@
       "how": "tool/recurrence_vectors.py, run in the web environment of the commit (uv sync --frozen --no-dev, this Python); compared byte for byte"
     },
     "task_templates": {
-      "release": "v0.3.1",
-      "commit": "f4e732b98f6fab896be9308b20d548dbcb309aa5",
+      "release": "v0.3.2",
+      "commit": "a76837fe30b5a313980184703454654a45b1f031",
       "web": [
         "src/housecairn/tasks/task_templates.yaml"
       ],
@@ -26,8 +26,8 @@
       "how": "copy of the web file; compared byte for byte"
     },
     "design_tokens": {
-      "release": "v0.3.1",
-      "commit": "f4e732b98f6fab896be9308b20d548dbcb309aa5",
+      "release": "v0.3.2",
+      "commit": "a76837fe30b5a313980184703454654a45b1f031",
       "web": [
         "design/tokens.json"
       ],
@@ -35,6 +35,24 @@
         "design/tokens.json"
       ],
       "how": "every token of the web file is in the app's file with the same value; the app may add its own"
+    },
+    "web_parity": {
+      "release": "v0.3.2",
+      "commit": "a76837fe30b5a313980184703454654a45b1f031",
+      "web": [
+        "src/housecairn/static/css",
+        "src/housecairn/templates/base.html",
+        "src/housecairn/templates/components",
+        "src/housecairn/templates/shell",
+        "src/housecairn/templates/tasks",
+        "src/housecairn/templates/rooms",
+        "src/housecairn/templates/homes",
+        "src/housecairn/homes/management/commands/load_demo_data.py"
+      ],
+      "mobile": [
+        "test/parity/web_fr_390.json"
+      ],
+      "how": "measured by tool/web_parity.py in a browser at 390 x 844 on the demonstration data (a script cannot regenerate it); `check` compares the release and commit the file says it measured with this pin, so a pin moved by `update` after a change of the web files listed here makes `check` fail until the measure is taken again"
     }
   }
 }

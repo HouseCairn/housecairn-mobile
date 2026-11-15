@@ -5,22 +5,41 @@ Run in the environment of the web repository at the commit of
 tool/web_alignment.json (`uv sync --frozen --group docs`, `playwright install
 chromium`), against a local instance filled by `manage.py load_demo_data
 --owner demo@example.com --language fr` (an account made beforehand, password
-`demo-password-for-local-captures`), with one item in the utility room and
+`demo-password-for-local-captures`, its language set to French in its preferences), the
+translations compiled (`manage.py compilemessages`), with one item in the utility room and
 one contractor added (the names of test/web_parity_test.dart):
 
     uv run python tool/web_parity.py <capture directory> [<base URL>]
 
 Opens every screen at 390 x 844 CSS px, device scale factor 3, in French,
-saves a screenshot of each in the capture directory and writes the measures
-to test/parity/web_fr_390.json.
+saves a screenshot of each in the capture directory and writes the measures, the
+release and commit it measured ("web", which `web_alignment.py check`
+compares with the pin of `web_parity`) and the day it ran ("today": the dates of the
+rows are relative to it) to test/parity/web_fr_390.json.
 """
 
+import datetime
 import json
+import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+
+
+
+def web_checkout() -> dict:
+    """The release and commit of the web checkout this runs in (`WEB_RELEASE` and `WEB_COMMIT`
+    stand in for a checkout without git, such as an archive)."""
+    def git(*args: str) -> str:
+        return subprocess.run(["git", *args], capture_output=True, text=True, check=True).stdout.strip()
+
+    release = os.environ.get("WEB_RELEASE") or git("describe", "--tags", "--exact-match", "HEAD")
+    commit = os.environ.get("WEB_COMMIT") or git("rev-parse", "HEAD")
+    return {"release": release, "commit": commit}
+
 
 base = sys.argv[2] if len(sys.argv) > 2 else "http://127.0.0.1:8000"
 out = Path(sys.argv[1])
@@ -34,14 +53,34 @@ MEASURE = """
   const box = (e) => { if (!e) return null; const r = e.getBoundingClientRect();
     return {x: r.x, y: r.y + window.scrollY, w: r.width, h: r.height}; };
   const fs = (s) => { const e = q(s); return e ? parseFloat(cs(e).fontSize) : null; };
+  const fw = (s) => { const e = q(s); return e ? parseInt(cs(e).fontWeight, 10) : null; };
+  const lh = (s) => { const e = q(s); return e ? parseFloat(cs(e).lineHeight) : null; };
+  const text = (e) => e ? e.innerText.replace(/\\s+/g, ' ').trim() : null;
+  // What the screen lists, section by section: the heading, its count, the rows
+  // (title, place, pills, height). Empty on a screen without section headings.
+  const sections = [...document.querySelectorAll('main section[aria-labelledby]')]
+    .filter((s) => s.querySelector('.task-list'))
+    .map((s) => ({
+      heading: text(s.querySelector('h2')),
+      rows: [...s.querySelectorAll('.task-list > li')].map((li) => ({
+        title: text(li.querySelector('.row-title')),
+        text: text(li.querySelector('.row-text')),
+        pills: [...li.querySelectorAll('.pill')].map(text),
+        height: li.getBoundingClientRect().height,
+      })),
+    }));
   const add = addSel ? q(addSel) : null;
   const row = q('main .task-row') || q('main .list > li') || q('main ul.list li');
-  const card = q('main .task-list') || q('main .list') || q('main .card');
+  const card = q('main .task-list') || q('main .list') || q('main .card-list') || q('main .card');
   const field = q('main input[type=text], main input:not([type]), main select');
   return {
     h1_font: fs('main h1'), h1_box: box(q('main h1')),
-    h2_font: fs('main h2'),
+    h2_font: fs('main h2'), h2_weight: fw('main h2'),
     row_title_font: fs('main .row-title'), row_text_font: fs('main .row-text'),
+    row_title_weight: fw('main .row-title'), row_text_weight: fw('main .row-text'),
+    row_title_line: lh('main .row-title'), row_text_line: lh('main .row-text'),
+    pill_font: fs('main .pill'), pill_weight: fw('main .pill'),
+    sections: sections,
     body_font: parseFloat(cs(document.body).fontSize),
     row_height: row ? box(row).h : null,
     done_button: box(q('main .button-done')),
@@ -131,6 +170,9 @@ with sync_playwright() as p:
         result[name] = m
         print(name, json.dumps(m))
     document = json.loads(target.read_text()) if target.exists() else {}
+    # What `tool/web_alignment.py check` compares with the pin of `web_parity`.
+    document["web"] = {"repository": "HouseCairn/housecairn", **web_checkout()}
+    document["today"] = datetime.date.today().isoformat()
     document["screens"] = result
     target.write_text(json.dumps(document, indent=1, ensure_ascii=False) + "\n")
     b.close()

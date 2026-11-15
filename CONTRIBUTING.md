@@ -82,6 +82,13 @@ The `Web alignment` workflow does the same every day and opens the pull request 
 when a file the app carries differs: a release without effect on them is reported in the run
 summary and moves nothing, not even the pin. `python3 tool/test_web_alignment.py` tests the tool.
 
+The measure of the web's rendering (`test/parity/web_fr_390.json`, read by
+`test/web_parity_test.dart`) is the exception: a script cannot regenerate it, it needs a browser.
+It carries the web release and commit it was taken at, which `check` compares with the pin
+`web_parity`. When a web release changes a file that draws the measured screens, `update` moves
+that pin and `check` fails until the measure is taken again (`tool/web_parity.py`, which says how)
+and `flutter test test/web_parity_test.dart` passes.
+
 Every string shown to people goes in `lib/l10n/app_en.arb` (with a description) and
 `lib/l10n/app_fr.arb`; a test fails when a screen shows a string that is in neither. A new
 dependency must have a licence listed in `tool/licenses/allowed-licenses.txt`, and no
