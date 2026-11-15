@@ -12,6 +12,7 @@ import 'home_selector.dart';
 import 'messages.dart';
 import 'state.dart';
 import 'stock_screens.dart';
+import 'report_screens.dart';
 import 'task_screen.dart';
 
 /// Today (docs/spec.md, "Screens of v1"): overdue, today, coming up within a
@@ -28,6 +29,7 @@ class TodayScreen extends StatefulWidget {
 
 class _TodayScreenState extends State<TodayScreen> {
   List<TodayEntry>? _entries;
+  int _reports = 0;
   int _revision = -1;
 
   @override
@@ -44,7 +46,16 @@ class _TodayScreenState extends State<TodayScreen> {
     final entries = await state.repository.todayEntries(
       homeId: state.todayAllHomes ? null : state.current?.id,
     );
-    if (mounted) setState(() => _entries = entries);
+    final current = state.current;
+    final reports = current == null
+        ? 0
+        : await state.repository.openReportCount([current.id]);
+    if (mounted) {
+      setState(() {
+        _entries = entries;
+        _reports = reports;
+      });
+    }
   }
 
   Future<void> _run(Future<void> Function() action) async {
@@ -156,6 +167,16 @@ class _TodayScreenState extends State<TodayScreen> {
           ? const SizedBox.shrink()
           : HcScreenList(
               children: [
+                // The open reports of the current home, under the title, as
+                // the web's `open_reports_line` (`reports/_today.html`).
+                if (state.current != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: HcSpace.s3),
+                    child: TodayReports(
+                      count: _reports,
+                      homeId: state.current!.id,
+                    ),
+                  ),
                 if (entries.isEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: HcSpace.s4),

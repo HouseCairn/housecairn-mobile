@@ -7,12 +7,16 @@ import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../l10n/app_localizations.dart';
 import 'about.dart';
+import 'budget_screens.dart';
 import 'contractor_screens.dart';
 import 'home_selector.dart';
 import 'homes_screen.dart';
+import 'project_screens.dart';
+import 'report_screens.dart';
 import 'reminders_row.dart';
 import 'rooms.dart';
 import 'shell.dart';
+import 'state.dart';
 import 'templates_screen.dart';
 import 'today.dart';
 import 'ways.dart';
@@ -21,8 +25,8 @@ import 'ways.dart';
 Widget sectionRoot(Section section) => switch (section) {
   Section.today => const TodayScreen(),
   Section.rooms => const RoomsScreen(),
-  Section.projects => EmptySection(title: (l10n) => l10n.navProjects),
-  Section.budget => EmptySection(title: (l10n) => l10n.navBudget),
+  Section.projects => const ProjectsScreen(),
+  Section.budget => const BudgetScreen(),
   Section.more => const MoreScreen(),
 };
 
@@ -84,6 +88,17 @@ class MoreScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              if (AppScope.of(context).current case final home?)
+                HcRow(
+                  key: const Key('more-reports'),
+                  leading: const HcIcon(HcIcons.info, color: HcColors.primary),
+                  title: l10n.reports,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (context) => ReportsScreen(homeId: home.id),
+                    ),
+                  ),
+                ),
               HcRow(
                 leading: const HcIcon(
                   HcIcons.templates,

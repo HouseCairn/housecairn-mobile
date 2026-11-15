@@ -2191,6 +2191,1044 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only a closed report can be reopened.'**
   String get errReportNotClosed;
+
+  /// Web catalogue (projects, budget or reports): En cours. Status of a project.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get projectInProgress;
+
+  /// Web catalogue (projects, budget or reports): Planned (status of a project).
+  ///
+  /// In en, this message translates to:
+  /// **'Planned'**
+  String get projectPlanned;
+
+  /// Web catalogue (projects, budget or reports): Finished (status of a project).
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get projectFinished;
+
+  /// Web catalogue (projects, budget or reports): Abandonné.
+  ///
+  /// In en, this message translates to:
+  /// **'Abandoned'**
+  String get projectAbandoned;
+
+  /// Web catalogue (projects, budget or reports): Idée.
+  ///
+  /// In en, this message translates to:
+  /// **'Idea'**
+  String get projectIdea;
+
+  /// Tab of Projects (in progress and planned). Web catalogue (projects, budget or reports): En cours.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get projectsInProgress;
+
+  /// Tab of Projects. Web catalogue (projects, budget or reports): Idées.
+  ///
+  /// In en, this message translates to:
+  /// **'Ideas'**
+  String get projectsIdeas;
+
+  /// Tab of Projects (finished and abandoned). Web catalogue (projects, budget or reports): Terminés.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get projectsFinished;
+
+  /// Web catalogue (projects, budget or reports): Fournitures.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials'**
+  String get natureMaterial;
+
+  /// Web catalogue (projects, budget or reports): Main-d'œuvre.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour'**
+  String get natureLabour;
+
+  /// Web catalogue (projects, budget or reports): Location.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental'**
+  String get natureRental;
+
+  /// Web catalogue (projects, budget or reports): Autre.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get natureOther;
+
+  /// Web catalogue (projects, budget or reports): Demandé.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested'**
+  String get quoteRequested;
+
+  /// Web catalogue (projects, budget or reports): Reçu.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get quoteReceived;
+
+  /// Web catalogue (projects, budget or reports): Accepté.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get quoteAccepted;
+
+  /// Web catalogue (projects, budget or reports): Refusé.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get quoteRejected;
+
+  /// Web catalogue (projects, budget or reports): Budget dépassé de %(amount)s.
+  ///
+  /// In en, this message translates to:
+  /// **'Over budget by {amount}'**
+  String overBudgetBy(String amount);
+
+  /// Web catalogue (projects, budget or reports): %(amount)s restants.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} left'**
+  String amountLeft(String amount);
+
+  /// Web catalogue (projects, budget or reports): Budget respecté.
+  ///
+  /// In en, this message translates to:
+  /// **'On budget'**
+  String get onBudget;
+
+  /// Web catalogue (projects, budget or reports): Prévu (context amount).
+  ///
+  /// In en, this message translates to:
+  /// **'Planned'**
+  String get amountPlanned;
+
+  /// Web catalogue (projects, budget or reports): Engagé.
+  ///
+  /// In en, this message translates to:
+  /// **'Committed'**
+  String get amountCommitted;
+
+  /// Web catalogue (projects, budget or reports): Payé.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get amountPaid;
+
+  /// Web catalogue (projects, budget or reports): Consommé.
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get amountUsed;
+
+  /// The gauge of a row: engaged against planned. Web: %(percent)s %% used.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent} % used'**
+  String percentUsed(int percent);
+
+  /// Web catalogue (projects, budget or reports): Reste à payer.
+  ///
+  /// In en, this message translates to:
+  /// **'Still to pay'**
+  String get stillToPay;
+
+  /// Web catalogue (projects, budget or reports): Année.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get budgetYear;
+
+  /// Web catalogue (projects, budget or reports): Enveloppe budgétaire %(year)s.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget envelope {year}'**
+  String envelopeOfYear(int year);
+
+  /// Web catalogue (projects, budget or reports): Aucune enveloppe fixée pour cette année.
+  ///
+  /// In en, this message translates to:
+  /// **'No envelope set for this year.'**
+  String get envelopeNone;
+
+  /// Web catalogue (projects, budget or reports): Enveloppe.
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope'**
+  String get envelope;
+
+  /// Web catalogue (projects, budget or reports): Prévu pour les projets en cours.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned for the projects going on'**
+  String get envelopePlannedActive;
+
+  /// Web catalogue (projects, budget or reports): Payé jusqu'ici.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid so far'**
+  String get envelopePaidSoFar;
+
+  /// Web catalogue (projects, budget or reports): Reste dans l'enveloppe.
+  ///
+  /// In en, this message translates to:
+  /// **'Left in the envelope'**
+  String get envelopeLeft;
+
+  /// Web catalogue (projects, budget or reports): %(amount)s (au-delà de l'enveloppe).
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} (over the envelope)'**
+  String overTheEnvelope(String amount);
+
+  /// Web catalogue (projects, budget or reports): Fixer l'enveloppe.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the envelope'**
+  String get envelopeSet;
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'No project yet. A project is a piece of work with an end, such as redoing the bathroom.'**
+  String get projectsEmpty;
+
+  /// Web catalogue (projects, budget or reports): Aucun projet dans cet onglet.
+  ///
+  /// In en, this message translates to:
+  /// **'No project in this tab.'**
+  String get projectsNoneInTab;
+
+  /// Web catalogue (projects, budget or reports): Prévu : %(planned)s.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned {amount}'**
+  String plannedAmount(String amount);
+
+  /// Web catalogue (projects, budget or reports): Pas encore de budget.
+  ///
+  /// In en, this message translates to:
+  /// **'No budget yet'**
+  String get noBudgetYet;
+
+  /// Web catalogue (projects, budget or reports): Priorité haute.
+  ///
+  /// In en, this message translates to:
+  /// **'High priority'**
+  String get highPriority;
+
+  /// Web catalogue (projects, budget or reports): Priorité basse.
+  ///
+  /// In en, this message translates to:
+  /// **'Low priority'**
+  String get lowPriority;
+
+  /// Web catalogue (projects, budget or reports): Ajouter un projet.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a project'**
+  String get addProject;
+
+  /// Field of a project (`goal`).
+  ///
+  /// In en, this message translates to:
+  /// **'Goal'**
+  String get projectGoal;
+
+  /// Web catalogue (projects, budget or reports): Pièces concernées.
+  ///
+  /// In en, this message translates to:
+  /// **'Rooms concerned'**
+  String get roomsConcerned;
+
+  /// Web catalogue (projects, budget or reports): Modifier le projet.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the project'**
+  String get editProject;
+
+  /// Web catalogue (projects, budget or reports): Supprimer le projet.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the project'**
+  String get deleteProject;
+
+  /// Body of the confirmation of deleting a project (`delete_project`).
+  ///
+  /// In en, this message translates to:
+  /// **'The project, its budget lines, quotes, links and files disappear from the screens; its tasks stay.'**
+  String get deleteProjectBody;
+
+  /// Web catalogue (projects, budget or reports): Budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get budgetHeading;
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'No budget line yet. Add one to say what you plan to spend.'**
+  String get linesEmpty;
+
+  /// Web catalogue (projects, budget or reports): Total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get total;
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Committed is the sum of the accepted quotes. The gap is the planned amount less the more of committed and paid.'**
+  String get committedExplained;
+
+  /// Web catalogue (projects, budget or reports): Ajouter une ligne de budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a budget line'**
+  String get addLine;
+
+  /// Web catalogue (projects, budget or reports): Modifier la ligne de budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the budget line'**
+  String get editLine;
+
+  /// Web catalogue (projects, budget or reports): Supprimer la ligne de budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the budget line'**
+  String get deleteLine;
+
+  /// Body of the confirmation of deleting a budget line (`delete_line`).
+  ///
+  /// In en, this message translates to:
+  /// **'Its accepted quotes go back to Received, committed on nothing.'**
+  String get deleteLineBody;
+
+  /// Web catalogue (projects, budget or reports): Libellé.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get lineLabel;
+
+  /// Web catalogue (projects, budget or reports): Nature.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature'**
+  String get nature;
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'What has been paid so far. The committed amount comes from accepted quotes.'**
+  String get linePaidHelp;
+
+  /// Web catalogue (projects, budget or reports): Les montants sont en %(currency)s.
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts are in {currency}.'**
+  String amountsAreIn(String currency);
+
+  /// Web catalogue (projects, budget or reports): Le montant est en %(currency)s.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount is in {currency}.'**
+  String amountIsIn(String currency);
+
+  /// Web catalogue (projects, budget or reports): Devis.
+  ///
+  /// In en, this message translates to:
+  /// **'Quotes'**
+  String get quotes;
+
+  /// Web catalogue (projects, budget or reports): Aucun devis pour l'instant.
+  ///
+  /// In en, this message translates to:
+  /// **'No quote yet.'**
+  String get quotesEmpty;
+
+  /// Web catalogue (projects, budget or reports): Aucun intervenant.
+  ///
+  /// In en, this message translates to:
+  /// **'No contractor'**
+  String get noContractor;
+
+  /// Web catalogue (projects, budget or reports): Engagé sur.
+  ///
+  /// In en, this message translates to:
+  /// **'Committed on {line}'**
+  String committedOn(String line);
+
+  /// Web catalogue (projects, budget or reports): Engagé sur.
+  ///
+  /// In en, this message translates to:
+  /// **'Committed on'**
+  String get committedOnLabel;
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'The budget line an accepted quote is committed on.'**
+  String get committedOnHelp;
+
+  /// Number of files of a quote.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 file} other{{count} files}}'**
+  String filesCount(int count);
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Add a budget line to accept a quote: its amount is committed on it.'**
+  String get addLineToAccept;
+
+  /// Web catalogue (projects, budget or reports): Ajouter un devis.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a quote'**
+  String get addQuote;
+
+  /// Web catalogue (projects, budget or reports): Modifier le devis.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the quote'**
+  String get editQuote;
+
+  /// Web catalogue (projects, budget or reports): Supprimer le devis.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the quote'**
+  String get deleteQuote;
+
+  /// Body of the confirmation of deleting a quote.
+  ///
+  /// In en, this message translates to:
+  /// **'The quote and its files disappear from the screens.'**
+  String get deleteQuoteBody;
+
+  /// Web catalogue (projects, budget or reports): Montant.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amount;
+
+  /// Web catalogue (projects, budget or reports): Date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get quoteDate;
+
+  /// Web catalogue (projects, budget or reports): Valable jusqu'au.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until'**
+  String get validUntil;
+
+  /// Web catalogue (projects, budget or reports): Note.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get note;
+
+  /// Web catalogue (projects, budget or reports): Fichiers du devis.
+  ///
+  /// In en, this message translates to:
+  /// **'Files of the quote'**
+  String get quoteFiles;
+
+  /// Empty list of the files of a quote.
+  ///
+  /// In en, this message translates to:
+  /// **'No file yet: attach the PDF of the quote.'**
+  String get quoteFilesEmpty;
+
+  /// Button that opens the Files app (iOS) or the document picker (Android).
+  ///
+  /// In en, this message translates to:
+  /// **'Attach a PDF or a photo'**
+  String get attachQuoteFile;
+
+  /// Kind of a file of a project.
+  ///
+  /// In en, this message translates to:
+  /// **'File of a quote'**
+  String get quoteFile;
+
+  /// Kind of a file of a project.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get photo;
+
+  /// Heading of the files of a project.
+  ///
+  /// In en, this message translates to:
+  /// **'Files'**
+  String get projectFiles;
+
+  /// Web catalogue (projects, budget or reports): Tâches.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get tasksHeading;
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'No task in this project yet.'**
+  String get projectTasksEmpty;
+
+  /// A task of a project with no open occurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get taskDoneLabel;
+
+  /// Web catalogue (projects, budget or reports): Ajouter une tâche au projet.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a task to the project'**
+  String get addProjectTask;
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Put an existing task in the project'**
+  String get attachTask;
+
+  /// Web catalogue (projects, budget or reports): Inspiration.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspiration'**
+  String get inspiration;
+
+  /// Web catalogue (projects, budget or reports): Aucun lien pour l'instant.
+  ///
+  /// In en, this message translates to:
+  /// **'No link yet.'**
+  String get linksEmpty;
+
+  /// Adapted from the web ("this instance does not read the pages"): no network in the app.
+  ///
+  /// In en, this message translates to:
+  /// **'The link is kept as you typed it: the app does not read the pages. It opens in the browser of the phone.'**
+  String get linkNotRead;
+
+  /// Web catalogue (projects, budget or reports): Ajouter le lien.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the link'**
+  String get addLinkButton;
+
+  /// Web catalogue (projects, budget or reports): Address of the page.
+  ///
+  /// In en, this message translates to:
+  /// **'Address of the page'**
+  String get linkPageAddress;
+
+  /// Web catalogue (projects, budget or reports): Titre.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get linkTitle;
+
+  /// Tooltip of the button that deletes a link.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {title}'**
+  String deleteLinkOf(String title);
+
+  /// Web catalogue (projects, budget or reports): Statut.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// Web catalogue (projects, budget or reports): Priorité.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get priority;
+
+  /// Web catalogue (projects, budget or reports): Haute.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get priorityHigh;
+
+  /// Web catalogue (projects, budget or reports): Normale.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get priorityNormal;
+
+  /// Web catalogue (projects, budget or reports): Basse.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get priorityLow;
+
+  /// Web catalogue (projects, budget or reports): Enveloppe annuelle.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual envelope'**
+  String get annualEnvelope;
+
+  /// Web catalogue (projects, budget or reports): (first sentence).
+  ///
+  /// In en, this message translates to:
+  /// **'What you want to spend on work this year, in the currency of the home. Empty: no envelope.'**
+  String get envelopeHelp;
+
+  /// Web catalogue (projects, budget or reports): Synthèse.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get budgetSummary;
+
+  /// Web catalogue (projects, budget or reports): Pièces (budget tab).
+  ///
+  /// In en, this message translates to:
+  /// **'Rooms'**
+  String get budgetRooms;
+
+  /// Web catalogue (projects, budget or reports): Projets (budget tab).
+  ///
+  /// In en, this message translates to:
+  /// **'Projects'**
+  String get budgetProjects;
+
+  /// Web catalogue (projects, budget or reports): Entretien.
+  ///
+  /// In en, this message translates to:
+  /// **'Upkeep'**
+  String get budgetUpkeep;
+
+  /// Web catalogue (projects, budget or reports): Enveloppe %(year)s.
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope {year}'**
+  String envelopeYear(int year);
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'No envelope set for this year: the figures are those of the plans.'**
+  String get envelopeNoneSummary;
+
+  /// Web catalogue (projects, budget or reports): Dépensé.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get spent;
+
+  /// Web catalogue (projects, budget or reports): Reste.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get left;
+
+  /// Web catalogue (projects, budget or reports): Dépassement de %(amount)s.
+  ///
+  /// In en, this message translates to:
+  /// **'Over by {amount}'**
+  String overBy(String amount);
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Spent against the envelope or the plans'**
+  String get spentAgainst;
+
+  /// Web: %(percent)s %% spent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent} % spent'**
+  String percentSpent(int percent);
+
+  /// Web: %(percent)s %% spent: over budget.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent} % spent: over budget'**
+  String percentSpentOver(int percent);
+
+  /// Web catalogue (projects, budget or reports): Détail de l'année.
+  ///
+  /// In en, this message translates to:
+  /// **'Details of the year'**
+  String get detailsOfYear;
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Planned, projects and upkeep'**
+  String get plannedAll;
+
+  /// Web catalogue (projects, budget or reports): Reste à prévoir.
+  ///
+  /// In en, this message translates to:
+  /// **'Left to plan'**
+  String get leftToPlan;
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} (the plans exceed the envelope)'**
+  String plansExceed(String amount);
+
+  /// Web catalogue (projects, budget or reports): prévu %(planned)s, payé %(paid)s.
+  ///
+  /// In en, this message translates to:
+  /// **'planned {planned}, paid {paid}'**
+  String plannedPaid(String planned, String paid);
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Spent is the more of committed and paid, line by line.'**
+  String get spentExplained;
+
+  /// Web catalogue (projects, budget or reports): Par nature, %(year)s.
+  ///
+  /// In en, this message translates to:
+  /// **'By nature, {year}'**
+  String byNature(int year);
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'The cost typed on a done task is shared between Materials and Labour as its estimate is; a task with no estimate has no such share, and its cost is counted under Other.'**
+  String get natureExplained;
+
+  /// Web catalogue (projects, budget or reports): Par année.
+  ///
+  /// In en, this message translates to:
+  /// **'By year'**
+  String get byYear;
+
+  /// Web catalogue (projects, budget or reports): 12 derniers mois.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 12 months'**
+  String get last12Months;
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'From {since} to {until}, the upkeep that was done. Payments on projects carry no date, so they are not in this figure.'**
+  String rollingExplained(String since, String until);
+
+  /// Web catalogue (projects, budget or reports): Où en est le budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Where it stands'**
+  String get whereItStands;
+
+  /// Web, plural.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 task was done without a cost: its estimate is counted, nothing is paid.} other{{count} tasks were done without a cost: their estimates are counted, nothing is paid.}}'**
+  String missingCosts(int count);
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'No budget yet for this year. Give a project a budget line, or a task an estimate.'**
+  String get roomsBudgetEmpty;
+
+  /// Web catalogue (projects, budget or reports): Aucune pièce.
+  ///
+  /// In en, this message translates to:
+  /// **'No room'**
+  String get noRoom;
+
+  /// Note of the budget by room (web budget/rooms.html, shortened).
+  ///
+  /// In en, this message translates to:
+  /// **'Projects counted in {year} are shared evenly between their rooms; the upkeep of a task goes to its room.'**
+  String roomsExplained(int year);
+
+  /// Web catalogue (projects, budget or reports): Aucun projet pour l'instant.
+  ///
+  /// In en, this message translates to:
+  /// **'No project yet.'**
+  String get projectsEmptyShort;
+
+  /// Web catalogue (projects, budget or reports): Compté en.
+  ///
+  /// In en, this message translates to:
+  /// **'Counted in {year}'**
+  String countedIn(int year);
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Planned by its tasks: {amount}'**
+  String plannedByTasks(String amount);
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Each project is counted in one year, the year it starts. An abandoned project plans nothing any more: what was paid on it shows as spent without a plan.'**
+  String get projectsCountedExplained;
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Planned is the budget lines of the project, and what its tasks plan beyond the lines of the same nature, materials or labour: an estimate a line already holds is not counted twice.'**
+  String get projectsPlannedExplained;
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'No task has an estimate or a cost yet. Give a task a labour or material budget.'**
+  String get upkeepEmpty;
+
+  /// Web catalogue (projects, budget or reports): Estimation par fois.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate each time'**
+  String get estimateEachTime;
+
+  /// Web catalogue (projects, budget or reports): dont articles en stock : %(amount)s.
+  ///
+  /// In en, this message translates to:
+  /// **'of which stock'**
+  String get ofWhichStock;
+
+  /// Web catalogue (projects, budget or reports): Coût par an.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost a year'**
+  String get costAYear;
+
+  /// Web catalogue (projects, budget or reports): Payé au total.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid in all'**
+  String get paidInAll;
+
+  /// Stock items of a task without a unit price (web budget/tasks.html).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 stock item has no unit price: it counts for nothing.} other{{count} stock items have no unit price: they count for nothing.}}'**
+  String unpricedMaterials(int count);
+
+  /// Note of the budget of the upkeep (web budget/tasks.html).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 task has no estimate nor cost and is not listed.} other{{count} tasks have no estimate nor cost and are not listed.}}'**
+  String unlistedTasks(int count);
+
+  /// Web catalogue (projects, budget or reports): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'The cost a year follows the repetition: a task every 3 years costs a third of its estimate a year. A task that does not repeat on the calendar has none.'**
+  String get costAYearExplained;
+
+  /// Web catalogue (projects, budget or reports): Ouvert.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get reportOpen;
+
+  /// Web catalogue (projects, budget or reports): Transformé en tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'Made into a task'**
+  String get reportMadeTask;
+
+  /// Web catalogue (projects, budget or reports): Résolu.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get reportResolved;
+
+  /// Web catalogue (projects, budget or reports): Classé sans suite.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed without action'**
+  String get reportNoAction;
+
+  /// The open reports on Today (web reports/_today.html).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 problem reported} other{{count} problems reported}}'**
+  String problemsReported(int count);
+
+  /// Web catalogue (projects, budget or reports): Voir les signalements.
+  ///
+  /// In en, this message translates to:
+  /// **'See the reports'**
+  String get seeReports;
+
+  /// Web catalogue (projects, budget or reports): Signaler un problème.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a problem'**
+  String get reportProblem;
+
+  /// Web catalogue (projects, budget or reports): Signalements.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get reports;
+
+  /// Web catalogue (projects, budget or reports): Classés.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get reportsClosed;
+
+  /// Filter of the reports (all of them).
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get reportsAll;
+
+  /// Web catalogue (projects, budget or reports): Rien à traiter.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to deal with.'**
+  String get reportsEmpty;
+
+  /// Web catalogue (projects, budget or reports): Où.
+  ///
+  /// In en, this message translates to:
+  /// **'Where'**
+  String get reportWhere;
+
+  /// Web catalogue (projects, budget or reports): Signalé le.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported on'**
+  String get reportedOn;
+
+  /// Web catalogue (projects, budget or reports): Classé le.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed on'**
+  String get closedOn;
+
+  /// Web catalogue (projects, budget or reports): Tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'Task'**
+  String get reportTask;
+
+  /// Label of the photo of a report, for screen readers.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo of the problem'**
+  String get reportPhoto;
+
+  /// Web catalogue (projects, budget or reports): En faire une tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'Make it a task'**
+  String get makeItATask;
+
+  /// Web catalogue (projects, budget or reports): Marquer comme résolu.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as resolved'**
+  String get markResolved;
+
+  /// Web catalogue (projects, budget or reports): Classer sans suite.
+  ///
+  /// In en, this message translates to:
+  /// **'Close without action'**
+  String get closeWithoutAction;
+
+  /// Web catalogue (projects, budget or reports): Rouvrir.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen'**
+  String get reopen;
+
+  /// Action of the form of a report (web: Send the report), short for the app bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get sendReport;
+
+  /// Web catalogue (projects, budget or reports): ce qui ne va pas.
+  ///
+  /// In en, this message translates to:
+  /// **'What is wrong'**
+  String get whatIsWrong;
+
+  /// Web catalogue (projects, budget or reports): Dites ce qui ne va pas.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what is wrong.'**
+  String get errSayWhatIsWrong;
+
+  /// Button of the report form once a photo is chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo added: choose another'**
+  String get photoChosen;
+
+  /// Web catalogue (projects, budget or reports): Budget matériel.
+  ///
+  /// In en, this message translates to:
+  /// **'Material budget'**
+  String get materialBudget;
+
+  /// Web catalogue (projects, budget or reports): Budget main d'œuvre.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour budget'**
+  String get labourBudget;
+
+  /// Help of the budgets of a task.
+  ///
+  /// In en, this message translates to:
+  /// **'What one time of the task is planned to cost, in {currency}. Empty: no estimate.'**
+  String taskBudgetHelp(String currency);
+
+  /// Web catalogue (projects, budget or reports): Coût réel.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual cost'**
+  String get realCostTitle;
+
+  /// The cost of a done occurrence, in the history of a task.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual cost: {amount}'**
+  String realCost(String amount);
+
+  /// A done occurrence without a cost, in the history of a task.
+  ///
+  /// In en, this message translates to:
+  /// **'No cost typed: tap to give it'**
+  String get costNotTyped;
+
+  /// Web catalogue (projects, budget or reports): paint left in stock.
+  ///
+  /// In en, this message translates to:
+  /// **'Paint left in stock'**
+  String get paintArticle;
+
+  /// No stock article for the paint of a room.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get paintArticleNone;
 }
 
 class _AppLocalizationsDelegate

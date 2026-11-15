@@ -7,9 +7,11 @@ import '../data/repository.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
+import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
 import '../domain/recurrence.dart' as recurrence;
 import '../l10n/app_localizations.dart';
+import 'budget_parts.dart';
 import 'messages.dart';
 import 'parts.dart';
 import 'state.dart';
@@ -47,6 +49,9 @@ class _TaskScreenState extends State<TaskScreen> {
   final _title = TextEditingController();
   final _interval = TextEditingController(text: '1');
   final _notes = TextEditingController();
+  final _material = TextEditingController();
+  final _labour = TextEditingController();
+  String _currency = '';
   Day? _due;
   String _mode = recurrence.once;
   String _unit = recurrence.monthUnit;
@@ -75,6 +80,7 @@ class _TaskScreenState extends State<TaskScreen> {
   Future<void> _loadPlaces() async {
     final repository = AppScope.of(context).repository;
     final rooms = await repository.rooms(widget.homeId);
+    final home = await repository.home(widget.homeId);
     var roomId = _roomId;
     if (roomId == null && _itemId != null) {
       roomId = (await repository.item(_itemId!))?.roomId;
@@ -84,6 +90,7 @@ class _TaskScreenState extends State<TaskScreen> {
         : await repository.itemsOf(roomId);
     if (!mounted) return;
     setState(() {
+      _currency = home?.currency ?? '';
       _rooms = rooms;
       _roomId = roomId;
       _items = items;
@@ -102,6 +109,12 @@ class _TaskScreenState extends State<TaskScreen> {
       _title.text = task.title;
       _interval.text = '${task.repeatInterval}';
       _notes.text = task.notes;
+      _material.text = task.materialBudget == null
+          ? ''
+          : budget.readMoney(task.materialBudget!).toStringAsFixed(2);
+      _labour.text = task.labourBudget == null
+          ? ''
+          : budget.readMoney(task.labourBudget!).toStringAsFixed(2);
       _mode = task.repeatMode;
       _unit = task.repeatUnit;
       _season = task.season;
@@ -119,6 +132,8 @@ class _TaskScreenState extends State<TaskScreen> {
     _title.dispose();
     _interval.dispose();
     _notes.dispose();
+    _material.dispose();
+    _labour.dispose();
     super.dispose();
   }
 
@@ -145,17 +160,78 @@ class _TaskScreenState extends State<TaskScreen> {
     final state = AppScope.of(context);
     final navigator = Navigator.of(context);
     try {
-      if (widget.taskId == null) {
-        await state.repository.createTask(widget.homeId, _input());
-      } else {
-        await state.repository.updateTask(widget.taskId!, _input());
+      final id = widget.taskId == null
+          ? await state.repository.createTask(widget.homeId, _input())
+          : widget.taskId!;
+      if (widget.taskId != null) {
+        await state.repository.updateTask(id, _input());
       }
+      await state.repository.setTaskBudgets(
+        id,
+        material: _material.text,
+        labour: _labour.text,
+      );
     } on Refused catch (refused) {
       if (mounted) showRefusal(context, refused);
       return;
     }
     await state.refresh();
     navigator.pop();
+  }
+
+  /// What a done occurrence really cost (`budget/_occurrence_cost.html`).
+  Future<void> _editCost(OccurrenceRow o) async {
+    final l10n = AppLocalizations.of(context);
+    final controller = TextEditingController(
+      text: o.actualCost == null
+          ? ''
+          : budget.readMoney(o.actualCost!).toStringAsFixed(2),
+    );
+    final form = GlobalKey<FormState>();
+    final typed = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.realCostTitle),
+        content: Form(
+          key: form,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              hcText(
+                l10n.amount,
+                controller,
+                key: const Key('cost-amount'),
+                keyboard: const TextInputType.numberWithOptions(decimal: true),
+                sentences: false,
+                validator: moneyCheck(l10n),
+              ),
+              fieldHelp(l10n.amountIsIn(_currency)),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            key: const Key('cost-save'),
+            onPressed: () {
+              if (form.currentState!.validate()) {
+                Navigator.of(context).pop(controller.text);
+              }
+            },
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (typed == null || !mounted) return;
+    if (await runChange(context, (r) => r.setActualCost(o.id, typed))) {
+      await _load();
+    }
   }
 
   Future<void> _chooseDate() async {
@@ -411,6 +487,27 @@ class _TaskScreenState extends State<TaskScreen> {
                       maxLines: 6,
                     ),
                   ),
+                  hcText(
+                    l10n.materialBudget,
+                    _material,
+                    key: const Key('task-material-budget'),
+                    keyboard: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    sentences: false,
+                    validator: moneyCheck(l10n),
+                  ),
+                  hcText(
+                    l10n.labourBudget,
+                    _labour,
+                    key: const Key('task-labour-budget'),
+                    keyboard: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    sentences: false,
+                    validator: moneyCheck(l10n),
+                  ),
+                  fieldHelp(l10n.taskBudgetHelp(_currency)),
                 ],
               ),
             ),
@@ -435,11 +532,24 @@ class _TaskScreenState extends State<TaskScreen> {
                 children: [
                   for (final o in _history)
                     HcRow(
+                      key: Key('history-${o.id}'),
                       title: o.status == 'done' && o.completedOn != null
                           ? l10n.historyDone(
                               formatDay(context, Day.parse(o.completedOn!)),
                             )
                           : l10n.historySkipped,
+                      text: o.status != 'done'
+                          ? null
+                          : o.actualCost == null
+                          ? l10n.costNotTyped
+                          : l10n.realCost(
+                              moneyIn(
+                                context,
+                                _currency,
+                                budget.readMoney(o.actualCost!),
+                              ),
+                            ),
+                      onTap: o.status == 'done' ? () => _editCost(o) : null,
                     ),
                 ],
               ),

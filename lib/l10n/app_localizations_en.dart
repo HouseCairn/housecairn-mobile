@@ -1254,4 +1254,629 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errReportNotClosed => 'Only a closed report can be reopened.';
+
+  @override
+  String get projectInProgress => 'In progress';
+
+  @override
+  String get projectPlanned => 'Planned';
+
+  @override
+  String get projectFinished => 'Finished';
+
+  @override
+  String get projectAbandoned => 'Abandoned';
+
+  @override
+  String get projectIdea => 'Idea';
+
+  @override
+  String get projectsInProgress => 'In progress';
+
+  @override
+  String get projectsIdeas => 'Ideas';
+
+  @override
+  String get projectsFinished => 'Finished';
+
+  @override
+  String get natureMaterial => 'Materials';
+
+  @override
+  String get natureLabour => 'Labour';
+
+  @override
+  String get natureRental => 'Rental';
+
+  @override
+  String get natureOther => 'Other';
+
+  @override
+  String get quoteRequested => 'Requested';
+
+  @override
+  String get quoteReceived => 'Received';
+
+  @override
+  String get quoteAccepted => 'Accepted';
+
+  @override
+  String get quoteRejected => 'Rejected';
+
+  @override
+  String overBudgetBy(String amount) {
+    return 'Over budget by $amount';
+  }
+
+  @override
+  String amountLeft(String amount) {
+    return '$amount left';
+  }
+
+  @override
+  String get onBudget => 'On budget';
+
+  @override
+  String get amountPlanned => 'Planned';
+
+  @override
+  String get amountCommitted => 'Committed';
+
+  @override
+  String get amountPaid => 'Paid';
+
+  @override
+  String get amountUsed => 'Used';
+
+  @override
+  String percentUsed(int percent) {
+    return '$percent % used';
+  }
+
+  @override
+  String get stillToPay => 'Still to pay';
+
+  @override
+  String get budgetYear => 'Year';
+
+  @override
+  String envelopeOfYear(int year) {
+    return 'Budget envelope $year';
+  }
+
+  @override
+  String get envelopeNone => 'No envelope set for this year.';
+
+  @override
+  String get envelope => 'Envelope';
+
+  @override
+  String get envelopePlannedActive => 'Planned for the projects going on';
+
+  @override
+  String get envelopePaidSoFar => 'Paid so far';
+
+  @override
+  String get envelopeLeft => 'Left in the envelope';
+
+  @override
+  String overTheEnvelope(String amount) {
+    return '$amount (over the envelope)';
+  }
+
+  @override
+  String get envelopeSet => 'Set the envelope';
+
+  @override
+  String get projectsEmpty =>
+      'No project yet. A project is a piece of work with an end, such as redoing the bathroom.';
+
+  @override
+  String get projectsNoneInTab => 'No project in this tab.';
+
+  @override
+  String plannedAmount(String amount) {
+    return 'Planned $amount';
+  }
+
+  @override
+  String get noBudgetYet => 'No budget yet';
+
+  @override
+  String get highPriority => 'High priority';
+
+  @override
+  String get lowPriority => 'Low priority';
+
+  @override
+  String get addProject => 'Add a project';
+
+  @override
+  String get projectGoal => 'Goal';
+
+  @override
+  String get roomsConcerned => 'Rooms concerned';
+
+  @override
+  String get editProject => 'Edit the project';
+
+  @override
+  String get deleteProject => 'Delete the project';
+
+  @override
+  String get deleteProjectBody =>
+      'The project, its budget lines, quotes, links and files disappear from the screens; its tasks stay.';
+
+  @override
+  String get budgetHeading => 'Budget';
+
+  @override
+  String get linesEmpty =>
+      'No budget line yet. Add one to say what you plan to spend.';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get committedExplained =>
+      'Committed is the sum of the accepted quotes. The gap is the planned amount less the more of committed and paid.';
+
+  @override
+  String get addLine => 'Add a budget line';
+
+  @override
+  String get editLine => 'Edit the budget line';
+
+  @override
+  String get deleteLine => 'Delete the budget line';
+
+  @override
+  String get deleteLineBody =>
+      'Its accepted quotes go back to Received, committed on nothing.';
+
+  @override
+  String get lineLabel => 'Label';
+
+  @override
+  String get nature => 'Nature';
+
+  @override
+  String get linePaidHelp =>
+      'What has been paid so far. The committed amount comes from accepted quotes.';
+
+  @override
+  String amountsAreIn(String currency) {
+    return 'Amounts are in $currency.';
+  }
+
+  @override
+  String amountIsIn(String currency) {
+    return 'The amount is in $currency.';
+  }
+
+  @override
+  String get quotes => 'Quotes';
+
+  @override
+  String get quotesEmpty => 'No quote yet.';
+
+  @override
+  String get noContractor => 'No contractor';
+
+  @override
+  String committedOn(String line) {
+    return 'Committed on $line';
+  }
+
+  @override
+  String get committedOnLabel => 'Committed on';
+
+  @override
+  String get committedOnHelp =>
+      'The budget line an accepted quote is committed on.';
+
+  @override
+  String filesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files',
+      one: '1 file',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addLineToAccept =>
+      'Add a budget line to accept a quote: its amount is committed on it.';
+
+  @override
+  String get addQuote => 'Add a quote';
+
+  @override
+  String get editQuote => 'Edit the quote';
+
+  @override
+  String get deleteQuote => 'Delete the quote';
+
+  @override
+  String get deleteQuoteBody =>
+      'The quote and its files disappear from the screens.';
+
+  @override
+  String get amount => 'Amount';
+
+  @override
+  String get quoteDate => 'Date';
+
+  @override
+  String get validUntil => 'Valid until';
+
+  @override
+  String get note => 'Note';
+
+  @override
+  String get quoteFiles => 'Files of the quote';
+
+  @override
+  String get quoteFilesEmpty => 'No file yet: attach the PDF of the quote.';
+
+  @override
+  String get attachQuoteFile => 'Attach a PDF or a photo';
+
+  @override
+  String get quoteFile => 'File of a quote';
+
+  @override
+  String get photo => 'Photo';
+
+  @override
+  String get projectFiles => 'Files';
+
+  @override
+  String get tasksHeading => 'Tasks';
+
+  @override
+  String get projectTasksEmpty => 'No task in this project yet.';
+
+  @override
+  String get taskDoneLabel => 'Done';
+
+  @override
+  String get addProjectTask => 'Add a task to the project';
+
+  @override
+  String get attachTask => 'Put an existing task in the project';
+
+  @override
+  String get inspiration => 'Inspiration';
+
+  @override
+  String get linksEmpty => 'No link yet.';
+
+  @override
+  String get linkNotRead =>
+      'The link is kept as you typed it: the app does not read the pages. It opens in the browser of the phone.';
+
+  @override
+  String get addLinkButton => 'Add the link';
+
+  @override
+  String get linkPageAddress => 'Address of the page';
+
+  @override
+  String get linkTitle => 'Title';
+
+  @override
+  String deleteLinkOf(String title) {
+    return 'Delete $title';
+  }
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get priority => 'Priority';
+
+  @override
+  String get priorityHigh => 'High';
+
+  @override
+  String get priorityNormal => 'Normal';
+
+  @override
+  String get priorityLow => 'Low';
+
+  @override
+  String get annualEnvelope => 'Annual envelope';
+
+  @override
+  String get envelopeHelp =>
+      'What you want to spend on work this year, in the currency of the home. Empty: no envelope.';
+
+  @override
+  String get budgetSummary => 'Summary';
+
+  @override
+  String get budgetRooms => 'Rooms';
+
+  @override
+  String get budgetProjects => 'Projects';
+
+  @override
+  String get budgetUpkeep => 'Upkeep';
+
+  @override
+  String envelopeYear(int year) {
+    return 'Envelope $year';
+  }
+
+  @override
+  String get envelopeNoneSummary =>
+      'No envelope set for this year: the figures are those of the plans.';
+
+  @override
+  String get spent => 'Spent';
+
+  @override
+  String get left => 'Left';
+
+  @override
+  String overBy(String amount) {
+    return 'Over by $amount';
+  }
+
+  @override
+  String get spentAgainst => 'Spent against the envelope or the plans';
+
+  @override
+  String percentSpent(int percent) {
+    return '$percent % spent';
+  }
+
+  @override
+  String percentSpentOver(int percent) {
+    return '$percent % spent: over budget';
+  }
+
+  @override
+  String get detailsOfYear => 'Details of the year';
+
+  @override
+  String get plannedAll => 'Planned, projects and upkeep';
+
+  @override
+  String get leftToPlan => 'Left to plan';
+
+  @override
+  String plansExceed(String amount) {
+    return '$amount (the plans exceed the envelope)';
+  }
+
+  @override
+  String plannedPaid(String planned, String paid) {
+    return 'planned $planned, paid $paid';
+  }
+
+  @override
+  String get spentExplained =>
+      'Spent is the more of committed and paid, line by line.';
+
+  @override
+  String byNature(int year) {
+    return 'By nature, $year';
+  }
+
+  @override
+  String get natureExplained =>
+      'The cost typed on a done task is shared between Materials and Labour as its estimate is; a task with no estimate has no such share, and its cost is counted under Other.';
+
+  @override
+  String get byYear => 'By year';
+
+  @override
+  String get last12Months => 'Last 12 months';
+
+  @override
+  String rollingExplained(String since, String until) {
+    return 'From $since to $until, the upkeep that was done. Payments on projects carry no date, so they are not in this figure.';
+  }
+
+  @override
+  String get whereItStands => 'Where it stands';
+
+  @override
+  String missingCosts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count tasks were done without a cost: their estimates are counted, nothing is paid.',
+      one: '1 task was done without a cost: its estimate is counted, nothing is paid.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get roomsBudgetEmpty =>
+      'No budget yet for this year. Give a project a budget line, or a task an estimate.';
+
+  @override
+  String get noRoom => 'No room';
+
+  @override
+  String roomsExplained(int year) {
+    return 'Projects counted in $year are shared evenly between their rooms; the upkeep of a task goes to its room.';
+  }
+
+  @override
+  String get projectsEmptyShort => 'No project yet.';
+
+  @override
+  String countedIn(int year) {
+    return 'Counted in $year';
+  }
+
+  @override
+  String plannedByTasks(String amount) {
+    return 'Planned by its tasks: $amount';
+  }
+
+  @override
+  String get projectsCountedExplained =>
+      'Each project is counted in one year, the year it starts. An abandoned project plans nothing any more: what was paid on it shows as spent without a plan.';
+
+  @override
+  String get projectsPlannedExplained =>
+      'Planned is the budget lines of the project, and what its tasks plan beyond the lines of the same nature, materials or labour: an estimate a line already holds is not counted twice.';
+
+  @override
+  String get upkeepEmpty =>
+      'No task has an estimate or a cost yet. Give a task a labour or material budget.';
+
+  @override
+  String get estimateEachTime => 'Estimate each time';
+
+  @override
+  String get ofWhichStock => 'of which stock';
+
+  @override
+  String get costAYear => 'Cost a year';
+
+  @override
+  String get paidInAll => 'Paid in all';
+
+  @override
+  String unpricedMaterials(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stock items have no unit price: they count for nothing.',
+      one: '1 stock item has no unit price: it counts for nothing.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unlistedTasks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tasks have no estimate nor cost and are not listed.',
+      one: '1 task has no estimate nor cost and is not listed.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get costAYearExplained =>
+      'The cost a year follows the repetition: a task every 3 years costs a third of its estimate a year. A task that does not repeat on the calendar has none.';
+
+  @override
+  String get reportOpen => 'Open';
+
+  @override
+  String get reportMadeTask => 'Made into a task';
+
+  @override
+  String get reportResolved => 'Resolved';
+
+  @override
+  String get reportNoAction => 'Closed without action';
+
+  @override
+  String problemsReported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count problems reported',
+      one: '1 problem reported',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get seeReports => 'See the reports';
+
+  @override
+  String get reportProblem => 'Report a problem';
+
+  @override
+  String get reports => 'Reports';
+
+  @override
+  String get reportsClosed => 'Closed';
+
+  @override
+  String get reportsAll => 'All';
+
+  @override
+  String get reportsEmpty => 'Nothing to deal with.';
+
+  @override
+  String get reportWhere => 'Where';
+
+  @override
+  String get reportedOn => 'Reported on';
+
+  @override
+  String get closedOn => 'Closed on';
+
+  @override
+  String get reportTask => 'Task';
+
+  @override
+  String get reportPhoto => 'Photo of the problem';
+
+  @override
+  String get makeItATask => 'Make it a task';
+
+  @override
+  String get markResolved => 'Mark as resolved';
+
+  @override
+  String get closeWithoutAction => 'Close without action';
+
+  @override
+  String get reopen => 'Reopen';
+
+  @override
+  String get sendReport => 'Send';
+
+  @override
+  String get whatIsWrong => 'What is wrong';
+
+  @override
+  String get errSayWhatIsWrong => 'Say what is wrong.';
+
+  @override
+  String get photoChosen => 'Photo added: choose another';
+
+  @override
+  String get materialBudget => 'Material budget';
+
+  @override
+  String get labourBudget => 'Labour budget';
+
+  @override
+  String taskBudgetHelp(String currency) {
+    return 'What one time of the task is planned to cost, in $currency. Empty: no estimate.';
+  }
+
+  @override
+  String get realCostTitle => 'Actual cost';
+
+  @override
+  String realCost(String amount) {
+    return 'Actual cost: $amount';
+  }
+
+  @override
+  String get costNotTyped => 'No cost typed: tap to give it';
+
+  @override
+  String get paintArticle => 'Paint left in stock';
+
+  @override
+  String get paintArticleNone => 'None';
 }

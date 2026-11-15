@@ -85,6 +85,12 @@ BigInt _halfEven(Decimal value, Decimal by) {
   return floor.isEven ? floor : floor + BigInt.one;
 }
 
+/// Engaged against planned, whole percent half to even, as the gauge of the
+/// web (`budget_extras.gauge`); none when nothing is planned.
+int? usedPercent(Amounts amounts) => amounts.planned <= zero
+    ? null
+    : _halfEven(amounts.engaged * _hundred, amounts.planned).toInt();
+
 Decimal _max(Decimal a, Decimal b) => a >= b ? a : b;
 
 /// The three amounts of a line or a project, and what they say together
