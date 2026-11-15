@@ -9,6 +9,9 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/app.dart';
+import 'package:housecairn_mobile/data/repository.dart';
+import 'package:housecairn_mobile/domain/photos.dart';
+import 'package:housecairn_mobile/domain/templates.dart';
 import 'package:housecairn_mobile/sync/mode.dart';
 import 'package:housecairn_mobile/ui/state.dart';
 import 'package:housecairn_mobile/ui/ways.dart';
@@ -43,6 +46,21 @@ const _words = {
     firstHome: 'Ma maison',
   ),
 };
+
+/// A repository that counts how many times the way is stored, that is how
+/// many times the first start ran.
+class _CountingRepository extends Repository {
+  _CountingRepository(Repository base)
+    : super(base.db, clock: base.clock, files: base.files);
+
+  int stores = 0;
+
+  @override
+  Future<void> setSyncMode(SyncMode mode) {
+    stores++;
+    return super.setSyncMode(mode);
+  }
+}
 
 /// The app started again on the data of [state]: a new [AppState] on the same
 /// repository, as the app is on its next launch.
@@ -173,6 +191,94 @@ void main() {
         );
       });
 
+      for (final forged in [SyncMode.relay, SyncMode.server]) {
+        testWidgets(
+          'a forged sync_mode ${forged.name} with no home asks the first start',
+          (tester) async {
+            await onPhone(tester, height: 1600);
+            final state = await pumpApp(
+              tester,
+              locale: locale,
+              firstStart: true,
+              seed: (r) => r.setSyncMode(forged),
+            );
+            expect(await state.repository.storedSyncMode(), isNull);
+            expect(state.firstStart, isTrue);
+            expect(state.syncMode, SyncMode.alone);
+            expect(state.homes, isEmpty);
+            expect(find.text(w.title), findsOneWidget);
+            expect(find.byType(NavigationBar), findsNothing);
+          },
+        );
+
+        testWidgets(
+          'a forged sync_mode ${forged.name} with homes is read as Alone',
+          (tester) async {
+            await onPhone(tester);
+            final state = await pumpApp(
+              tester,
+              locale: locale,
+              firstStart: true,
+              seed: (r) async {
+                await r.createHome(name: 'Cottage');
+                await r.setSyncMode(forged);
+              },
+            );
+            expect(await state.repository.storedSyncMode(), isNull);
+            expect(state.syncMode, SyncMode.alone);
+            expect(state.firstStart, isFalse);
+            expect(state.homes.single.name, 'Cottage');
+            expect(find.text(w.title), findsNothing);
+            expect(find.byType(NavigationBar), findsOneWidget);
+            // Settings: only Alone is in use.
+            await openMore(tester, w.more);
+            await tester.scrollUntilVisible(
+              find.byKey(const Key('way-row-server')),
+              100,
+            );
+            Finder pill(String way, String text) => find.descendant(
+              of: find.byKey(Key('way-row-$way')),
+              matching: find.text(text),
+            );
+            expect(pill('alone', w.inUse), findsOneWidget);
+            expect(pill('relay', w.inUse), findsNothing);
+            expect(pill('server', w.inUse), findsNothing);
+            expect(pill('relay', w.later), findsOneWidget);
+            expect(pill('server', w.later), findsOneWidget);
+          },
+        );
+      }
+
+      testWidgets('two quick taps on Continue make one home', (tester) async {
+        await onPhone(tester);
+        final base = await openRepository();
+        addTearDown(base.db.close);
+        final repository = _CountingRepository(base);
+        await repository.open();
+        final state = AppState(
+          repository,
+          photoProcessor: (bytes) async => processPhoto(bytes),
+          loadTemplates: () async => parseTemplates(
+            File('assets/task_templates.yaml').readAsStringSync(),
+          ),
+        );
+        await tester.pumpWidget(
+          HousecairnApp(state: state, locale: Locale(locale)),
+        );
+        await tester.pumpAndSettle();
+        expect(state.firstStart, isTrue);
+        // No frame between the taps: the second one lands on the button as
+        // it was drawn, so only the handler can refuse it.
+        await tester.tap(find.byKey(const Key('ways-continue')));
+        await tester.tap(find.byKey(const Key('ways-continue')));
+        await tester.pumpAndSettle();
+        expect(repository.stores, 1, reason: 'the first start ran once');
+        expect(state.homes, hasLength(1));
+        expect(state.homes.single.name, w.firstHome);
+        expect(await state.repository.homes(), hasLength(1));
+        expect(await state.repository.storedSyncMode(), SyncMode.alone);
+      });
+
       testWidgets('More shows the way in use and the two others disabled', (
         tester,
       ) async {
@@ -246,10 +352,15 @@ void main() {
           'relay',
           'server',
         ]);
+        // A way that is not available reads as none, whatever is written.
         for (final mode in SyncMode.values) {
           await repository.setSyncMode(mode);
-          expect(await repository.storedSyncMode(), mode);
+          expect(
+            await repository.storedSyncMode(),
+            wayAvailable(mode) ? mode : isNull,
+          );
         }
+        expect(SyncMode.values.where(wayAvailable), [SyncMode.alone]);
         expect(SyncMode.parse('mesh'), isNull, reason: 'unknown value');
       },
     );

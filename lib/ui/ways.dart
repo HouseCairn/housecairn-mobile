@@ -17,16 +17,31 @@ import 'state.dart';
       SyncMode.server => (title: l10n.wayServerTitle, text: l10n.wayServerText),
     };
 
-/// Only the first way exists in this build; the two others are shown,
-/// disabled, until their lots are merged (docs/plan.md, lots 4 to 7).
-bool wayAvailable(SyncMode way) => way == SyncMode.alone;
-
 /// The first-start screen: the three ways to use the app as three choices of
 /// equal weight, "Alone on this phone" selected and the only one active
 /// (docs/adr/0010, "What the screen says"). Choosing it stores the way and
 /// makes the first home.
-class WaysScreen extends StatelessWidget {
+class WaysScreen extends StatefulWidget {
   const WaysScreen({super.key});
+
+  @override
+  State<WaysScreen> createState() => _WaysScreenState();
+}
+
+class _WaysScreenState extends State<WaysScreen> {
+  /// Set while the first home is being made: Continue does nothing more
+  /// until then, so that two quick taps make one home.
+  bool _starting = false;
+
+  Future<void> _continue(AppState state, String firstHomeName) async {
+    if (_starting) return;
+    setState(() => _starting = true);
+    try {
+      await state.startAlone(firstHomeName);
+    } finally {
+      if (mounted) setState(() => _starting = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +83,9 @@ class WaysScreen extends StatelessWidget {
               padding: const EdgeInsets.all(HcSpace.s4),
               child: FilledButton(
                 key: const Key('ways-continue'),
-                onPressed: () => state.startAlone(l10n.firstHomeName),
+                onPressed: _starting
+                    ? null
+                    : () => _continue(state, l10n.firstHomeName),
                 child: Text(l10n.waysContinue),
               ),
             ),
