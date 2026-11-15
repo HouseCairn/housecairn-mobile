@@ -80,6 +80,7 @@ void main() {
         'lib/design/widgets.dart',
         'lib/design/theme.dart',
         'lib/design/icons.dart',
+        'lib/design/values.dart',
       ]) {
         final source = File(path).readAsStringSync();
         expect(

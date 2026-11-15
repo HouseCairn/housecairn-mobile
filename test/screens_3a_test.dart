@@ -8,6 +8,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/data/repository.dart';
+import 'package:housecairn_mobile/design/values.dart';
 import 'package:housecairn_mobile/design/widgets.dart';
 import 'package:housecairn_mobile/ui/state.dart';
 import 'package:housecairn_mobile/ui/stock_screens.dart';
@@ -86,7 +87,11 @@ void main() {
         tester,
         ArticleScreen(homeId: data.main, articleId: data.filter),
       );
-      expect(find.text(t('2 pieces', '2 pièces')), findsOneWidget);
+      // The level as the web's `.stock-quantity`: the figure, then its unit.
+      final level = tester.widget<HcFigure>(
+        find.byKey(const Key('article-level')),
+      );
+      expect((level.figure, level.unit), ('2', t('pieces', 'pièces')));
       expect(find.text(t('€12.50', '12,50\u00a0€')), findsOneWidget);
       await type(tester, 'movement-quantity', '3');
       await tapKey(tester, 'movement-entry');

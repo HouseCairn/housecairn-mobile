@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../design/theme.dart';
 import '../design/tokens.dart';
+import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/budget.dart' as budget;
 import '../l10n/app_localizations.dart';
@@ -111,28 +112,28 @@ class AmountFacts extends StatelessWidget {
     String m(Decimal v) => moneyIn(context, currency, v);
     final a = amounts;
     final used = budget.usedPercent(a);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return HcValueList(
+      dense: true,
       children: [
-        HcFact(l10n.amountPlanned, factText(m(a.planned))),
-        HcFact(l10n.amountCommitted, factText(m(a.committed))),
-        HcFact(l10n.amountPaid, factText(m(a.paid))),
-        HcFact(
-          l10n.amountUsed,
-          factText(
-            used == null
-                ? m(a.engaged)
-                : '${m(a.engaged)} · ${l10n.percentUsed(used)}',
+        HcValueRow(l10n.amountPlanned, m(a.planned), dense: true),
+        HcValueRow(l10n.amountCommitted, m(a.committed), dense: true),
+        HcValueRow(l10n.amountPaid, m(a.paid), dense: true),
+        HcValueRow(l10n.amountUsed, m(a.engaged), dense: true),
+        if (used != null)
+          HcProgress(
+            key: const Key('amount-gauge'),
+            percent: used,
+            text: l10n.percentUsed(used),
+            label: l10n.amountUsed,
           ),
-        ),
-        if (toPay ?? false) HcFact(l10n.stillToPay, factText(m(a.toPay))),
+        if (toPay ?? false)
+          HcValueRow(l10n.stillToPay, m(a.toPay), dense: true),
         if (gapPills(a, currency).isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: HcSpace.s1),
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: GapPill(a, currency),
-            ),
+          HcValueRow(
+            l10n.whereItStands,
+            '',
+            dense: true,
+            child: GapPill(a, currency),
           ),
       ],
     );

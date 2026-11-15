@@ -92,6 +92,26 @@ The web's measures carry the release and commit they were taken at (`web` of the
 file that draws these screens, `update` moves the pin, and `check` fails until the measure is
 taken again with `tool/web_parity.py`.
 
+**Figures as the web, measured** (`test/web_parity_values_test.dart`, design lot D3). A value
+of a card is a line, the label at the left and the value at the right (`HcValueRow` in an
+`HcValueList`, the web's `dl.facts`): label 14/400 muted, value 16/600, 12 above and under a
+row, a line between two rows; the figures of a budget card are the same line, smaller (13/400
+and 14/400, 4 above and under, no line, the web's `.table-stack td` on a phone). The quantity
+of a stock item is a figure 32/700 with its unit after it and the pill of its state
+(`HcFigure`, `.stock-quantity`); a gauge is `HcProgress`, with its text at the right. Long
+texts (notes, goal, address, links) stay under their label (`HcFact`). The test opens the
+budget, a project and a stock item as `test/web_parity_test.dart` does, and compares the size,
+weight, line height and colour of each text, the place of the value at the right edge, the
+height of the rows and the gap of the unit with what `tool/web_parity_values.py` measured
+(`test/parity/web_values_fr_390.json`); that file carries the release and commit it measured,
+which the test compares with the pin `web_parity`.
+
+| Web | App | Why |
+| --- | --- | --- |
+| The value keeps up to 60 % of the line and wraps there, the label wraps in what is left | The same; the value goes under its label, at the left, only when the line cannot hold it (the value wider than 60 %, or the longest word of the label beside it), which happens at large text sizes | The value is never cut and never wraps beside its label; at the normal size the line is the web's |
+| The browser's own `progress` (16 high and 10 em wide in Chromium) | A gauge 8 high, rounded, primary on the muted surface, warning beyond 100 %, across the card, its text at the right | The design's gauge, the same on iOS and Android; Safari and Chromium draw `progress` differently |
+| Engaged, then its gauge and "40 % used" in the same cell | Engaged on its line, the gauge and its text on the next | The same order; a cell of the web holds three things side by side, too narrow at 390 |
+
 **Today, as the web's v0.3.2.** Sections *Overdue*, *Today*, *Coming up* (and *No date*), each
 heading followed by its count in brackets; under each title the room, then the item
 (`Room · Item`; on All homes the home first); the date as a pill in the web's format
