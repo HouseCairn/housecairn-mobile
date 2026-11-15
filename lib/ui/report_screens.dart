@@ -376,8 +376,6 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                     l10n.whatIsWrong,
                     _title,
                     key: const Key('report-title'),
-                    minLines: 2,
-                    maxLines: 4,
                     validator: (v) => (v ?? '').trim().isEmpty
                         ? l10n.errSayWhatIsWrong
                         : null,

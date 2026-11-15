@@ -1270,7 +1270,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get projectInProgress => 'En cours';
 
   @override
-  String get projectPlanned => 'Prévu';
+  String get projectPlanned => 'Prévue';
 
   @override
   String get projectFinished => 'Terminé';

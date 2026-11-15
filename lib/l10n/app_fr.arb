@@ -505,7 +505,7 @@
   "errReportNotOpen": "Seul un signalement ouvert peut être transformé en tâche.",
   "errReportNotClosed": "Seul un signalement classé peut être rouvert.",
   "projectInProgress": "En cours",
-  "projectPlanned": "Prévu",
+  "projectPlanned": "Prévue",
   "projectFinished": "Terminé",
   "projectAbandoned": "Abandonné",
   "projectIdea": "Idée",
