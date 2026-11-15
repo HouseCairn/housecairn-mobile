@@ -29,7 +29,6 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 
-
 def web_checkout() -> dict:
     """The release and commit of the web checkout this runs in (`WEB_RELEASE` and `WEB_COMMIT`
     stand in for a checkout without git, such as an archive)."""
