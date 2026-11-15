@@ -72,7 +72,9 @@ class Case(unittest.TestCase):
         self.app_write("assets/task_templates.yaml", "templates: one\n")
         self.app_write("test/fixtures/recurrence_vectors.json", vectors(self.first).decode())
         self.app_write(TOKENS, json.dumps({"color": {"slate": "#1F3A3D", "app-only": "#000000"}}, indent=2) + "\n")
-        self.app_write(PARITY, json.dumps({"web": {"release": "v0.1.0", "commit": self.first}}) + "\n")
+        self.app_write(
+            PARITY, json.dumps({"web": {"repository": wa.WEB_REPOSITORY, "release": "v0.1.0", "commit": self.first}}) + "\n"
+        )
         pin = {"release": "v0.1.0", "commit": self.first}
         element = lambda web, mobile, **extra: {**pin, "web": [web], "mobile": [mobile], **extra}  # noqa: E731
         self.reference = {
@@ -206,12 +208,12 @@ class Update(Case):
         self.web_write(CSS, ".row { padding: 1px }\n")
         second = self.web_release("v0.2.0")
         self.update("v0.2.0")
-        self.app_write(PARITY, json.dumps({"web": {"release": "v0.2.0", "commit": second}}) + "\n")
+        self.app_write(PARITY, json.dumps({"web": {"repository": wa.WEB_REPOSITORY, "release": "v0.2.0", "commit": second}}) + "\n")
         code, out, _ = self.cli("check", "--web", str(self.web))
         self.assertEqual(code, 0, out)
 
     def test_a_measure_of_another_commit_fails(self):
-        self.app_write(PARITY, json.dumps({"web": {"release": "v0.1.0", "commit": "0" * 40}}) + "\n")
+        self.app_write(PARITY, json.dumps({"web": {"repository": wa.WEB_REPOSITORY, "release": "v0.1.0", "commit": "0" * 40}}) + "\n")
         code, out, _ = self.cli("check", "--web", str(self.web))
         self.assertEqual(code, 1)
         self.assertIn("web_parity: test/parity/web_fr_390.json was measured at v0.1.0", out)
@@ -251,6 +253,20 @@ class Check(Case):
         code, out, _ = self.cli("check", "--web", str(self.web))
         self.assertEqual(code, 1)
         self.assertIn("the pin says", out)
+
+    def test_missing_parity_measure_fails_cleanly(self):
+        (self.app / PARITY).unlink()
+        code, out, err = self.cli("check", "--web", str(self.web))
+        self.assertEqual(code, 1, err)
+        self.assertIn(f"FAIL web_parity: {PARITY} is missing", out)
+
+    def test_parity_measure_of_another_repository_fails(self):
+        self.app_write(
+            PARITY, json.dumps({"web": {"repository": "example.com/other", "release": "v0.1.0", "commit": self.first}}) + "\n"
+        )
+        code, out, _ = self.cli("check", "--web", str(self.web))
+        self.assertEqual(code, 1)
+        self.assertIn("(" + self.first[:7] + ") of example.com/other, the pin says", out)
 
 
 class Reference(Case):

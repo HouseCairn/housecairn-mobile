@@ -14,9 +14,10 @@ import 'state.dart';
 import 'task_screen.dart';
 
 /// Today (docs/spec.md, "Screens of v1"): overdue, today, coming up within a
-/// week, and without a date, each with its count as the web's headings, of the current home or of All homes, where each row
-/// names its home. Done is one tap, with an undo bar; skip and postpone from
-/// the menu of the same row.
+/// week, and without a date, each with its count as the web's headings, of
+/// the current home or of All homes, where each row names its home. Done is
+/// one tap, with an undo bar; skip and postpone from the menu of the same
+/// row.
 class TodayScreen extends StatefulWidget {
   const TodayScreen({super.key});
 

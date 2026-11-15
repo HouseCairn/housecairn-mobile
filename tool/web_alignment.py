@@ -234,13 +234,22 @@ def check(web: Path) -> int:
             if not carried_file.exists() or expected != carried_file.read_bytes():
                 failures.append(f"task_templates: {element['mobile'][0]} is not {element['web'][0]} of {element['release']}")
         elif name == "web_parity":
-            measured = json.loads((ROOT / element["mobile"][0]).read_text(encoding="utf-8")).get("web", {})
-            if (measured.get("release"), measured.get("commit")) != (element["release"], commit):
+            parity_file = ROOT / element["mobile"][0]
+            if not parity_file.exists():
                 failures.append(
-                    f"web_parity: {element['mobile'][0]} was measured at {measured.get('release')} "
-                    f"({str(measured.get('commit'))[:7]}), the pin says {element['release']} ({commit[:7]}); "
-                    "measure again with tool/web_parity.py, then run test/web_parity_test.dart"
+                    f"web_parity: {element['mobile'][0]} is missing; measure the web with tool/web_parity.py"
                 )
+            else:
+                measured = json.loads(parity_file.read_text(encoding="utf-8")).get("web", {})
+                if (measured.get("repository"), measured.get("release"), measured.get("commit")) != (
+                    reference["repository"], element["release"], commit,
+                ):
+                    of = "" if measured.get("repository") == reference["repository"] else f" of {measured.get('repository')}"
+                    failures.append(
+                        f"web_parity: {element['mobile'][0]} was measured at {measured.get('release')} "
+                        f"({str(measured.get('commit'))[:7]}){of}, the pin says {element['release']} ({commit[:7]}); "
+                        "measure again with tool/web_parity.py, then run test/web_parity_test.dart"
+                    )
         else:
             web_tokens = json.loads(show(web, commit, element["web"][0]))
             mobile_tokens = json.loads((ROOT / element["mobile"][0]).read_text(encoding="utf-8"))
