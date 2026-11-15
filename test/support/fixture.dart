@@ -90,7 +90,30 @@ class TwoHomes {
           itemId: boiler,
         ),
       );
-      await repo.createTask(home, TaskInput(title: '$prefix gutters'));
+      final gutters = await repo.createTask(
+        home,
+        TaskInput(title: '$prefix gutters'),
+      );
+      // The stock of lot 3a: an article fitting the boiler, kept in the
+      // cellar, with a supplier, two movements and a material line.
+      final filter = await repo.addArticle(
+        home,
+        ArticleInput(
+          name: '$prefix filter',
+          unit: 'piece',
+          threshold: '1',
+          unitPrice: '12.50',
+          roomIds: [cellar],
+          itemIds: [boiler],
+        ),
+      );
+      await repo.addSupplier(
+        filter,
+        SupplierInput(name: '$prefix shop', lastPrice: '11.90'),
+      );
+      await repo.recordMovement(filter, kind: 'entry', quantity: '3');
+      await repo.recordMovement(filter, kind: 'exit', quantity: '1');
+      await repo.saveMaterial(gutters, filter, '1');
       for (final room in [kitchen, cellar]) {
         final photo = await repo.createPhotoRow(home, roomId: room);
         final dir = repo.homeDirectory(home)..createSync(recursive: true);

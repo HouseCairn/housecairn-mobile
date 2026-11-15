@@ -33,19 +33,33 @@ String formatQuantity(String locale, Decimal value) {
 }
 
 /// An amount in [currency], the currency of its home (docs/spec.md,
-/// "Budget": homes are never added together), with the digits the currency
-/// has.
+/// "Budget": homes are never added together), as the web's `money` filter
+/// writes it (`core/templatetags/money.py`): the symbol the language gives
+/// the currency, else its code, always two decimals, and a no-break space
+/// between a code in letters and the number (the currency spacing of CLDR).
 String formatMoney(String locale, String currency, Decimal value) {
-  final format = NumberFormat.currency(locale: locale, name: currency);
-  final digits = format.decimalDigits ?? 2;
+  const digits = 2;
+  final format = NumberFormat.simpleCurrency(
+    locale: locale,
+    name: currency,
+    decimalDigits: digits,
+  );
   final scale = BigInt.from(10).pow(digits);
   final negative = value < stock.zero;
   final units = ((negative ? -value : value) * Decimal.fromBigInt(scale))
       .round()
       .toBigInt();
   final whole = (units ~/ scale).toInt();
-  final text = format.format(negative ? -whole : whole);
-  if (digits == 0) return text;
+  final text = format
+      .format(negative ? -whole : whole)
+      .replaceAllMapped(
+        RegExp(r'(\p{L})(\d)', unicode: true),
+        (m) => '${m[1]}\u00a0${m[2]}',
+      )
+      .replaceAllMapped(
+        RegExp(r'(\d)(\p{L})', unicode: true),
+        (m) => '${m[1]}\u00a0${m[2]}',
+      );
   final sep = format.symbols.DECIMAL_SEP;
   final zeros = '$sep${'0' * digits}';
   final at = text.lastIndexOf(zeros);
