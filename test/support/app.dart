@@ -1,18 +1,28 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/app.dart';
+import 'package:housecairn_mobile/core/notifier.dart';
+import 'package:housecairn_mobile/core/photo_source.dart';
 import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/design/icons.dart';
 import 'package:housecairn_mobile/design/widgets.dart';
+import 'package:housecairn_mobile/domain/photos.dart';
+import 'package:housecairn_mobile/domain/templates.dart';
 import 'package:housecairn_mobile/ui/state.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'fixture.dart';
 
 /// A phone of 360 logical pixels by 760, the narrowest width of the spec.
-Future<void> onPhone(WidgetTester tester, {double textScale = 1}) async {
-  tester.view.physicalSize = const Size(360 * 3, 760 * 3);
+Future<void> onPhone(
+  WidgetTester tester, {
+  double textScale = 1,
+  double height = 760,
+}) async {
+  tester.view.physicalSize = Size(360 * 3, height * 3);
   tester.view.devicePixelRatio = 3;
   tester.platformDispatcher.textScaleFactorTestValue = textScale;
   addTearDown(tester.view.reset);
@@ -25,11 +35,24 @@ Future<AppState> pumpApp(
   WidgetTester tester, {
   String locale = 'en',
   Future<void> Function(Repository repository)? seed,
+  PhotoSource? photoSource,
+  Notifier? notifier,
+  UrlOpener? openUrl,
 }) async {
   final repository = await openRepository();
   addTearDown(repository.db.close);
   if (seed != null) await seed(repository);
-  final state = AppState(repository);
+  final state = AppState(
+    repository,
+    photoSource: photoSource,
+    notifier: notifier,
+    // Synchronous, so that the widget tests do not wait for an isolate.
+    photoProcessor: (bytes) async => processPhoto(bytes),
+    // Read at once: the asset bundle needs a real event loop.
+    loadTemplates: () async =>
+        parseTemplates(File('assets/task_templates.yaml').readAsStringSync()),
+    openUrl: openUrl ?? (_) async => true,
+  );
   await tester.pumpWidget(HousecairnApp(state: state, locale: Locale(locale)));
   await tester.pumpAndSettle();
   return state;

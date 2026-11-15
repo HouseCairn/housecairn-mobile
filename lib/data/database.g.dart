@@ -1870,7 +1870,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
   final String contractNumber;
   final String contractUrl;
 
-  /// JSON list of `{"title", "url"}`, at most 10, `http(s)` only
+  /// JSON list of `{"url", "label"}` (label optional), at most 10, `http(s)` only
   /// (`rooms/models.py:15`, `:35-49`).
   final String links;
   final String notes;

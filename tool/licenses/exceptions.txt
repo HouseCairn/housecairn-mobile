@@ -1,0 +1,15 @@
+# Licences granted to one named package beyond tool/licenses/allowed-licenses.txt
+# (tool/check_licenses.dart). One line: `package: LICENCE LICENCE # reason`. An
+# exception is a decision about one package, with its reason, reviewed in the
+# pull request that adds it; it adds no licence to the allowed list, so the same
+# licence in any other package still fails.
+
+# `dbus` is the D-Bus client of flutter_local_notifications_linux, the Linux
+# desktop part of flutter_local_notifications (docs/adr/0001). The app has no
+# Linux build, and pub downloads that part only because the plugin declares it:
+# it is not compiled into the iOS or Android app. Its licence is MPL-2.0, a
+# file-level weak copyleft that asks to share changes to its own files, and the
+# app changes none. The other three names are not licences of the package: the
+# text of MPL-2.0 (section 1.12, "Secondary Licenses") lists the GPL, LGPL and
+# AGPL, which the check reads as if they applied. Maintainer to confirm: docs/plan.md.
+dbus: MPL AGPL GPL LGPL # Linux desktop only, not in the iOS or Android app; MPL-2.0 text names the GNU licences as secondary licences

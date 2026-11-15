@@ -667,6 +667,870 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} days late'**
   String daysLate(int count);
+
+  /// Kind of a room. Web catalogue: Salon.
+  ///
+  /// In en, this message translates to:
+  /// **'Living room'**
+  String get roomKindLiving;
+
+  /// Kind of a room. Web catalogue: Cuisine.
+  ///
+  /// In en, this message translates to:
+  /// **'Kitchen'**
+  String get roomKindKitchen;
+
+  /// Kind of a room. Web catalogue: Salle de bain.
+  ///
+  /// In en, this message translates to:
+  /// **'Bathroom'**
+  String get roomKindBathroom;
+
+  /// Kind of a room. Web catalogue: Chambre.
+  ///
+  /// In en, this message translates to:
+  /// **'Bedroom'**
+  String get roomKindBedroom;
+
+  /// Kind of a room. Web catalogue: Couloir.
+  ///
+  /// In en, this message translates to:
+  /// **'Hallway'**
+  String get roomKindHallway;
+
+  /// Kind of a room. Web catalogue: Bureau.
+  ///
+  /// In en, this message translates to:
+  /// **'Office'**
+  String get roomKindOffice;
+
+  /// Kind of a room. Web catalogue: Local technique.
+  ///
+  /// In en, this message translates to:
+  /// **'Utility room'**
+  String get roomKindUtility;
+
+  /// Kind of a room. Web catalogue: Garage.
+  ///
+  /// In en, this message translates to:
+  /// **'Garage'**
+  String get roomKindGarage;
+
+  /// Kind of a room. Web catalogue: Cave.
+  ///
+  /// In en, this message translates to:
+  /// **'Cellar'**
+  String get roomKindCellar;
+
+  /// Kind of a room. Web catalogue: Grenier.
+  ///
+  /// In en, this message translates to:
+  /// **'Attic'**
+  String get roomKindAttic;
+
+  /// Kind of a room. Web catalogue: Extérieur.
+  ///
+  /// In en, this message translates to:
+  /// **'Outdoor'**
+  String get roomKindOutdoor;
+
+  /// Kind of a room. Web catalogue: Autre.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get roomKindOther;
+
+  /// Kind of an item. Web catalogue: Équipement.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment'**
+  String get itemKindEquipment;
+
+  /// Kind of an item. Web catalogue: Surface.
+  ///
+  /// In en, this message translates to:
+  /// **'Surface'**
+  String get itemKindSurface;
+
+  /// Trade of a contractor. Web catalogue: Plombier.
+  ///
+  /// In en, this message translates to:
+  /// **'Plumber'**
+  String get tradePlumber;
+
+  /// Trade of a contractor. Web catalogue: Électricien.
+  ///
+  /// In en, this message translates to:
+  /// **'Electrician'**
+  String get tradeElectrician;
+
+  /// Trade of a contractor. Web catalogue: Chauffagiste.
+  ///
+  /// In en, this message translates to:
+  /// **'Heating engineer'**
+  String get tradeHeatingEngineer;
+
+  /// Trade of a contractor. Web catalogue: Couvreur.
+  ///
+  /// In en, this message translates to:
+  /// **'Roofer'**
+  String get tradeRoofer;
+
+  /// Trade of a contractor. Web catalogue: Menuisier.
+  ///
+  /// In en, this message translates to:
+  /// **'Carpenter'**
+  String get tradeCarpenter;
+
+  /// Trade of a contractor. Web catalogue: Peintre.
+  ///
+  /// In en, this message translates to:
+  /// **'Painter'**
+  String get tradePainter;
+
+  /// Trade of a contractor. Web catalogue: Maçon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mason'**
+  String get tradeMason;
+
+  /// Trade of a contractor. Web catalogue: Jardinier.
+  ///
+  /// In en, this message translates to:
+  /// **'Gardener'**
+  String get tradeGardener;
+
+  /// Trade of a contractor. Web catalogue: Serrurier.
+  ///
+  /// In en, this message translates to:
+  /// **'Locksmith'**
+  String get tradeLocksmith;
+
+  /// Trade of a contractor. Web catalogue: Ramoneur.
+  ///
+  /// In en, this message translates to:
+  /// **'Chimney sweep'**
+  String get tradeChimneySweep;
+
+  /// Trade of a contractor. Web catalogue: Autre.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get tradeOther;
+
+  /// Category of a photo. Web catalogue: Général.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get photoCategoryGeneral;
+
+  /// Category of a photo. Web catalogue: Derrière les murs.
+  ///
+  /// In en, this message translates to:
+  /// **'Behind the walls'**
+  String get photoCategoryBehindWalls;
+
+  /// Category of a photo. Web catalogue: Avant les travaux.
+  ///
+  /// In en, this message translates to:
+  /// **'Before the work'**
+  String get photoCategoryBefore;
+
+  /// Category of a photo. Web catalogue: Après les travaux.
+  ///
+  /// In en, this message translates to:
+  /// **'After the work'**
+  String get photoCategoryAfter;
+
+  /// Category of a photo. Web catalogue: Autre.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get photoCategoryOther;
+
+  /// Label of the name field of a room, an item or a contractor.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get fieldName;
+
+  /// Label of the kind of a room or an item. Web catalogue: Type.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get fieldType;
+
+  /// Label of a notes field. Web catalogue: Notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get fieldNotes;
+
+  /// Button that opens the form of what is shown. Web catalogue: Modifier.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// Button that deletes what is shown. Web catalogue: Supprimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// Heading of the tasks of a room, an item or a contractor. Web catalogue: Tâches.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get tasks;
+
+  /// Shown when a room or an item has no task.
+  ///
+  /// In en, this message translates to:
+  /// **'No task yet.'**
+  String get tasksEmpty;
+
+  /// Button that creates a room. Web catalogue: Ajouter une pièce.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a room'**
+  String get addRoom;
+
+  /// Title of the form that creates a room.
+  ///
+  /// In en, this message translates to:
+  /// **'New room'**
+  String get newRoom;
+
+  /// Title of the screen of a room and label of the room of a task. Web catalogue: Pièce.
+  ///
+  /// In en, this message translates to:
+  /// **'Room'**
+  String get room;
+
+  /// Shown when a home has no room. Web catalogue: Aucune pièce pour l'instant.
+  ///
+  /// In en, this message translates to:
+  /// **'No room yet.'**
+  String get roomsEmpty;
+
+  /// Second line of a room in the list: its kind and how many items it has.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind} · {count, plural, one{{count} item} other{{count} items}}'**
+  String roomSummary(String kind, int count);
+
+  /// Button that opens the form of a room. Web catalogue: Modifier la pièce.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the room'**
+  String get editRoom;
+
+  /// Button and title of the confirmation that deletes a room. Web catalogue: Supprimer la pièce.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the room'**
+  String get deleteRoom;
+
+  /// Text of the confirmation that deletes a room.
+  ///
+  /// In en, this message translates to:
+  /// **'The room, its items and their photos are deleted from this phone. Its tasks are kept, with no room.'**
+  String get deleteRoomBody;
+
+  /// Heading of what was used and fitted in a room. Web catalogue: Mémoire de la pièce.
+  ///
+  /// In en, this message translates to:
+  /// **'Room memory'**
+  String get roomMemory;
+
+  /// Shown when a room has no memory. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing noted yet: paint, floor and wall coverings, and what runs behind the walls.'**
+  String get roomMemoryEmpty;
+
+  /// Field of the room memory. Web catalogue: Couleur de la peinture.
+  ///
+  /// In en, this message translates to:
+  /// **'Paint colour'**
+  String get paintColour;
+
+  /// Field of the room memory. Web catalogue: Marque de la peinture.
+  ///
+  /// In en, this message translates to:
+  /// **'Paint brand'**
+  String get paintBrand;
+
+  /// Field of the room memory. Web catalogue: Référence de la peinture.
+  ///
+  /// In en, this message translates to:
+  /// **'Paint reference'**
+  String get paintReference;
+
+  /// Field of the room memory. Web catalogue: Lot de la peinture.
+  ///
+  /// In en, this message translates to:
+  /// **'Paint batch'**
+  String get paintBatch;
+
+  /// Field of the room memory. Web catalogue: Revêtement de sol.
+  ///
+  /// In en, this message translates to:
+  /// **'Floor covering'**
+  String get floorCovering;
+
+  /// Field of the room memory. Web catalogue: Revêtement de mur.
+  ///
+  /// In en, this message translates to:
+  /// **'Wall covering'**
+  String get wallCovering;
+
+  /// Field of the room memory. Web catalogue: Notes de mémoire.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory notes'**
+  String get memoryNotes;
+
+  /// Heading of the items of a room. Web catalogue: Éléments.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get items;
+
+  /// Button that creates an item. Web catalogue: Ajouter un élément.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an item'**
+  String get addItem;
+
+  /// Shown when a room has no item. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'No item in this room yet.'**
+  String get itemsEmpty;
+
+  /// Title of the form that creates an item.
+  ///
+  /// In en, this message translates to:
+  /// **'New item'**
+  String get newItem;
+
+  /// Title of the screen of an item. Web catalogue: Élément.
+  ///
+  /// In en, this message translates to:
+  /// **'Item'**
+  String get item;
+
+  /// Button that opens the form of an item. Web catalogue: Modifier l'élément.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the item'**
+  String get editItem;
+
+  /// Button and title of the confirmation that deletes an item. Web catalogue: Supprimer l'élément.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the item'**
+  String get deleteItem;
+
+  /// Text of the confirmation that deletes an item.
+  ///
+  /// In en, this message translates to:
+  /// **'The item and its photos are deleted from this phone. Its tasks are kept, with no item.'**
+  String get deleteItemBody;
+
+  /// Field of an item.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand'**
+  String get itemBrand;
+
+  /// Field of an item.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get itemModel;
+
+  /// Line of an item that has a brand or a model. Web catalogue: Marque, modèle.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand, model'**
+  String get itemBrandModel;
+
+  /// Field of an item. Web catalogue: Numéro de série.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial number'**
+  String get itemSerial;
+
+  /// Field of an item. Web catalogue: Posé le.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed on'**
+  String get itemInstalledOn;
+
+  /// Field of an item. Web catalogue: fin de garantie.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty ends on'**
+  String get itemWarrantyEndsOn;
+
+  /// Line of an item that has a warranty. Web catalogue: Garantie.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty'**
+  String get itemWarranty;
+
+  /// Pill of an item whose warranty ended. Web catalogue: terminée le.
+  ///
+  /// In en, this message translates to:
+  /// **'ended on {date}'**
+  String warrantyEnded(String date);
+
+  /// Pill of an item under warranty. Web catalogue: jusqu'au.
+  ///
+  /// In en, this message translates to:
+  /// **'until {date}'**
+  String warrantyUntil(String date);
+
+  /// Heading of the contract of an item. Web catalogue: Contrat d'entretien.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance contract'**
+  String get maintenanceContract;
+
+  /// Field of the contract of an item: one of the contractors of the home.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get contractProvider;
+
+  /// Choice of no contractor.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get contractNone;
+
+  /// Field of the contract of an item.
+  ///
+  /// In en, this message translates to:
+  /// **'Number'**
+  String get contractNumber;
+
+  /// Field of the contract of an item.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get contractLink;
+
+  /// Heading of the links of an item. Web catalogue: Liens.
+  ///
+  /// In en, this message translates to:
+  /// **'Links'**
+  String get links;
+
+  /// Field of a link.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get linkLabel;
+
+  /// Field of a link: the web address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get linkAddress;
+
+  /// Button that adds a link to an item.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a link'**
+  String get addLink;
+
+  /// Button that removes a link of an item.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the link'**
+  String get removeLink;
+
+  /// Heading of the photos of a room or an item. Web catalogue: Photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get photos;
+
+  /// Button that adds a photo. Web catalogue: Ajouter une photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo'**
+  String get addPhoto;
+
+  /// Choice of the camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get photoTake;
+
+  /// Choice of the gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from the gallery'**
+  String get photoPick;
+
+  /// Shown when a room or an item has no photo. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'No photo yet.'**
+  String get photosEmpty;
+
+  /// Spoken label of a photo in the grid.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo, {category}'**
+  String photoLabel(String category);
+
+  /// Field of a photo. Web catalogue: Catégorie.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get photoCategoryField;
+
+  /// Field of a photo. Web catalogue: Légende.
+  ///
+  /// In en, this message translates to:
+  /// **'Caption'**
+  String get photoCaption;
+
+  /// Button that deletes a photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the photo'**
+  String get photoDelete;
+
+  /// Message after a photo was deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo deleted.'**
+  String get photoDeleted;
+
+  /// Placeholder of a photo whose file is not on this phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo not on this phone'**
+  String get photoNotHere;
+
+  /// Message when the person refused the camera or the gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Housecairn is not allowed to use the camera or the photos. You can allow it in the settings of your phone.'**
+  String get photoDenied;
+
+  /// Message when the phone has no camera.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone has no camera to use. You can pick a photo from the gallery instead.'**
+  String get photoNoCamera;
+
+  /// Entry of More and title of the screen of contractors. Web catalogue: Intervenants.
+  ///
+  /// In en, this message translates to:
+  /// **'Contractors'**
+  String get contractors;
+
+  /// Shown when a home has no contractor. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'No contractor yet. People and companies who work in this home, with their trade and how to reach them, are kept here.'**
+  String get contractorsEmpty;
+
+  /// Button that creates a contractor. Web catalogue: Ajouter un intervenant.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a contractor'**
+  String get addContractor;
+
+  /// Title of the form that creates a contractor.
+  ///
+  /// In en, this message translates to:
+  /// **'New contractor'**
+  String get newContractor;
+
+  /// Title of the screen of a contractor.
+  ///
+  /// In en, this message translates to:
+  /// **'Contractor'**
+  String get contractor;
+
+  /// Field of a contractor. Web catalogue: Métier.
+  ///
+  /// In en, this message translates to:
+  /// **'Trade'**
+  String get contractorTrade;
+
+  /// Field of a contractor with the trade Other. Web catalogue: quel métier.
+  ///
+  /// In en, this message translates to:
+  /// **'Which trade'**
+  String get contractorTradeOther;
+
+  /// Field of a contractor. Web catalogue: Téléphone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get contractorPhone;
+
+  /// Field of a contractor. Web catalogue: Adresse e-mail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get contractorEmail;
+
+  /// Field of a contractor. Web catalogue: Adresse.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get contractorAddress;
+
+  /// Field of a contractor. Web catalogue: Note.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get contractorNote;
+
+  /// Button that calls a contractor.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get contractorCall;
+
+  /// Button that writes to a contractor.
+  ///
+  /// In en, this message translates to:
+  /// **'Send an e-mail'**
+  String get contractorWrite;
+
+  /// Shown when no task names a contractor. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'No task is linked to this contractor.'**
+  String get contractorNoTasks;
+
+  /// Message when the phone has no app to call or to write.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on this phone can open this.'**
+  String get contractorCannotOpen;
+
+  /// Button and title of the confirmation that deletes a contractor.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the contractor'**
+  String get deleteContractor;
+
+  /// Text of the confirmation that deletes a contractor.
+  ///
+  /// In en, this message translates to:
+  /// **'The contractor is deleted from this phone. The items and tasks that named them are kept, with no contractor.'**
+  String get deleteContractorBody;
+
+  /// Entry of More and title of the screen of task templates. Web catalogue: Ajouter depuis un modèle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add from a template'**
+  String get addFromTemplate;
+
+  /// Introduction of the screen of task templates.
+  ///
+  /// In en, this message translates to:
+  /// **'Common tasks of a home, with an indicative interval and its source. Tick those you need: each becomes a task of the current home, which you can change afterwards.'**
+  String get templatesIntro;
+
+  /// Field of the screen of task templates: the room the tasks are attached to.
+  ///
+  /// In en, this message translates to:
+  /// **'Room (optional)'**
+  String get templatesRoom;
+
+  /// Choice of no room.
+  ///
+  /// In en, this message translates to:
+  /// **'No room'**
+  String get templatesNoRoom;
+
+  /// Field of the screen of task templates.
+  ///
+  /// In en, this message translates to:
+  /// **'First due date (optional)'**
+  String get templatesDue;
+
+  /// Button of the screen of task templates. Web catalogue: Ajouter les tâches.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the tasks'**
+  String get templatesAdd;
+
+  /// Message when no template is ticked.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick at least one template.'**
+  String get templatesNoneTicked;
+
+  /// Message after tasks were made from templates.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 task added.} other{{count} tasks added.}}'**
+  String templatesAdded(int count);
+
+  /// Mention of a template that is the rule of one country. Web catalogue: règle de.
+  ///
+  /// In en, this message translates to:
+  /// **'rule of {region}'**
+  String templateRegion(String region);
+
+  /// Interval of a template.
+  ///
+  /// In en, this message translates to:
+  /// **'every {count, plural, one{day} other{{count} days}}'**
+  String templateEveryDays(int count);
+
+  /// Interval of a template.
+  ///
+  /// In en, this message translates to:
+  /// **'every {count, plural, one{week} other{{count} weeks}}'**
+  String templateEveryWeeks(int count);
+
+  /// Interval of a template.
+  ///
+  /// In en, this message translates to:
+  /// **'every {count, plural, one{month} other{{count} months}}'**
+  String templateEveryMonths(int count);
+
+  /// Interval of a template.
+  ///
+  /// In en, this message translates to:
+  /// **'every {count, plural, one{year} other{{count} years}}'**
+  String templateEveryYears(int count);
+
+  /// Line of the notes of a task made from a template. Web catalogue: Matériel.
+  ///
+  /// In en, this message translates to:
+  /// **'Material: {list}.'**
+  String templateMaterial(String list);
+
+  /// Line of the notes of a task made from a template. Web catalogue: Intervalle d'après.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval from: {title}, {url}'**
+  String templateSource(String title, String url);
+
+  /// Entry of More: notifications of the tasks to do.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get reminders;
+
+  /// Explains reminders on the Reminders row.
+  ///
+  /// In en, this message translates to:
+  /// **'The phone reminds you the day before a task is due, at 8:00, and again until it is done. Nothing is sent from the phone.'**
+  String get remindersExplain;
+
+  /// Message when the person refused notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are not allowed. You can allow them in the settings of your phone.'**
+  String get remindersDenied;
+
+  /// Title of a reminder when the family has two homes or more.
+  ///
+  /// In en, this message translates to:
+  /// **'{home}: {task}'**
+  String reminderTitleHome(String home, String task);
+
+  /// Title of the daily summary of the tasks that have no reminder of their own.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 more task to do} other{{count} more tasks to do}}'**
+  String reminderSummaryTitle(int count);
+
+  /// Line of the daily summary: the tasks of one home.
+  ///
+  /// In en, this message translates to:
+  /// **'{home}: {count, plural, one{1 task} other{{count} tasks}}'**
+  String reminderSummaryLineHome(String home, int count);
+
+  /// Line of the daily summary with one home.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 task} other{{count} tasks}}'**
+  String reminderSummaryLine(int count);
+
+  /// Name of the notification channel on Android.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get remindersChannel;
+
+  /// Message of a refusal. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Digits, spaces and + ( ) - . / only.'**
+  String get errPhoneInvalid;
+
+  /// Message of a refusal. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address.'**
+  String get errEmailInvalid;
+
+  /// Message of a refusal. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a web address that starts with http:// or https://.'**
+  String get errUrlInvalid;
+
+  /// Message of a refusal. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'At most 10 links.'**
+  String get errTooManyLinks;
+
+  /// Message of a refusal. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Say which trade.'**
+  String get errTradeOther;
+
+  /// Message of a refusal. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a value from the list.'**
+  String get errChoiceInvalid;
+
+  /// Message of a refusal. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not in this home.'**
+  String get errNotInHome;
+
+  /// Message of a refusal. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'At most 30 photos here.'**
+  String get errTooManyPhotos;
+
+  /// Message of a refusal. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not a photo the app can read.'**
+  String get errPhotoUnreadable;
+
+  /// Message of a refusal. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'This photo is too large (20 MiB at most).'**
+  String get errPhotoTooLarge;
 }
 
 class _AppLocalizationsDelegate

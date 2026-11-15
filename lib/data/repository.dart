@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -8,8 +9,11 @@ import 'package:uuid/uuid.dart';
 
 import '../core/clock.dart';
 import '../core/hlc.dart';
+import '../domain/choices.dart';
 import '../domain/day.dart';
+import '../domain/photos.dart';
 import '../domain/recurrence.dart' as recurrence;
+import '../domain/reminders.dart';
 import 'database.dart';
 
 /// Why the repository refused a change. Each value has its message in the
@@ -63,6 +67,41 @@ enum Refusal {
 
   /// The row does not exist (or not in this home).
   notFound,
+
+  /// A phone number: digits, spaces and `+ ( ) - . /` only
+  /// (`tasks/models.py:112`).
+  phoneInvalid,
+
+  /// An e-mail address without an `@` and a domain (Django's `EmailField`).
+  emailInvalid,
+
+  /// A link that is not `http(s)` or is longer than 500 characters
+  /// (`rooms/models.py:35-49`).
+  urlInvalid,
+
+  /// More than ten links on an item (`rooms/models.py:15`).
+  tooManyLinks,
+
+  /// The trade Other needs to say which trade (`tasks/models.py:157-158`).
+  tradeOtherRequired,
+
+  /// A choice that is not in the list of the model (kind of a room, trade,
+  /// category of a photo).
+  choiceInvalid,
+
+  /// The contractor, the room or the item is not in this home
+  /// (`rooms/models.py` `Item.clean`).
+  notInHome,
+
+  /// A photo already has thirty on its room or item
+  /// (`rooms/conf.py`, `MAX_PHOTOS_PER_TARGET`).
+  tooManyPhotos,
+
+  /// A photo the app cannot read (see `PhotoProblem.unreadable`).
+  photoUnreadable,
+
+  /// A photo above 20 MiB or 40 million pixels.
+  photoTooLarge,
 }
 
 class Refused implements Exception {
@@ -91,7 +130,15 @@ class TaskInput {
     this.hideDaysBefore = 0,
     this.roomId,
     this.itemId,
+    this.estimatedMinutes,
+    this.procedure = '',
   });
+
+  /// Minutes the task takes, if known (`tasks/models.py` `estimated_minutes`).
+  final int? estimatedMinutes;
+
+  /// How to do it, in Markdown (`tasks/models.py` `procedure`).
+  final String procedure;
 
   final String title;
   final Day? dueOn;
@@ -108,6 +155,128 @@ class TaskInput {
   final int hideDaysBefore;
   final String? roomId;
   final String? itemId;
+}
+
+/// What a room is made of, as its forms edit it (`rooms/models.py:67-91`).
+class RoomInput {
+  const RoomInput({
+    required this.name,
+    this.kind = 'other',
+    this.notes = '',
+    this.paintColour = '',
+    this.paintBrand = '',
+    this.paintReference = '',
+    this.paintBatch = '',
+    this.floorCovering = '',
+    this.wallCovering = '',
+    this.memoryNotes = '',
+  });
+
+  /// The fields of [row], to edit them.
+  factory RoomInput.of(RoomRow row) => RoomInput(
+    name: row.name,
+    kind: row.kind,
+    notes: row.notes,
+    paintColour: row.paintColour,
+    paintBrand: row.paintBrand,
+    paintReference: row.paintReference,
+    paintBatch: row.paintBatch,
+    floorCovering: row.floorCovering,
+    wallCovering: row.wallCovering,
+    memoryNotes: row.memoryNotes,
+  );
+
+  final String name;
+  final String kind;
+  final String notes;
+  final String paintColour;
+  final String paintBrand;
+  final String paintReference;
+  final String paintBatch;
+  final String floorCovering;
+  final String wallCovering;
+  final String memoryNotes;
+}
+
+/// A link of an item (`validate_links`).
+class ItemLink {
+  const ItemLink({required this.url, this.label = ''});
+
+  final String url;
+  final String label;
+}
+
+/// What an item is made of (`rooms/models.py:124-157`).
+class ItemInput {
+  const ItemInput({
+    required this.name,
+    this.kind = 'equipment',
+    this.brand = '',
+    this.model = '',
+    this.serialNumber = '',
+    this.installedOn,
+    this.warrantyEndsOn,
+    this.contractContractorId,
+    this.contractNumber = '',
+    this.contractUrl = '',
+    this.links = const [],
+    this.notes = '',
+  });
+
+  final String name;
+  final String kind;
+  final String brand;
+  final String model;
+  final String serialNumber;
+  final Day? installedOn;
+  final Day? warrantyEndsOn;
+  final String? contractContractorId;
+  final String contractNumber;
+  final String contractUrl;
+  final List<ItemLink> links;
+  final String notes;
+}
+
+/// What a contractor is made of (`tasks/models.py:116-158`).
+class ContractorInput {
+  const ContractorInput({
+    required this.name,
+    this.trade = '',
+    this.tradeOther = '',
+    this.phone = '',
+    this.email = '',
+    this.address = '',
+    this.note = '',
+  });
+
+  factory ContractorInput.of(ContractorRow row) => ContractorInput(
+    name: row.name,
+    trade: row.trade,
+    tradeOther: row.tradeOther,
+    phone: row.phone,
+    email: row.email,
+    address: row.address,
+    note: row.note,
+  );
+
+  final String name;
+  final String trade;
+  final String tradeOther;
+  final String phone;
+  final String email;
+  final String address;
+  final String note;
+}
+
+/// A task of a room or an item with its open occurrence, if any.
+class TaskEntry {
+  const TaskEntry(this.task, this.occurrence);
+
+  final TaskRow task;
+  final OccurrenceRow? occurrence;
+
+  Day? get dueOn =>
+      occurrence?.dueOn == null ? null : Day.parse(occurrence!.dueOn!);
 }
 
 /// An occurrence just closed and the one that follows it, if any.
@@ -619,6 +788,580 @@ class Repository {
     return id;
   }
 
+  // ---------- rooms (lot 2b) ----------
+
+  /// The rooms of a home in the household's order (`rooms/models.py` `Meta`).
+  Future<List<RoomRow>> rooms(String homeId) =>
+      (db.select(db.rooms)
+            ..where((r) => r.homeId.equalsValue(homeId) & r.deletedAt.isNull())
+            ..orderBy([
+              (r) => OrderingTerm.asc(r.position),
+              (r) => OrderingTerm.asc(r.createdAt),
+              (r) => OrderingTerm.asc(r.id),
+            ]))
+          .get();
+
+  Future<RoomRow?> room(String id) =>
+      (db.select(db.rooms)
+            ..where((r) => r.id.equalsValue(id) & r.deletedAt.isNull()))
+          .getSingleOrNull();
+
+  /// How many items each room of [homeId] has, by room id.
+  Future<Map<String, int>> itemCounts(String homeId) async {
+    final counts = <String, int>{};
+    for (final item in await itemsOfHome(homeId)) {
+      counts[item.roomId] = (counts[item.roomId] ?? 0) + 1;
+    }
+    return counts;
+  }
+
+  /// The checks of a text field: trimmed, at most [max] characters.
+  static String _text(String value, int max) {
+    final trimmed = value.trim();
+    if (trimmed.length > max) throw const Refused(Refusal.tooLong);
+    return trimmed;
+  }
+
+  static void _oneOf(String value, List<String> choices) {
+    if (!choices.contains(value)) throw const Refused(Refusal.choiceInvalid);
+  }
+
+  /// The changed fields of [row] among [fields] (the clocks of the others
+  /// stay as they are).
+  Map<String, Object?> _changes(
+    Insertable<dynamic> row,
+    Map<String, Object?> fields,
+  ) {
+    final before = row.toColumns(false);
+    return {
+      for (final MapEntry(:key, :value) in fields.entries)
+        if (_differs(before[key], value)) key: value,
+    };
+  }
+
+  /// Changes a room and its memory (`rooms/models.py:67-91`).
+  Future<void> updateRoom(String id, RoomInput input) async {
+    final current = await room(id);
+    if (current == null) throw const Refused(Refusal.notFound);
+    await _writableHome(current.homeId);
+    _oneOf(input.kind, roomKinds);
+    final fields = <String, Object?>{
+      'name': _name(input.name, 120),
+      'kind': input.kind,
+      'notes': _text(input.notes, notesMaxLength),
+      'paint_colour': _text(input.paintColour, 120),
+      'paint_brand': _text(input.paintBrand, 120),
+      'paint_reference': _text(input.paintReference, 120),
+      'paint_batch': _text(input.paintBatch, 120),
+      'floor_covering': _text(input.floorCovering, 200),
+      'wall_covering': _text(input.wallCovering, 200),
+      'memory_notes': _text(input.memoryNotes, notesMaxLength),
+    };
+    final changes = _changes(current, fields);
+    if (changes.isEmpty) return;
+    await db.transaction(() => _put('rooms', id, changes));
+  }
+
+  /// Deletes a room with its items and photos (`on_delete=CASCADE`); the
+  /// tasks that pointed to them are kept, with no room.
+  Future<void> deleteRoom(String id) async {
+    final current = await room(id);
+    if (current == null) throw const Refused(Refusal.notFound);
+    await _writableHome(current.homeId);
+    final now = _now();
+    await db.transaction(() async {
+      final items = await itemsOf(id);
+      for (final photo in await photosOf(roomId: id)) {
+        await _put('photos', photo.id, {'deleted_at': now});
+      }
+      for (final item in items) {
+        await _deleteItemRows(item, now);
+      }
+      await _unlinkTasks(roomId: id);
+      await _put('rooms', id, {'deleted_at': now});
+    });
+  }
+
+  Future<void> _unlinkTasks({String? roomId, String? itemId}) async {
+    final tasks =
+        await (db.select(db.tasks)..where(
+              (t) =>
+                  t.deletedAt.isNull() &
+                  (roomId != null
+                      ? t.roomId.equalsValue(roomId)
+                      : t.itemId.equalsValue(itemId!)),
+            ))
+            .get();
+    for (final task in tasks) {
+      await _put('tasks', task.id, {
+        if (roomId != null) 'room_id': null,
+        if (itemId != null) 'item_id': null,
+      });
+    }
+  }
+
+  // ---------- items (lot 2b) ----------
+
+  Future<List<ItemRow>> itemsOfHome(String homeId) => (db.select(
+    db.items,
+  )..where((i) => i.homeId.equalsValue(homeId) & i.deletedAt.isNull())).get();
+
+  /// The items of a room by name (`rooms/models.py` `Item.Meta`).
+  Future<List<ItemRow>> itemsOf(String roomId) =>
+      (db.select(db.items)
+            ..where((i) => i.roomId.equalsValue(roomId) & i.deletedAt.isNull())
+            ..orderBy([
+              (i) => OrderingTerm.asc(i.name),
+              (i) => OrderingTerm.asc(i.createdAt),
+              (i) => OrderingTerm.asc(i.id),
+            ]))
+          .get();
+
+  Future<ItemRow?> item(String id) =>
+      (db.select(db.items)
+            ..where((i) => i.id.equalsValue(id) & i.deletedAt.isNull()))
+          .getSingleOrNull();
+
+  /// `none`, `active` or `expired` at [today] (`Item.warranty_state`).
+  static String warrantyState(ItemRow item, Day today) {
+    final ends = item.warrantyEndsOn;
+    if (ends == null) return 'none';
+    return Day.parse(ends) >= today ? 'active' : 'expired';
+  }
+
+  static String _webUrl(String value) {
+    final url = value.trim();
+    final uri = Uri.tryParse(url);
+    if (url.length > 500 ||
+        uri == null ||
+        !(uri.scheme == 'http' || uri.scheme == 'https') ||
+        uri.host.isEmpty ||
+        url.contains(RegExp(r'\s'))) {
+      throw const Refused(Refusal.urlInvalid);
+    }
+    return url;
+  }
+
+  /// The links of an item as the JSON column holds them
+  /// (`validate_links`, `rooms/models.py:35-49`).
+  static String linksJson(List<ItemLink> links) {
+    if (links.length > maxLinks) throw const Refused(Refusal.tooManyLinks);
+    return jsonEncode([
+      for (final link in links)
+        {
+          'url': _webUrl(link.url),
+          if (link.label.trim().isNotEmpty) 'label': _text(link.label, 100),
+        },
+    ]);
+  }
+
+  /// The links of [item], from its column.
+  static List<ItemLink> linksOf(ItemRow item) {
+    final decoded = jsonDecode(item.links);
+    if (decoded is! List) return const [];
+    return [
+      for (final entry in decoded.whereType<Map<String, dynamic>>())
+        ItemLink(
+          url: entry['url'] as String? ?? '',
+          label: entry['label'] as String? ?? '',
+        ),
+    ];
+  }
+
+  Future<Map<String, Object?>> _itemFields(
+    ItemInput input,
+    String homeId,
+  ) async {
+    _oneOf(input.kind, itemKinds);
+    final contractor = input.contractContractorId;
+    if (contractor != null) {
+      final found = await this.contractor(contractor);
+      if (found == null || found.homeId != homeId) {
+        throw const Refused(Refusal.notInHome);
+      }
+    }
+    _checkDate(input.installedOn);
+    _checkDate(input.warrantyEndsOn);
+    return {
+      'name': _name(input.name, 120),
+      'kind': input.kind,
+      'brand': _text(input.brand, 120),
+      'model': _text(input.model, 120),
+      'serial_number': _text(input.serialNumber, 120),
+      'installed_on': input.installedOn,
+      'warranty_ends_on': input.warrantyEndsOn,
+      'contract_contractor_id': contractor,
+      'contract_number': _text(input.contractNumber, 120),
+      'contract_url': input.contractUrl.trim().isEmpty
+          ? ''
+          : _webUrl(input.contractUrl),
+      'links': linksJson(input.links),
+      'notes': _text(input.notes, notesMaxLength),
+    };
+  }
+
+  /// Creates an item of a room with all its fields (`rooms/models.py:124-157`).
+  Future<String> addItem(String roomId, ItemInput input) async {
+    final owner = await room(roomId);
+    if (owner == null) throw const Refused(Refusal.notFound);
+    await _writableHome(owner.homeId);
+    final fields = await _itemFields(input, owner.homeId);
+    final id = newId();
+    await db.transaction(
+      () => _put(
+        'items',
+        id,
+        {'room_id': roomId, ...fields, 'deleted_at': null},
+        homeId: owner.homeId,
+        create: true,
+      ),
+    );
+    return id;
+  }
+
+  Future<void> updateItem(String id, ItemInput input) async {
+    final current = await item(id);
+    if (current == null) throw const Refused(Refusal.notFound);
+    await _writableHome(current.homeId);
+    final changes = _changes(current, await _itemFields(input, current.homeId));
+    if (changes.isEmpty) return;
+    await db.transaction(() => _put('items', id, changes));
+  }
+
+  Future<void> _deleteItemRows(ItemRow item, int now) async {
+    for (final photo in await photosOf(itemId: item.id)) {
+      await _put('photos', photo.id, {'deleted_at': now});
+    }
+    await _unlinkTasks(itemId: item.id);
+    await _put('items', item.id, {'deleted_at': now});
+  }
+
+  /// Deletes an item with its photos; its tasks are kept, with no item.
+  Future<void> deleteItem(String id) async {
+    final current = await item(id);
+    if (current == null) throw const Refused(Refusal.notFound);
+    await _writableHome(current.homeId);
+    await db.transaction(() => _deleteItemRows(current, _now()));
+  }
+
+  // ---------- contractors (lot 2b) ----------
+
+  /// The contractors of a home by name (`tasks/models.py:143`).
+  Future<List<ContractorRow>> contractors(String homeId) =>
+      (db.select(db.contractors)
+            ..where((c) => c.homeId.equalsValue(homeId) & c.deletedAt.isNull())
+            ..orderBy([
+              (c) => OrderingTerm.asc(c.name),
+              (c) => OrderingTerm.asc(c.createdAt),
+              (c) => OrderingTerm.asc(c.id),
+            ]))
+          .get();
+
+  Future<ContractorRow?> contractor(String id) =>
+      (db.select(db.contractors)
+            ..where((c) => c.id.equalsValue(id) & c.deletedAt.isNull()))
+          .getSingleOrNull();
+
+  Map<String, Object?> _contractorFields(ContractorInput input) {
+    if (input.trade.isNotEmpty) _oneOf(input.trade, trades);
+    final other = _text(input.tradeOther, 120);
+    if (input.trade == 'other' && other.isEmpty) {
+      throw const Refused(Refusal.tradeOtherRequired);
+    }
+    final phone = _text(input.phone, 40);
+    if (phone.isNotEmpty && !phonePattern.hasMatch(phone)) {
+      throw const Refused(Refusal.phoneInvalid);
+    }
+    final email = _text(input.email, 254);
+    if (email.isNotEmpty && !emailPattern.hasMatch(email)) {
+      throw const Refused(Refusal.emailInvalid);
+    }
+    final address = input.address.trim();
+    if (address.length > addressMaxLength) {
+      throw const Refused(Refusal.tooLong);
+    }
+    return {
+      'name': _name(input.name, 120),
+      'trade': input.trade,
+      // The words of "which trade" belong to the trade Other only.
+      'trade_other': input.trade == 'other' ? other : '',
+      'phone': phone,
+      'email': email,
+      'address': address,
+      'note': _text(input.note, notesMaxLength),
+    };
+  }
+
+  /// Creates a contractor with all its fields (`tasks/models.py:116-158`).
+  Future<String> addContractor(String homeId, ContractorInput input) async {
+    await _writableHome(homeId);
+    final fields = _contractorFields(input);
+    final id = newId();
+    await db.transaction(
+      () => _put(
+        'contractors',
+        id,
+        {...fields, 'deleted_at': null},
+        homeId: homeId,
+        create: true,
+      ),
+    );
+    return id;
+  }
+
+  Future<void> updateContractor(String id, ContractorInput input) async {
+    final current = await contractor(id);
+    if (current == null) throw const Refused(Refusal.notFound);
+    await _writableHome(current.homeId);
+    final changes = _changes(current, _contractorFields(input));
+    if (changes.isEmpty) return;
+    await db.transaction(() => _put('contractors', id, changes));
+  }
+
+  /// Deletes a contractor; the items and tasks that named it are kept, with
+  /// no contractor, and the number and link of a contract stay
+  /// (`tasks.services.delete_contractor`).
+  Future<void> deleteContractor(String id) async {
+    final current = await contractor(id);
+    if (current == null) throw const Refused(Refusal.notFound);
+    await _writableHome(current.homeId);
+    await db.transaction(() async {
+      final items =
+          await (db.select(db.items)..where(
+                (i) =>
+                    i.deletedAt.isNull() &
+                    i.contractContractorId.equalsValue(id),
+              ))
+              .get();
+      for (final item in items) {
+        await _put('items', item.id, {'contract_contractor_id': null});
+      }
+      final tasks =
+          await (db.select(db.tasks)..where(
+                (t) => t.deletedAt.isNull() & t.contractorId.equalsValue(id),
+              ))
+              .get();
+      for (final task in tasks) {
+        await _put('tasks', task.id, {'contractor_id': null});
+      }
+      await _put('contractors', id, {'deleted_at': _now()});
+    });
+  }
+
+  /// The tasks that name a contractor, by title.
+  Future<List<TaskRow>> tasksOfContractor(String id) =>
+      (db.select(db.tasks)
+            ..where(
+              (t) => t.deletedAt.isNull() & t.contractorId.equalsValue(id),
+            )
+            ..orderBy([(t) => OrderingTerm.asc(t.title)]))
+          .get();
+
+  // ---------- tasks of a room or an item (lot 2b) ----------
+
+  /// The tasks of a room or an item with their open occurrence, the nearest
+  /// date first and no date last (`open_occurrences_for` of the web).
+  Future<List<TaskEntry>> tasksOf({String? roomId, String? itemId}) async {
+    assert((roomId == null) != (itemId == null));
+    final tasks =
+        await (db.select(db.tasks)..where(
+              (t) =>
+                  t.deletedAt.isNull() &
+                  (roomId != null
+                      ? t.roomId.equalsValue(roomId)
+                      : t.itemId.equalsValue(itemId!)),
+            ))
+            .get();
+    final entries = <TaskEntry>[];
+    for (final task in tasks) {
+      final open = await openOccurrencesOf(task.id);
+      entries.add(TaskEntry(task, open.isEmpty ? null : open.first));
+    }
+    entries.sort((a, b) {
+      final x = a.occurrence?.dueOn, y = b.occurrence?.dueOn;
+      if (x == null && y == null) return a.task.title.compareTo(b.task.title);
+      if (x == null) return 1;
+      if (y == null) return -1;
+      final byDate = x.compareTo(y);
+      return byDate != 0 ? byDate : a.task.title.compareTo(b.task.title);
+    });
+    return entries;
+  }
+
+  // ---------- photos (lot 2b) ----------
+
+  /// The live photos of a room or an item, oldest first
+  /// (`rooms/models.py` `Photo.Meta`).
+  Future<List<PhotoRow>> photosOf({String? roomId, String? itemId}) {
+    assert((roomId == null) != (itemId == null));
+    return (db.select(db.photos)
+          ..where(
+            (p) =>
+                p.deletedAt.isNull() &
+                (roomId != null
+                    ? p.roomId.equalsValue(roomId)
+                    : p.itemId.equalsValue(itemId!)),
+          )
+          ..orderBy([
+            (p) => OrderingTerm.asc(p.createdAt),
+            (p) => OrderingTerm.asc(p.id),
+          ]))
+        .get();
+  }
+
+  Future<PhotoRow?> photo(String id) =>
+      (db.select(db.photos)
+            ..where((p) => p.id.equalsValue(id) & p.deletedAt.isNull()))
+          .getSingleOrNull();
+
+  /// The file of a photo: `homes/<home id>/<photo id>.jpg`, named by the id
+  /// of its row (docs/adr/0002-local-storage-and-migrations.md).
+  File photoFile(PhotoRow photo) =>
+      File('${homeDirectory(photo.homeId).path}/${photo.id}.jpg');
+
+  /// The thumbnail of a photo, made when the photo is stored and never synced.
+  File thumbnailFile(PhotoRow photo) =>
+      File('${homeDirectory(photo.homeId).path}/${photo.id}.thumb.jpg');
+
+  /// Stores a photo of a room or an item, already re-encoded by
+  /// `processPhoto` (no metadata, at most 2560 px): the file and its
+  /// thumbnail under the id of the new row, then the row with the file
+  /// reference of docs/protocol.md section 2.9. A failure leaves no file.
+  Future<String> addPhoto(
+    String homeId,
+    ProcessedPhoto photo, {
+    String? roomId,
+    String? itemId,
+    String category = 'general',
+  }) async {
+    if ((roomId == null) == (itemId == null)) {
+      throw ArgumentError('A photo is of one room or one item.');
+    }
+    await _writableHome(homeId);
+    _oneOf(category, photoCategories);
+    final owner = roomId != null ? await room(roomId) : await item(itemId!);
+    final ownerHome = roomId != null
+        ? (owner as RoomRow?)?.homeId
+        : (owner as ItemRow?)?.homeId;
+    if (ownerHome != homeId) throw const Refused(Refusal.notInHome);
+    if ((await photosOf(roomId: roomId, itemId: itemId)).length >=
+        maxPhotosPerTarget) {
+      throw const Refused(Refusal.tooManyPhotos);
+    }
+    final id = newId();
+    final directory = homeDirectory(homeId)..createSync(recursive: true);
+    final image = File('${directory.path}/$id.jpg');
+    final thumb = File('${directory.path}/$id.thumb.jpg');
+    try {
+      image.writeAsBytesSync(photo.image, flush: true);
+      thumb.writeAsBytesSync(photo.thumbnail, flush: true);
+      await db.transaction(
+        () => _put(
+          'photos',
+          id,
+          {
+            'room_id': roomId,
+            'item_id': itemId,
+            'category': category,
+            'caption': '',
+            'image': photo.reference,
+            'deleted_at': null,
+          },
+          homeId: homeId,
+          create: true,
+        ),
+      );
+    } catch (_) {
+      for (final file in [image, thumb]) {
+        if (file.existsSync()) file.deleteSync();
+      }
+      rethrow;
+    }
+    return id;
+  }
+
+  /// Changes the category or the caption of a photo.
+  Future<void> updatePhoto(
+    String id, {
+    String? category,
+    String? caption,
+  }) async {
+    final current =
+        await (db.select(db.photos)
+              ..where((p) => p.id.equalsValue(id) & p.deletedAt.isNull()))
+            .getSingleOrNull();
+    if (current == null) throw const Refused(Refusal.notFound);
+    await _writableHome(current.homeId);
+    if (category != null) _oneOf(category, photoCategories);
+    final changes = _changes(current, {
+      'category': ?category,
+      if (caption != null) 'caption': _text(caption, 200),
+    });
+    if (changes.isEmpty) return;
+    await db.transaction(() => _put('photos', id, changes));
+  }
+
+  /// Deletes a photo. Its file stays on the phone: a deleted photo can be
+  /// restored for 30 days (docs/spec.md, "Photos and files"), and the file
+  /// goes with the sweep of the sync lot.
+  Future<void> deletePhoto(String id) async {
+    final current =
+        await (db.select(db.photos)
+              ..where((p) => p.id.equalsValue(id) & p.deletedAt.isNull()))
+            .getSingleOrNull();
+    if (current == null) throw const Refused(Refusal.notFound);
+    await _writableHome(current.homeId);
+    await db.transaction(() => _put('photos', id, {'deleted_at': _now()}));
+  }
+
+  // ---------- reminders (lot 2b) ----------
+
+  /// The open occurrences with a due date of every active home, for the
+  /// planner of reminders (`notifications/reminders.py`, `dispatch`).
+  Future<List<ReminderSource>> reminderSources() async {
+    final homes = {for (final h in await activeHomes()) h.id: h};
+    if (homes.isEmpty) return [];
+    final query =
+        db.select(db.occurrences).join([
+            innerJoin(db.tasks, db.tasks.id.equalsExp(db.occurrences.taskId)),
+          ])
+          ..where(
+            db.occurrences.deletedAt.isNull() &
+                db.tasks.deletedAt.isNull() &
+                db.occurrences.status.isIn(openStatuses) &
+                db.occurrences.dueOn.isNotNull() &
+                db.occurrences.homeId.isInValues(homes.keys),
+          )
+          ..orderBy([
+            OrderingTerm.asc(db.occurrences.dueOn),
+            OrderingTerm.asc(db.occurrences.createdAt),
+            OrderingTerm.asc(db.occurrences.id),
+          ]);
+    return [
+      for (final row in await query.get())
+        () {
+          final occurrence = row.readTable(db.occurrences);
+          final task = row.readTable(db.tasks);
+          return ReminderSource(
+            occurrenceId: occurrence.id,
+            taskId: task.id,
+            taskTitle: task.title,
+            homeId: occurrence.homeId,
+            homeName: homes[occurrence.homeId]!.name,
+            dueOn: Day.parse(occurrence.dueOn!),
+            priority: task.priority,
+          );
+        }(),
+    ];
+  }
+
+  /// Whether the person turned reminders on (this phone only).
+  Future<bool> remindersEnabled() async =>
+      await _setting('reminders_enabled') == '1';
+
+  Future<void> setRemindersEnabled(bool on) =>
+      _setSetting('reminders_enabled', on ? '1' : null);
+
   // ---------- tasks ----------
 
   Future<TaskRow?> task(String id) =>
@@ -720,6 +1463,8 @@ class Repository {
       'room_id': input.roomId,
       'item_id': input.itemId,
       'priority': input.priority,
+      'estimated_minutes': input.estimatedMinutes,
+      'procedure': input.procedure,
       'notes': input.notes,
       'repeat_mode': input.repeatMode,
       'repeat_unit': input.repeatUnit,
@@ -770,6 +1515,15 @@ class Repository {
     });
     return id;
   }
+
+  /// Creates several tasks in one transaction, all or none (`add_templates`
+  /// of the web).
+  Future<List<String>> createTasks(String homeId, List<TaskInput> inputs) =>
+      db.transaction(
+        () async => [
+          for (final input in inputs) await createTask(homeId, input),
+        ],
+      );
 
   /// Changes a task; [TaskInput.dueOn] moves the open occurrence when it
   /// differs from its date (`tasks/services.py:407-444`).

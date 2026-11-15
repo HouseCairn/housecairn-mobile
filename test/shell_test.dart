@@ -44,6 +44,9 @@ void main() {
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull, reason: label);
         }
+        await tester.scrollUntilVisible(hcIcon(HcIcons.info), 100);
+        await tester.ensureVisible(hcIcon(HcIcons.info));
+        await tester.pumpAndSettle();
         await tester.tap(hcIcon(HcIcons.info));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull, reason: 'About');

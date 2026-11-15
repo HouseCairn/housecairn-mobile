@@ -17,22 +17,59 @@ Map<String, String> arbMessages(String locale) {
   };
 }
 
-/// A pattern that matches a message once its placeholders are filled.
-RegExp messagePattern(String message) {
-  final buffer = StringBuffer('^');
-  var last = 0;
-  for (final match in RegExp(
-    r'\{[A-Za-z_][A-Za-z0-9_]*\}',
-  ).allMatches(message)) {
-    buffer
-      ..write(RegExp.escape(message.substring(last, match.start)))
-      ..write('.+');
-    last = match.end;
+/// A pattern that matches a message once its placeholders are filled. A
+/// plural (`{count, plural, one{{count} thing} other{{count} things}}`, ICU) matches any
+/// of its forms.
+RegExp messagePattern(String message) =>
+    RegExp('^${_icuPattern(message)}\$', dotAll: true);
+
+/// The regular expression of [message]: literal text escaped, `{name}` as any
+/// text, and a plural as the alternation of its forms.
+String _icuPattern(String message) {
+  final out = StringBuffer();
+  var i = 0;
+  while (i < message.length) {
+    final open = message.indexOf('{', i);
+    if (open < 0) {
+      out.write(RegExp.escape(message.substring(i)));
+      break;
+    }
+    out.write(RegExp.escape(message.substring(i, open)));
+    final close = _closing(message, open);
+    final inner = message.substring(open + 1, close);
+    final plural = RegExp(
+      r'^\s*\w+\s*,\s*plural\s*,(.*)$',
+      dotAll: true,
+      caseSensitive: false,
+    ).firstMatch(inner);
+    if (plural == null) {
+      out.write('.+');
+    } else {
+      final forms = <String>[];
+      final body = plural.group(1)!;
+      var j = 0;
+      while (j < body.length) {
+        final brace = body.indexOf('{', j);
+        if (brace < 0) break;
+        final end = _closing(body, brace);
+        forms.add(_icuPattern(body.substring(brace + 1, end)));
+        j = end + 1;
+      }
+      out.write('(?:${forms.join('|')})');
+    }
+    i = close + 1;
   }
-  buffer
-    ..write(RegExp.escape(message.substring(last)))
-    ..write(r'$');
-  return RegExp(buffer.toString(), dotAll: true);
+  return out.toString();
+}
+
+/// The index of the brace that closes the one at [open].
+int _closing(String text, int open) {
+  var depth = 0;
+  for (var i = open; i < text.length; i++) {
+    if (text[i] == '{') depth++;
+    if (text[i] == '}' && --depth == 0) return i;
+  }
+  throw FormatException('Unbalanced braces in "$text"');
 }
 
 /// Every text shown on the screen: text of `RichText` (which `Text` builds)

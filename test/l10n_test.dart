@@ -12,9 +12,11 @@ import 'support/arb.dart';
 
 const locales = ['en', 'fr'];
 
+/// The placeholders of an ICU message: `{name}` and the name of a plural, not
+/// the words of its forms (`one{day}`).
 Set<String> placeholders(String message) => {
   for (final match in RegExp(
-    r'\{([A-Za-z_][A-Za-z0-9_]*)\}',
+    r'(?<!\b(?:zero|one|two|few|many|other)|=\d)\{([A-Za-z_][A-Za-z0-9_]*)\s*[,}]',
   ).allMatches(message))
     match.group(1)!,
 };
@@ -36,6 +38,9 @@ Future<void> visitEveryScreen(
     await check('section ${i + 1}');
   }
   // More (the last section) is open: its entry About.
+  await tester.scrollUntilVisible(hcIcon(HcIcons.info), 100);
+  await tester.ensureVisible(hcIcon(HcIcons.info));
+  await tester.pumpAndSettle();
   await tester.tap(hcIcon(HcIcons.info));
   await tester.pumpAndSettle();
   await check('About');

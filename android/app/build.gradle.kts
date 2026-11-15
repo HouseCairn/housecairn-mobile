@@ -6,12 +6,24 @@ plugins {
 
 android {
     namespace = "app.housecairn.mobile"
-    compileSdk = flutter.compileSdkVersion
+    // androidx.core 1.19 and flutter_local_notifications ask for API 37 or later
+    // to compile against (the check of the AAR metadata fails below it).
+    compileSdk = maxOf(flutter.compileSdkVersion, 37)
     ndkVersion = flutter.ndkVersion
+
+    // The lint of the release build crashes while analysing image_picker_android
+    // (a NoSuchMethodError on `List.removeLast()`, a Java 21 method): a crash of
+    // the tool, not a finding. Lint is not one of the checks of this repository.
+    lint {
+        checkReleaseBuilds = false
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // flutter_local_notifications schedules with java.time on old Androids
+        // (its README, "Gradle setup").
+        isCoreLibraryDesugaringEnabled = true
     }
 
     defaultConfig {
@@ -46,4 +58,8 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

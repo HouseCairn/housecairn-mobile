@@ -83,7 +83,7 @@ class Items extends Table with ModelColumns, HomeOwned {
   TextColumn get contractNumber => text().withDefault(const Constant(''))();
   TextColumn get contractUrl => text().withDefault(const Constant(''))();
 
-  /// JSON list of `{"title", "url"}`, at most 10, `http(s)` only
+  /// JSON list of `{"url", "label"}` (label optional), at most 10, `http(s)` only
   /// (`rooms/models.py:15`, `:35-49`).
   TextColumn get links => text().withDefault(const Constant('[]'))();
   TextColumn get notes => text().withDefault(const Constant(''))();

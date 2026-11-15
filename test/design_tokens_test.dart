@@ -105,6 +105,20 @@ void main() {
     expect(font['family-base'], startsWith('"${HcFont.family}"'));
   });
 
+  test('every weight the app draws is declared in pubspec.yaml', () {
+    // The weights of the Manrope family, read from the text of pubspec.yaml
+    // (no YAML package: the `weight:` lines are the only ones of the file).
+    final declared = RegExp(r'^\s*weight:\s*(\d+)\s*$', multiLine: true)
+        .allMatches(File('pubspec.yaml').readAsStringSync())
+        .map((m) => int.parse(m.group(1)!))
+        .toSet();
+    for (final weight in HcFont.weights) {
+      expect(declared, contains(weight.value), reason: 'w${weight.value}');
+    }
+    // And no weight is bundled that the app does not draw.
+    expect(declared, HcFont.weights.map((w) => w.value).toSet());
+  });
+
   test('shadows are those of the tokens', () {
     final shadow = (tokens['shadow'] as Map<String, dynamic>)
         .cast<String, String>();

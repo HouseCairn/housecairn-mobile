@@ -7,15 +7,19 @@ import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../l10n/app_localizations.dart';
 import 'about.dart';
+import 'contractor_screens.dart';
 import 'home_selector.dart';
 import 'homes_screen.dart';
+import 'reminders_row.dart';
+import 'rooms.dart';
 import 'shell.dart';
+import 'templates_screen.dart';
 import 'today.dart';
 
 /// The root screen of a section.
 Widget sectionRoot(Section section) => switch (section) {
   Section.today => const TodayScreen(),
-  Section.rooms => EmptySection(title: (l10n) => l10n.navRooms),
+  Section.rooms => const RoomsScreen(),
   Section.projects => EmptySection(title: (l10n) => l10n.navProjects),
   Section.budget => EmptySection(title: (l10n) => l10n.navBudget),
   Section.more => const MoreScreen(),
@@ -67,6 +71,31 @@ class MoreScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              HcRow(
+                leading: const HcIcon(
+                  HcIcons.contractors,
+                  color: HcColors.primary,
+                ),
+                title: l10n.contractors,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const ContractorsScreen(),
+                  ),
+                ),
+              ),
+              HcRow(
+                leading: const HcIcon(
+                  HcIcons.templates,
+                  color: HcColors.primary,
+                ),
+                title: l10n.addFromTemplate,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const TemplatesScreen(),
+                  ),
+                ),
+              ),
+              const RemindersRow(),
             ],
           ),
           HcSectionHeading(l10n.moreHelpGroup),

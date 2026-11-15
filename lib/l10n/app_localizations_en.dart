@@ -317,4 +317,533 @@ class AppLocalizationsEn extends AppLocalizations {
   String daysLate(int count) {
     return '$count days late';
   }
+
+  @override
+  String get roomKindLiving => 'Living room';
+
+  @override
+  String get roomKindKitchen => 'Kitchen';
+
+  @override
+  String get roomKindBathroom => 'Bathroom';
+
+  @override
+  String get roomKindBedroom => 'Bedroom';
+
+  @override
+  String get roomKindHallway => 'Hallway';
+
+  @override
+  String get roomKindOffice => 'Office';
+
+  @override
+  String get roomKindUtility => 'Utility room';
+
+  @override
+  String get roomKindGarage => 'Garage';
+
+  @override
+  String get roomKindCellar => 'Cellar';
+
+  @override
+  String get roomKindAttic => 'Attic';
+
+  @override
+  String get roomKindOutdoor => 'Outdoor';
+
+  @override
+  String get roomKindOther => 'Other';
+
+  @override
+  String get itemKindEquipment => 'Equipment';
+
+  @override
+  String get itemKindSurface => 'Surface';
+
+  @override
+  String get tradePlumber => 'Plumber';
+
+  @override
+  String get tradeElectrician => 'Electrician';
+
+  @override
+  String get tradeHeatingEngineer => 'Heating engineer';
+
+  @override
+  String get tradeRoofer => 'Roofer';
+
+  @override
+  String get tradeCarpenter => 'Carpenter';
+
+  @override
+  String get tradePainter => 'Painter';
+
+  @override
+  String get tradeMason => 'Mason';
+
+  @override
+  String get tradeGardener => 'Gardener';
+
+  @override
+  String get tradeLocksmith => 'Locksmith';
+
+  @override
+  String get tradeChimneySweep => 'Chimney sweep';
+
+  @override
+  String get tradeOther => 'Other';
+
+  @override
+  String get photoCategoryGeneral => 'General';
+
+  @override
+  String get photoCategoryBehindWalls => 'Behind the walls';
+
+  @override
+  String get photoCategoryBefore => 'Before the work';
+
+  @override
+  String get photoCategoryAfter => 'After the work';
+
+  @override
+  String get photoCategoryOther => 'Other';
+
+  @override
+  String get fieldName => 'Name';
+
+  @override
+  String get fieldType => 'Type';
+
+  @override
+  String get fieldNotes => 'Notes';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get tasks => 'Tasks';
+
+  @override
+  String get tasksEmpty => 'No task yet.';
+
+  @override
+  String get addRoom => 'Add a room';
+
+  @override
+  String get newRoom => 'New room';
+
+  @override
+  String get room => 'Room';
+
+  @override
+  String get roomsEmpty => 'No room yet.';
+
+  @override
+  String roomSummary(String kind, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '$count item',
+    );
+    return '$kind · $_temp0';
+  }
+
+  @override
+  String get editRoom => 'Edit the room';
+
+  @override
+  String get deleteRoom => 'Delete the room';
+
+  @override
+  String get deleteRoomBody =>
+      'The room, its items and their photos are deleted from this phone. Its tasks are kept, with no room.';
+
+  @override
+  String get roomMemory => 'Room memory';
+
+  @override
+  String get roomMemoryEmpty =>
+      'Nothing noted yet: paint, floor and wall coverings, and what runs behind the walls.';
+
+  @override
+  String get paintColour => 'Paint colour';
+
+  @override
+  String get paintBrand => 'Paint brand';
+
+  @override
+  String get paintReference => 'Paint reference';
+
+  @override
+  String get paintBatch => 'Paint batch';
+
+  @override
+  String get floorCovering => 'Floor covering';
+
+  @override
+  String get wallCovering => 'Wall covering';
+
+  @override
+  String get memoryNotes => 'Memory notes';
+
+  @override
+  String get items => 'Items';
+
+  @override
+  String get addItem => 'Add an item';
+
+  @override
+  String get itemsEmpty => 'No item in this room yet.';
+
+  @override
+  String get newItem => 'New item';
+
+  @override
+  String get item => 'Item';
+
+  @override
+  String get editItem => 'Edit the item';
+
+  @override
+  String get deleteItem => 'Delete the item';
+
+  @override
+  String get deleteItemBody =>
+      'The item and its photos are deleted from this phone. Its tasks are kept, with no item.';
+
+  @override
+  String get itemBrand => 'Brand';
+
+  @override
+  String get itemModel => 'Model';
+
+  @override
+  String get itemBrandModel => 'Brand, model';
+
+  @override
+  String get itemSerial => 'Serial number';
+
+  @override
+  String get itemInstalledOn => 'Installed on';
+
+  @override
+  String get itemWarrantyEndsOn => 'Warranty ends on';
+
+  @override
+  String get itemWarranty => 'Warranty';
+
+  @override
+  String warrantyEnded(String date) {
+    return 'ended on $date';
+  }
+
+  @override
+  String warrantyUntil(String date) {
+    return 'until $date';
+  }
+
+  @override
+  String get maintenanceContract => 'Maintenance contract';
+
+  @override
+  String get contractProvider => 'Provider';
+
+  @override
+  String get contractNone => 'None';
+
+  @override
+  String get contractNumber => 'Number';
+
+  @override
+  String get contractLink => 'Link';
+
+  @override
+  String get links => 'Links';
+
+  @override
+  String get linkLabel => 'Label';
+
+  @override
+  String get linkAddress => 'Address';
+
+  @override
+  String get addLink => 'Add a link';
+
+  @override
+  String get removeLink => 'Remove the link';
+
+  @override
+  String get photos => 'Photos';
+
+  @override
+  String get addPhoto => 'Add a photo';
+
+  @override
+  String get photoTake => 'Take a photo';
+
+  @override
+  String get photoPick => 'Choose from the gallery';
+
+  @override
+  String get photosEmpty => 'No photo yet.';
+
+  @override
+  String photoLabel(String category) {
+    return 'Photo, $category';
+  }
+
+  @override
+  String get photoCategoryField => 'Category';
+
+  @override
+  String get photoCaption => 'Caption';
+
+  @override
+  String get photoDelete => 'Delete the photo';
+
+  @override
+  String get photoDeleted => 'Photo deleted.';
+
+  @override
+  String get photoNotHere => 'Photo not on this phone';
+
+  @override
+  String get photoDenied =>
+      'Housecairn is not allowed to use the camera or the photos. You can allow it in the settings of your phone.';
+
+  @override
+  String get photoNoCamera =>
+      'This phone has no camera to use. You can pick a photo from the gallery instead.';
+
+  @override
+  String get contractors => 'Contractors';
+
+  @override
+  String get contractorsEmpty =>
+      'No contractor yet. People and companies who work in this home, with their trade and how to reach them, are kept here.';
+
+  @override
+  String get addContractor => 'Add a contractor';
+
+  @override
+  String get newContractor => 'New contractor';
+
+  @override
+  String get contractor => 'Contractor';
+
+  @override
+  String get contractorTrade => 'Trade';
+
+  @override
+  String get contractorTradeOther => 'Which trade';
+
+  @override
+  String get contractorPhone => 'Phone';
+
+  @override
+  String get contractorEmail => 'Email address';
+
+  @override
+  String get contractorAddress => 'Address';
+
+  @override
+  String get contractorNote => 'Note';
+
+  @override
+  String get contractorCall => 'Call';
+
+  @override
+  String get contractorWrite => 'Send an e-mail';
+
+  @override
+  String get contractorNoTasks => 'No task is linked to this contractor.';
+
+  @override
+  String get contractorCannotOpen => 'Nothing on this phone can open this.';
+
+  @override
+  String get deleteContractor => 'Delete the contractor';
+
+  @override
+  String get deleteContractorBody =>
+      'The contractor is deleted from this phone. The items and tasks that named them are kept, with no contractor.';
+
+  @override
+  String get addFromTemplate => 'Add from a template';
+
+  @override
+  String get templatesIntro =>
+      'Common tasks of a home, with an indicative interval and its source. Tick those you need: each becomes a task of the current home, which you can change afterwards.';
+
+  @override
+  String get templatesRoom => 'Room (optional)';
+
+  @override
+  String get templatesNoRoom => 'No room';
+
+  @override
+  String get templatesDue => 'First due date (optional)';
+
+  @override
+  String get templatesAdd => 'Add the tasks';
+
+  @override
+  String get templatesNoneTicked => 'Tick at least one template.';
+
+  @override
+  String templatesAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tasks added.',
+      one: '1 task added.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String templateRegion(String region) {
+    return 'rule of $region';
+  }
+
+  @override
+  String templateEveryDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: 'day',
+    );
+    return 'every $_temp0';
+  }
+
+  @override
+  String templateEveryWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks',
+      one: 'week',
+    );
+    return 'every $_temp0';
+  }
+
+  @override
+  String templateEveryMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count months',
+      one: 'month',
+    );
+    return 'every $_temp0';
+  }
+
+  @override
+  String templateEveryYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count years',
+      one: 'year',
+    );
+    return 'every $_temp0';
+  }
+
+  @override
+  String templateMaterial(String list) {
+    return 'Material: $list.';
+  }
+
+  @override
+  String templateSource(String title, String url) {
+    return 'Interval from: $title, $url';
+  }
+
+  @override
+  String get reminders => 'Reminders';
+
+  @override
+  String get remindersExplain =>
+      'The phone reminds you the day before a task is due, at 8:00, and again until it is done. Nothing is sent from the phone.';
+
+  @override
+  String get remindersDenied =>
+      'Notifications are not allowed. You can allow them in the settings of your phone.';
+
+  @override
+  String reminderTitleHome(String home, String task) {
+    return '$home: $task';
+  }
+
+  @override
+  String reminderSummaryTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more tasks to do',
+      one: '1 more task to do',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderSummaryLineHome(String home, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tasks',
+      one: '1 task',
+    );
+    return '$home: $_temp0';
+  }
+
+  @override
+  String reminderSummaryLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tasks',
+      one: '1 task',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get remindersChannel => 'Reminders';
+
+  @override
+  String get errPhoneInvalid => 'Digits, spaces and + ( ) - . / only.';
+
+  @override
+  String get errEmailInvalid => 'Enter a valid email address.';
+
+  @override
+  String get errUrlInvalid =>
+      'Enter a web address that starts with http:// or https://.';
+
+  @override
+  String get errTooManyLinks => 'At most 10 links.';
+
+  @override
+  String get errTradeOther => 'Say which trade.';
+
+  @override
+  String get errChoiceInvalid => 'Choose a value from the list.';
+
+  @override
+  String get errNotInHome => 'This is not in this home.';
+
+  @override
+  String get errTooManyPhotos => 'At most 30 photos here.';
+
+  @override
+  String get errPhotoUnreadable => 'This file is not a photo the app can read.';
+
+  @override
+  String get errPhotoTooLarge => 'This photo is too large (20 MiB at most).';
 }

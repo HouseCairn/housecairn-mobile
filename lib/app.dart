@@ -59,10 +59,19 @@ class _FirstStartState extends State<_FirstStart> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_started) return;
-    _started = true;
-    AppScope.of(context)
-        .refresh(firstHomeName: AppLocalizations.of(context).firstHomeName);
+    final state = AppScope.of(context);
+    final l10n = AppLocalizations.of(context);
+    final languageChanged = state.l10n?.localeName != l10n.localeName;
+    // The words of the reminders follow the language of the phone.
+    state.l10n = l10n;
+    if (!_started) {
+      _started = true;
+      state
+          .refresh(firstHomeName: l10n.firstHomeName)
+          .then((_) => state.openLaunchReminder());
+    } else if (languageChanged) {
+      state.reschedule();
+    }
   }
 
   @override

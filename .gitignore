@@ -49,3 +49,4 @@ app.*.map.json
 
 # Downloaded wheels (e.g. a local zizmor), never committed
 *.whl
+test/failures/

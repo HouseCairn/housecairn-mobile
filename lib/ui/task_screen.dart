@@ -11,6 +11,7 @@ import '../domain/day.dart';
 import '../domain/recurrence.dart' as recurrence;
 import '../l10n/app_localizations.dart';
 import 'messages.dart';
+import 'parts.dart';
 import 'state.dart';
 
 /// Task (docs/spec.md, "Screens of v1"): a form where only the title is
@@ -18,9 +19,20 @@ import 'state.dart';
 /// (`tasks/recurrence.py:341-351`); the history of a task that exists.
 /// Rooms, items, materials and photos come with lot 2b and lot 3.
 class TaskScreen extends StatefulWidget {
-  const TaskScreen({super.key, required this.homeId, this.taskId});
+  const TaskScreen({
+    super.key,
+    required this.homeId,
+    this.taskId,
+    this.roomId,
+    this.itemId,
+  });
 
   final String homeId;
+
+  /// The room or the item a new task starts attached to, when it is added from
+  /// their screen.
+  final String? roomId;
+  final String? itemId;
 
   /// `null` for a new task.
   final String? taskId;
@@ -39,6 +51,10 @@ class _TaskScreenState extends State<TaskScreen> {
   String _unit = recurrence.monthUnit;
   String _season = '';
   TaskRow? _task;
+  String? _roomId;
+  String? _itemId;
+  List<RoomRow> _rooms = const [];
+  List<ItemRow> _items = const [];
   List<OccurrenceRow> _history = const [];
   bool _loaded = false;
 
@@ -47,8 +63,30 @@ class _TaskScreenState extends State<TaskScreen> {
     super.didChangeDependencies();
     if (!_loaded) {
       _loaded = true;
+      _roomId = widget.roomId;
+      _itemId = widget.itemId;
+      _loadPlaces();
       if (widget.taskId != null) _load();
     }
+  }
+
+  /// The rooms of the home, and the items of the room chosen.
+  Future<void> _loadPlaces() async {
+    final repository = AppScope.of(context).repository;
+    final rooms = await repository.rooms(widget.homeId);
+    var roomId = _roomId;
+    if (roomId == null && _itemId != null) {
+      roomId = (await repository.item(_itemId!))?.roomId;
+    }
+    final items = roomId == null
+        ? <ItemRow>[]
+        : await repository.itemsOf(roomId);
+    if (!mounted) return;
+    setState(() {
+      _rooms = rooms;
+      _roomId = roomId;
+      _items = items;
+    });
   }
 
   Future<void> _load() async {
@@ -66,10 +104,13 @@ class _TaskScreenState extends State<TaskScreen> {
       _mode = task.repeatMode;
       _unit = task.repeatUnit;
       _season = task.season;
+      _roomId = task.roomId;
+      _itemId = task.itemId;
       final due = open.isEmpty ? null : open.first.dueOn;
       _due = due == null ? null : Day.parse(due);
       _history = all.where((o) => closedStatuses.contains(o.status)).toList();
     });
+    await _loadPlaces();
   }
 
   @override
@@ -91,8 +132,11 @@ class _TaskScreenState extends State<TaskScreen> {
     seasonEndMonth: _task?.seasonEndMonth,
     notes: _notes.text,
     hideDaysBefore: _task?.hideDaysBefore ?? 0,
-    roomId: _task?.roomId,
-    itemId: _task?.itemId,
+    roomId: _roomId,
+    itemId: _itemId,
+    priority: _task?.priority ?? 'normal',
+    estimatedMinutes: _task?.estimatedMinutes,
+    procedure: _task?.procedure ?? '',
   );
 
   Future<void> _save() async {
@@ -213,6 +257,50 @@ class _TaskScreenState extends State<TaskScreen> {
                         ),
                     ],
                   ),
+                ],
+              ),
+            ),
+            const SizedBox(height: HcSpace.s3),
+            HcCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  hcChoice<String?>(
+                    l10n.room,
+                    _rooms.any((r) => r.id == _roomId) ? _roomId : null,
+                    [
+                      (null, l10n.templatesNoRoom),
+                      for (final room in _rooms) (room.id, room.name),
+                    ],
+                    (value) {
+                      setState(() {
+                        _roomId = value;
+                        _itemId = null;
+                        _items = const [];
+                      });
+                      if (value != null) {
+                        AppScope.of(context).repository
+                            .itemsOf(value)
+                            .then((items) {
+                              if (mounted && _roomId == value) {
+                                setState(() => _items = items);
+                              }
+                            });
+                      }
+                    },
+                    key: const Key('task-room'),
+                  ),
+                  if (_items.isNotEmpty)
+                    hcChoice<String?>(
+                      l10n.item,
+                      _items.any((i) => i.id == _itemId) ? _itemId : null,
+                      [
+                        (null, l10n.contractNone),
+                        for (final item in _items) (item.id, item.name),
+                      ],
+                      (value) => setState(() => _itemId = value),
+                      key: const Key('task-item'),
+                    ),
                 ],
               ),
             ),

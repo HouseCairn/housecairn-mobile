@@ -54,6 +54,11 @@ Manrope. It has no dark theme (`color-scheme: light`, `base.css`).
 | Number and unit side by side, the unit under the number when too narrow (`.field-pair`) | Side by side, stacked from a text size of 1.3 | The same rule, decided by the text size of the phone |
 | Text sizes scale with the browser | Text sizes scale with the phone; the labels of the bar keep their size, and the Save action of the app bar grows up to 1.3 times | Five labels side by side at 360 px, as the tab bar of iOS does; a larger Save pushes the back button out of the bar |
 | Safe area of the bar (`env(safe-area-inset-bottom)`) | `Scaffold` and `NavigationBar` keep the safe areas | The same rule, done by the framework |
+| Room list: a search form, "Change the order" with up and down buttons, a block "Add a room" | The list and a floating "Add a room"; no search, no reordering (rooms keep the household's order, then their creation) | Search and a reordering screen are not in the plan of lot 2b; the order is the web's, `position` then creation |
+| Room page: photos filtered by category chips, the stock of the room, the label tools | Photos as one grid (the category is on each photo, and on its own screen); no stock, no labels | Stock is lot 3; labels are not in v1 |
+| Photo: an upload form (file field) | A sheet with Take a photo and Choose from the gallery, permission asked at that moment; the photo is re-encoded before it is stored | A phone has a camera, and the location must not leave it |
+| Contractor: a vCard download | Call and Write buttons on the card (`tel:`, `mailto:`) | What a phone does with a number; the spec asks for call and e-mail |
+| Reminder preferences per member (days before, hour) | One switch in More, the web's defaults (1 day before, 08:00, follow-ups by priority) | The per-member settings come with sync; the permission is asked when the switch is turned on |
 
 **Not taken.** No dark theme: the web has none. No page title and back link inside the page,
 no breadcrumbs, no computer layout with a column on the left: the app is a phone app. The help

@@ -56,8 +56,9 @@ version is released; the first builds will be alpha. Merged so far, from the
 [plan](docs/plan.md): the foundations (lot 1: the Flutter project for Android and iOS, the
 app shell, English and French, the continuous integration with an Android APK and an
 unsigned iOS build on every pull request), the data, the recurrence and several homes with
-the Today, Task and Homes screens (lot 2a), and the look of the web application (lot 2d).
-Rooms, items, budget, stock, projects and family sync are still to come. How to build and
+the Today, Task and Homes screens (lot 2a), the look of the web application (lot 2d), and
+the rooms, items, contractors, task templates, photos and local reminders (lot 2b).
+Budget, stock, projects and family sync are still to come. How to build and
 test: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 | Document | What it settles |

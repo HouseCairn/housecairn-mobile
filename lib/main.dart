@@ -6,6 +6,8 @@ import 'package:material_ui/material_ui.dart';
 
 import 'app.dart';
 import 'core/clock.dart';
+import 'core/local_notifier.dart';
+import 'core/photo_source.dart';
 import 'data/database.dart';
 import 'data/repository.dart';
 import 'design/fonts.dart';
@@ -28,5 +30,16 @@ Future<void> main() async {
     files: File(path).parent,
   );
   await repository.open();
-  runApp(HousecairnApp(state: AppState(repository)));
+  // The camera, the gallery and the local notifications: each asks for its
+  // permission at the moment of use, never here.
+  late final AppState state;
+  final notifier = LocalNotifier(
+    onOpen: (payload) => state.openReminder(payload),
+  );
+  state = AppState(
+    repository,
+    photoSource: ImagePickerSource(),
+    notifier: notifier,
+  );
+  runApp(HousecairnApp(state: state));
 }
