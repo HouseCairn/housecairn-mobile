@@ -14,6 +14,7 @@ import 'package:housecairn_mobile/domain/photos.dart';
 import 'package:housecairn_mobile/domain/templates.dart';
 import 'package:housecairn_mobile/sync/mode.dart';
 import 'package:housecairn_mobile/ui/state.dart';
+import 'package:housecairn_mobile/ui/task_screen.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'fixture.dart';
@@ -102,6 +103,45 @@ Future<void> tapAdd(WidgetTester tester, String key) async {
   // shows all of it above the bottom bar at large text sizes.
   await tester.drag(find.byType(Scrollable).last, const Offset(0, -2000));
   await tester.pumpAndSettle();
+  await tester.tap(button);
+  await tester.pumpAndSettle();
+}
+
+/// The scrollable of the list of the task form (not the one of a field).
+Finder _taskFormList() => find
+    .descendant(
+      of: find.byType(TaskFormScreen),
+      matching: find.byType(Scrollable),
+    )
+    .first;
+
+/// Shows [finder] in the task form, by scrolling its list.
+Future<void> seeInTaskForm(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(finder, 200, scrollable: _taskFormList());
+  await tester.pumpAndSettle();
+}
+
+/// Opens the folded section of key [key] of the task form (Repeat, Who,
+/// Time and budget, How to do it), when it is not open yet.
+Future<void> unfoldTaskSection(WidgetTester tester, String key) async {
+  final section = find.byKey(Key(key));
+  await seeInTaskForm(tester, section);
+  if (tester.state<State<HcFoldSection>>(section).mounted &&
+      find
+          .descendant(of: section, matching: find.byIcon(Icons.arrow_right))
+          .evaluate()
+          .isNotEmpty) {
+    await tester.tap(
+      find.descendant(of: section, matching: find.byIcon(Icons.arrow_right)),
+    );
+    await tester.pumpAndSettle();
+  }
+}
+
+/// Saves the task form: its button is at the end of the form.
+Future<void> saveTask(WidgetTester tester) async {
+  final button = find.byKey(const Key('task-save'));
+  await seeInTaskForm(tester, button);
   await tester.tap(button);
   await tester.pumpAndSettle();
 }

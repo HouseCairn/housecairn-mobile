@@ -2106,4 +2106,206 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get occurrenceDetails => 'Détails';
+
+  @override
+  String get taskEditTask => 'Modifier la tâche';
+
+  @override
+  String get taskAddTitle => 'Ajouter une tâche';
+
+  @override
+  String get taskDueOn => 'Échéance';
+
+  @override
+  String get taskPostponedFrom => 'Reportée depuis le';
+
+  @override
+  String get taskHiddenUntil => 'Masquée jusqu\'à';
+
+  @override
+  String taskHiddenDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n jours avant la date',
+      one: '$n jour avant la date',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get taskThen => 'Ensuite';
+
+  @override
+  String get taskDetails => 'Détails';
+
+  @override
+  String get taskCost => 'Coût';
+
+  @override
+  String get taskOfWhichStock => 'Dont articles en stock';
+
+  @override
+  String get taskPaidSoFar => 'Payé jusqu\'ici';
+
+  @override
+  String get taskWho => 'Qui';
+
+  @override
+  String get taskTimeAndBudget => 'Durée et budget';
+
+  @override
+  String repeatEveryDay(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Tous les $n jours',
+      one: 'Tous les jours',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatEveryWeek(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Toutes les $n semaines',
+      one: 'Toutes les semaines',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatEveryMonth(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Tous les $n mois',
+      one: 'Tous les mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatEveryYear(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Tous les $n ans',
+      one: 'Tous les ans',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatDaysAfter(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n jours après la dernière fois',
+      one: 'Un jour après la dernière fois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatWeeksAfter(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n semaines après la dernière fois',
+      one: 'Une semaine après la dernière fois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatMonthsAfter(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n mois après la dernière fois',
+      one: 'Un mois après la dernière fois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatYearsAfter(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ans après la dernière fois',
+      one: 'Un an après la dernière fois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatMonths(String start, String end) {
+    return 'de $start à $end';
+  }
+
+  @override
+  String durationMin(int n) {
+    return '$n min';
+  }
+
+  @override
+  String durationHours(int hours) {
+    return '$hours h';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, String minutes) {
+    return '$hours h $minutes';
+  }
+
+  @override
+  String durationDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n jours',
+      one: '$n jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationWeeks(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n semaines',
+      one: '$n semaine',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationMonths(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n mois',
+      one: '$n mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationYears(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ans',
+      one: '$n an',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get taskAddSubmit => 'Ajouter la tâche';
 }
