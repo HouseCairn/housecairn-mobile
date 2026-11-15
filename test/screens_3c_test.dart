@@ -278,9 +278,11 @@ void main() {
       final data = await start(tester);
       await openScreen(tester, TaskScreen(homeId: data.main));
       await tester.enterText(find.byKey(const Key('task-title')), 'Paint');
-      await _see(tester, find.byKey(const Key('task-hide-days')));
+      await unfoldTaskSection(tester, 'task-section-repeat');
+      await seeInTaskForm(tester, find.byKey(const Key('task-hide-days')));
       await tester.enterText(find.byKey(const Key('task-hide-days')), '7');
-      await _see(tester, find.byKey(const Key('task-priority')));
+      await unfoldTaskSection(tester, 'task-section-who');
+      await seeInTaskForm(tester, find.byKey(const Key('task-priority')));
       await tester.tap(find.byKey(const Key('task-priority')));
       await tester.pumpAndSettle();
       await tester.tap(find.text(t('High', 'Haute')).last);
@@ -289,15 +291,16 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Main plumber').last);
       await tester.pumpAndSettle();
-      await _see(tester, find.byKey(const Key('task-duration')));
+      await unfoldTaskSection(tester, 'task-section-budget');
+      await seeInTaskForm(tester, find.byKey(const Key('task-duration')));
       await tester.enterText(find.byKey(const Key('task-duration')), '2');
-      await _see(tester, find.byKey(const Key('task-procedure')));
+      await unfoldTaskSection(tester, 'task-section-how');
+      await seeInTaskForm(tester, find.byKey(const Key('task-procedure')));
       await tester.enterText(
         find.byKey(const Key('task-procedure')),
         '1. Sand\n2. Paint',
       );
-      await tester.tap(find.text(t('Save', 'Enregistrer')));
-      await tester.pumpAndSettle();
+      await saveTask(tester);
       final task =
           (await stateOf(tester).repository.db
                   .select(stateOf(tester).repository.db.tasks)
@@ -320,8 +323,7 @@ void main() {
       await tester.tap(find.text(t('Add a room…', 'Ajouter une pièce…')).last);
       await tester.pumpAndSettle();
       // Without a name for the new room, nothing is saved.
-      await tester.tap(find.text(t('Save', 'Enregistrer')));
-      await tester.pumpAndSettle();
+      await saveTask(tester);
       expect(
         find.text(
           t('Give it a name or a title.', 'Donnez-lui un nom ou un titre.'),
@@ -332,7 +334,7 @@ void main() {
         find.byKey(const Key('task-new-room-name')),
         'Porch',
       );
-      await _see(tester, find.byKey(const Key('task-item')));
+      await seeInTaskForm(tester, find.byKey(const Key('task-item')));
       await tester.tap(find.byKey(const Key('task-item')));
       await tester.pumpAndSettle();
       await tester.tap(
@@ -343,7 +345,8 @@ void main() {
         find.byKey(const Key('task-new-item-name')),
         'Gate',
       );
-      await _see(tester, find.byKey(const Key('task-contractor')));
+      await unfoldTaskSection(tester, 'task-section-who');
+      await seeInTaskForm(tester, find.byKey(const Key('task-contractor')));
       await tester.tap(find.byKey(const Key('task-contractor')));
       await tester.pumpAndSettle();
       await tester.tap(
@@ -354,8 +357,7 @@ void main() {
         find.byKey(const Key('task-new-contractor-name')),
         'Fencer',
       );
-      await tester.tap(find.text(t('Save', 'Enregistrer')));
-      await tester.pumpAndSettle();
+      await saveTask(tester);
       final repository = stateOf(tester).repository;
       final room = (await repository.rooms(data.main))
           .firstWhere((r) => r.name == 'Porch');
@@ -381,7 +383,9 @@ void main() {
         tester,
         TaskScreen(homeId: data.main, taskId: data.hiddenTask),
       );
-      await _see(tester, find.byKey(const Key('task-delete')));
+      await tester.tap(find.byKey(const Key('task-edit')));
+      await tester.pumpAndSettle();
+      await seeInTaskForm(tester, find.byKey(const Key('task-delete')));
       await tester.tap(find.byKey(const Key('task-delete')));
       await tester.pumpAndSettle();
       expect(
@@ -393,7 +397,13 @@ void main() {
         ),
         findsOneWidget,
       );
-      await tester.tap(find.text(t('Cancel', 'Annuler')));
+      // The Cancel of the dialog, not the one of the form under it.
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text(t('Cancel', 'Annuler')),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(
         await stateOf(tester).repository.task(data.hiddenTask),
@@ -408,6 +418,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(await stateOf(tester).repository.task(data.hiddenTask), isNull);
       expect(find.byType(TaskScreen), findsNothing);
+      expect(find.byType(TaskFormScreen), findsNothing);
     });
 
     testWidgets('a home that is archived is read only: no action, no delete, '
@@ -421,6 +432,7 @@ void main() {
       );
       expect(find.byKey(const Key('task-delete')), findsNothing);
       expect(find.byKey(const Key('task-done')), findsNothing);
+      expect(find.byKey(const Key('task-edit')), findsNothing);
       expect(find.byKey(const Key('task-undo')), findsNothing);
     });
   }

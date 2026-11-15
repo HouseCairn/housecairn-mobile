@@ -113,8 +113,7 @@ void main() {
           find.byKey(const Key('task-title')),
           'Fix the tap',
         );
-        await tester.tap(find.text(t('Save', 'Enregistrer')));
-        await tester.pumpAndSettle();
+        await saveTask(tester);
         expect(find.text('Fix the tap'), findsOneWidget);
 
         await tester.tap(find.widgetWithText(FilledButton, t('Done', 'Fait')));
@@ -138,8 +137,7 @@ void main() {
       final state = await pumpApp(tester, locale: locale);
       await tapAdd(tester, 'today-add');
       await tester.pumpAndSettle();
-      await tester.tap(find.text(t('Save', 'Enregistrer')));
-      await tester.pumpAndSettle();
+      await saveTask(tester);
       expect(
         find.text(
           t('Give it a name or a title.', 'Donnez-lui un nom ou un titre.'),
@@ -327,7 +325,7 @@ void main() {
               )
               .first;
           final history = heading(t('History', 'Historique'));
-          final nextDates = heading(t('Next dates', 'Prochaines dates'));
+          final nextDates = find.text(t('Then', 'Ensuite'));
           var sawNextDates = nextDates.evaluate().isNotEmpty;
           for (var i = 0; i < 40 && history.evaluate().isEmpty; i++) {
             await tester.drag(list, const Offset(0, -250));
@@ -336,7 +334,7 @@ void main() {
           }
           expect(history, findsOneWidget);
           check('Task, history');
-          expect(sawNextDates, isTrue, reason: 'the preview of five dates');
+          expect(sawNextDates, isTrue, reason: 'the next dates');
           await back(tester);
 
           await tapAdd(tester, 'today-add');

@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
+import '../design/icons.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/values.dart';
@@ -12,6 +13,7 @@ import '../design/widgets.dart';
 import '../domain/day.dart';
 import '../domain/stock.dart' as stock;
 import '../l10n/app_localizations.dart';
+import 'autosave.dart';
 import 'item_screens.dart';
 import 'messages.dart';
 import 'parts.dart';
@@ -37,7 +39,8 @@ class RoomsTabs extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return HcTabs(
       key: const Key('rooms-tabs'),
-      labels: [l10n.navRooms, l10n.stock],
+      // Rooms, Equipment and Stock, in the web's order (`tab_bar "rooms"`).
+      labels: [l10n.navRooms, l10n.equipmentTab, l10n.stock],
       current: current,
       onSelect: onSelect,
     );
@@ -580,8 +583,19 @@ class ArticleFormScreen extends StatefulWidget implements HcFormScreen {
   State<ArticleFormScreen> createState() => _ArticleFormScreenState();
 }
 
-class _ArticleFormScreenState extends State<ArticleFormScreen> {
+class _ArticleFormScreenState extends State<ArticleFormScreen>
+    with AutosaveSheet<ArticleFormScreen> {
   final _form = GlobalKey<FormState>();
+
+  @override
+  GlobalKey<FormState> get sheetForm => _form;
+
+  @override
+  bool get existing => widget.articleId != null;
+
+  @override
+  Future<void> writeSheet(Repository repository) =>
+      repository.updateArticle(widget.articleId!, _input());
   final _name = TextEditingController();
   final _reference = TextEditingController();
   final _dimensions = TextEditingController();
@@ -639,6 +653,7 @@ class _ArticleFormScreenState extends State<ArticleFormScreen> {
         _items.addAll(linkedItems.map((i) => i.id));
       }
     });
+    sheetLoaded();
   }
 
   @override
@@ -673,6 +688,7 @@ class _ArticleFormScreenState extends State<ArticleFormScreen> {
   );
 
   Future<void> _save() async {
+    cancelAutosave();
     if (!_form.currentState!.validate()) return;
     final navigator = Navigator.of(context);
     final saved = await runChange(
@@ -701,6 +717,12 @@ class _ArticleFormScreenState extends State<ArticleFormScreen> {
     }
   }
 
+  /// A room or an item ticked or unticked: kept, and saved at once.
+  void _toggle(void Function() change) {
+    setState(change);
+    sheetChanged(now: true);
+  }
+
   String? _quantityCheck(String? value, AppLocalizations l10n) {
     final text = (value ?? '').trim();
     return text.isEmpty || stock.parseQuantity(text) != null
@@ -714,9 +736,13 @@ class _ArticleFormScreenState extends State<ArticleFormScreen> {
     const number = TextInputType.numberWithOptions(decimal: true);
     return HcScaffold(
       title: widget.articleId == null ? l10n.addArticle : l10n.editArticle,
-      actions: [HcBarAction(label: l10n.save, onPressed: _save)],
+      actions: [
+        Center(child: savedStatus()),
+        HcBarAction(label: l10n.save, onPressed: _save),
+      ],
       body: Form(
         key: _form,
+        onChanged: sheetChanged,
         child: HcScreenList(
           children: [
             const SizedBox(height: HcSpace.s2),
@@ -784,7 +810,7 @@ class _ArticleFormScreenState extends State<ArticleFormScreen> {
                       l10n.articleCompatible,
                       [for (final i in _itemChoices) (i.id, i.name)],
                       _items,
-                      (id, on) => setState(
+                      (id, on) => _toggle(
                         () => on ? _items.add(id) : _items.remove(id),
                       ),
                       keyPrefix: 'article-item',
@@ -796,7 +822,7 @@ class _ArticleFormScreenState extends State<ArticleFormScreen> {
                       l10n.navRooms,
                       [for (final r in _roomChoices) (r.id, r.name)],
                       _rooms,
-                      (id, on) => setState(
+                      (id, on) => _toggle(
                         () => on ? _rooms.add(id) : _rooms.remove(id),
                       ),
                       keyPrefix: 'article-room',
@@ -1113,8 +1139,14 @@ class _TaskMaterialsState extends State<TaskMaterialsSection> {
                       ),
                       Align(
                         alignment: AlignmentDirectional.centerStart,
-                        child: OutlinedButton(
+                        // One line to fill, and « + » for the next one, as
+                        // the web's form has it since its lot of 2026-11-15.
+                        child: OutlinedButton.icon(
                           key: const Key('material-add'),
+                          icon: const HcIcon(
+                            HcIcons.add,
+                            color: HcColors.primary,
+                          ),
                           onPressed: () async {
                             if (await runChange(
                               context,
@@ -1127,7 +1159,7 @@ class _TaskMaterialsState extends State<TaskMaterialsSection> {
                               _quantity.text = '1';
                             }
                           },
-                          child: Text(l10n.addMaterial),
+                          label: Text(l10n.addMaterial),
                         ),
                       ),
                     ],

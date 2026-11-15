@@ -1,20 +1,22 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import 'package:decimal/decimal.dart';
+import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
+import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/budget.dart' as budget;
-import '../domain/choices.dart';
 import '../domain/day.dart';
 import '../domain/durations.dart' as durations;
 import '../domain/recurrence.dart' as recurrence;
 import '../l10n/app_localizations.dart';
 import 'budget_parts.dart';
-import 'choices.dart';
+import 'contractor_screens.dart';
 import 'item_screens.dart';
 import 'messages.dart';
 import 'occurrence_actions.dart';
@@ -24,21 +26,18 @@ import 'photos.dart';
 import 'rooms.dart';
 import 'state.dart';
 import 'stock_screens.dart';
+import 'task_form_screen.dart';
 
-/// The choice that adds a room, an item or a contractor with the task: the
-/// last of their lists (`AddInPlaceChoiceField`).
-const _newChoice = '+new';
+export 'task_form_screen.dart' show TaskFormScreen;
 
-/// Task (docs/spec.md, "Screens of v1"): the page of a task that exists, with
-/// what can be done to its open occurrence (Done, Postpone, Skip this time,
-/// Undo), and a form where only the title is required; the repetition with a
-/// preview of the next five dates (`tasks/recurrence.py:341-351`); the
-/// photos of its place; the history, whose done lines open their details; the
-/// deletion.
-class TaskScreen extends StatefulWidget implements HcFormScreen {
-  @override
-  bool get opensAsSheet => taskId == null;
-
+/// A task (docs/spec.md, "Screens of v1"; `tasks/task_detail.html`). An
+/// existing task opens on its page, to read, as on the web: its pills, its
+/// title, its place, the row of actions (Done, Postpone, Skip this time or
+/// Undo, then Edit the task), then When, How to do it, Details, Cost,
+/// Materials, the photos of its place and its History. The form opens from
+/// Edit the task; without [taskId], this is the form of a new task, which
+/// opens as a sheet on iOS (lot D4).
+class TaskScreen extends StatelessWidget implements HcFormScreen {
   const TaskScreen({
     super.key,
     required this.homeId,
@@ -58,42 +57,100 @@ class TaskScreen extends StatefulWidget implements HcFormScreen {
   final String? taskId;
 
   @override
-  State<TaskScreen> createState() => _TaskScreenState();
+  bool get opensAsSheet => taskId == null;
+
+  @override
+  Widget build(BuildContext context) => taskId == null
+      ? TaskFormScreen(homeId: homeId, roomId: roomId, itemId: itemId)
+      : TaskPage(homeId: homeId, taskId: taskId!);
 }
 
-class _TaskScreenState extends State<TaskScreen> {
-  final _form = GlobalKey<FormState>();
-  final _title = TextEditingController();
-  final _interval = TextEditingController(text: '1');
-  final _notes = TextEditingController();
-  final _procedure = TextEditingController();
-  final _hide = TextEditingController(text: '0');
-  final _duration = TextEditingController();
-  final _material = TextEditingController();
-  final _labour = TextEditingController();
-  final _newRoomName = TextEditingController();
-  final _newItemName = TextEditingController();
-  final _newContractorName = TextEditingController();
-  final _newContractorOther = TextEditingController();
-  String _currency = '';
-  Day? _due;
-  String _mode = recurrence.once;
-  String _unit = recurrence.monthUnit;
-  String _season = '';
-  String _priority = 'normal';
-  String _durationUnit = durations.hour;
-  String _newRoomKind = 'other';
-  String _newContractorTrade = '';
+/// The rule of a task in a sentence, as the web's `repeat_summary`
+/// (`tasks/templatetags/tasks_extras.py`): "Every 3 months", "A month after
+/// the last time", then its season and its months when it has some.
+String repeatSummary(BuildContext context, TaskRow task) {
+  final l10n = AppLocalizations.of(context);
+  final n = task.repeatInterval;
+  if (task.repeatMode == recurrence.once) return l10n.repeatOnce;
+  final fixed = task.repeatMode == recurrence.fixed;
+  var text = switch (task.repeatUnit) {
+    recurrence.dayUnit =>
+      fixed ? l10n.repeatEveryDay(n) : l10n.repeatDaysAfter(n),
+    recurrence.weekUnit =>
+      fixed ? l10n.repeatEveryWeek(n) : l10n.repeatWeeksAfter(n),
+    recurrence.yearUnit =>
+      fixed ? l10n.repeatEveryYear(n) : l10n.repeatYearsAfter(n),
+    _ => fixed ? l10n.repeatEveryMonth(n) : l10n.repeatMonthsAfter(n),
+  };
+  final start = task.seasonStartMonth, end = task.seasonEndMonth;
+  if (start != null && end != null) {
+    final season = switch (task.season) {
+      recurrence.spring => l10n.seasonSpring,
+      recurrence.summer => l10n.seasonSummer,
+      recurrence.autumn => l10n.seasonAutumn,
+      recurrence.winter => l10n.seasonWinter,
+      _ => null,
+    };
+    if (season != null) text += ', $season';
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    String month(int m) => DateFormat.MMMM(locale).format(DateTime(2000, m));
+    text += ', ${l10n.repeatMonths(month(start), month(end))}';
+  }
+  return text;
+}
+
+/// An estimated duration as people say it, as the web's `durations.label`:
+/// "45 min", "1 h 30", "2 days", "1 month 1 week".
+String durationLabel(AppLocalizations l10n, int minutes) {
+  final parts = <String>[];
+  var rest = minutes;
+  for (final (unit, say) in [
+    (durations.year, l10n.durationYears),
+    (durations.month, l10n.durationMonths),
+    (durations.week, l10n.durationWeeks),
+    (durations.day, l10n.durationDays),
+  ]) {
+    final size = durations.minutesIn[unit]!;
+    final count = rest ~/ size;
+    rest = rest % size;
+    if (count > 0) parts.add(say(count));
+  }
+  if (rest > 0 || parts.isEmpty) {
+    if (rest < 60) {
+      parts.add(l10n.durationMin(rest));
+    } else {
+      final hours = rest ~/ 60, left = rest % 60;
+      parts.add(
+        left == 0
+            ? l10n.durationHours(hours)
+            : l10n.durationHoursMinutes(hours, left.toString().padLeft(2, '0')),
+      );
+    }
+  }
+  return parts.join(' ');
+}
+
+/// The page of a task, to read (`tasks/task_detail.html`).
+class TaskPage extends StatefulWidget {
+  const TaskPage({super.key, required this.homeId, required this.taskId});
+
+  final String homeId;
+  final String taskId;
+
+  @override
+  State<TaskPage> createState() => _TaskPageState();
+}
+
+class _TaskPageState extends State<TaskPage> {
   TaskRow? _task;
-  String? _roomId;
-  String? _itemId;
-  String? _contractorId;
-  List<RoomRow> _rooms = const [];
-  List<ItemRow> _items = const [];
-  List<ContractorRow> _contractors = const [];
+  RoomRow? _room;
+  ItemRow? _item;
+  ContractorRow? _contractor;
+  String _currency = '';
   OccurrenceRow? _current;
   OccurrenceRow? _lastClosed;
   List<OccurrenceRow> _history = const [];
+  budget.TaskBudget? _cost;
   bool _loaded = false;
   int _revision = -1;
 
@@ -104,264 +161,74 @@ class _TaskScreenState extends State<TaskScreen> {
     if (!_loaded) {
       _loaded = true;
       _revision = state.revision;
-      _roomId = widget.roomId;
-      _itemId = widget.itemId;
-      _loadPlaces();
-      if (widget.taskId != null) _load();
+      _load();
     } else if (state.revision != _revision) {
-      // A change made from here (Done, Skip, Undo) or from the bar of Today.
+      // A change made from here (Done, Skip, Undo, the form) or from the bar
+      // of Today.
       _revision = state.revision;
-      if (widget.taskId != null) _loadOccurrences();
+      _load();
     }
-  }
-
-  /// The rooms of the home, the contractors, and the items of the room chosen.
-  Future<void> _loadPlaces() async {
-    final repository = AppScope.of(context).repository;
-    final rooms = await repository.rooms(widget.homeId);
-    final contractors = await repository.contractors(widget.homeId);
-    final home = await repository.home(widget.homeId);
-    var roomId = _roomId;
-    if (roomId == null && _itemId != null) {
-      roomId = (await repository.item(_itemId!))?.roomId;
-    }
-    final items = roomId == null || roomId == _newChoice
-        ? <ItemRow>[]
-        : await repository.itemsOf(roomId);
-    if (!mounted) return;
-    setState(() {
-      _currency = home?.currency ?? '';
-      _rooms = rooms;
-      _contractors = contractors;
-      _roomId = roomId;
-      _items = items;
-    });
   }
 
   Future<void> _load() async {
     final repository = AppScope.of(context).repository;
-    final task = await repository.task(widget.taskId!);
-    if (task == null || !mounted) return;
-    setState(() {
-      _task = task;
-      _title.text = task.title;
-      _interval.text = '${task.repeatInterval}';
-      _notes.text = task.notes;
-      _procedure.text = task.procedure;
-      _hide.text = '${task.hideDaysBefore}';
-      final minutes = task.estimatedMinutes;
-      if (minutes != null) {
-        final (value, unit) = durations.split(minutes);
-        _duration.text = '$value';
-        _durationUnit = unit;
-      }
-      _material.text = task.materialBudget == null
-          ? ''
-          : budget.readMoney(task.materialBudget!).toStringAsFixed(2);
-      _labour.text = task.labourBudget == null
-          ? ''
-          : budget.readMoney(task.labourBudget!).toStringAsFixed(2);
-      _mode = task.repeatMode;
-      _unit = task.repeatUnit;
-      _season = task.season;
-      _priority = task.priority;
-      _roomId = task.roomId;
-      _itemId = task.itemId;
-      _contractorId = task.contractorId;
-    });
-    await _loadOccurrences();
-    await _loadPlaces();
-  }
-
-  /// The open occurrence and the history of the task. The date of the form
-  /// follows the open occurrence, so that saving after a Done does not move
-  /// the next one back.
-  Future<void> _loadOccurrences() async {
-    final repository = AppScope.of(context).repository;
-    final open = await repository.openOccurrencesOf(widget.taskId!);
-    final all = await repository.occurrencesOf(widget.taskId!);
+    final task = await repository.task(widget.taskId);
+    if (task == null) return;
+    final home = await repository.home(widget.homeId);
+    final room = task.roomId == null
+        ? null
+        : await repository.room(task.roomId!);
+    final item = task.itemId == null
+        ? null
+        : await repository.item(task.itemId!);
+    final contractor = task.contractorId == null
+        ? null
+        : await repository.contractor(task.contractorId!);
+    final open = await repository.openOccurrencesOf(widget.taskId);
+    final all = await repository.occurrencesOf(widget.taskId);
+    final ledger = await repository.ledger(widget.homeId);
     if (!mounted) return;
     final closed = all.where((o) => closedStatuses.contains(o.status)).toList()
       ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
     setState(() {
+      _task = task;
+      _room = room;
+      _item = item;
+      _contractor = contractor;
+      _currency = home?.currency ?? '';
       _current = open.isEmpty ? null : open.first;
       _lastClosed = closed.isEmpty ? null : closed.first;
-      final due = _current?.dueOn;
-      _due = due == null ? null : Day.parse(due);
       _history = all.where((o) => closedStatuses.contains(o.status)).toList();
+      // A task of a project has its money in the lines of the project.
+      _cost = ledger.tasks
+          .where((budget.TaskBudget t) => t.task.id == task.id)
+          .firstOrNull;
     });
   }
 
-  @override
-  void dispose() {
-    for (final c in [
-      _title,
-      _interval,
-      _notes,
-      _procedure,
-      _hide,
-      _duration,
-      _material,
-      _labour,
-      _newRoomName,
-      _newItemName,
-      _newContractorName,
-      _newContractorOther,
-    ]) {
-      c.dispose();
-    }
-    super.dispose();
-  }
-
-  TaskInput _input(
-    String? roomId,
-    String? itemId,
-    String? contractorId,
-    int? minutes,
-  ) => TaskInput(
-    title: _title.text,
-    dueOn: _due,
-    repeatMode: _mode,
-    repeatUnit: _unit,
-    repeatInterval: int.tryParse(_interval.text.trim()) ?? 0,
-    season: _season,
-    seasonStartMonth: _task?.seasonStartMonth,
-    seasonEndMonth: _task?.seasonEndMonth,
-    notes: _notes.text,
-    hideDaysBefore: int.tryParse(_hide.text.trim()) ?? 0,
-    roomId: roomId,
-    itemId: itemId,
-    priority: _priority,
-    estimatedMinutes: minutes,
-    procedure: _procedure.text,
-    contractorId: contractorId,
-  );
-
-  Future<void> _save() async {
-    if (!_form.currentState!.validate()) return;
-    final state = AppScope.of(context);
+  /// The form of the task; when it deletes the task, the page closes too.
+  Future<void> _edit() async {
     final navigator = Navigator.of(context);
-    final repository = state.repository;
-    final typed = int.tryParse(_duration.text.trim());
-    final minutes = typed == null
-        ? null
-        : durations.toMinutes(typed, _durationUnit);
-    try {
-      await repository.atomic(() async {
-        // A room, an item and a contractor added with the task join the home
-        // with it, or not at all.
-        var roomId = _roomId;
-        var itemId = _itemId;
-        var contractorId = _contractorId;
-        if (roomId == _newChoice) {
-          roomId = await repository.createRoom(
-            widget.homeId,
-            name: _newRoomName.text,
-            kind: _newRoomKind,
-            position: _rooms.length,
-          );
-        }
-        if (itemId == _newChoice) {
-          itemId = await repository.addItem(
-            roomId!,
-            ItemInput(name: _newItemName.text),
-          );
-        }
-        if (contractorId == _newChoice) {
-          contractorId = await repository.addContractor(
-            widget.homeId,
-            ContractorInput(
-              name: _newContractorName.text,
-              trade: _newContractorTrade,
-              tradeOther: _newContractorTrade == 'other'
-                  ? _newContractorOther.text
-                  : '',
-            ),
-          );
-        }
-        final input = _input(roomId, itemId, contractorId, minutes);
-        final id = widget.taskId == null
-            ? await repository.createTask(widget.homeId, input)
-            : widget.taskId!;
-        if (widget.taskId != null) await repository.updateTask(id, input);
-        await repository.setTaskBudgets(
-          id,
-          material: _material.text,
-          labour: _labour.text,
-        );
-      });
-    } on Refused catch (refused) {
-      if (mounted) showRefusal(context, refused);
-      return;
-    }
-    await state.refresh();
-    navigator.pop();
+    final kept = await navigator.push<bool>(
+      hcRouteOf<bool>(
+        TaskFormScreen(homeId: widget.homeId, taskId: widget.taskId),
+      ),
+    );
+    if (kept == false && mounted) navigator.pop();
   }
 
-  Future<void> _delete() async {
-    final l10n = AppLocalizations.of(context);
-    final navigator = Navigator.of(context);
-    final confirmed = await confirmDelete(
-      context,
-      title: l10n.taskDeleteTitle(_task?.title ?? _title.text),
-      body: l10n.taskDeleteBody,
-    );
-    if (!confirmed || !mounted) return;
-    if (await runChange(context, (r) => r.deleteTask(widget.taskId!))) {
-      navigator.pop();
-    }
-  }
+  void _open(Widget screen) => Navigator.of(context).push(hcRoute(screen));
 
-  Future<void> _chooseDate() async {
-    final today = AppScope.of(context).repository.today();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: asDateTime(_due ?? today),
-      firstDate: asDateTime(today.addYears(-dateSpanYears)),
-      lastDate: asDateTime(today.addYears(dateSpanYears)),
-    );
-    if (picked != null) setState(() => _due = Day.of(picked));
-  }
+  String _money(String amount) =>
+      moneyIn(context, _currency, budget.readMoney(amount));
 
-  List<Day> _preview(String hemisphere) {
-    final due = _due;
-    final interval = int.tryParse(_interval.text.trim());
-    if (due == null || _mode == recurrence.once || interval == null) {
-      return const [];
-    }
-    final window = _season == recurrence.custom
-        ? (_task?.seasonStartMonth, _task?.seasonEndMonth)
-        : recurrence.seasonWindow(_season, hemisphere);
-    final rule = recurrence.Rule(
-      mode: _mode,
-      unit: _unit,
-      interval: interval,
-      seasonStart: window?.$1,
-      seasonEnd: window?.$2,
-    );
-    if (recurrence.problems(rule).isNotEmpty) return const [];
-    final anchor = _task?.seriesStart;
-    return recurrence.preview(
-      rule,
-      anchor: anchor == null ? due : Day.parse(anchor),
-      dueOn: due,
-      count: 5,
-    );
-  }
-
-  String? _nameRequired(String? value, AppLocalizations l10n) =>
-      (value ?? '').trim().isEmpty ? l10n.errTitleRequired : null;
-
-  /// The task as a page, above its form: what is due, where, and what can be
-  /// done to it (`tasks/task_detail.html`).
-  Widget _summary(AppLocalizations l10n, bool writable) {
+  /// Pills, title, place and the row of actions: the head of the page.
+  Widget _head(AppLocalizations l10n, bool writable) {
     final task = _task!;
     final today = AppScope.of(context).repository.today();
     final current = _current;
     final closed = _lastClosed;
-    final room = _rooms.where((r) => r.id == task.roomId).firstOrNull;
-    final item = _items.where((i) => i.id == task.itemId).firstOrNull;
-    final place = [?room?.name, ?item?.name].join(' · ');
+    final room = _room, item = _item;
     return HcCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -393,19 +260,46 @@ class _TaskScreenState extends State<TaskScreen> {
                       : HcPillTone.ghost,
                 ),
               if (task.priority == 'high')
-                HcPill(l10n.taskHighPriority, tone: HcPillTone.warning),
-              if (task.priority == 'low')
+                HcPill(l10n.taskHighPriority, tone: HcPillTone.warning)
+              else if (task.priority == 'low')
                 HcPill(l10n.taskLowPriority, tone: HcPillTone.ghost),
+              if (task.repeatMode != recurrence.once)
+                HcPill(repeatSummary(context, task), tone: HcPillTone.info),
             ],
           ),
           const SizedBox(height: HcSpace.s2),
-          Text(task.title, style: HcText.cardTitle),
-          if (place.isNotEmpty) ...[
-            const SizedBox(height: HcSpace.s1),
-            Text(place, style: HcText.rowText),
-          ],
-          if (writable && (current != null || closed != null)) ...[
+          Semantics(
+            header: true,
+            child: Text(task.title, style: HcText.pageTitle),
+          ),
+          if (room != null || item != null)
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (room != null)
+                  HcLink(
+                    room.name,
+                    key: const Key('task-room-link'),
+                    onTap: () => _open(
+                      RoomScreen(homeId: widget.homeId, roomId: room.id),
+                    ),
+                  ),
+                if (room != null && item != null)
+                  Text(' · ', style: HcText.rowText),
+                if (item != null)
+                  HcLink(
+                    item.name,
+                    key: const Key('task-item-link'),
+                    onTap: () => _open(
+                      ItemScreen(homeId: widget.homeId, itemId: item.id),
+                    ),
+                  ),
+              ],
+            ),
+          if (writable) ...[
             const SizedBox(height: HcSpace.s3),
+            // One primary action, then the secondary ones, on lines that
+            // wrap (design/patterns.md of the web, Record page).
             Wrap(
               spacing: HcSpace.s2,
               runSpacing: HcSpace.s2,
@@ -427,12 +321,17 @@ class _TaskScreenState extends State<TaskScreen> {
                         markSkipped(context, current.id, task.title),
                     child: Text(l10n.actionSkip),
                   ),
-                ] else
+                ] else if (closed != null)
                   OutlinedButton(
                     key: const Key('task-undo'),
-                    onPressed: () => undoOccurrence(context, closed!.id),
+                    onPressed: () => undoOccurrence(context, closed.id),
                     child: Text(l10n.undo),
                   ),
+                OutlinedButton(
+                  key: const Key('task-edit'),
+                  onPressed: _edit,
+                  child: Text(l10n.taskEditTask),
+                ),
               ],
             ),
           ],
@@ -440,6 +339,156 @@ class _TaskScreenState extends State<TaskScreen> {
       ),
     );
   }
+
+  /// When: the rule, the date, the first date of a postponed one, how long
+  /// it stays hidden, and the next three dates (`services.upcoming_dates`).
+  Widget _when(AppLocalizations l10n) {
+    final task = _task!;
+    final current = _current;
+    final due = current?.dueOn == null ? null : Day.parse(current!.dueOn!);
+    final next = <Day>[];
+    if (task.repeatMode != recurrence.once && due != null) {
+      final rule = recurrence.Rule(
+        mode: task.repeatMode,
+        unit: task.repeatUnit,
+        interval: task.repeatInterval,
+        seasonStart: task.seasonStartMonth,
+        seasonEnd: task.seasonEndMonth,
+      );
+      if (recurrence.problems(rule).isEmpty) {
+        final anchor = task.seriesStart;
+        next.addAll(
+          recurrence.preview(
+            rule,
+            anchor: anchor == null ? due : Day.parse(anchor),
+            dueOn: due,
+            count: 3,
+          ),
+        );
+      }
+    }
+    return _section(
+      l10n.taskWhen,
+      HcCard(
+        child: HcValueList(
+          children: [
+            HcValueRow(l10n.repeat, repeatSummary(context, task)),
+            if (due != null)
+              HcValueRow(l10n.taskDueOn, formatDay(context, due)),
+            if (current?.postponedFrom != null)
+              HcValueRow(
+                l10n.taskPostponedFrom,
+                formatDay(context, Day.parse(current!.postponedFrom!)),
+              ),
+            if (task.hideDaysBefore > 0)
+              HcValueRow(
+                l10n.taskHiddenUntil,
+                l10n.taskHiddenDays(task.hideDaysBefore),
+              ),
+            if (next.isNotEmpty)
+              // One date a line: three dates do not hold on one line of a
+              // phone.
+              HcValueRow(
+                l10n.taskThen,
+                '',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    for (final day in next)
+                      Text(formatDay(context, day), style: HcValueText.value),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Details: duration, budgets, contractor and notes, when there are some.
+  Widget? _details(AppLocalizations l10n) {
+    final task = _task!;
+    final contractor = _contractor;
+    final minutes = task.estimatedMinutes;
+    final rows = <Widget>[
+      if (minutes != null && minutes > 0)
+        HcValueRow(l10n.taskDuration, durationLabel(l10n, minutes)),
+      if (task.labourBudget != null)
+        HcValueRow(l10n.labourBudget, _money(task.labourBudget!)),
+      if (task.materialBudget != null)
+        HcValueRow(l10n.materialBudget, _money(task.materialBudget!)),
+      if (contractor != null)
+        HcValueRow(
+          l10n.contractor,
+          '',
+          child: HcLink(
+            [
+              contractor.name,
+              if (contractor.trade.isNotEmpty)
+                contractorTrade(l10n, contractor),
+            ].join(' · '),
+            key: const Key('task-contractor-link'),
+            onTap: () => _open(
+              ContractorScreen(
+                homeId: widget.homeId,
+                contractorId: contractor.id,
+              ),
+            ),
+          ),
+        ),
+    ];
+    if (rows.isEmpty && task.notes.isEmpty) return null;
+    return _section(
+      l10n.taskDetails,
+      HcCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (rows.isNotEmpty) HcValueList(children: rows),
+            // A long text goes under its label, as a paragraph.
+            if (task.notes.isNotEmpty) ...[
+              if (rows.isNotEmpty) const Divider(height: HcSpace.s6),
+              Text(l10n.taskNotes, style: HcValueText.label),
+              const SizedBox(height: HcSpace.s1),
+              Text(task.notes, style: HcText.body),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Cost: the estimate of one time, its part from the stock, a year of it,
+  /// and what the times done cost (`budget/_task_cost.html`).
+  Widget? _costSection(AppLocalizations l10n) {
+    final row = _cost;
+    if (row == null) return null;
+    final paid = row.figures(budget.anytime).paid;
+    if (!row.hasEstimate && paid == budget.zero) return null;
+    String money(Decimal value) => moneyIn(context, _currency, value);
+    final annual = row.annualCost;
+    return _section(
+      l10n.taskCost,
+      HcCard(
+        child: HcValueList(
+          children: [
+            if (row.hasEstimate) ...[
+              HcValueRow(l10n.estimateEachTime, money(row.estimate)),
+              if (row.stock.priced > 0)
+                HcValueRow(l10n.taskOfWhichStock, money(row.stock.amount)),
+              if (annual != null) HcValueRow(l10n.costAYear, money(annual)),
+            ],
+            HcValueRow(l10n.taskPaidSoFar, money(paid)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _section(String heading, Widget body) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [HcSectionHeading(heading), body],
+  );
 
   /// The photos of the item of the task, else of its room, read only, with a
   /// way to their sheet (`task_detail.html`).
@@ -471,12 +520,10 @@ class _TaskScreenState extends State<TaskScreen> {
                   alignment: AlignmentDirectional.centerStart,
                   child: TextButton(
                     key: const Key('task-photos-link'),
-                    onPressed: () => Navigator.of(context).push(
-                      hcRoute(
-                        isItem
-                            ? ItemScreen(homeId: widget.homeId, itemId: place)
-                            : RoomScreen(homeId: widget.homeId, roomId: place),
-                      ),
+                    onPressed: () => _open(
+                      isItem
+                          ? ItemScreen(homeId: widget.homeId, itemId: place)
+                          : RoomScreen(homeId: widget.homeId, roomId: place),
                     ),
                     child: Text(
                       isItem
@@ -490,512 +537,76 @@ class _TaskScreenState extends State<TaskScreen> {
     );
   }
 
-  Widget _historyList(AppLocalizations l10n, bool writable) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      HcSectionHeading(l10n.taskHistory),
-      HcCardList(
-        children: [
-          for (final o in _history)
-            HcRow(
-              key: Key('history-${o.id}'),
-              title: o.status == 'done' && o.completedOn != null
-                  ? l10n.historyDone(
-                      formatDay(context, Day.parse(o.completedOn!)),
-                    )
-                  : l10n.historySkipped,
-              text: o.status != 'done'
-                  ? null
-                  : o.actualCost == null
-                  ? l10n.costNotTyped
-                  : l10n.realCost(
-                      moneyIn(
-                        context,
-                        _currency,
-                        budget.readMoney(o.actualCost!),
-                      ),
-                    ),
-              moreText: o.completionNote.isEmpty ? null : o.completionNote,
-              onTap: o.status == 'done' && writable
-                  ? () => Navigator.of(context).push(
-                      hcRoute(
-                        OccurrenceScreen(
-                          homeId: widget.homeId,
-                          occurrenceId: o.id,
-                        ),
-                      ),
-                    )
-                  : null,
-            ),
-        ],
-      ),
-    ],
+  Widget _historyList(AppLocalizations l10n, bool writable) => _section(
+    l10n.taskHistory,
+    HcCardList(
+      children: [
+        for (final o in _history)
+          HcRow(
+            key: Key('history-${o.id}'),
+            title: o.status == 'done' && o.completedOn != null
+                ? l10n.historyDone(
+                    formatDay(context, Day.parse(o.completedOn!)),
+                  )
+                : l10n.historySkipped,
+            text: o.status != 'done'
+                ? null
+                : o.actualCost == null
+                ? l10n.costNotTyped
+                : l10n.realCost(_money(o.actualCost!)),
+            moreText: o.completionNote.isEmpty ? null : o.completionNote,
+            onTap: o.status == 'done' && writable
+                ? () => _open(
+                    OccurrenceScreen(homeId: widget.homeId, occurrenceId: o.id),
+                  )
+                : null,
+          ),
+      ],
+    ),
   );
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final state = AppScope.of(context);
-    final hemisphere =
-        state.homes
-            .where((h) => h.id == widget.homeId)
-            .firstOrNull
-            ?.hemisphere ??
-        recurrence.north;
-    final writable = state.homes
-        .where((h) => h.id == widget.homeId)
-        .every((h) => h.archivedAt == null);
-    final repeats = _mode != recurrence.once;
-    // The text size of the phone at which a pair of fields stacks.
-    final wide = MediaQuery.textScalerOf(context).scale(1) > 1.3;
-    final next = _preview(hemisphere);
-    final newRoom = _roomId == _newChoice;
+    final home = state.homes.where((h) => h.id == widget.homeId).firstOrNull;
+    final writable = home?.archivedAt == null;
+    final task = _task;
+    final details = task == null ? null : _details(l10n);
+    final cost = task == null ? null : _costSection(l10n);
+    // The h1 is drawn under the pills of the head (lot D2); on iOS it still
+    // folds into the bar once scrolled away (lot D4).
     return HcScaffold(
-      title: widget.taskId == null ? l10n.newTask : l10n.task,
-      actions: [HcBarAction(label: l10n.save, onPressed: _save)],
-      body: Form(
-        key: _form,
-        child: HcScreenList(
-          children: [
-            const SizedBox(height: HcSpace.s2),
-            if (_task != null) ...[
-              _summary(l10n, writable),
-              const SizedBox(height: HcSpace.s3),
-            ],
-            HcCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  HcField(
-                    label: l10n.taskTitle,
-                    child: TextFormField(
-                      key: const Key('task-title'),
-                      controller: _title,
-                      autofocus: widget.taskId == null,
-                      textCapitalization: TextCapitalization.sentences,
-                      validator: (value) => _nameRequired(value, l10n),
-                    ),
-                  ),
-                  Text(l10n.taskDueDate, style: HcText.fieldLabel),
-                  const SizedBox(height: HcSpace.s1),
-                  Wrap(
-                    spacing: HcSpace.s2,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text(
-                        _due == null
-                            ? l10n.todayNoDate
-                            : l10n.dueOn(formatDay(context, _due!)),
+      title: task?.title,
+      drawsTitle: false,
+      body: task == null
+          ? const SizedBox.shrink()
+          : HcScreenList(
+              children: [
+                _head(l10n, writable),
+                _when(l10n),
+                if (task.procedure.trim().isNotEmpty)
+                  _section(
+                    l10n.taskProcedure,
+                    HcCard(
+                      child: Text(
+                        task.procedure,
+                        key: const Key('task-procedure-text'),
                         style: HcText.body,
                       ),
-                      TextButton(
-                        onPressed: _chooseDate,
-                        child: Text(l10n.taskChooseDate),
-                      ),
-                      if (_due != null)
-                        TextButton(
-                          onPressed: () => setState(() => _due = null),
-                          child: Text(l10n.taskClearDate),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: HcSpace.s3),
-            HcCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  hcChoice<String?>(
-                    l10n.room,
-                    newRoom || _rooms.any((r) => r.id == _roomId)
-                        ? _roomId
-                        : null,
-                    [
-                      (null, l10n.templatesNoRoom),
-                      for (final room in _rooms) (room.id, room.name),
-                      (_newChoice, l10n.taskAddRoom),
-                    ],
-                    (value) {
-                      setState(() {
-                        _roomId = value;
-                        _itemId = null;
-                        _items = const [];
-                      });
-                      if (value != null && value != _newChoice) {
-                        AppScope.of(context).repository
-                            .itemsOf(value)
-                            .then((items) {
-                              if (mounted && _roomId == value) {
-                                setState(() => _items = items);
-                              }
-                            });
-                      }
-                    },
-                    key: const Key('task-room'),
-                  ),
-                  if (newRoom) ...[
-                    HcSectionHeading(l10n.taskNewRoom),
-                    hcText(
-                      l10n.taskNewRoomName,
-                      _newRoomName,
-                      key: const Key('task-new-room-name'),
-                      validator: (v) => _nameRequired(v, l10n),
-                    ),
-                    hcChoice<String>(
-                      l10n.taskNewRoomKind,
-                      _newRoomKind,
-                      [for (final k in roomKinds) (k, roomKindLabel(l10n, k))],
-                      (value) => setState(() => _newRoomKind = value),
-                      key: const Key('task-new-room-kind'),
-                    ),
-                  ],
-                  if (_roomId != null)
-                    hcChoice<String?>(
-                      l10n.item,
-                      _itemId == _newChoice ||
-                              _items.any((i) => i.id == _itemId)
-                          ? _itemId
-                          : null,
-                      [
-                        (null, l10n.contractNone),
-                        for (final item in _items) (item.id, item.name),
-                        (_newChoice, l10n.taskAddItem),
-                      ],
-                      (value) => setState(() => _itemId = value),
-                      key: const Key('task-item'),
-                    ),
-                  if (_itemId == _newChoice) ...[
-                    HcSectionHeading(l10n.taskNewItem),
-                    hcText(
-                      l10n.taskNewItemName,
-                      _newItemName,
-                      key: const Key('task-new-item-name'),
-                      validator: (v) => _nameRequired(v, l10n),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: HcSpace.s3),
-            HcCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  HcField(
-                    label: l10n.repeat,
-                    child: DropdownButtonFormField<String>(
-                      key: const Key('task-repeat'),
-                      initialValue: _mode,
-                      isExpanded: true,
-                      items: [
-                        DropdownMenuItem(
-                          value: recurrence.once,
-                          child: Text(l10n.repeatOnce),
-                        ),
-                        DropdownMenuItem(
-                          value: recurrence.fixed,
-                          child: Text(l10n.repeatFixed),
-                        ),
-                        DropdownMenuItem(
-                          value: recurrence.afterLast,
-                          child: Text(l10n.repeatAfterLast),
-                        ),
-                      ],
-                      onChanged: (value) => setState(() => _mode = value!),
                     ),
                   ),
-                  if (repeats)
-                    HcField(
-                      label: l10n.repeatEvery,
-                      // A number and its unit on one line, as `.field-pair`;
-                      // with a large text, the unit goes under the number.
-                      child: Flex(
-                        direction: wide ? Axis.vertical : Axis.horizontal,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _pairPart(
-                            wide,
-                            TextFormField(
-                              key: const Key('task-interval'),
-                              controller: _interval,
-                              keyboardType: TextInputType.number,
-                              onChanged: (_) => setState(() {}),
-                              validator: (value) {
-                                final n = int.tryParse((value ?? '').trim());
-                                final max = recurrence.maxInterval[_unit]!;
-                                return n == null || n < 1 || n > max
-                                    ? l10n.errIntervalOutOfRange
-                                    : null;
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: HcSpace.s2, height: HcSpace.s2),
-                          _pairPart(
-                            wide,
-                            DropdownButtonFormField<String>(
-                              initialValue: _unit,
-                              isExpanded: true,
-                              items: [
-                                for (final (unit, label) in [
-                                  (recurrence.dayUnit, l10n.unitDays),
-                                  (recurrence.weekUnit, l10n.unitWeeks),
-                                  (recurrence.monthUnit, l10n.unitMonths),
-                                  (recurrence.yearUnit, l10n.unitYears),
-                                ])
-                                  DropdownMenuItem(
-                                    value: unit,
-                                    child: Text(label),
-                                  ),
-                              ],
-                              onChanged: (value) =>
-                                  setState(() => _unit = value!),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  HcField(
-                    label: l10n.season,
-                    child: DropdownButtonFormField<String>(
-                      initialValue: _season,
-                      isExpanded: true,
-                      items: [
-                        for (final (season, label) in [
-                          ('', l10n.seasonWholeYear),
-                          (recurrence.spring, l10n.seasonSpring),
-                          (recurrence.summer, l10n.seasonSummer),
-                          (recurrence.autumn, l10n.seasonAutumn),
-                          (recurrence.winter, l10n.seasonWinter),
-                          if (_season == recurrence.custom)
-                            (recurrence.custom, l10n.seasonCustom),
-                        ])
-                          DropdownMenuItem(value: season, child: Text(label)),
-                      ],
-                      onChanged: (value) => setState(() => _season = value!),
-                    ),
-                  ),
-                  hcText(
-                    l10n.taskHideDays,
-                    _hide,
-                    key: const Key('task-hide-days'),
-                    keyboard: TextInputType.number,
-                    sentences: false,
-                    validator: (value) {
-                      final n = int.tryParse((value ?? '').trim());
-                      return n == null || n < 0 || n > 365
-                          ? l10n.errHideDays
-                          : null;
-                    },
-                  ),
-                  fieldHelp(l10n.taskHideDaysHelp),
-                ],
-              ),
-            ),
-            const SizedBox(height: HcSpace.s3),
-            HcCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  hcChoice<String>(
-                    l10n.priority,
-                    _priority,
-                    [
-                      ('high', l10n.priorityHigh),
-                      ('normal', l10n.priorityNormal),
-                      ('low', l10n.priorityLow),
-                    ],
-                    (value) => setState(() => _priority = value),
-                    key: const Key('task-priority'),
-                  ),
-                  hcChoice<String?>(
-                    l10n.contractor,
-                    _contractorId == _newChoice ||
-                            _contractors.any((c) => c.id == _contractorId)
-                        ? _contractorId
-                        : null,
-                    [
-                      (null, l10n.contractNone),
-                      for (final c in _contractors) (c.id, c.name),
-                      (_newChoice, l10n.taskAddContractor),
-                    ],
-                    (value) => setState(() => _contractorId = value),
-                    key: const Key('task-contractor'),
-                  ),
-                  if (_contractorId == _newChoice) ...[
-                    HcSectionHeading(l10n.taskNewContractor),
-                    hcText(
-                      l10n.taskNewContractorName,
-                      _newContractorName,
-                      key: const Key('task-new-contractor-name'),
-                      validator: (v) => _nameRequired(v, l10n),
-                    ),
-                    hcChoice<String>(
-                      l10n.contractorTrade,
-                      _newContractorTrade,
-                      [
-                        ('', ''),
-                        for (final t in trades) (t, tradeLabel(l10n, t)),
-                      ],
-                      (value) => setState(() => _newContractorTrade = value),
-                      key: const Key('task-new-contractor-trade'),
-                    ),
-                    if (_newContractorTrade == 'other')
-                      hcText(
-                        l10n.contractorTradeOther,
-                        _newContractorOther,
-                        key: const Key('task-new-contractor-other'),
-                        validator: (v) => (v ?? '').trim().isEmpty
-                            ? l10n.errTradeOther
-                            : null,
-                      ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: HcSpace.s3),
-            HcCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  HcField(
-                    label: l10n.taskDuration,
-                    child: Flex(
-                      direction: wide ? Axis.vertical : Axis.horizontal,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _pairPart(
-                          wide,
-                          TextFormField(
-                            key: const Key('task-duration'),
-                            controller: _duration,
-                            keyboardType: TextInputType.number,
-                            validator: (value) {
-                              final text = (value ?? '').trim();
-                              if (text.isEmpty) return null;
-                              final n = int.tryParse(text);
-                              return n == null ||
-                                      !durations.withinBounds(
-                                        durations.toMinutes(n, _durationUnit),
-                                      )
-                                  ? l10n.errDuration
-                                  : null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: HcSpace.s2, height: HcSpace.s2),
-                        _pairPart(
-                          wide,
-                          Semantics(
-                            label: l10n.taskDurationUnit,
-                            child: DropdownButtonFormField<String>(
-                              key: const Key('task-duration-unit'),
-                              initialValue: _durationUnit,
-                              isExpanded: true,
-                              items: [
-                                for (final (unit, label) in [
-                                  (durations.minute, l10n.unitMinutes),
-                                  (durations.hour, l10n.unitHours),
-                                  (durations.day, l10n.unitDays),
-                                  (durations.week, l10n.unitWeeks),
-                                  (durations.month, l10n.unitMonths),
-                                  (durations.year, l10n.unitYears),
-                                ])
-                                  DropdownMenuItem(
-                                    value: unit,
-                                    child: Text(label),
-                                  ),
-                              ],
-                              onChanged: (value) =>
-                                  setState(() => _durationUnit = value!),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  hcText(
-                    l10n.materialBudget,
-                    _material,
-                    key: const Key('task-material-budget'),
-                    keyboard: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    sentences: false,
-                    validator: moneyCheck(l10n),
-                  ),
-                  hcText(
-                    l10n.labourBudget,
-                    _labour,
-                    key: const Key('task-labour-budget'),
-                    keyboard: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    sentences: false,
-                    validator: moneyCheck(l10n),
-                  ),
-                  fieldHelp(l10n.taskBudgetHelp(_currency)),
-                ],
-              ),
-            ),
-            const SizedBox(height: HcSpace.s3),
-            HcCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  hcText(
-                    l10n.taskProcedure,
-                    _procedure,
-                    key: const Key('task-procedure'),
-                    minLines: 3,
-                    maxLines: 10,
-                  ),
-                  HcField(
-                    label: l10n.taskNotes,
-                    child: TextFormField(
-                      controller: _notes,
-                      minLines: 2,
-                      maxLines: 6,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (widget.taskId != null)
-              TaskMaterialsSection(
-                homeId: widget.homeId,
-                taskId: widget.taskId!,
-                writable: state.current?.archivedAt == null,
-              ),
-            if (next.isNotEmpty) ...[
-              HcSectionHeading(l10n.taskNextDates),
-              HcCardList(
-                children: [
-                  for (final day in next)
-                    HcRow(title: l10n.dueOn(formatDay(context, day))),
-                ],
-              ),
-            ],
-            if (_task != null) _placePhotos(l10n),
-            if (_history.isNotEmpty) _historyList(l10n, writable),
-            if (_task != null && writable)
-              Padding(
-                padding: const EdgeInsets.only(top: HcSpace.s4),
-                child: FilledButton(
-                  key: const Key('task-delete'),
-                  style: hcDangerStyle(),
-                  onPressed: _delete,
-                  child: Text(l10n.taskDelete),
+                ?details,
+                ?cost,
+                TaskMaterialsSection(
+                  homeId: widget.homeId,
+                  taskId: widget.taskId,
+                  writable: writable,
                 ),
-              ),
-          ],
-        ),
-      ),
+                _placePhotos(l10n),
+                if (_history.isNotEmpty) _historyList(l10n, writable),
+              ],
+            ),
     );
   }
 }
-
-/// One field of a pair: half the line, or the whole line when they stack.
-Widget _pairPart(bool stacked, Widget field) =>
-    stacked ? field : Expanded(child: field);

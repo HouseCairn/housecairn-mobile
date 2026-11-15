@@ -77,6 +77,7 @@ String unitAfter(AppLocalizations l10n, ArticleRow article, Decimal quantity) {
   return switch (article.unit) {
     'piece' => l10n.unitPiece(count),
     'litre' => l10n.unitLitre(count),
+    'millilitre' => l10n.unitMillilitre,
     'metre' => l10n.unitMetre(count),
     'kilogram' => l10n.unitKilogram(count),
     'roll' => l10n.unitRoll(count),
@@ -104,6 +105,7 @@ List<(String, String)> unitChoices(AppLocalizations l10n) => [
   ('', l10n.unitNone),
   ('piece', l10n.unitPieceChoice),
   ('litre', l10n.unitLitreChoice),
+  ('millilitre', l10n.unitMillilitreChoice),
   ('metre', l10n.unitMetreChoice),
   ('kilogram', l10n.unitKilogramChoice),
   ('roll', l10n.unitRollChoice),

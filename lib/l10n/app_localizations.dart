@@ -3637,6 +3637,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Details'**
   String get occurrenceDetails;
+
+  /// Button of the page of a task that opens its form, and title of that form. Web catalogue: Modifier la tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the task'**
+  String get taskEditTask;
+
+  /// Title of the form that creates a task. Web catalogue: Ajouter une tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a task'**
+  String get taskAddTitle;
+
+  /// Label of the due date on the page of a task. Web catalogue: Échéance.
+  ///
+  /// In en, this message translates to:
+  /// **'Due on'**
+  String get taskDueOn;
+
+  /// Label of the first date of a postponed task. Web catalogue: Reportée depuis le.
+  ///
+  /// In en, this message translates to:
+  /// **'Postponed from'**
+  String get taskPostponedFrom;
+
+  /// Label of how long before its date a task stays hidden. Web catalogue: Masquée jusqu'à.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden until'**
+  String get taskHiddenUntil;
+
+  /// Value of Hidden until. Web catalogue: %(counter)s jour avant la date.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{{n} day before the date} other{{n} days before the date}}'**
+  String taskHiddenDays(int n);
+
+  /// Label of the next dates of a task. Web catalogue: Ensuite.
+  ///
+  /// In en, this message translates to:
+  /// **'Then'**
+  String get taskThen;
+
+  /// Heading of the duration, budgets, contractor and notes of a task. Web catalogue: Détails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get taskDetails;
+
+  /// Heading of the cost of a task. Web catalogue: Coût.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost'**
+  String get taskCost;
+
+  /// Part of the estimate that comes from the stock. Web catalogue: Dont articles en stock.
+  ///
+  /// In en, this message translates to:
+  /// **'Of which stock'**
+  String get taskOfWhichStock;
+
+  /// What the times done of a task cost. Web catalogue: Payé jusqu'ici.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid so far'**
+  String get taskPaidSoFar;
+
+  /// Section of the task form: priority and contractor. Web catalogue: Qui.
+  ///
+  /// In en, this message translates to:
+  /// **'Who'**
+  String get taskWho;
+
+  /// Section of the task form: duration and budgets. Web catalogue: Durée et budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Time and budget'**
+  String get taskTimeAndBudget;
+
+  /// Repetition of a task on fixed dates. Web catalogue: Tous les jours.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Every day} other{Every {n} days}}'**
+  String repeatEveryDay(int n);
+
+  /// Repetition of a task on fixed dates. Web catalogue: Toutes les semaines.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Every week} other{Every {n} weeks}}'**
+  String repeatEveryWeek(int n);
+
+  /// Repetition of a task on fixed dates. Web catalogue: Tous les mois.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Every month} other{Every {n} months}}'**
+  String repeatEveryMonth(int n);
+
+  /// Repetition of a task on fixed dates. Web catalogue: Tous les ans.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Every year} other{Every {n} years}}'**
+  String repeatEveryYear(int n);
+
+  /// Repetition counted from the day the task is done. Web catalogue: Un jour après la dernière fois.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{A day after the last time} other{{n} days after the last time}}'**
+  String repeatDaysAfter(int n);
+
+  /// Repetition counted from the day the task is done. Web catalogue: Une semaine après la dernière fois.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{A week after the last time} other{{n} weeks after the last time}}'**
+  String repeatWeeksAfter(int n);
+
+  /// Repetition counted from the day the task is done. Web catalogue: Un mois après la dernière fois.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{A month after the last time} other{{n} months after the last time}}'**
+  String repeatMonthsAfter(int n);
+
+  /// Repetition counted from the day the task is done. Web catalogue: Un an après la dernière fois.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{A year after the last time} other{{n} years after the last time}}'**
+  String repeatYearsAfter(int n);
+
+  /// Months of the season of a task, after its repetition. Web catalogue: de %(start)s à %(end)s.
+  ///
+  /// In en, this message translates to:
+  /// **'from {start} to {end}'**
+  String repeatMonths(String start, String end);
+
+  /// An estimated duration under an hour. Web catalogue: %(n)d min.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min'**
+  String durationMin(int n);
+
+  /// An estimated duration in whole hours. Web catalogue: 1 h.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h'**
+  String durationHours(int hours);
+
+  /// An estimated duration in hours and minutes, the minutes on two digits. Web catalogue: 1 h 30.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes}'**
+  String durationHoursMinutes(int hours, String minutes);
+
+  /// Part of an estimated duration. Web catalogue: %(n)d jour.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{{n} day} other{{n} days}}'**
+  String durationDays(int n);
+
+  /// Part of an estimated duration. Web catalogue: %(n)d semaine.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{{n} week} other{{n} weeks}}'**
+  String durationWeeks(int n);
+
+  /// Part of an estimated duration. Web catalogue: %(n)d mois.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{{n} month} other{{n} months}}'**
+  String durationMonths(int n);
+
+  /// Part of an estimated duration. Web catalogue: %(n)d an.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{{n} year} other{{n} years}}'**
+  String durationYears(int n);
+
+  /// Button that ends the form of a new task. Web catalogue: Ajouter la tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the task'**
+  String get taskAddSubmit;
+
+  /// Web catalogue (stock): Millilitre (mL).
+  ///
+  /// In en, this message translates to:
+  /// **'Millilitre (mL)'**
+  String get unitMillilitreChoice;
+
+  /// Unit after a quantity, the same in the singular and the plural. Web catalogue (stock): mL.
+  ///
+  /// In en, this message translates to:
+  /// **'mL'**
+  String get unitMillilitre;
+
+  /// Error of the item form: the duration of the warranty is out of range (MAX_WARRANTY_DURATION of the web).
+  ///
+  /// In en, this message translates to:
+  /// **'A warranty lasts from 1 to 99 months or years.'**
+  String get errWarrantyDuration;
+
+  /// Tab of Rooms: every item of the home. Web catalogue (context tab): Équipements.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment'**
+  String get equipmentTab;
+
+  /// Search field of the list of every item. Web catalogue: Rechercher par nom, marque, modèle ou numéro de série.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, brand, model or serial number'**
+  String get itemsSearch;
+
+  /// First choice of the room filter of the list of every item. Web catalogue: Toutes les pièces.
+  ///
+  /// In en, this message translates to:
+  /// **'Every room'**
+  String get itemsEveryRoom;
+
+  /// Line of an item in the list of every item: its next task. Web catalogue: Prochaine :.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {title}'**
+  String itemsNext(String title);
+
+  /// Line of an item without an open task. Web catalogue: Aucune tâche à venir.
+  ///
+  /// In en, this message translates to:
+  /// **'No task to come'**
+  String get itemsNoTask;
+
+  /// Pill of an item under warranty, in the list of every item. Web catalogue: garantie jusqu'au.
+  ///
+  /// In en, this message translates to:
+  /// **'warranty until {date}'**
+  String itemsWarrantyUntil(String date);
+
+  /// Pill of an item whose warranty ended, in the list of every item. Web catalogue: garantie terminée le.
+  ///
+  /// In en, this message translates to:
+  /// **'warranty ended {date}'**
+  String itemsWarrantyEnded(String date);
+
+  /// Empty list of every item. Web catalogue: Aucun élément pour l'instant.
+  ///
+  /// In en, this message translates to:
+  /// **'No item yet. Add one from the page of a room.'**
+  String get itemsAllEmpty;
+
+  /// The filters of the list of every item leave nothing. Web catalogue: Aucun élément ne correspond.
+  ///
+  /// In en, this message translates to:
+  /// **'No item matches.'**
+  String get itemsNoMatch;
+
+  /// Line and section of an item. Web catalogue: Garantie constructeur.
+  ///
+  /// In en, this message translates to:
+  /// **'Manufacturer\'s warranty'**
+  String get itemManufacturerWarranty;
+
+  /// Field of an item. Web catalogue: Acheté le.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchased on'**
+  String get itemPurchasedOn;
+
+  /// Field of an item. Web catalogue: garantie : durée.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty: duration'**
+  String get warrantyDuration;
+
+  /// Field of an item: months or years. Web catalogue: garantie : en.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty: in'**
+  String get warrantyDurationUnit;
+
+  /// Field of an item. Web catalogue: garantie : donnée par.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty: given by'**
+  String get warrantyProvider;
+
+  /// Field of an item. Web catalogue: garantie : nom du fabricant ou du magasin.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty: name of the manufacturer or shop'**
+  String get warrantyProviderName;
+
+  /// Field of an item. Web catalogue: garantie : départ le.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty: starts on'**
+  String get warrantyStartsOn;
+
+  /// Unit of a warranty. Web catalogue (rooms): mois.
+  ///
+  /// In en, this message translates to:
+  /// **'months'**
+  String get warrantyMonthsChoice;
+
+  /// Unit of a warranty. Web catalogue (rooms): ans.
+  ///
+  /// In en, this message translates to:
+  /// **'years'**
+  String get warrantyYearsChoice;
+
+  /// Who gives a warranty. Web catalogue: Le fabricant.
+  ///
+  /// In en, this message translates to:
+  /// **'The manufacturer'**
+  String get warrantyByManufacturer;
+
+  /// Who gives a warranty. Web catalogue: Le magasin.
+  ///
+  /// In en, this message translates to:
+  /// **'The shop'**
+  String get warrantyByShop;
+
+  /// Duration of a warranty. Web catalogue: %(counter)s mois.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} month} other{{count} months}}'**
+  String warrantyMonths(int count);
+
+  /// Duration of a warranty. Web catalogue: %(counter)s an / ans.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} year} other{{count} years}}'**
+  String warrantyYears(int count);
+
+  /// Start of a warranty, after its duration. Web catalogue: depuis le.
+  ///
+  /// In en, this message translates to:
+  /// **'from {date}'**
+  String warrantyFrom(String date);
+
+  /// Help of the item form. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'The warranty of the manufacturer or of the shop, in months or years.'**
+  String get warrantyDurationHelp;
+
+  /// Help of the item form. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: Acme, or the shop where you bought it.'**
+  String get warrantyProviderNameHelp;
+
+  /// Help of the item form. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty: from the purchase date.'**
+  String get warrantyStartsOnHelp;
+
+  /// Help of the item form. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Worked out from the start and the duration. Type it only when you do not know them.'**
+  String get warrantyEndsOnHelp;
+
+  /// Discreet status of a sheet saved as it is changed, said by the screen reader. Web catalogue (core): Enregistré.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get saved;
 }
 
 class _AppLocalizationsDelegate

@@ -1608,6 +1608,75 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, ItemRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _purchasedOnMeta = const VerificationMeta(
+    'purchasedOn',
+  );
+  @override
+  late final GeneratedColumn<String> purchasedOn = GeneratedColumn<String>(
+    'purchased_on',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _warrantyDurationMeta = const VerificationMeta(
+    'warrantyDuration',
+  );
+  @override
+  late final GeneratedColumn<int> warrantyDuration = GeneratedColumn<int>(
+    'warranty_duration',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _warrantyDurationUnitMeta =
+      const VerificationMeta('warrantyDurationUnit');
+  @override
+  late final GeneratedColumn<String> warrantyDurationUnit =
+      GeneratedColumn<String>(
+        'warranty_duration_unit',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('year'),
+      );
+  static const VerificationMeta _warrantyProviderMeta = const VerificationMeta(
+    'warrantyProvider',
+  );
+  @override
+  late final GeneratedColumn<String> warrantyProvider = GeneratedColumn<String>(
+    'warranty_provider',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _warrantyProviderNameMeta =
+      const VerificationMeta('warrantyProviderName');
+  @override
+  late final GeneratedColumn<String> warrantyProviderName =
+      GeneratedColumn<String>(
+        'warranty_provider_name',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
+  static const VerificationMeta _warrantyStartsOnMeta = const VerificationMeta(
+    'warrantyStartsOn',
+  );
+  @override
+  late final GeneratedColumn<String> warrantyStartsOn = GeneratedColumn<String>(
+    'warranty_starts_on',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   late final GeneratedColumnWithTypeConverter<String?, Uint8List>
   contractContractorId = GeneratedColumn<Uint8List>(
@@ -1676,6 +1745,12 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, ItemRow> {
     serialNumber,
     installedOn,
     warrantyEndsOn,
+    purchasedOn,
+    warrantyDuration,
+    warrantyDurationUnit,
+    warrantyProvider,
+    warrantyProviderName,
+    warrantyStartsOn,
     contractContractorId,
     contractNumber,
     contractUrl,
@@ -1766,6 +1841,60 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, ItemRow> {
         warrantyEndsOn.isAcceptableOrUnknown(
           data['warranty_ends_on']!,
           _warrantyEndsOnMeta,
+        ),
+      );
+    }
+    if (data.containsKey('purchased_on')) {
+      context.handle(
+        _purchasedOnMeta,
+        purchasedOn.isAcceptableOrUnknown(
+          data['purchased_on']!,
+          _purchasedOnMeta,
+        ),
+      );
+    }
+    if (data.containsKey('warranty_duration')) {
+      context.handle(
+        _warrantyDurationMeta,
+        warrantyDuration.isAcceptableOrUnknown(
+          data['warranty_duration']!,
+          _warrantyDurationMeta,
+        ),
+      );
+    }
+    if (data.containsKey('warranty_duration_unit')) {
+      context.handle(
+        _warrantyDurationUnitMeta,
+        warrantyDurationUnit.isAcceptableOrUnknown(
+          data['warranty_duration_unit']!,
+          _warrantyDurationUnitMeta,
+        ),
+      );
+    }
+    if (data.containsKey('warranty_provider')) {
+      context.handle(
+        _warrantyProviderMeta,
+        warrantyProvider.isAcceptableOrUnknown(
+          data['warranty_provider']!,
+          _warrantyProviderMeta,
+        ),
+      );
+    }
+    if (data.containsKey('warranty_provider_name')) {
+      context.handle(
+        _warrantyProviderNameMeta,
+        warrantyProviderName.isAcceptableOrUnknown(
+          data['warranty_provider_name']!,
+          _warrantyProviderNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('warranty_starts_on')) {
+      context.handle(
+        _warrantyStartsOnMeta,
+        warrantyStartsOn.isAcceptableOrUnknown(
+          data['warranty_starts_on']!,
+          _warrantyStartsOnMeta,
         ),
       );
     }
@@ -1866,6 +1995,30 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, ItemRow> {
         DriftSqlType.string,
         data['${effectivePrefix}warranty_ends_on'],
       ),
+      purchasedOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}purchased_on'],
+      ),
+      warrantyDuration: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}warranty_duration'],
+      ),
+      warrantyDurationUnit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}warranty_duration_unit'],
+      )!,
+      warrantyProvider: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}warranty_provider'],
+      )!,
+      warrantyProviderName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}warranty_provider_name'],
+      )!,
+      warrantyStartsOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}warranty_starts_on'],
+      ),
       contractContractorId: $ItemsTable.$convertercontractContractorIdn.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.blob,
@@ -1921,6 +2074,12 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
   final String serialNumber;
   final String? installedOn;
   final String? warrantyEndsOn;
+  final String? purchasedOn;
+  final int? warrantyDuration;
+  final String warrantyDurationUnit;
+  final String warrantyProvider;
+  final String warrantyProviderName;
+  final String? warrantyStartsOn;
   final String? contractContractorId;
   final String contractNumber;
   final String contractUrl;
@@ -1943,6 +2102,12 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     required this.serialNumber,
     this.installedOn,
     this.warrantyEndsOn,
+    this.purchasedOn,
+    this.warrantyDuration,
+    required this.warrantyDurationUnit,
+    required this.warrantyProvider,
+    required this.warrantyProviderName,
+    this.warrantyStartsOn,
     this.contractContractorId,
     required this.contractNumber,
     required this.contractUrl,
@@ -1981,6 +2146,18 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     if (!nullToAbsent || warrantyEndsOn != null) {
       map['warranty_ends_on'] = Variable<String>(warrantyEndsOn);
     }
+    if (!nullToAbsent || purchasedOn != null) {
+      map['purchased_on'] = Variable<String>(purchasedOn);
+    }
+    if (!nullToAbsent || warrantyDuration != null) {
+      map['warranty_duration'] = Variable<int>(warrantyDuration);
+    }
+    map['warranty_duration_unit'] = Variable<String>(warrantyDurationUnit);
+    map['warranty_provider'] = Variable<String>(warrantyProvider);
+    map['warranty_provider_name'] = Variable<String>(warrantyProviderName);
+    if (!nullToAbsent || warrantyStartsOn != null) {
+      map['warranty_starts_on'] = Variable<String>(warrantyStartsOn);
+    }
     if (!nullToAbsent || contractContractorId != null) {
       map['contract_contractor_id'] = Variable<Uint8List>(
         $ItemsTable.$convertercontractContractorIdn.toSql(contractContractorId),
@@ -2014,6 +2191,18 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
       warrantyEndsOn: warrantyEndsOn == null && nullToAbsent
           ? const Value.absent()
           : Value(warrantyEndsOn),
+      purchasedOn: purchasedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(purchasedOn),
+      warrantyDuration: warrantyDuration == null && nullToAbsent
+          ? const Value.absent()
+          : Value(warrantyDuration),
+      warrantyDurationUnit: Value(warrantyDurationUnit),
+      warrantyProvider: Value(warrantyProvider),
+      warrantyProviderName: Value(warrantyProviderName),
+      warrantyStartsOn: warrantyStartsOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(warrantyStartsOn),
       contractContractorId: contractContractorId == null && nullToAbsent
           ? const Value.absent()
           : Value(contractContractorId),
@@ -2043,6 +2232,16 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
       serialNumber: serializer.fromJson<String>(json['serialNumber']),
       installedOn: serializer.fromJson<String?>(json['installedOn']),
       warrantyEndsOn: serializer.fromJson<String?>(json['warrantyEndsOn']),
+      purchasedOn: serializer.fromJson<String?>(json['purchasedOn']),
+      warrantyDuration: serializer.fromJson<int?>(json['warrantyDuration']),
+      warrantyDurationUnit: serializer.fromJson<String>(
+        json['warrantyDurationUnit'],
+      ),
+      warrantyProvider: serializer.fromJson<String>(json['warrantyProvider']),
+      warrantyProviderName: serializer.fromJson<String>(
+        json['warrantyProviderName'],
+      ),
+      warrantyStartsOn: serializer.fromJson<String?>(json['warrantyStartsOn']),
       contractContractorId: serializer.fromJson<String?>(
         json['contractContractorId'],
       ),
@@ -2069,6 +2268,12 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
       'serialNumber': serializer.toJson<String>(serialNumber),
       'installedOn': serializer.toJson<String?>(installedOn),
       'warrantyEndsOn': serializer.toJson<String?>(warrantyEndsOn),
+      'purchasedOn': serializer.toJson<String?>(purchasedOn),
+      'warrantyDuration': serializer.toJson<int?>(warrantyDuration),
+      'warrantyDurationUnit': serializer.toJson<String>(warrantyDurationUnit),
+      'warrantyProvider': serializer.toJson<String>(warrantyProvider),
+      'warrantyProviderName': serializer.toJson<String>(warrantyProviderName),
+      'warrantyStartsOn': serializer.toJson<String?>(warrantyStartsOn),
       'contractContractorId': serializer.toJson<String?>(contractContractorId),
       'contractNumber': serializer.toJson<String>(contractNumber),
       'contractUrl': serializer.toJson<String>(contractUrl),
@@ -2091,6 +2296,12 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     String? serialNumber,
     Value<String?> installedOn = const Value.absent(),
     Value<String?> warrantyEndsOn = const Value.absent(),
+    Value<String?> purchasedOn = const Value.absent(),
+    Value<int?> warrantyDuration = const Value.absent(),
+    String? warrantyDurationUnit,
+    String? warrantyProvider,
+    String? warrantyProviderName,
+    Value<String?> warrantyStartsOn = const Value.absent(),
     Value<String?> contractContractorId = const Value.absent(),
     String? contractNumber,
     String? contractUrl,
@@ -2112,6 +2323,16 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     warrantyEndsOn: warrantyEndsOn.present
         ? warrantyEndsOn.value
         : this.warrantyEndsOn,
+    purchasedOn: purchasedOn.present ? purchasedOn.value : this.purchasedOn,
+    warrantyDuration: warrantyDuration.present
+        ? warrantyDuration.value
+        : this.warrantyDuration,
+    warrantyDurationUnit: warrantyDurationUnit ?? this.warrantyDurationUnit,
+    warrantyProvider: warrantyProvider ?? this.warrantyProvider,
+    warrantyProviderName: warrantyProviderName ?? this.warrantyProviderName,
+    warrantyStartsOn: warrantyStartsOn.present
+        ? warrantyStartsOn.value
+        : this.warrantyStartsOn,
     contractContractorId: contractContractorId.present
         ? contractContractorId.value
         : this.contractContractorId,
@@ -2141,6 +2362,24 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
       warrantyEndsOn: data.warrantyEndsOn.present
           ? data.warrantyEndsOn.value
           : this.warrantyEndsOn,
+      purchasedOn: data.purchasedOn.present
+          ? data.purchasedOn.value
+          : this.purchasedOn,
+      warrantyDuration: data.warrantyDuration.present
+          ? data.warrantyDuration.value
+          : this.warrantyDuration,
+      warrantyDurationUnit: data.warrantyDurationUnit.present
+          ? data.warrantyDurationUnit.value
+          : this.warrantyDurationUnit,
+      warrantyProvider: data.warrantyProvider.present
+          ? data.warrantyProvider.value
+          : this.warrantyProvider,
+      warrantyProviderName: data.warrantyProviderName.present
+          ? data.warrantyProviderName.value
+          : this.warrantyProviderName,
+      warrantyStartsOn: data.warrantyStartsOn.present
+          ? data.warrantyStartsOn.value
+          : this.warrantyStartsOn,
       contractContractorId: data.contractContractorId.present
           ? data.contractContractorId.value
           : this.contractContractorId,
@@ -2171,6 +2410,12 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
           ..write('serialNumber: $serialNumber, ')
           ..write('installedOn: $installedOn, ')
           ..write('warrantyEndsOn: $warrantyEndsOn, ')
+          ..write('purchasedOn: $purchasedOn, ')
+          ..write('warrantyDuration: $warrantyDuration, ')
+          ..write('warrantyDurationUnit: $warrantyDurationUnit, ')
+          ..write('warrantyProvider: $warrantyProvider, ')
+          ..write('warrantyProviderName: $warrantyProviderName, ')
+          ..write('warrantyStartsOn: $warrantyStartsOn, ')
           ..write('contractContractorId: $contractContractorId, ')
           ..write('contractNumber: $contractNumber, ')
           ..write('contractUrl: $contractUrl, ')
@@ -2181,7 +2426,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     createdAt,
     updatedAt,
@@ -2195,12 +2440,18 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     serialNumber,
     installedOn,
     warrantyEndsOn,
+    purchasedOn,
+    warrantyDuration,
+    warrantyDurationUnit,
+    warrantyProvider,
+    warrantyProviderName,
+    warrantyStartsOn,
     contractContractorId,
     contractNumber,
     contractUrl,
     links,
     notes,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2218,6 +2469,12 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
           other.serialNumber == this.serialNumber &&
           other.installedOn == this.installedOn &&
           other.warrantyEndsOn == this.warrantyEndsOn &&
+          other.purchasedOn == this.purchasedOn &&
+          other.warrantyDuration == this.warrantyDuration &&
+          other.warrantyDurationUnit == this.warrantyDurationUnit &&
+          other.warrantyProvider == this.warrantyProvider &&
+          other.warrantyProviderName == this.warrantyProviderName &&
+          other.warrantyStartsOn == this.warrantyStartsOn &&
           other.contractContractorId == this.contractContractorId &&
           other.contractNumber == this.contractNumber &&
           other.contractUrl == this.contractUrl &&
@@ -2239,6 +2496,12 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
   final Value<String> serialNumber;
   final Value<String?> installedOn;
   final Value<String?> warrantyEndsOn;
+  final Value<String?> purchasedOn;
+  final Value<int?> warrantyDuration;
+  final Value<String> warrantyDurationUnit;
+  final Value<String> warrantyProvider;
+  final Value<String> warrantyProviderName;
+  final Value<String?> warrantyStartsOn;
   final Value<String?> contractContractorId;
   final Value<String> contractNumber;
   final Value<String> contractUrl;
@@ -2259,6 +2522,12 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     this.serialNumber = const Value.absent(),
     this.installedOn = const Value.absent(),
     this.warrantyEndsOn = const Value.absent(),
+    this.purchasedOn = const Value.absent(),
+    this.warrantyDuration = const Value.absent(),
+    this.warrantyDurationUnit = const Value.absent(),
+    this.warrantyProvider = const Value.absent(),
+    this.warrantyProviderName = const Value.absent(),
+    this.warrantyStartsOn = const Value.absent(),
     this.contractContractorId = const Value.absent(),
     this.contractNumber = const Value.absent(),
     this.contractUrl = const Value.absent(),
@@ -2280,6 +2549,12 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     this.serialNumber = const Value.absent(),
     this.installedOn = const Value.absent(),
     this.warrantyEndsOn = const Value.absent(),
+    this.purchasedOn = const Value.absent(),
+    this.warrantyDuration = const Value.absent(),
+    this.warrantyDurationUnit = const Value.absent(),
+    this.warrantyProvider = const Value.absent(),
+    this.warrantyProviderName = const Value.absent(),
+    this.warrantyStartsOn = const Value.absent(),
     this.contractContractorId = const Value.absent(),
     this.contractNumber = const Value.absent(),
     this.contractUrl = const Value.absent(),
@@ -2306,6 +2581,12 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     Expression<String>? serialNumber,
     Expression<String>? installedOn,
     Expression<String>? warrantyEndsOn,
+    Expression<String>? purchasedOn,
+    Expression<int>? warrantyDuration,
+    Expression<String>? warrantyDurationUnit,
+    Expression<String>? warrantyProvider,
+    Expression<String>? warrantyProviderName,
+    Expression<String>? warrantyStartsOn,
     Expression<Uint8List>? contractContractorId,
     Expression<String>? contractNumber,
     Expression<String>? contractUrl,
@@ -2327,6 +2608,14 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
       if (serialNumber != null) 'serial_number': serialNumber,
       if (installedOn != null) 'installed_on': installedOn,
       if (warrantyEndsOn != null) 'warranty_ends_on': warrantyEndsOn,
+      if (purchasedOn != null) 'purchased_on': purchasedOn,
+      if (warrantyDuration != null) 'warranty_duration': warrantyDuration,
+      if (warrantyDurationUnit != null)
+        'warranty_duration_unit': warrantyDurationUnit,
+      if (warrantyProvider != null) 'warranty_provider': warrantyProvider,
+      if (warrantyProviderName != null)
+        'warranty_provider_name': warrantyProviderName,
+      if (warrantyStartsOn != null) 'warranty_starts_on': warrantyStartsOn,
       if (contractContractorId != null)
         'contract_contractor_id': contractContractorId,
       if (contractNumber != null) 'contract_number': contractNumber,
@@ -2351,6 +2640,12 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     Value<String>? serialNumber,
     Value<String?>? installedOn,
     Value<String?>? warrantyEndsOn,
+    Value<String?>? purchasedOn,
+    Value<int?>? warrantyDuration,
+    Value<String>? warrantyDurationUnit,
+    Value<String>? warrantyProvider,
+    Value<String>? warrantyProviderName,
+    Value<String?>? warrantyStartsOn,
     Value<String?>? contractContractorId,
     Value<String>? contractNumber,
     Value<String>? contractUrl,
@@ -2372,6 +2667,12 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
       serialNumber: serialNumber ?? this.serialNumber,
       installedOn: installedOn ?? this.installedOn,
       warrantyEndsOn: warrantyEndsOn ?? this.warrantyEndsOn,
+      purchasedOn: purchasedOn ?? this.purchasedOn,
+      warrantyDuration: warrantyDuration ?? this.warrantyDuration,
+      warrantyDurationUnit: warrantyDurationUnit ?? this.warrantyDurationUnit,
+      warrantyProvider: warrantyProvider ?? this.warrantyProvider,
+      warrantyProviderName: warrantyProviderName ?? this.warrantyProviderName,
+      warrantyStartsOn: warrantyStartsOn ?? this.warrantyStartsOn,
       contractContractorId: contractContractorId ?? this.contractContractorId,
       contractNumber: contractNumber ?? this.contractNumber,
       contractUrl: contractUrl ?? this.contractUrl,
@@ -2427,6 +2728,28 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     if (warrantyEndsOn.present) {
       map['warranty_ends_on'] = Variable<String>(warrantyEndsOn.value);
     }
+    if (purchasedOn.present) {
+      map['purchased_on'] = Variable<String>(purchasedOn.value);
+    }
+    if (warrantyDuration.present) {
+      map['warranty_duration'] = Variable<int>(warrantyDuration.value);
+    }
+    if (warrantyDurationUnit.present) {
+      map['warranty_duration_unit'] = Variable<String>(
+        warrantyDurationUnit.value,
+      );
+    }
+    if (warrantyProvider.present) {
+      map['warranty_provider'] = Variable<String>(warrantyProvider.value);
+    }
+    if (warrantyProviderName.present) {
+      map['warranty_provider_name'] = Variable<String>(
+        warrantyProviderName.value,
+      );
+    }
+    if (warrantyStartsOn.present) {
+      map['warranty_starts_on'] = Variable<String>(warrantyStartsOn.value);
+    }
     if (contractContractorId.present) {
       map['contract_contractor_id'] = Variable<Uint8List>(
         $ItemsTable.$convertercontractContractorIdn.toSql(
@@ -2468,6 +2791,12 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
           ..write('serialNumber: $serialNumber, ')
           ..write('installedOn: $installedOn, ')
           ..write('warrantyEndsOn: $warrantyEndsOn, ')
+          ..write('purchasedOn: $purchasedOn, ')
+          ..write('warrantyDuration: $warrantyDuration, ')
+          ..write('warrantyDurationUnit: $warrantyDurationUnit, ')
+          ..write('warrantyProvider: $warrantyProvider, ')
+          ..write('warrantyProviderName: $warrantyProviderName, ')
+          ..write('warrantyStartsOn: $warrantyStartsOn, ')
           ..write('contractContractorId: $contractContractorId, ')
           ..write('contractNumber: $contractNumber, ')
           ..write('contractUrl: $contractUrl, ')
@@ -17045,6 +17374,12 @@ typedef $$ItemsTableCreateCompanionBuilder = ItemsCompanion Function({
   Value<String> serialNumber,
   Value<String?> installedOn,
   Value<String?> warrantyEndsOn,
+  Value<String?> purchasedOn,
+  Value<int?> warrantyDuration,
+  Value<String> warrantyDurationUnit,
+  Value<String> warrantyProvider,
+  Value<String> warrantyProviderName,
+  Value<String?> warrantyStartsOn,
   Value<String?> contractContractorId,
   Value<String> contractNumber,
   Value<String> contractUrl,
@@ -17066,6 +17401,12 @@ typedef $$ItemsTableUpdateCompanionBuilder = ItemsCompanion Function({
   Value<String> serialNumber,
   Value<String?> installedOn,
   Value<String?> warrantyEndsOn,
+  Value<String?> purchasedOn,
+  Value<int?> warrantyDuration,
+  Value<String> warrantyDurationUnit,
+  Value<String> warrantyProvider,
+  Value<String> warrantyProviderName,
+  Value<String?> warrantyStartsOn,
   Value<String?> contractContractorId,
   Value<String> contractNumber,
   Value<String> contractUrl,
@@ -17147,6 +17488,36 @@ class $$ItemsTableFilterComposer extends Composer<_$AppDatabase, $ItemsTable> {
 
   ColumnFilters<String> get warrantyEndsOn => $composableBuilder(
     column: $table.warrantyEndsOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get purchasedOn => $composableBuilder(
+    column: $table.purchasedOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get warrantyDuration => $composableBuilder(
+    column: $table.warrantyDuration,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get warrantyDurationUnit => $composableBuilder(
+    column: $table.warrantyDurationUnit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get warrantyProvider => $composableBuilder(
+    column: $table.warrantyProvider,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get warrantyProviderName => $composableBuilder(
+    column: $table.warrantyProviderName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get warrantyStartsOn => $composableBuilder(
+    column: $table.warrantyStartsOn,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -17251,6 +17622,36 @@ class $$ItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get purchasedOn => $composableBuilder(
+    column: $table.purchasedOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get warrantyDuration => $composableBuilder(
+    column: $table.warrantyDuration,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get warrantyDurationUnit => $composableBuilder(
+    column: $table.warrantyDurationUnit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get warrantyProvider => $composableBuilder(
+    column: $table.warrantyProvider,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get warrantyProviderName => $composableBuilder(
+    column: $table.warrantyProviderName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get warrantyStartsOn => $composableBuilder(
+    column: $table.warrantyStartsOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<Uint8List> get contractContractorId => $composableBuilder(
     column: $table.contractContractorId,
     builder: (column) => ColumnOrderings(column),
@@ -17331,6 +17732,36 @@ class $$ItemsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get purchasedOn => $composableBuilder(
+    column: $table.purchasedOn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get warrantyDuration => $composableBuilder(
+    column: $table.warrantyDuration,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get warrantyDurationUnit => $composableBuilder(
+    column: $table.warrantyDurationUnit,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get warrantyProvider => $composableBuilder(
+    column: $table.warrantyProvider,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get warrantyProviderName => $composableBuilder(
+    column: $table.warrantyProviderName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get warrantyStartsOn => $composableBuilder(
+    column: $table.warrantyStartsOn,
+    builder: (column) => column,
+  );
+
   GeneratedColumnWithTypeConverter<String?, Uint8List>
   get contractContractorId => $composableBuilder(
     column: $table.contractContractorId,
@@ -17395,6 +17826,12 @@ class $$ItemsTableTableManager
                 Value<String> serialNumber = const Value.absent(),
                 Value<String?> installedOn = const Value.absent(),
                 Value<String?> warrantyEndsOn = const Value.absent(),
+                Value<String?> purchasedOn = const Value.absent(),
+                Value<int?> warrantyDuration = const Value.absent(),
+                Value<String> warrantyDurationUnit = const Value.absent(),
+                Value<String> warrantyProvider = const Value.absent(),
+                Value<String> warrantyProviderName = const Value.absent(),
+                Value<String?> warrantyStartsOn = const Value.absent(),
                 Value<String?> contractContractorId = const Value.absent(),
                 Value<String> contractNumber = const Value.absent(),
                 Value<String> contractUrl = const Value.absent(),
@@ -17415,6 +17852,12 @@ class $$ItemsTableTableManager
                 serialNumber: serialNumber,
                 installedOn: installedOn,
                 warrantyEndsOn: warrantyEndsOn,
+                purchasedOn: purchasedOn,
+                warrantyDuration: warrantyDuration,
+                warrantyDurationUnit: warrantyDurationUnit,
+                warrantyProvider: warrantyProvider,
+                warrantyProviderName: warrantyProviderName,
+                warrantyStartsOn: warrantyStartsOn,
                 contractContractorId: contractContractorId,
                 contractNumber: contractNumber,
                 contractUrl: contractUrl,
@@ -17437,6 +17880,12 @@ class $$ItemsTableTableManager
                 Value<String> serialNumber = const Value.absent(),
                 Value<String?> installedOn = const Value.absent(),
                 Value<String?> warrantyEndsOn = const Value.absent(),
+                Value<String?> purchasedOn = const Value.absent(),
+                Value<int?> warrantyDuration = const Value.absent(),
+                Value<String> warrantyDurationUnit = const Value.absent(),
+                Value<String> warrantyProvider = const Value.absent(),
+                Value<String> warrantyProviderName = const Value.absent(),
+                Value<String?> warrantyStartsOn = const Value.absent(),
                 Value<String?> contractContractorId = const Value.absent(),
                 Value<String> contractNumber = const Value.absent(),
                 Value<String> contractUrl = const Value.absent(),
@@ -17457,6 +17906,12 @@ class $$ItemsTableTableManager
                 serialNumber: serialNumber,
                 installedOn: installedOn,
                 warrantyEndsOn: warrantyEndsOn,
+                purchasedOn: purchasedOn,
+                warrantyDuration: warrantyDuration,
+                warrantyDurationUnit: warrantyDurationUnit,
+                warrantyProvider: warrantyProvider,
+                warrantyProviderName: warrantyProviderName,
+                warrantyStartsOn: warrantyStartsOn,
                 contractContractorId: contractContractorId,
                 contractNumber: contractNumber,
                 contractUrl: contractUrl,

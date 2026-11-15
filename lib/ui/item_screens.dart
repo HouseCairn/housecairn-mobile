@@ -11,8 +11,11 @@ import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/choices.dart';
 import '../domain/day.dart';
+import '../domain/warranty.dart';
 import '../l10n/app_localizations.dart';
+import 'budget_parts.dart';
 import 'choices.dart';
+import 'autosave.dart';
 import 'contractor_screens.dart';
 import 'messages.dart';
 import 'parts.dart';
@@ -102,32 +105,24 @@ class ItemScreen extends StatelessWidget {
                             ),
                           if (item.serialNumber.isNotEmpty)
                             HcValueRow(l10n.itemSerial, item.serialNumber),
+                          if (item.purchasedOn != null)
+                            HcValueRow(
+                              l10n.itemPurchasedOn,
+                              formatDay(context, Day.parse(item.purchasedOn!)),
+                            ),
                           if (item.installedOn != null)
                             HcValueRow(
                               l10n.itemInstalledOn,
                               formatDay(context, Day.parse(item.installedOn!)),
                             ),
-                          if (warranty != 'none')
+                          if (warranty != 'none' ||
+                              item.warrantyDuration != null)
                             HcValueRow(
-                              l10n.itemWarranty,
+                              l10n.itemManufacturerWarranty,
                               '',
-                              child: HcPill(
-                                warranty == 'expired'
-                                    ? l10n.warrantyEnded(
-                                        formatDay(
-                                          context,
-                                          Day.parse(item.warrantyEndsOn!),
-                                        ),
-                                      )
-                                    : l10n.warrantyUntil(
-                                        formatDay(
-                                          context,
-                                          Day.parse(item.warrantyEndsOn!),
-                                        ),
-                                      ),
-                                tone: warranty == 'expired'
-                                    ? HcPillTone.danger
-                                    : HcPillTone.sand,
+                              child: _WarrantyValue(
+                                item: item,
+                                state: warranty,
                               ),
                             ),
                         ],
@@ -189,6 +184,63 @@ class ItemScreen extends StatelessWidget {
   }
 }
 
+/// The manufacturer's warranty of an item, as `rooms/_warranty.html` draws
+/// it: the pill of its end, then its duration from its start, then who gives
+/// it.
+class _WarrantyValue extends StatelessWidget {
+  const _WarrantyValue({required this.item, required this.state});
+
+  final ItemRow item;
+  final String state;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final ends = item.warrantyEndsOn;
+    final start = warrantyStart(
+      item.warrantyStartsOn == null ? null : Day.parse(item.warrantyStartsOn!),
+      item.purchasedOn == null ? null : Day.parse(item.purchasedOn!),
+    );
+    final duration = item.warrantyDuration;
+    final provider = switch (item.warrantyProvider) {
+      'manufacturer' => l10n.warrantyByManufacturer,
+      'shop' => l10n.warrantyByShop,
+      _ => '',
+    };
+    final who = [
+      provider,
+      item.warrantyProviderName,
+    ].where((t) => t.isNotEmpty).join(': ');
+    final details = [
+      if (duration != null)
+        [
+          item.warrantyDurationUnit == warrantyMonth
+              ? l10n.warrantyMonths(duration)
+              : l10n.warrantyYears(duration),
+          if (start != null) l10n.warrantyFrom(formatDay(context, start)),
+        ].join(' · '),
+      if (who.isNotEmpty) who,
+    ].join(' · ');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (ends != null)
+          HcPill(
+            state == 'expired'
+                ? l10n.warrantyEnded(formatDay(context, Day.parse(ends)))
+                : l10n.warrantyUntil(formatDay(context, Day.parse(ends))),
+            tone: state == 'expired' ? HcPillTone.danger : HcPillTone.sand,
+          ),
+        if (details.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: HcSpace.s1),
+            child: Text(details, style: HcText.bodySmall),
+          ),
+      ],
+    );
+  }
+}
+
 /// A link of an item. It opens in the browser of the phone, and only when the
 /// person taps it: the page is never fetched by the app.
 class _LinkRow extends StatelessWidget {
@@ -240,8 +292,19 @@ class ItemFormScreen extends StatefulWidget implements HcFormScreen {
   State<ItemFormScreen> createState() => _ItemFormScreenState();
 }
 
-class _ItemFormScreenState extends State<ItemFormScreen> {
+class _ItemFormScreenState extends State<ItemFormScreen>
+    with AutosaveSheet<ItemFormScreen> {
   final _form = GlobalKey<FormState>();
+
+  @override
+  GlobalKey<FormState> get sheetForm => _form;
+
+  @override
+  bool get existing => widget.itemId != null;
+
+  @override
+  Future<void> writeSheet(Repository repository) =>
+      repository.updateItem(widget.itemId!, _input());
   final _name = TextEditingController();
   final _brand = TextEditingController();
   final _model = TextEditingController();
@@ -249,10 +312,16 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
   final _contractNumber = TextEditingController();
   final _contractUrl = TextEditingController();
   final _notes = TextEditingController();
+  final _warrantyDuration = TextEditingController();
+  final _warrantyProviderName = TextEditingController();
   final _links = <(TextEditingController, TextEditingController)>[];
   String _kind = 'equipment';
   Day? _installedOn;
   Day? _warrantyEndsOn;
+  Day? _purchasedOn;
+  Day? _warrantyStartsOn;
+  String _warrantyUnit = warrantyYear;
+  String _warrantyProvider = '';
   String? _contractor;
   List<ContractorRow> _contractors = const [];
   bool _loaded = false;
@@ -262,6 +331,8 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
     super.didChangeDependencies();
     if (_loaded) return;
     _loaded = true;
+    // The end worked out follows the duration as it is typed.
+    _warrantyDuration.addListener(() => setState(() {}));
     _load(AppScope.of(context).repository);
   }
 
@@ -285,6 +356,18 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
       _warrantyEndsOn = item.warrantyEndsOn == null
           ? null
           : Day.parse(item.warrantyEndsOn!);
+      _purchasedOn = item.purchasedOn == null
+          ? null
+          : Day.parse(item.purchasedOn!);
+      _warrantyStartsOn = item.warrantyStartsOn == null
+          ? null
+          : Day.parse(item.warrantyStartsOn!);
+      _warrantyDuration.text = item.warrantyDuration?.toString() ?? '';
+      _warrantyUnit = item.warrantyDurationUnit.isEmpty
+          ? warrantyYear
+          : item.warrantyDurationUnit;
+      _warrantyProvider = item.warrantyProvider;
+      _warrantyProviderName.text = item.warrantyProviderName;
       _contractor = item.contractContractorId;
       _contractNumber.text = item.contractNumber;
       _contractUrl.text = item.contractUrl;
@@ -296,6 +379,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
         ));
       }
     });
+    sheetLoaded();
   }
 
   @override
@@ -308,6 +392,8 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
       _contractNumber,
       _contractUrl,
       _notes,
+      _warrantyDuration,
+      _warrantyProviderName,
       for (final (a, b) in _links) ...[a, b],
     ]) {
       c.dispose();
@@ -323,6 +409,12 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
     serialNumber: _serial.text,
     installedOn: _installedOn,
     warrantyEndsOn: _warrantyEndsOn,
+    purchasedOn: _purchasedOn,
+    warrantyDuration: int.tryParse(_warrantyDuration.text.trim()),
+    warrantyDurationUnit: _warrantyUnit,
+    warrantyProvider: _warrantyProvider,
+    warrantyProviderName: _warrantyProviderName.text,
+    warrantyStartsOn: _warrantyStartsOn,
     contractContractorId: _contractor,
     contractNumber: _contractNumber.text,
     contractUrl: _contractUrl.text,
@@ -335,6 +427,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
   );
 
   Future<void> _save() async {
+    cancelAutosave();
     if (!_form.currentState!.validate()) return;
     final navigator = Navigator.of(context);
     final saved = await runChange(
@@ -363,14 +456,103 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
     }
   }
 
+  /// The manufacturer's warranty (web ADR 0080): its duration in months or
+  /// years, who gives it, its start and its end, worked out when a duration
+  /// and a start are known, typed otherwise.
+  Widget _warrantyFields(AppLocalizations l10n) {
+    final computed = warrantyEnd(
+      warrantyStart(_warrantyStartsOn, _purchasedOn),
+      int.tryParse(_warrantyDuration.text.trim()),
+      _warrantyUnit,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        hcText(
+          l10n.warrantyDuration,
+          _warrantyDuration,
+          key: const Key('item-warranty-duration'),
+          keyboard: TextInputType.number,
+          sentences: false,
+          validator: (v) {
+            final text = (v ?? '').trim();
+            if (text.isEmpty) return null;
+            final n = int.tryParse(text);
+            return n == null || n < 1 || n > maxWarrantyDuration
+                ? l10n.errWarrantyDuration
+                : null;
+          },
+        ),
+        fieldHelp(l10n.warrantyDurationHelp),
+        hcChoice<String>(
+          l10n.warrantyDurationUnit,
+          _warrantyUnit,
+          [
+            (warrantyMonth, l10n.warrantyMonthsChoice),
+            (warrantyYear, l10n.warrantyYearsChoice),
+          ],
+          (v) => setState(() => _warrantyUnit = v),
+          key: const Key('item-warranty-unit'),
+        ),
+        hcChoice<String>(
+          l10n.warrantyProvider,
+          _warrantyProvider,
+          [
+            ('', l10n.contractNone),
+            ('manufacturer', l10n.warrantyByManufacturer),
+            ('shop', l10n.warrantyByShop),
+          ],
+          (v) => setState(() => _warrantyProvider = v),
+          key: const Key('item-warranty-provider'),
+        ),
+        hcText(l10n.warrantyProviderName, _warrantyProviderName),
+        fieldHelp(l10n.warrantyProviderNameHelp),
+        HcDateField(
+          label: l10n.warrantyStartsOn,
+          value: _warrantyStartsOn,
+          noDate: l10n.todayNoDate,
+          onChanged: (d) {
+            setState(() => _warrantyStartsOn = d);
+            sheetChanged(now: true);
+          },
+        ),
+        fieldHelp(l10n.warrantyStartsOnHelp),
+        if (computed != null)
+          HcField(
+            label: l10n.itemWarrantyEndsOn,
+            child: Text(
+              formatDay(context, computed),
+              key: const Key('item-warranty-end'),
+              style: HcText.body,
+            ),
+          )
+        else
+          HcDateField(
+            label: l10n.itemWarrantyEndsOn,
+            value: _warrantyEndsOn,
+            noDate: l10n.todayNoDate,
+            onChanged: (d) {
+              setState(() => _warrantyEndsOn = d);
+              sheetChanged(now: true);
+            },
+          ),
+        fieldHelp(l10n.warrantyEndsOnHelp),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return HcScaffold(
       title: widget.itemId == null ? l10n.newItem : l10n.editItem,
-      actions: [HcBarAction(label: l10n.save, onPressed: _save)],
+      actions: [
+        Center(child: savedStatus()),
+        HcBarAction(label: l10n.save, onPressed: _save),
+      ],
       body: Form(
         key: _form,
+        onChanged: sheetChanged,
         child: HcScreenList(
           children: [
             const SizedBox(height: HcSpace.s2),
@@ -396,21 +578,29 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
                   hcText(l10n.itemModel, _model),
                   hcText(l10n.itemSerial, _serial, sentences: false),
                   HcDateField(
+                    label: l10n.itemPurchasedOn,
+                    value: _purchasedOn,
+                    noDate: l10n.todayNoDate,
+                    onChanged: (d) {
+                      setState(() => _purchasedOn = d);
+                      sheetChanged(now: true);
+                    },
+                  ),
+                  HcDateField(
                     label: l10n.itemInstalledOn,
                     value: _installedOn,
                     noDate: l10n.todayNoDate,
-                    onChanged: (d) => setState(() => _installedOn = d),
-                  ),
-                  HcDateField(
-                    label: l10n.itemWarrantyEndsOn,
-                    value: _warrantyEndsOn,
-                    noDate: l10n.todayNoDate,
-                    onChanged: (d) => setState(() => _warrantyEndsOn = d),
+                    onChanged: (d) {
+                      setState(() => _installedOn = d);
+                      sheetChanged(now: true);
+                    },
                   ),
                   hcText(l10n.fieldNotes, _notes, minLines: 2, maxLines: 6),
                 ],
               ),
             ),
+            HcSectionHeading(l10n.itemManufacturerWarranty),
+            HcCard(child: _warrantyFields(l10n)),
             HcSectionHeading(l10n.maintenanceContract),
             HcCard(
               child: Column(
@@ -457,11 +647,14 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
                     Align(
                       alignment: AlignmentDirectional.centerStart,
                       child: TextButton(
-                        onPressed: () => setState(() {
-                          final removed = _links.removeAt(i);
-                          removed.$1.dispose();
-                          removed.$2.dispose();
-                        }),
+                        onPressed: () {
+                          setState(() {
+                            final removed = _links.removeAt(i);
+                            removed.$1.dispose();
+                            removed.$2.dispose();
+                          });
+                          sheetChanged(now: true);
+                        },
                         child: Text(l10n.removeLink),
                       ),
                     ),

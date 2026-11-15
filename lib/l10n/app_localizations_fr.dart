@@ -2130,4 +2130,329 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get occurrenceDetails => 'Détails';
+
+  @override
+  String get taskEditTask => 'Modifier la tâche';
+
+  @override
+  String get taskAddTitle => 'Ajouter une tâche';
+
+  @override
+  String get taskDueOn => 'Échéance';
+
+  @override
+  String get taskPostponedFrom => 'Reportée depuis le';
+
+  @override
+  String get taskHiddenUntil => 'Masquée jusqu\'à';
+
+  @override
+  String taskHiddenDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n jours avant la date',
+      one: '$n jour avant la date',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get taskThen => 'Ensuite';
+
+  @override
+  String get taskDetails => 'Détails';
+
+  @override
+  String get taskCost => 'Coût';
+
+  @override
+  String get taskOfWhichStock => 'Dont articles en stock';
+
+  @override
+  String get taskPaidSoFar => 'Payé jusqu\'ici';
+
+  @override
+  String get taskWho => 'Qui';
+
+  @override
+  String get taskTimeAndBudget => 'Durée et budget';
+
+  @override
+  String repeatEveryDay(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Tous les $n jours',
+      one: 'Tous les jours',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatEveryWeek(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Toutes les $n semaines',
+      one: 'Toutes les semaines',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatEveryMonth(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Tous les $n mois',
+      one: 'Tous les mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatEveryYear(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Tous les $n ans',
+      one: 'Tous les ans',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatDaysAfter(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n jours après la dernière fois',
+      one: 'Un jour après la dernière fois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatWeeksAfter(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n semaines après la dernière fois',
+      one: 'Une semaine après la dernière fois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatMonthsAfter(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n mois après la dernière fois',
+      one: 'Un mois après la dernière fois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatYearsAfter(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ans après la dernière fois',
+      one: 'Un an après la dernière fois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeatMonths(String start, String end) {
+    return 'de $start à $end';
+  }
+
+  @override
+  String durationMin(int n) {
+    return '$n min';
+  }
+
+  @override
+  String durationHours(int hours) {
+    return '$hours h';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, String minutes) {
+    return '$hours h $minutes';
+  }
+
+  @override
+  String durationDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n jours',
+      one: '$n jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationWeeks(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n semaines',
+      one: '$n semaine',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationMonths(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n mois',
+      one: '$n mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationYears(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ans',
+      one: '$n an',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get taskAddSubmit => 'Ajouter la tâche';
+
+  @override
+  String get unitMillilitreChoice => 'Millilitre (mL)';
+
+  @override
+  String get unitMillilitre => 'mL';
+
+  @override
+  String get errWarrantyDuration => 'Une garantie dure de 1 à 99 mois ou ans.';
+
+  @override
+  String get equipmentTab => 'Équipements';
+
+  @override
+  String get itemsSearch =>
+      'Rechercher par nom, marque, modèle ou numéro de série';
+
+  @override
+  String get itemsEveryRoom => 'Toutes les pièces';
+
+  @override
+  String itemsNext(String title) {
+    return 'Prochaine : $title';
+  }
+
+  @override
+  String get itemsNoTask => 'Aucune tâche à venir';
+
+  @override
+  String itemsWarrantyUntil(String date) {
+    return 'garantie jusqu\'au $date';
+  }
+
+  @override
+  String itemsWarrantyEnded(String date) {
+    return 'garantie terminée le $date';
+  }
+
+  @override
+  String get itemsAllEmpty =>
+      'Aucun élément pour l\'instant. Ajoutez-en un depuis la page d\'une pièce.';
+
+  @override
+  String get itemsNoMatch => 'Aucun élément ne correspond.';
+
+  @override
+  String get itemManufacturerWarranty => 'Garantie constructeur';
+
+  @override
+  String get itemPurchasedOn => 'Acheté le';
+
+  @override
+  String get warrantyDuration => 'Garantie : durée';
+
+  @override
+  String get warrantyDurationUnit => 'Garantie : en';
+
+  @override
+  String get warrantyProvider => 'Garantie : donnée par';
+
+  @override
+  String get warrantyProviderName =>
+      'Garantie : nom du fabricant ou du magasin';
+
+  @override
+  String get warrantyStartsOn => 'Garantie : départ le';
+
+  @override
+  String get warrantyMonthsChoice => 'mois';
+
+  @override
+  String get warrantyYearsChoice => 'ans';
+
+  @override
+  String get warrantyByManufacturer => 'Le fabricant';
+
+  @override
+  String get warrantyByShop => 'Le magasin';
+
+  @override
+  String warrantyMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mois',
+      one: '$count mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String warrantyYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ans',
+      one: '$count an',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String warrantyFrom(String date) {
+    return 'depuis le $date';
+  }
+
+  @override
+  String get warrantyDurationHelp =>
+      'La garantie du fabricant ou du magasin, en mois ou en années.';
+
+  @override
+  String get warrantyProviderNameHelp =>
+      'Exemple : Acme, ou le magasin où vous l\'avez acheté.';
+
+  @override
+  String get warrantyStartsOnHelp => 'Vide : à partir de la date d\'achat.';
+
+  @override
+  String get warrantyEndsOnHelp =>
+      'Calculée à partir du départ et de la durée. Ne la saisissez que si vous ne les connaissez pas.';
+
+  @override
+  String get saved => 'Enregistré';
 }

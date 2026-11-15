@@ -9,7 +9,9 @@ import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/choices.dart';
 import '../l10n/app_localizations.dart';
+import 'autosave.dart';
 import 'choices.dart';
+import 'equipment_screen.dart';
 import 'home_selector.dart';
 import 'item_screens.dart';
 import 'messages.dart';
@@ -22,9 +24,10 @@ import 'task_screen.dart';
 import 'templates_screen.dart';
 
 /// Rooms (docs/spec.md, "Screens of v1"): the rooms of the current home in the
-/// household's order, each with its kind and how many items it holds; and
-/// its second tab, the stock of the home (lib/ui/stock_screens.dart), as the
-/// web's section Rooms has the tabs Rooms and Stock.
+/// household's order, each with its kind and how many items it holds; its
+/// second tab, every item of the home (lib/ui/equipment_screen.dart), and its
+/// third, the stock of the home (lib/ui/stock_screens.dart), as the web's
+/// section Rooms has the tabs Rooms, Equipment and Stock.
 class RoomsScreen extends StatefulWidget {
   const RoomsScreen({super.key});
 
@@ -46,11 +49,21 @@ class _RoomsScreenState extends State<RoomsScreen> {
       onSelect: (i) => setState(() => _tab = i),
     );
     return HcScaffold(
-      title: _tab == 0 ? l10n.navRooms : l10n.stock,
+      title: switch (_tab) {
+        0 => l10n.navRooms,
+        1 => l10n.equipmentTab,
+        _ => l10n.stock,
+      },
       actions: const [HomeSelector()],
       body: home == null
           ? const SizedBox.shrink()
           : _tab == 1
+          ? EquipmentList(
+              key: ValueKey('equipment-${home.id}'),
+              home: home,
+              tabs: tabs,
+            )
+          : _tab == 2
           ? StockList(key: ValueKey('stock-${home.id}'), home: home, tabs: tabs)
           : DataView<(List<RoomRow>, Map<String, int>)>(
               key: ValueKey(home.id),
@@ -348,8 +361,22 @@ class RoomFormScreen extends StatefulWidget implements HcFormScreen {
   State<RoomFormScreen> createState() => _RoomFormScreenState();
 }
 
-class _RoomFormScreenState extends State<RoomFormScreen> {
+class _RoomFormScreenState extends State<RoomFormScreen>
+    with AutosaveSheet<RoomFormScreen> {
   final _form = GlobalKey<FormState>();
+
+  @override
+  GlobalKey<FormState> get sheetForm => _form;
+
+  @override
+  bool get existing => widget.roomId != null;
+
+  @override
+  Future<void> writeSheet(Repository repository) async {
+    await repository.updateRoom(widget.roomId!, _input());
+    await repository.setPaintArticle(widget.roomId!, _paintArticle);
+  }
+
   final _name = TextEditingController();
   final _notes = TextEditingController();
   final _paintColour = TextEditingController();
@@ -393,6 +420,7 @@ class _RoomFormScreenState extends State<RoomFormScreen> {
         _wall.text = input.wallCovering;
         _memoryNotes.text = input.memoryNotes;
       });
+      sheetLoaded();
     });
   }
 
@@ -428,6 +456,7 @@ class _RoomFormScreenState extends State<RoomFormScreen> {
   );
 
   Future<void> _save() async {
+    cancelAutosave();
     if (!_form.currentState!.validate()) return;
     final navigator = Navigator.of(context);
     final saved = await runChange(context, (r) async {
@@ -473,9 +502,13 @@ class _RoomFormScreenState extends State<RoomFormScreen> {
     final l10n = AppLocalizations.of(context);
     return HcScaffold(
       title: widget.roomId == null ? l10n.newRoom : l10n.editRoom,
-      actions: [HcBarAction(label: l10n.save, onPressed: _save)],
+      actions: [
+        Center(child: savedStatus()),
+        HcBarAction(label: l10n.save, onPressed: _save),
+      ],
       body: Form(
         key: _form,
+        onChanged: sheetChanged,
         child: HcScreenList(
           children: [
             const SizedBox(height: HcSpace.s2),

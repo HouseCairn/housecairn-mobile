@@ -69,7 +69,10 @@ class Rooms extends Table with ModelColumns, HomeOwned {
       blob().map(const UuidConverter()).nullable()();
 }
 
-/// `rooms.item` (`rooms/models.py:124-157`): equipment or surface.
+/// `rooms.item` (`rooms/models.py:124-157`): equipment or surface. The
+/// manufacturer's warranty (schema 5, web ADR 0080): a duration in months or
+/// years, who gives it and their name, its start (else the purchase date);
+/// [warrantyEndsOn] is worked out from them, or typed without a duration.
 @DataClassName('ItemRow')
 class Items extends Table with ModelColumns, HomeOwned {
   BlobColumn get roomId => blob().map(const UuidConverter())();
@@ -80,6 +83,14 @@ class Items extends Table with ModelColumns, HomeOwned {
   TextColumn get serialNumber => text().withDefault(const Constant(''))();
   TextColumn get installedOn => text().nullable()();
   TextColumn get warrantyEndsOn => text().nullable()();
+  TextColumn get purchasedOn => text().nullable()();
+  IntColumn get warrantyDuration => integer().nullable()();
+  TextColumn get warrantyDurationUnit =>
+      text().withDefault(const Constant('year'))();
+  TextColumn get warrantyProvider => text().withDefault(const Constant(''))();
+  TextColumn get warrantyProviderName =>
+      text().withDefault(const Constant(''))();
+  TextColumn get warrantyStartsOn => text().nullable()();
   BlobColumn get contractContractorId =>
       blob().map(const UuidConverter()).nullable()();
   TextColumn get contractNumber => text().withDefault(const Constant(''))();

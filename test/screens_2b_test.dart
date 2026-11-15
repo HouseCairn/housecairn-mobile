@@ -443,8 +443,7 @@ void main() {
         await tapText(tester, 'Main cellar');
         await tapKey(tester, 'task-add');
         await type(tester, 'task-title', 'Check the valve');
-        await tester.tap(find.text(l.save));
-        await tester.pumpAndSettle();
+        await saveTask(tester);
         final repository = stateOf(tester).repository;
         final cellar = (await repository.rooms(data.homes.main))
             .firstWhere((r) => r.name == 'Main cellar')

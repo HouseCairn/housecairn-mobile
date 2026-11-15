@@ -21,7 +21,8 @@ part 'database.g.dart';
 /// adds projects with their rooms, budget lines, quotes, files, links and
 /// tasks, the annual envelopes and the reports, and four nullable columns:
 /// the two budgets of a task, the real cost of an occurrence, the paint left
-/// of a room. Migrations are drift's
+/// of a room. Schema 5 adds the manufacturer's warranty of an item, six
+/// columns (web ADR 0080). Migrations are drift's
 /// guided migrations: `dart run drift_dev make-migrations` keeps one schema
 /// file per version in `drift_schemas/` and generates the step-by-step code
 /// (`database.steps.dart`) and the migration tests under `test/drift/`.
@@ -64,7 +65,7 @@ class AppDatabase extends _$AppDatabase implements Db {
       AppDatabase(driftDatabase(name: 'housecairn'));
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -139,6 +140,21 @@ class AppDatabase extends _$AppDatabase implements Db {
               schema.reportHomeStatus,
             ]) {
               await m.create(index);
+            }
+          },
+          from4To5: (m, schema) async {
+            // The manufacturer's warranty of an item (web ADR 0080): six
+            // columns, nullable or with a default; the end already typed
+            // stays as it is.
+            for (final column in [
+              schema.items.purchasedOn,
+              schema.items.warrantyDuration,
+              schema.items.warrantyDurationUnit,
+              schema.items.warrantyProvider,
+              schema.items.warrantyProviderName,
+              schema.items.warrantyStartsOn,
+            ]) {
+              await m.addColumn(schema.items, column);
             }
           },
         ),

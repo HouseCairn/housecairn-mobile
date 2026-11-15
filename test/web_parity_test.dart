@@ -392,12 +392,16 @@ Measures measure(
   bool field = false,
 }) {
   final m = <String, Object?>{};
-  // The title is the `h1` at the top of the content (HcLargeTitle, lot D4).
-  // Once scrolled to the end of a long screen (measureLong), the title is
-  // away: the measure taken at the top has it.
-  final title = find.byKey(const Key('page-title'));
-  if (title.evaluate().isNotEmpty) {
-    m['h1_font'] = drawnSize(tester, title.last);
+  // The title is the `h1` at the top of the content (HcLargeTitle, lot D4),
+  // or, on the page of a task, under its pills (design lot D2). Once
+  // scrolled to the end of a long screen (measureLong), the title is away:
+  // the measure taken at the top has it.
+  final large = find.byKey(const Key('page-title'));
+  final inPage = withStyle(HcText.pageTitle);
+  if (large.evaluate().isNotEmpty) {
+    m['h1_font'] = drawnSize(tester, large.last);
+  } else if (inPage.evaluate().isNotEmpty) {
+    m['h1_font'] = drawnSize(tester, inPage.first);
   }
   m['nav_height'] = rectOf(tester, find.byType(NavigationBar)).height;
   if (rowTitle != null) {
@@ -683,6 +687,10 @@ final screens = <Screen>[
     measure: (t) =>
         measure(t, rowTitle: 'Filtre de VMC', add: 'Ajouter un article'),
   ),
+  // Not measured yet: the Equipment tab (every item of the home). The
+  // reference above is taken at the pinned web release (v0.3.2), which does
+  // not have that screen; it joins this list with the follow-up lot
+  // (t_d3cbc438), once a web release (v0.4.0) has it.
   (
     name: 'article',
     open: (tester, demo) => openScreen(

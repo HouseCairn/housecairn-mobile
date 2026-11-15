@@ -7,6 +7,7 @@ import 'package:housecairn_mobile/ui/photos.dart';
 import 'package:housecairn_mobile/ui/rooms.dart';
 import 'package:housecairn_mobile/ui/reminders_row.dart';
 import 'package:housecairn_mobile/ui/templates_screen.dart';
+import 'package:material_ui/material_ui.dart' show Key;
 
 import 'lot2b.dart';
 
@@ -15,6 +16,19 @@ import 'lot2b.dart';
 final screens2b =
     <(String page, Future<void> Function(WidgetTester, Lot2b, Labels))>[
       ('rooms', (tester, data, l) => openRooms(tester, l.rooms)),
+      (
+        'equipment',
+        (tester, data, l) async {
+          await openRooms(tester, l.rooms);
+          await tester.tap(
+            find.descendant(
+              of: find.byKey(const Key('rooms-tabs')),
+              matching: find.text(l.equipment),
+            ),
+          );
+          await tester.pumpAndSettle();
+        },
+      ),
       (
         'room',
         (tester, data, l) => openScreen(
@@ -89,6 +103,7 @@ final screens2b =
 /// The few words of the navigation, by language.
 typedef Labels = ({
   String rooms,
+  String equipment,
   String more,
   String stock,
   String materials,
@@ -103,6 +118,7 @@ typedef Labels = ({
 const labels = {
   'en': (
     rooms: 'Rooms',
+    equipment: 'Equipment',
     more: 'More',
     stock: 'Stock',
     materials: 'MATERIALS',
@@ -115,6 +131,7 @@ const labels = {
   ),
   'fr': (
     rooms: 'Pièces',
+    equipment: 'Équipements',
     more: 'Plus',
     stock: 'Matériel',
     materials: 'FOURNITURES',

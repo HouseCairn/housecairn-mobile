@@ -35,14 +35,14 @@ and each operation names its home ([ADR 0008](adr/0008-several-homes-one-family-
 | --- | --- | --- |
 | Home: name, currency (ISO 4217), hemisphere | `homes/models.py:31-52` | Hemisphere drives the predefined seasons. Several homes per family. One app field more, `archived_at` ([Homes](#homes)); `required_provider` (`:53-58`) is left out with sign-in. |
 | Room, with its memory (paint, coverings, notes) | `rooms/models.py:67-91` | `kind` from `RoomKind` (`:52-64`). `paint_article` links to stock (`:81-88`). |
-| Item (equipment or surface): brand, model, serial, installation, warranty, contract, links | `rooms/models.py:124-157` | Contract provider is a contractor (`:140-148`). Links: at most 10, `http(s)` only (`:15`, `:35-49`). |
+| Item (equipment or surface): brand, model, serial, purchase, installation, manufacturer's warranty, contract, links | `rooms/models.py:124-157` | Contract provider is a contractor (`:140-148`). Links: at most 10, `http(s)` only (`:15`, `:35-49`). Warranty (schema 5, web ADR 0080): `warranty_duration` 1 to 99, `warranty_duration_unit` `month` or `year`, `warranty_provider` `manufacturer`, `shop` or empty, `warranty_provider_name`, `warranty_starts_on`, `purchased_on`; `warranty_ends_on` is worked out from them (the same date that many months or years later, the last day of a shorter month), typed only without a duration. |
 | Photo of a room or an item, with category | `rooms/models.py:189-196`, `:210-245` | Exactly one of room or item (`:238-245`). Re-encoded on the phone, as on the server. |
 | Contractor: name, trade (list plus Other), phone, email, address, note | `tasks/models.py:96-158` | Phone pattern `:112`, address max length `:113`. |
 | Task: title, room, item, priority, duration, labour and material budgets, notes, procedure (Markdown), assignee, contractor, repetition, season, masking | `tasks/models.py:161-229` | Assignee becomes a **member of the family** (see below). |
 | Occurrence: due date, status, postponement, completion, real cost, note, `follows` | `tasks/models.py:324-346` | One open occurrence per task (`:357-361`): kept, by a deterministic successor ([ADR 0003](adr/0003-sync-protocol.md)). |
 | Task material (article and quantity) | `tasks/models.py:284-318` | One line per article and task (`:310-314`). |
 | Material draw (what a done occurrence took from the stock) | `tasks/models.py:375-411` | `drawn` never above `wanted` (`:400-401`). |
-| Stock article: name, references, dimensions, place, unit, threshold, unit price, compatible items, rooms, notes, label photo | `stock/models.py:68-122` | Unit list plus Other (`:24-33`). |
+| Stock article: name, references, dimensions, place, unit, threshold, unit price, compatible items, rooms, notes, label photo | `stock/models.py:68-122` | Unit list plus Other (`:24-33`), the millilitre (`millilitre`, shown mL) included, with no conversion between units. |
 | Supplier of an article | `stock/models.py:148-157` | |
 | Stock movement: entry, exit, inventory; never changed | `stock/models.py:168-197` | Stock is the sum of deltas (`:177-180`), computed. |
 | Project: title, goal, status, priority, rooms, duration, preferred season | `projects/models.py:52-127` | Statuses `:52-57`. |
@@ -176,14 +176,33 @@ Homes and Settings shows the current home.
    that is on, due beyond the week or without a date (`tasks/agenda.py`, `today_sections`). On one
    home, a tab **All** opens the list of every task (by room, the hidden ones on demand, 30 to a
    page) and, under Done, the history with its real cost (`tasks/task_list.html`).
-2. **Task**: form with only the title required (priority, duration, procedure, contractor,
-   masking, and a room, an item or a contractor added with the task); repetition with a preview
-   of the next five dates (`tasks/recurrence.py:341-351`); materials; the page shows Done, Skip,
-   Postpone and Undo; history of occurrences, each done one opening its details (day, real cost,
-   note); photos of the item or the room; deletion.
+2. **Task**: opens on its page, to read, in the order of the web (`tasks/task_detail.html`;
+   web `design/patterns.md`, Record page): the pills of state, priority and repetition, the
+   title, the place (room and item as links), the row of actions (Done as the primary one,
+   Postpone, Skip this time, or Undo, then Edit the task), then When (repetition, due date,
+   first date of a postponed one, masking, the next three dates), How to do it, Details
+   (duration, budgets, contractor, notes), Cost (estimate, part from the stock, a year, paid so
+   far), materials, photos of the item or the room, history of occurrences, each done one
+   opening its details (day, real cost, note). Edit the task opens the form, in the order and
+   the folded sections of the web (`tasks/task_form.html`): title, room, item and due date, then
+   Repeat (with a preview of the next five dates, `tasks/recurrence.py:341-351`), Who, Time and
+   budget, How to do it; only the title is required; a room, an item or a contractor can be
+   added with the task; Save and Cancel end it, deletion is under them. The files attached to a
+   task (web: Photos and files) are not in the app yet.
 3. **Add from a template**: the bundled library, filtered by the equipment ticked.
 4. **Rooms**: list in the household's order; a room shows its memory, items, photos, tasks.
-5. **Item**: details, warranty state (`rooms/models.py:182-186`), contract, links, photos, tasks.
+   Its tab **Equipment** lists every item of the home, by room then name, with its next task
+   and its warranty, filtered by a room and by words of the name, brand, model or serial number
+   (`rooms/services.py` `item_rows`, `rooms/item_list.html`).
+5. **Item**: details, the manufacturer's warranty (a duration in months or years, who gives it,
+   its start, else the purchase date, and its end worked out; web ADR 0080), its state,
+   contract, links, photos, tasks.
+
+The sheets of an existing item, room, task and stock article save themselves as they are
+changed (web ADR 0082): a choice, a date or a tick at once, a text 800 ms after the typing
+stops, one write of the fields that changed, a discreet "Saved" said by the screen reader. A
+creation and a deletion keep their button, as does a task that adds a room, an item or a
+contractor with it.
 6. **Stock**: articles with low-stock flag (`stock/models.py:90-96`), an article with its
    movements and suppliers, add an entry, an exit or an inventory.
 7. **Projects**: list by status (`projects/models.py:61-67`); a project with its budget lines,
