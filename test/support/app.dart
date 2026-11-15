@@ -16,13 +16,15 @@ import 'package:material_ui/material_ui.dart';
 
 import 'fixture.dart';
 
-/// A phone of 360 logical pixels by 760, the narrowest width of the spec.
+/// A phone of 360 logical pixels by 760, the narrowest width of the spec,
+/// or of [width].
 Future<void> onPhone(
   WidgetTester tester, {
   double textScale = 1,
+  double width = 360,
   double height = 760,
 }) async {
-  tester.view.physicalSize = Size(360 * 3, height * 3);
+  tester.view.physicalSize = Size(width * 3, height * 3);
   tester.view.devicePixelRatio = 3;
   tester.platformDispatcher.textScaleFactorTestValue = textScale;
   addTearDown(tester.view.reset);
@@ -77,3 +79,20 @@ Finder hcIcon(HcIcons icon) =>
 /// A heading of a group of rows, by its text (it shows in capitals).
 Finder heading(String text) =>
     find.byWidgetPredicate((w) => w is HcSectionHeading && w.text == text);
+
+/// Taps the add button of key [key], after its list: scrolls the list of the
+/// screen until it shows.
+Future<void> tapAdd(WidgetTester tester, String key) async {
+  final button = find.byKey(Key(key));
+  await tester.scrollUntilVisible(
+    button,
+    200,
+    scrollable: find.byType(Scrollable).last,
+  );
+  // To the end of the list: the button is its last child, and only that
+  // shows all of it above the bottom bar at large text sizes.
+  await tester.drag(find.byType(Scrollable).last, const Offset(0, -2000));
+  await tester.pumpAndSettle();
+  await tester.tap(button);
+  await tester.pumpAndSettle();
+}

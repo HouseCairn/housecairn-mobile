@@ -296,6 +296,12 @@ abstract class AppLocalizations {
   /// **'New task'**
   String get newTask;
 
+  /// Button after a list of tasks that creates a task. Web catalogue: Ajouter une tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a task'**
+  String get addTask;
+
   /// Title of the screen of an existing task. Web catalogue: Tâche.
   ///
   /// In en, this message translates to:
@@ -475,6 +481,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New home'**
   String get newHome;
+
+  /// Button after the list of homes that creates a home. Web catalogue: Ajouter un logement.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a home'**
+  String get addHome;
 
   /// Field of the home form. Web catalogue: Nom.
   ///

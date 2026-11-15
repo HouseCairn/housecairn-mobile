@@ -136,17 +136,6 @@ class _TodayScreenState extends State<TodayScreen> {
         title: Text(l10n.navToday),
         actions: const [HomeSelector(withAllHomes: true)],
       ),
-      floatingActionButton: state.current == null
-          ? null
-          : FloatingActionButton.extended(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => TaskScreen(homeId: state.current!.id),
-                ),
-              ),
-              icon: const HcIcon(HcIcons.add),
-              label: Text(l10n.newTask),
-            ),
       body: entries == null
           ? const SizedBox.shrink()
           : HcScreenList(
@@ -177,6 +166,17 @@ class _TodayScreenState extends State<TodayScreen> {
                       ],
                     ),
                   ],
+                // After the list, as on the web (`tasks/today.html`).
+                if (state.current != null)
+                  HcAddButton(
+                    key: const Key('today-add'),
+                    label: l10n.addTask,
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => TaskScreen(homeId: state.current!.id),
+                      ),
+                    ),
+                  ),
               ],
             ),
     );

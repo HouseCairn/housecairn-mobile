@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
-import '../design/icons.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/choices.dart';
@@ -39,18 +38,6 @@ class ContractorsScreen extends StatelessWidget {
         title: Text(l10n.contractors),
         actions: const [HomeSelector()],
       ),
-      floatingActionButton: writable
-          ? FloatingActionButton.extended(
-              key: const Key('contractor-add'),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => ContractorFormScreen(homeId: home.id),
-                ),
-              ),
-              icon: const HcIcon(HcIcons.add),
-              label: Text(l10n.addContractor),
-            )
-          : null,
       body: home == null
           ? const SizedBox.shrink()
           : DataView<List<ContractorRow>>(
@@ -81,6 +68,18 @@ class ContractorsScreen extends StatelessWidget {
                             ),
                           ),
                       ],
+                    ),
+                  // After the list, as on the web
+                  // (`tasks/contractor_list.html`).
+                  if (writable)
+                    HcAddButton(
+                      key: const Key('contractor-add'),
+                      label: l10n.addContractor,
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => ContractorFormScreen(homeId: home.id),
+                        ),
+                      ),
                     ),
                 ],
               ),

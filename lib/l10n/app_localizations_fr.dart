@@ -121,6 +121,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get newTask => 'Nouvelle tâche';
 
   @override
+  String get addTask => 'Ajouter une tâche';
+
+  @override
   String get task => 'Tâche';
 
   @override
@@ -211,6 +214,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get newHome => 'Nouveau logement';
+
+  @override
+  String get addHome => 'Ajouter un logement';
 
   @override
   String get homeName => 'Nom';

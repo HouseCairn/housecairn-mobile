@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
-import '../design/icons.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
@@ -29,11 +28,6 @@ class HomesScreen extends StatelessWidget {
     );
     return Scaffold(
       appBar: AppBar(title: Text(l10n.homes)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => open(null),
-        icon: const HcIcon(HcIcons.add),
-        label: Text(l10n.newHome),
-      ),
       body: HcScreenList(
         children: [
           const SizedBox(height: HcSpace.s2),
@@ -46,6 +40,14 @@ class HomesScreen extends StatelessWidget {
                   onTap: () => open(home),
                 ),
             ],
+          ),
+          // After the homes in use, secondary, as on the web
+          // (`homes/home_list.html`).
+          HcAddButton(
+            key: const Key('home-add'),
+            label: l10n.addHome,
+            primary: false,
+            onPressed: () => open(null),
           ),
           if (archived.isNotEmpty) ...[
             HcSectionHeading(l10n.homesArchived),

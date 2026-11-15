@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
-import '../design/icons.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
@@ -36,18 +35,6 @@ class RoomsScreen extends StatelessWidget {
         title: Text(l10n.navRooms),
         actions: const [HomeSelector()],
       ),
-      floatingActionButton: writable
-          ? FloatingActionButton.extended(
-              key: const Key('room-add'),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => RoomFormScreen(homeId: home.id),
-                ),
-              ),
-              icon: const HcIcon(HcIcons.add),
-              label: Text(l10n.addRoom),
-            )
-          : null,
       body: home == null
           ? const SizedBox.shrink()
           : DataView<(List<RoomRow>, Map<String, int>)>(
@@ -81,6 +68,20 @@ class RoomsScreen extends StatelessWidget {
                               ),
                             ),
                         ],
+                      ),
+                    // After the list, secondary and as wide as its label,
+                    // as on the web (`rooms/room_list.html`).
+                    if (writable)
+                      HcAddButton(
+                        key: const Key('room-add'),
+                        label: l10n.addRoom,
+                        primary: false,
+                        block: false,
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => RoomFormScreen(homeId: home.id),
+                          ),
+                        ),
                       ),
                   ],
                 );
@@ -142,35 +143,32 @@ class TaskRows extends StatelessWidget {
                   ),
               ],
             ),
+          // After the tasks, secondary and the width of the column, as on
+          // the web (`rooms/room_detail.html`, `rooms/item_detail.html`).
           if (writable) ...[
-            const SizedBox(height: HcSpace.s3),
-            Wrap(
-              spacing: HcSpace.s2,
-              runSpacing: HcSpace.s2,
-              children: [
-                OutlinedButton(
-                  key: const Key('task-add'),
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => TaskScreen(
-                        homeId: homeId,
-                        roomId: roomId,
-                        itemId: itemId,
-                      ),
-                    ),
+            HcAddButton(
+              key: const Key('task-add'),
+              label: l10n.addTask,
+              primary: false,
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => TaskScreen(
+                    homeId: homeId,
+                    roomId: roomId,
+                    itemId: itemId,
                   ),
-                  child: Text(l10n.newTask),
                 ),
-                OutlinedButton(
-                  key: const Key('task-from-template'),
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => TemplatesScreen(roomId: roomId),
-                    ),
-                  ),
-                  child: Text(l10n.addFromTemplate),
+              ),
+            ),
+            HcAddButton(
+              key: const Key('task-from-template'),
+              label: l10n.addFromTemplate,
+              primary: false,
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => TemplatesScreen(roomId: roomId),
                 ),
-              ],
+              ),
             ),
           ],
         ],

@@ -389,8 +389,41 @@ ButtonStyle hcDangerStyle() => FilledButton.styleFrom(
   foregroundColor: HcColors.textInverse,
 );
 
+/// The button that adds to a list, after it, as on the web (`.button`,
+/// `.button-block`): primary or secondary, the width of the column or of its
+/// label, a gap of `--hc-space-3` above it. Not a floating button: the web
+/// has none, and a floating button covers the last row.
+class HcAddButton extends StatelessWidget {
+  const HcAddButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.primary = true,
+    this.block = true,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+  final bool primary;
+  final bool block;
+
+  @override
+  Widget build(BuildContext context) {
+    final child = Text(label, textAlign: TextAlign.center);
+    final button = primary
+        ? FilledButton(onPressed: onPressed, child: child)
+        : OutlinedButton(onPressed: onPressed, child: child);
+    return Padding(
+      padding: const EdgeInsets.only(top: HcSpace.s3),
+      child: block
+          ? button
+          : Align(alignment: AlignmentDirectional.centerStart, child: button),
+    );
+  }
+}
+
 /// The list of a screen: the margins of `.content`, and room at the end for
-/// the floating button and the undo bar.
+/// the undo bar.
 class HcScreenList extends StatelessWidget {
   const HcScreenList({super.key, required this.children});
 
