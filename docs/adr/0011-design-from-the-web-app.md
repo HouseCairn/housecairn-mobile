@@ -50,8 +50,8 @@ Manrope. It has no dark theme (`color-scheme: light`, `base.css`).
 
 | Web | App | Why |
 | --- | --- | --- |
-| Brand bar, then the page title as `h1` in the page | The title in the app bar, in the `h1` style; the selector of the current home at its end | The app bar is where a phone shows the title and the back button; the brand is the app icon |
-| Back link at the top of the page | The back button of the app bar, the system back of Android, the back gesture of iOS (`MaterialPageRoute`) | What each platform's users expect; the gesture comes with the route |
+| Brand bar, then the page title as `h1` in the page | A compact app bar (back, one action at most, the selector of the current home on a section root), then the title as the `h1` at the top of the content, where it wraps (`HcScaffold`, lot D4). On iOS the `h1` folds into the bar once the content is scrolled | The title in the bar was cut by its action ("Report a pro…"); the large title of iOS is the same rule, the title in the content (design/patterns.md of the web, Header) |
+| Back link at the top of the page | The back button of the app bar, the system back of Android, the back gesture of iOS (`hcRoute`). On iOS a form opens as a modal sheet, Cancel on the left of its bar and the web's label of its save on the right (the form of a task keeps Save and Cancel at its end, as on the web); on Android it stays a page. The sheet of a row that exists also saves itself as it is changed, "Saved" shown in its bar; a creation waits for its save | What each platform's users expect; the gesture comes with the route (platform adaptations 5 and 7 of design/patterns.md) |
 | Targets of 44 px, Done of 48 px | 48 px for every target (`touch-target-lg`): buttons 48 high where the web's are 45.2 (44 and a border), fields 48 where the web's are 50 | The minimum of Android, and the size Material's own widgets keep |
 | Hover colours | None (`hoverColor` transparent); a sand ripple on press | No hover on a touch screen |
 | Undo banner above the bar | Floating snack bar above the bar, sage, border, action in the primary colour | The same place and look, with the platform's announcement to screen readers |
@@ -64,7 +64,7 @@ Manrope. It has no dark theme (`color-scheme: light`, `base.css`).
 | Stock item page: the photo of its label, the label tools; the movement form sent by one of three buttons | No label photo yet (the column exists, `label`), no labels; the same form and buttons | The label photo is not in lot 3a; labels are not in v1 |
 | Photo: an upload form (file field) | A sheet with Take a photo and Choose from the gallery, permission asked at that moment; the photo is re-encoded before it is stored | A phone has a camera, and the location must not leave it |
 | Contractor: a vCard download | Call and Write buttons on the card (`tel:`, `mailto:`) | What a phone does with a number; the spec asks for call and e-mail |
-| Reminder preferences per member (days before, hour) | One switch in More, the web's defaults (1 day before, 08:00, follow-ups by priority) | The per-member settings come with sync; the permission is asked when the switch is turned on |
+| Reminder preferences per member (days before, hour) | One switch on the Notifications screen (More, Me), the web's defaults (1 day before, 08:00, follow-ups by priority) | The per-member settings come with sync; the permission is asked when the switch is turned on |
 
 **Not taken.** No dark theme: the web has none. No page title and back link inside the page,
 no breadcrumbs, no computer layout with a column on the left: the app is a phone app. The help
@@ -120,7 +120,7 @@ web's CSS. Kept apart from the web, with the reason:
 
 | Web (v0.3.2) | App | Why |
 | --- | --- | --- |
-| Offer to receive the reminders on this device (`_device_banner.html`, Web Push) | None | The app's reminders are local notifications, asked by the switch in More; there is no Web Push subscription to offer |
+| Offer to receive the reminders on this device (`_device_banner.html`, Web Push) | None | The app's reminders are local notifications, asked by the switch of Notifications (More, Me); there is no Web Push subscription to offer |
 | *Photo* pill on a task born from a report with a photo; "Report a problem" | None | Reports are a web feature that the app does not have; its tasks carry no report |
 | Undated tasks only when in season, under *In season* | Undated tasks under *No date* | The app has no seasons on Today yet; showing them is the safer error |
 | A postponed task shows its date | A postponed task shows an info pill "Postponed to ..." | The state is useful on a phone and a test pins it; a later lot may drop it |

@@ -3,8 +3,11 @@
 import 'package:material_ui/material_ui.dart';
 
 import 'icons.dart';
+import 'page.dart';
 import 'theme.dart';
 import 'tokens.dart';
+
+export 'page.dart';
 
 /// The components of the web application (`static/css/components.css`,
 /// `tasks.css`), for the screens of the app. A screen uses these, or the
@@ -391,13 +394,22 @@ class HcBarAction extends StatelessWidget {
   // Its text grows with the text size of the phone up to 1.3 times, as the
   // buttons of the navigation bar of iOS do: larger, it would push the back
   // button and the title out of the bar.
+  //
+  // The label is the web's, word for word ("Send the report"): never cut, it
+  // is drawn smaller when it does not fit next to the back button.
   @override
-  Widget build(BuildContext context) => MediaQuery.withClampedTextScaling(
-    maxScaleFactor: 1.3,
-    child: TextButton(
-      style: TextButton.styleFrom(textStyle: HcText.buttonSmall),
-      onPressed: onPressed,
-      child: Text(label),
+  Widget build(BuildContext context) => ConstrainedBox(
+    constraints: BoxConstraints(
+      maxWidth:
+          MediaQuery.sizeOf(context).width - HcComponent.appbarMinHeight * 2,
+    ),
+    child: MediaQuery.withClampedTextScaling(
+      maxScaleFactor: 1.3,
+      child: TextButton(
+        style: TextButton.styleFrom(textStyle: HcText.buttonSmall),
+        onPressed: onPressed,
+        child: FittedBox(fit: BoxFit.scaleDown, child: Text(label)),
+      ),
     ),
   );
 }
@@ -453,16 +465,21 @@ class HcScreenList extends StatelessWidget {
 
   final List<Widget> children;
 
+  // The title of the screen ([HcScaffold]) is its first line, as the `h1` of
+  // a page of the web (design/patterns.md, Header).
   @override
-  Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.fromLTRB(
-      HcSpace.s4,
-      HcSpace.s2,
-      HcSpace.s4,
-      HcSpace.s12 + HcSpace.s12,
-    ),
-    children: children,
-  );
+  Widget build(BuildContext context) {
+    final title = HcPageTitle.of(context);
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        HcSpace.s4,
+        HcSpace.s2,
+        HcSpace.s4,
+        HcSpace.s12 + HcSpace.s12,
+      ),
+      children: [if (title != null) HcLargeTitle(title), ...children],
+    );
+  }
 }
 
 /// The tabs of a section (`components/tabs.html`, `.tabs-fit`): sister

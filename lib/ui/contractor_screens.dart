@@ -33,11 +33,9 @@ class ContractorsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final home = AppScope.of(context).current;
     final writable = home != null && home.archivedAt == null;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.contractors),
-        actions: const [HomeSelector()],
-      ),
+    return HcScaffold(
+      title: l10n.contractors,
+      actions: const [HomeSelector()],
       body: home == null
           ? const SizedBox.shrink()
           : DataView<List<ContractorRow>>(
@@ -59,8 +57,8 @@ class ContractorsScreen extends StatelessWidget {
                               c.phone,
                             ].where((t) => t.isNotEmpty).join(' · '),
                             onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => ContractorScreen(
+                              hcRoute(
+                                ContractorScreen(
                                   homeId: home.id,
                                   contractorId: c.id,
                                 ),
@@ -75,11 +73,8 @@ class ContractorsScreen extends StatelessWidget {
                     HcAddButton(
                       key: const Key('contractor-add'),
                       label: l10n.addContractor,
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => ContractorFormScreen(homeId: home.id),
-                        ),
-                      ),
+                      onPressed: () => Navigator.of(context)
+                          .push(hcRoute(ContractorFormScreen(homeId: home.id))),
                     ),
                 ],
               ),
@@ -126,30 +121,27 @@ class ContractorScreen extends StatelessWidget {
       builder: (context, data) {
         final (c, tasks) = data;
         if (c == null) {
-          return Scaffold(
-            appBar: AppBar(),
+          return HcScaffold(
             body: HcScreenList(children: [HcEmpty(l10n.errNotFound)]),
           );
         }
         final trade = contractorTrade(l10n, c);
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(c.name),
-            actions: [
-              if (writable)
-                HcBarAction(
-                  label: l10n.edit,
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => ContractorFormScreen(
-                        homeId: homeId,
-                        contractorId: contractorId,
-                      ),
+        return HcScaffold(
+          title: c.name,
+          actions: [
+            if (writable)
+              HcBarAction(
+                label: l10n.edit,
+                onPressed: () => Navigator.of(context).push(
+                  hcRoute(
+                    ContractorFormScreen(
+                      homeId: homeId,
+                      contractorId: contractorId,
                     ),
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
           body: HcScreenList(
             children: [
               const SizedBox(height: HcSpace.s2),
@@ -204,10 +196,7 @@ class ContractorScreen extends StatelessWidget {
                       HcRow(
                         title: task.title,
                         onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) =>
-                                TaskScreen(homeId: homeId, taskId: task.id),
-                          ),
+                          hcRoute(TaskScreen(homeId: homeId, taskId: task.id)),
                         ),
                       ),
                   ],
@@ -221,7 +210,10 @@ class ContractorScreen extends StatelessWidget {
 }
 
 /// The form of a contractor.
-class ContractorFormScreen extends StatefulWidget {
+class ContractorFormScreen extends StatefulWidget implements HcFormScreen {
+  @override
+  bool get opensAsSheet => true;
+
   const ContractorFormScreen({
     super.key,
     required this.homeId,
@@ -320,13 +312,9 @@ class _ContractorFormScreenState extends State<ContractorFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.contractorId == null ? l10n.newContractor : l10n.contractor,
-        ),
-        actions: [HcBarAction(label: l10n.save, onPressed: _save)],
-      ),
+    return HcScaffold(
+      title: widget.contractorId == null ? l10n.newContractor : l10n.contractor,
+      actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
         key: _form,
         child: HcScreenList(

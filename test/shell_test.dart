@@ -2,6 +2,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/design/icons.dart';
+import 'package:housecairn_mobile/design/widgets.dart';
 import 'package:housecairn_mobile/version.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -25,11 +26,11 @@ void main() {
           .toList();
       expect(shown, labels);
       // Today opens first.
-      expect(find.widgetWithText(AppBar, labels.first), findsOneWidget);
+      expect(find.widgetWithText(HcLargeTitle, labels.first), findsOneWidget);
       for (final label in labels) {
         await tester.tap(destination(label));
         await tester.pumpAndSettle();
-        expect(find.widgetWithText(AppBar, label), findsOneWidget);
+        expect(find.widgetWithText(HcLargeTitle, label), findsOneWidget);
       }
     });
 
@@ -93,10 +94,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(destination('More'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(AppBar, 'About'), findsOneWidget);
+    expect(find.widgetWithText(HcLargeTitle, 'About'), findsOneWidget);
     // A second tap on the current section goes back to its root.
     await tester.tap(destination('More'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(AppBar, 'More'), findsOneWidget);
+    expect(find.widgetWithText(HcLargeTitle, 'More'), findsOneWidget);
   });
 }

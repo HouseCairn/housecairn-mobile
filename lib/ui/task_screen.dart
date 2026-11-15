@@ -35,8 +35,9 @@ export 'task_form_screen.dart' show TaskFormScreen;
 /// title, its place, the row of actions (Done, Postpone, Skip this time or
 /// Undo, then Edit the task), then When, How to do it, Details, Cost,
 /// Materials, the photos of its place and its History. The form opens from
-/// Edit the task; without [taskId], this is the form of a new task.
-class TaskScreen extends StatelessWidget {
+/// Edit the task; without [taskId], this is the form of a new task, which
+/// opens as a sheet on iOS (lot D4).
+class TaskScreen extends StatelessWidget implements HcFormScreen {
   const TaskScreen({
     super.key,
     required this.homeId,
@@ -54,6 +55,9 @@ class TaskScreen extends StatelessWidget {
 
   /// `null` for a new task.
   final String? taskId;
+
+  @override
+  bool get opensAsSheet => taskId == null;
 
   @override
   Widget build(BuildContext context) => taskId == null
@@ -206,17 +210,14 @@ class _TaskPageState extends State<TaskPage> {
   Future<void> _edit() async {
     final navigator = Navigator.of(context);
     final kept = await navigator.push<bool>(
-      MaterialPageRoute(
-        builder: (_) =>
-            TaskFormScreen(homeId: widget.homeId, taskId: widget.taskId),
+      hcRouteOf<bool>(
+        TaskFormScreen(homeId: widget.homeId, taskId: widget.taskId),
       ),
     );
     if (kept == false && mounted) navigator.pop();
   }
 
-  void _open(Widget screen) =>
-      Navigator.of(context)
-          .push(MaterialPageRoute<void>(builder: (_) => screen));
+  void _open(Widget screen) => Navigator.of(context).push(hcRoute(screen));
 
   String _money(String amount) =>
       moneyIn(context, _currency, budget.readMoney(amount));
@@ -573,8 +574,11 @@ class _TaskPageState extends State<TaskPage> {
     final task = _task;
     final details = task == null ? null : _details(l10n);
     final cost = task == null ? null : _costSection(l10n);
-    return Scaffold(
-      appBar: AppBar(),
+    // The h1 is drawn under the pills of the head (lot D2); on iOS it still
+    // folds into the bar once scrolled away (lot D4).
+    return HcScaffold(
+      title: task?.title,
+      drawsTitle: false,
       body: task == null
           ? const SizedBox.shrink()
           : HcScreenList(

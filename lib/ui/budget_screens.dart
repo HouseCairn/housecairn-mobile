@@ -37,11 +37,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
     final l10n = AppLocalizations.of(context);
     final state = AppScope.of(context);
     final home = state.current;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.navBudget),
-        actions: const [HomeSelector()],
-      ),
+    return HcScaffold(
+      title: l10n.navBudget,
+      actions: const [HomeSelector()],
       body: home == null
           ? const SizedBox.shrink()
           : DataView<budget.Ledger>(
@@ -169,11 +167,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 alignment: AlignmentDirectional.centerStart,
                 child: OutlinedButton(
                   key: const Key('budget-envelope-set'),
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => EnvelopeFormScreen(homeId: homeId),
-                    ),
-                  ),
+                  onPressed: () =>
+                      Navigator.of(context)
+                          .push(hcRoute(EnvelopeFormScreen(homeId: homeId))),
                   child: Text(l10n.envelopeSet),
                 ),
               ),
@@ -305,10 +301,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 currency: c,
                 toPay: true,
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) =>
-                        ProjectScreen(homeId: home.id, projectId: line.id!),
-                  ),
+                  hcRoute(ProjectScreen(homeId: home.id, projectId: line.id!)),
                 ),
               ),
             AmountCard(

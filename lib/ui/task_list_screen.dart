@@ -375,11 +375,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           budget.readMoney(entry.occurrence.actualCost!),
                         ),
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => TaskScreen(
-                        homeId: widget.homeId,
-                        taskId: entry.task.id,
-                      ),
+                    hcRoute(
+                      TaskScreen(homeId: widget.homeId, taskId: entry.task.id),
                     ),
                   ),
                 ),
@@ -396,8 +393,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
     final list = _list;
     final past = _past;
     final writable = _home != null && _home!.archivedAt == null;
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.tasksTitle)),
+    return HcScaffold(
+      title: l10n.tasksTitle,
       body: (list == null && past == null)
           ? const SizedBox.shrink()
           : HcScreenList(
@@ -419,9 +416,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     // Under the line of the hidden tasks, 8 as on the web.
                     gap: (list?.hidden ?? 0) > 0 ? HcSpace.s2 : HcSpace.s3,
                     onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) =>
-                            TaskScreen(homeId: widget.homeId, roomId: _roomId),
+                      hcRoute(
+                        TaskScreen(homeId: widget.homeId, roomId: _roomId),
                       ),
                     ),
                   ),
@@ -429,11 +425,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     key: const Key('tasks-add-template'),
                     label: l10n.addFromTemplate,
                     primary: false,
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => TemplatesScreen(roomId: _roomId),
-                      ),
-                    ),
+                    onPressed: () =>
+                        Navigator.of(context)
+                            .push(hcRoute(TemplatesScreen(roomId: _roomId))),
                   ),
                 ],
               ],

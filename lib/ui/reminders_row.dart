@@ -41,3 +41,24 @@ class RemindersRow extends StatelessWidget {
     );
   }
 }
+
+/// Notifications, the entry of Me in More (web: Notifications, "where and
+/// when your reminders go"): the switch of the reminders and what they do.
+/// It is a screen of its own, as on the web, so that More holds only links.
+class NotificationsScreen extends StatelessWidget {
+  const NotificationsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return HcScaffold(
+      title: l10n.notifications,
+      body: HcScreenList(
+        children: [
+          const SizedBox(height: HcSpace.s2),
+          HcCardList(children: const [RemindersRow()]),
+        ],
+      ),
+    );
+  }
+}

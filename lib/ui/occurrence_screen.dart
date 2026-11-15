@@ -15,7 +15,10 @@ import 'state.dart';
 
 /// The details of what was done (`tasks/completion_form.html`): the day it
 /// was done, what it really cost and a note, for an occurrence that is done.
-class OccurrenceScreen extends StatefulWidget {
+class OccurrenceScreen extends StatefulWidget implements HcFormScreen {
+  @override
+  bool get opensAsSheet => true;
+
   const OccurrenceScreen({
     super.key,
     required this.homeId,
@@ -90,11 +93,9 @@ class _OccurrenceScreenState extends State<OccurrenceScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.occurrenceTitle),
-        actions: [HcBarAction(label: l10n.save, onPressed: _save)],
-      ),
+    return HcScaffold(
+      title: l10n.occurrenceTitle,
+      actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       body: _occurrence == null
           ? const SizedBox.shrink()
           : Form(

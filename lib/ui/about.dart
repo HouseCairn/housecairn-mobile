@@ -3,6 +3,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../design/tokens.dart';
+import '../design/widgets.dart';
 import '../l10n/app_localizations.dart';
 import '../version.dart';
 
@@ -16,11 +17,12 @@ class AboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.about)),
+    return HcScaffold(
+      title: l10n.about,
       body: ListView(
         padding: const EdgeInsets.all(HcSpace.s6),
         children: [
+          HcLargeTitle(l10n.about),
           Text(l10n.appTitle, style: text.headlineMedium),
           const SizedBox(height: HcSpace.s2),
           Text(l10n.aboutAttribution, style: text.titleMedium),

@@ -381,8 +381,11 @@ void main() {
         tester,
       ) async {
         await start(tester);
-        await tester.tap(destination(l.navMore));
+        // Add from a template is an action of the pages it applies to, not an
+        // entry of More (design/patterns.md of the web, More).
+        await tester.tap(destination(l.navRooms));
         await tester.pumpAndSettle();
+        await tapText(tester, 'Main kitchen');
         await tapText(tester, l.addFromTemplate);
         expect(find.byType(TemplatesScreen), findsOneWidget);
         // Nothing ticked: a message, nothing added.
@@ -418,8 +421,9 @@ void main() {
         'a task from a template shows the rule of one country as such',
         (tester) async {
           await start(tester);
-          await tester.tap(destination(l.navMore));
+          await tester.tap(destination(l.navRooms));
           await tester.pumpAndSettle();
+          await tapText(tester, 'Main kitchen');
           await tapText(tester, l.addFromTemplate);
           final boiler = find.byKey(const Key('template-boiler-service'));
           expect(
@@ -595,9 +599,11 @@ void main() {
       });
 
       group('reminders', () {
+        // The switch is on Notifications, the entry of Me in More.
         Future<void> openMore(WidgetTester tester) async {
           await tester.tap(destination(l.navMore));
           await tester.pumpAndSettle();
+          await tapText(tester, l.notifications);
         }
 
         testWidgets(

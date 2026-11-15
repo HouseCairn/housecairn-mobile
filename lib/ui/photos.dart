@@ -175,11 +175,8 @@ class _Thumbnail extends StatelessWidget {
       button: true,
       label: l10n.photoLabel(photoCategoryLabel(l10n, photo.category)),
       child: InkWell(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => PhotoScreen(photoId: photo.id, writable: writable),
-          ),
-        ),
+        onTap: () => Navigator.of(context)
+            .push(hcRoute(PhotoScreen(photoId: photo.id, writable: writable))),
         child: SizedBox(
           width: side,
           height: side,
@@ -271,14 +268,12 @@ class _PhotoScreenState extends State<PhotoScreen> {
     final repository = AppScope.of(context).repository;
     final photo = _photo;
     final file = photo == null ? null : repository.photoFile(photo);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.photos),
-        actions: [
-          if (widget.writable && photo != null)
-            HcBarAction(label: l10n.save, onPressed: _save),
-        ],
-      ),
+    return HcScaffold(
+      title: l10n.photos,
+      actions: [
+        if (widget.writable && photo != null)
+          HcBarAction(label: l10n.save, onPressed: _save),
+      ],
       body: HcScreenList(
         children: [
           const SizedBox(height: HcSpace.s2),

@@ -38,9 +38,7 @@ class TodayReports extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    void open(Widget screen) =>
-        Navigator.of(context)
-            .push(MaterialPageRoute<void>(builder: (_) => screen));
+    void open(Widget screen) => Navigator.of(context).push(hcRoute(screen));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -100,8 +98,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     const keys = [reportOpen, 'closed', ''];
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.reports)),
+    return HcScaffold(
+      title: l10n.reports,
       body: DataView<List<ReportEntry>>(
         key: ValueKey('${widget.homeId}|$_filter'),
         load: (r) => r.reportsOf(widget.homeId, status: keys[_filter]),
@@ -128,8 +126,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         formatDay(context, _dayOf(e.report.createdAt)),
                       ].join(' · '),
                       onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => ReportScreen(
+                        hcRoute(
+                          ReportScreen(
                             homeId: widget.homeId,
                             reportId: e.report.id,
                           ),
@@ -142,11 +140,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
               key: const Key('report-add'),
               label: l10n.reportProblem,
               gap: HcSpace.s3,
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => ReportFormScreen(homeId: widget.homeId),
-                ),
-              ),
+              onPressed: () =>
+                  Navigator.of(context)
+                      .push(hcRoute(ReportFormScreen(homeId: widget.homeId))),
             ),
           ],
         ),
@@ -176,13 +172,13 @@ class ReportScreen extends StatelessWidget {
       },
       builder: (context, data) {
         final (report, task, home) = data;
-        if (report == null || home == null) return Scaffold(appBar: AppBar());
+        if (report == null || home == null) return HcScaffold();
         final repository = AppScope.of(context).repository;
         final writable = home.archivedAt == null;
         final closed = reportClosedStatuses.contains(report.status);
         final photo = repository.reportPhoto(report);
-        return Scaffold(
-          appBar: AppBar(title: Text(report.title)),
+        return HcScaffold(
+          title: report.title,
           body: HcScreenList(
             children: [
               const SizedBox(height: HcSpace.s2),
@@ -213,9 +209,8 @@ class ReportScreen extends StatelessWidget {
                         l10n.reportTask,
                         InkWell(
                           onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) =>
-                                  TaskScreen(homeId: homeId, taskId: task.id),
+                            hcRoute(
+                              TaskScreen(homeId: homeId, taskId: task.id),
                             ),
                           ),
                           child: Text(
@@ -285,7 +280,10 @@ class ReportScreen extends StatelessWidget {
 
 /// Report a problem (`reports/report_form.html`): what is wrong, where (a
 /// room, optional) and a photo (optional), re-encoded without metadata.
-class ReportFormScreen extends StatefulWidget {
+class ReportFormScreen extends StatefulWidget implements HcFormScreen {
+  @override
+  bool get opensAsSheet => true;
+
   const ReportFormScreen({super.key, required this.homeId});
 
   final String homeId;
@@ -358,11 +356,9 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.reportProblem),
-        actions: [HcBarAction(label: l10n.sendReport, onPressed: _save)],
-      ),
+    return HcScaffold(
+      title: l10n.reportProblem,
+      actions: [HcBarAction(label: l10n.sendReport, onPressed: _save)],
       body: Form(
         key: _form,
         child: HcScreenList(
@@ -387,7 +383,9 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                     (v) => setState(() => _room = v),
                     key: const Key('report-room'),
                   ),
-                  if (AppScope.of(context).photoSource != null)
+                  if (AppScope.of(context).photoSource != null) ...[
+                    Text(l10n.reportPhotoHelp, style: HcText.bodySmall),
+                    const SizedBox(height: HcSpace.s2),
                     Align(
                       alignment: AlignmentDirectional.centerStart,
                       child: OutlinedButton(
@@ -398,6 +396,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                         ),
                       ),
                     ),
+                  ],
                 ],
               ),
             ),

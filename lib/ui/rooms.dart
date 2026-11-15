@@ -48,15 +48,13 @@ class _RoomsScreenState extends State<RoomsScreen> {
       current: _tab,
       onSelect: (i) => setState(() => _tab = i),
     );
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(switch (_tab) {
-          0 => l10n.navRooms,
-          1 => l10n.equipmentTab,
-          _ => l10n.stock,
-        }),
-        actions: const [HomeSelector()],
-      ),
+    return HcScaffold(
+      title: switch (_tab) {
+        0 => l10n.navRooms,
+        1 => l10n.equipmentTab,
+        _ => l10n.stock,
+      },
+      actions: const [HomeSelector()],
       body: home == null
           ? const SizedBox.shrink()
           : _tab == 1
@@ -89,11 +87,8 @@ class _RoomsScreenState extends State<RoomsScreen> {
                                 counts[room.id] ?? 0,
                               ),
                               onTap: () => Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => RoomScreen(
-                                    homeId: home.id,
-                                    roomId: room.id,
-                                  ),
+                                hcRoute(
+                                  RoomScreen(homeId: home.id, roomId: room.id),
                                 ),
                               ),
                             ),
@@ -107,11 +102,9 @@ class _RoomsScreenState extends State<RoomsScreen> {
                         label: l10n.addRoom,
                         primary: false,
                         block: false,
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => RoomFormScreen(homeId: home.id),
-                          ),
-                        ),
+                        onPressed: () =>
+                            Navigator.of(context)
+                                .push(hcRoute(RoomFormScreen(homeId: home.id))),
                       ),
                   ],
                 );
@@ -162,9 +155,8 @@ class TaskRows extends StatelessWidget {
                         ? l10n.todayNoDate
                         : formatDay(context, entry.dueOn!),
                     onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) =>
-                            TaskScreen(homeId: homeId, taskId: entry.task.id),
+                      hcRoute(
+                        TaskScreen(homeId: homeId, taskId: entry.task.id),
                       ),
                     ),
                   ),
@@ -179,12 +171,8 @@ class TaskRows extends StatelessWidget {
               primary: false,
               gap: entries.isEmpty ? HcSpace.s2 : HcSpace.s3,
               onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => TaskScreen(
-                    homeId: homeId,
-                    roomId: roomId,
-                    itemId: itemId,
-                  ),
+                hcRoute(
+                  TaskScreen(homeId: homeId, roomId: roomId, itemId: itemId),
                 ),
               ),
             ),
@@ -192,11 +180,9 @@ class TaskRows extends StatelessWidget {
               key: const Key('task-from-template'),
               label: l10n.addFromTemplate,
               primary: false,
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => TemplatesScreen(roomId: roomId),
-                ),
-              ),
+              onPressed: () =>
+                  Navigator.of(context)
+                      .push(hcRoute(TemplatesScreen(roomId: roomId))),
             ),
           ],
         ],
@@ -236,8 +222,7 @@ class RoomScreen extends StatelessWidget {
         final (room, items, paint) = data;
         if (room == null) {
           // Deleted meanwhile (here or on another phone): back to the list.
-          return Scaffold(
-            appBar: AppBar(),
+          return HcScaffold(
             body: HcScreenList(children: [HcEmpty(l10n.errNotFound)]),
           );
         }
@@ -250,22 +235,17 @@ class RoomScreen extends StatelessWidget {
           (l10n.wallCovering, room.wallCovering),
           (l10n.memoryNotes, room.memoryNotes),
         ].where((m) => m.$2.isNotEmpty).toList();
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(room.name),
-            actions: [
-              if (writable)
-                HcBarAction(
-                  label: l10n.edit,
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) =>
-                          RoomFormScreen(homeId: homeId, roomId: roomId),
-                    ),
-                  ),
-                ),
-            ],
-          ),
+        return HcScaffold(
+          title: room.name,
+          actions: [
+            if (writable)
+              HcBarAction(
+                label: l10n.edit,
+                onPressed: () => Navigator.of(
+                  context,
+                ).push(hcRoute(RoomFormScreen(homeId: homeId, roomId: roomId))),
+              ),
+          ],
           body: HcScreenList(
             children: [
               const SizedBox(height: HcSpace.s2),
@@ -298,8 +278,8 @@ class RoomScreen extends StatelessWidget {
                               InkWell(
                                 key: const Key('room-paint'),
                                 onTap: () => Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) => ArticleScreen(
+                                  hcRoute(
+                                    ArticleScreen(
                                       homeId: homeId,
                                       articleId: paint.article.id,
                                     ),
@@ -339,10 +319,7 @@ class RoomScreen extends StatelessWidget {
                             HcPill(l10n.itemWarranty, tone: HcPillTone.sand),
                         ],
                         onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) =>
-                                ItemScreen(homeId: homeId, itemId: item.id),
-                          ),
+                          hcRoute(ItemScreen(homeId: homeId, itemId: item.id)),
                         ),
                       ),
                   ],
@@ -352,10 +329,7 @@ class RoomScreen extends StatelessWidget {
                 OutlinedButton(
                   key: const Key('item-add'),
                   onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) =>
-                          ItemFormScreen(homeId: homeId, roomId: roomId),
-                    ),
+                    hcRoute(ItemFormScreen(homeId: homeId, roomId: roomId)),
                   ),
                   child: Text(l10n.addItem),
                 ),
@@ -372,7 +346,10 @@ class RoomScreen extends StatelessWidget {
 
 /// The form of a room: its name, kind and notes, and its memory (what was
 /// used and fitted in it).
-class RoomFormScreen extends StatefulWidget {
+class RoomFormScreen extends StatefulWidget implements HcFormScreen {
+  @override
+  bool get opensAsSheet => true;
+
   const RoomFormScreen({super.key, required this.homeId, this.roomId});
 
   final String homeId;
@@ -523,14 +500,12 @@ class _RoomFormScreenState extends State<RoomFormScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.roomId == null ? l10n.newRoom : l10n.editRoom),
-        actions: [
-          Center(child: savedStatus()),
-          HcBarAction(label: l10n.save, onPressed: _save),
-        ],
-      ),
+    return HcScaffold(
+      title: widget.roomId == null ? l10n.newRoom : l10n.editRoom,
+      actions: [
+        Center(child: savedStatus()),
+        HcBarAction(label: l10n.save, onPressed: _save),
+      ],
       body: Form(
         key: _form,
         onChanged: sheetChanged,

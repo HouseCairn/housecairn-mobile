@@ -53,12 +53,9 @@ class OpenTaskRow extends StatelessWidget {
       overdue: due != null && due < today,
       doneLabel: l10n.actionDone,
       onDone: () => markDone(context, entry.occurrence.id, entry.task.title),
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) =>
-              TaskScreen(homeId: entry.home.id, taskId: entry.task.id),
-        ),
-      ),
+      onTap: () => Navigator.of(
+        context,
+      ).push(hcRoute(TaskScreen(homeId: entry.home.id, taskId: entry.task.id))),
       more: PopupMenuButton<_RowAction>(
         tooltip: l10n.actionMore,
         icon: const HcIcon(HcIcons.more, color: HcColors.textMuted),

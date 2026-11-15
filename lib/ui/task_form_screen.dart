@@ -32,8 +32,9 @@ const _newChoice = '+new';
 /// the title is required. The title of the form is in the page, under the
 /// bar, so that it is never cut; Save and Cancel end the form, and Delete the
 /// task comes under them, as on the web. The materials of a task are changed
-/// on its page, line by line, as the web's page does.
-class TaskFormScreen extends StatefulWidget {
+/// on its page, line by line, as the web's page does. On iOS the form opens as
+/// a sheet (lot D4), with Cancel on the left of its bar.
+class TaskFormScreen extends StatefulWidget implements HcFormScreen {
   const TaskFormScreen({
     super.key,
     required this.homeId,
@@ -51,6 +52,9 @@ class TaskFormScreen extends StatefulWidget {
 
   /// `null` for a new task.
   final String? taskId;
+
+  @override
+  bool get opensAsSheet => true;
 
   @override
   State<TaskFormScreen> createState() => _TaskFormScreenState();
@@ -786,18 +790,15 @@ class _TaskFormScreenState extends State<TaskFormScreen>
     // The text size of the phone at which a pair of fields stacks.
     final wide = MediaQuery.textScalerOf(context).scale(1) > 1.3;
     final title = widget.taskId == null ? l10n.taskAddTitle : l10n.taskEditTask;
-    return Scaffold(
-      appBar: AppBar(actions: [Center(child: savedStatus())]),
+    return HcScaffold(
+      title: title,
+      actions: [Center(child: savedStatus())],
       body: Form(
         key: _form,
         onChanged: sheetChanged,
         child: HcScreenList(
           children: [
-            Semantics(
-              header: true,
-              child: Text(title, style: HcText.pageTitle),
-            ),
-            const SizedBox(height: HcSpace.s4),
+            const SizedBox(height: HcSpace.s2),
             // The sections open on what the task holds: they are drawn once
             // it is read.
             if (_ready) ...[

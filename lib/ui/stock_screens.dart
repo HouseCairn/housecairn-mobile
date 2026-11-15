@@ -122,8 +122,8 @@ class _StockListState extends State<StockList> {
                           HcPill(l10n.stockLow, tone: HcPillTone.warning),
                       ],
                       onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => ArticleScreen(
+                        hcRoute(
+                          ArticleScreen(
                             homeId: home.id,
                             articleId: entry.article.id,
                           ),
@@ -138,11 +138,9 @@ class _StockListState extends State<StockList> {
                 label: l10n.addArticle,
                 primary: false,
                 gap: entries.isEmpty ? HcSpace.s2 : HcSpace.s3,
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => ArticleFormScreen(homeId: home.id),
-                  ),
-                ),
+                onPressed: () =>
+                    Navigator.of(context)
+                        .push(hcRoute(ArticleFormScreen(homeId: home.id))),
               ),
           ],
         );
@@ -210,7 +208,7 @@ class ArticleScreen extends StatelessWidget {
     return DataView<_ArticleData?>(
       load: _load,
       builder: (context, data) {
-        if (data == null) return Scaffold(appBar: AppBar());
+        if (data == null) return HcScaffold();
         final a = data.article;
         final writable = data.home.archivedAt == null;
         final threshold = a.threshold == null
@@ -225,11 +223,9 @@ class ArticleScreen extends StatelessWidget {
                 data.home.currency,
                 stock.readQuantity(stored),
               );
-        void open(Widget screen) =>
-            Navigator.of(context)
-                .push(MaterialPageRoute<void>(builder: (_) => screen));
-        return Scaffold(
-          appBar: AppBar(title: Text(a.name)),
+        void open(Widget screen) => Navigator.of(context).push(hcRoute(screen));
+        return HcScaffold(
+          title: a.name,
           body: HcScreenList(
             children: [
               const SizedBox(height: HcSpace.s2),
@@ -572,7 +568,10 @@ Widget _chips(
 );
 
 /// The form of an article (`stock/article_form.html`).
-class ArticleFormScreen extends StatefulWidget {
+class ArticleFormScreen extends StatefulWidget implements HcFormScreen {
+  @override
+  bool get opensAsSheet => true;
+
   const ArticleFormScreen({super.key, required this.homeId, this.articleId});
 
   final String homeId;
@@ -735,16 +734,12 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     const number = TextInputType.numberWithOptions(decimal: true);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.articleId == null ? l10n.addArticle : l10n.editArticle,
-        ),
-        actions: [
-          Center(child: savedStatus()),
-          HcBarAction(label: l10n.save, onPressed: _save),
-        ],
-      ),
+    return HcScaffold(
+      title: widget.articleId == null ? l10n.addArticle : l10n.editArticle,
+      actions: [
+        Center(child: savedStatus()),
+        HcBarAction(label: l10n.save, onPressed: _save),
+      ],
       body: Form(
         key: _form,
         onChanged: sheetChanged,
@@ -857,7 +852,10 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
 }
 
 /// The form of a supplier of an article (`stock/supplier_form.html`).
-class SupplierFormScreen extends StatefulWidget {
+class SupplierFormScreen extends StatefulWidget implements HcFormScreen {
+  @override
+  bool get opensAsSheet => true;
+
   const SupplierFormScreen({
     super.key,
     required this.homeId,
@@ -957,13 +955,9 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.supplierId == null ? l10n.addSupplier : l10n.editSupplier,
-        ),
-        actions: [HcBarAction(label: l10n.save, onPressed: _save)],
-      ),
+    return HcScaffold(
+      title: widget.supplierId == null ? l10n.addSupplier : l10n.editSupplier,
+      actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
         key: _form,
         child: HcScreenList(

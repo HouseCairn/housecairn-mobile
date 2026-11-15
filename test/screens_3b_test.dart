@@ -93,6 +93,8 @@ void main() {
         200,
         scrollable: _vertical(),
       );
+      await tester.ensureVisible(find.byKey(const Key('quote-file-add')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('quote-file-add')));
       await tester.pumpAndSettle();
       expect(documents.asked, 1);

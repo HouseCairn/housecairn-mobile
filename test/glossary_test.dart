@@ -28,11 +28,13 @@ const keys = <String, String>{
   'navBudget': 'budget',
   'budgetHeading': 'budget',
   'navMore': 'more',
-  'moreHouseholdGroup': 'home',
+  'moreHomeGroup': 'home',
+  'moreMeGroup': 'me',
   'moreHelpGroup': 'help',
   'about': 'about',
   'homes': 'my-homes',
   'contractors': 'contractors',
+  'notifications': 'notifications',
   'room': 'room',
   'item': 'item',
   'itemKindEquipment': 'equipment',
@@ -82,13 +84,7 @@ const keys = <String, String>{
 /// Keys known to differ from the glossary, with the lot that aligns them
 /// (design/patterns.md of the web, Gaps at the time of writing). The test fails
 /// once a key agrees, so that this list only shrinks.
-const pending = <String, String>{
-  'homes': 'lot D6: "My homes" / "Mes logements" (app: Homes / Logements)',
-  'moreHouseholdGroup': 'lot D6: the group of More is "Home" / "Logement"; "Foyer" names the members',
-  'whatIsWrong': 'lot D6: the labels of the report form are the web\'s',
-  'reportWhere': 'lot D6: the labels of the report form are the web\'s',
-  'sendReport': 'lot D6: the labels of the report form are the web\'s',
-};
+const pending = <String, String>{};
 
 void main() {
   final en = arbMessages('en');
