@@ -20,10 +20,12 @@ import '../domain/stock.dart' as stock;
 import '../domain/warranty.dart' as warranty;
 import '../sync/mode.dart';
 import '../sync/operation.dart';
+import '../sync/server_transport.dart';
 import '../sync/transport.dart';
 import 'database.dart';
 
 part 'budget_repository.dart';
+part 'server_repository.dart';
 part 'stock_repository.dart';
 part 'sync_repository.dart';
 part 'task_repository.dart';

@@ -1,0 +1,348 @@
+{
+ "source": "HouseCairn/housecairn v0.4.0, core.netguard.is_public, Python 3.13.18",
+ "vectors": [
+  {
+   "ipv4": [
+    127,
+    0,
+    0,
+    1
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    10,
+    0,
+    0,
+    5
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    172,
+    16,
+    3,
+    4
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    172,
+    32,
+    0,
+    1
+   ],
+   "public": true
+  },
+  {
+   "ipv4": [
+    192,
+    168,
+    1,
+    20
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    100,
+    64,
+    0,
+    1
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    100,
+    127,
+    255,
+    254
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    100,
+    128,
+    0,
+    1
+   ],
+   "public": true
+  },
+  {
+   "ipv4": [
+    169,
+    254,
+    10,
+    1
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    192,
+    0,
+    2,
+    10
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    198,
+    51,
+    100,
+    7
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    203,
+    0,
+    113,
+    9
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    198,
+    18,
+    0,
+    1
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    192,
+    0,
+    0,
+    9
+   ],
+   "public": true
+  },
+  {
+   "ipv4": [
+    192,
+    0,
+    0,
+    10
+   ],
+   "public": true
+  },
+  {
+   "ipv4": [
+    192,
+    0,
+    0,
+    1
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    8,
+    8,
+    8,
+    8
+   ],
+   "public": true
+  },
+  {
+   "ipv4": [
+    1,
+    1,
+    1,
+    1
+   ],
+   "public": true
+  },
+  {
+   "ipv4": [
+    93,
+    184,
+    216,
+    34
+   ],
+   "public": true
+  },
+  {
+   "ipv4": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    255,
+    255,
+    255,
+    255
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    224,
+    0,
+    0,
+    1
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    240,
+    0,
+    0,
+    1
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    192,
+    88,
+    99,
+    1
+   ],
+   "public": true
+  },
+  {
+   "ipv6": "::1",
+   "public": false
+  },
+  {
+   "ipv6": "::",
+   "public": false
+  },
+  {
+   "ipv6": "fe80::1",
+   "public": false
+  },
+  {
+   "ipv6": "fd12:3456::1",
+   "public": false
+  },
+  {
+   "ipv6": "fc00::1",
+   "public": false
+  },
+  {
+   "ipv6": "fec0::1",
+   "public": false
+  },
+  {
+   "ipv6": "ff02::1",
+   "public": false
+  },
+  {
+   "ipv6": "2001:db8::1",
+   "public": false
+  },
+  {
+   "ipv6": "3fff::1",
+   "public": false
+  },
+  {
+   "ipv6": "2606:4700:4700::1111",
+   "public": true
+  },
+  {
+   "ipv6": "2a00:1450:4007:80e::200e",
+   "public": true
+  },
+  {
+   "ipv6": "::ffff:c0a8:101",
+   "public": false
+  },
+  {
+   "ipv6": "::ffff:808:808",
+   "public": true
+  },
+  {
+   "ipv6": "64:ff9b::a00:1",
+   "public": false
+  },
+  {
+   "ipv6": "64:ff9b::808:808",
+   "public": true
+  },
+  {
+   "ipv6": "2002:c0a8:101::1",
+   "public": false
+  },
+  {
+   "ipv6": "2002:808:808::1",
+   "public": true
+  },
+  {
+   "ipv6": "2001:0:4136:e378:8000:63bf:3f57:fefe",
+   "public": false
+  },
+  {
+   "ipv6": "2001::1",
+   "public": false
+  },
+  {
+   "ipv6": "2001:1::1",
+   "public": true
+  },
+  {
+   "ipv6": "2001:3::1",
+   "public": true
+  },
+  {
+   "ipv6": "2001:20::1",
+   "public": true
+  },
+  {
+   "ipv6": "100::1",
+   "public": false
+  },
+  {
+   "ipv6": "64:ff9b:1::1",
+   "public": false
+  },
+  {
+   "ipv4": [
+    100,
+    100,
+    100,
+    200
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    169,
+    254,
+    169,
+    254
+   ],
+   "public": false
+  },
+  {
+   "ipv4": [
+    192,
+    0,
+    0,
+    192
+   ],
+   "public": false
+  },
+  {
+   "ipv6": "fd00:ec2::254",
+   "public": false
+  }
+ ]
+}

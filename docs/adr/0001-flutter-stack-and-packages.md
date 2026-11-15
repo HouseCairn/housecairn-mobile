@@ -46,6 +46,7 @@ Dart 3, Material 3 widgets with the Housecairn design tokens. No web or desktop 
 | Opening a link, a phone number, an address | url_launcher | 6.3.3, 2026-10-02 | flutter.dev | BSD-3-Clause | Android, iOS, others | <https://pub.dev/packages/url_launcher> |
 | PDF picking, export file | file_picker, share_plus | 13.3.2, 2026-11-02; 13.3.1, 2026-10-01 | victorcarreras.dev; fluttercommunity.dev | MIT; BSD-3-Clause | Android, iOS, others | <https://pub.dev/packages/file_picker>, <https://pub.dev/packages/share_plus> |
 | Backup archive (zip) | archive | 4.7.1, 2026-11-13 | taosengine.com | MIT | all | <https://pub.dev/packages/archive> |
+| SHA-256 of the PKCE challenge of the sign-in to a Housecairn server (lot 4b) | crypto | 3.0.8, already in the lock file through other packages | dart.dev | BSD-3-Clause | all | <https://pub.dev/packages/crypto> |
 
 **Choices within the table, and what was rejected:**
 

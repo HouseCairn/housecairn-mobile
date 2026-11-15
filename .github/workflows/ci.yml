@@ -105,7 +105,7 @@ jobs:
           git status --porcelain
           test -z "$(git status --porcelain)" || { git diff; echo "::error::Generated files differ from the committed ones: regenerate them."; exit 1; }
       - name: Format (dart format)
-        run: dart format --output=none --set-exit-if-changed lib test tool
+        run: dart format --output=none --set-exit-if-changed lib test test_e2e tool
       - name: Analyze (flutter analyze)
         run: flutter analyze --fatal-infos
       - name: Unit and widget tests (flutter test)
@@ -154,6 +154,71 @@ jobs:
         run: .github/scripts/install-uv.sh "$RUNNER_TEMP/uv-archive"
       - name: The app carries what its pinned web release gives (tool/web_alignment.py check)
         run: python3 tool/web_alignment.py check --web "$RUNNER_TEMP/web"
+
+  server-e2e:
+    # The third way against a real Housecairn server (docs/plan.md, lot 4b):
+    # the web release that brings the sync API, started from its published
+    # image pinned by digest, on the loopback of the runner (plain HTTP to a
+    # local IP literal, the rule of docs/protocol.md section 2.10). The test
+    # signs in by the real consent page and OAuth flow with PKCE, then syncs
+    # both ways and reads the result through the web API.
+    name: Sync with a Housecairn server (e2e)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      HC_SERVER_IMAGE: ghcr.io/housecairn/housecairn:0.4.0@sha256:a2d807a02fbf34e62bd5b9d2aeda4a2a824c2127cb81e461ba1096118098ed50
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Start the Housecairn server (v0.4.0, pinned by digest)
+        run: |
+          docker run --detach --name housecairn --publish 127.0.0.1:8000:8000 \
+            --env ALLOWED_HOSTS=127.0.0.1 \
+            --env HOUSECAIRN_FORWARDED_ALLOW_IPS=192.0.2.1 \
+            "$HC_SERVER_IMAGE"
+          for _ in $(seq 1 90); do
+            if curl --silent --fail http://127.0.0.1:8000/api/v1/sync/info >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs housecairn
+          exit 1
+      - name: Prepare an account, two homes, a session and an API token (tool/e2e/provision.py)
+        run: |
+          docker exec -i housecairn python -m housecairn.entrypoint manage shell \
+            < tool/e2e/provision.py > "$RUNNER_TEMP/provision.out"
+          line="$(grep '^E2E ' "$RUNNER_TEMP/provision.out" | head -n 1)"
+          test -n "$line" || { cat "$RUNNER_TEMP/provision.out"; exit 1; }
+          python3 -c 'import json, sys
+          for key, value in json.loads(sys.argv[1][4:]).items():
+              print(f"::add-mask::{value}")
+              print(f"{key}={value}")' "$line" > "$RUNNER_TEMP/provision.env"
+          grep '^::add-mask::' "$RUNNER_TEMP/provision.env"
+          grep -v '^::add-mask::' "$RUNNER_TEMP/provision.env" >> "$GITHUB_ENV"
+      - name: Cache the Flutter archive
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/housecairn-ci/flutter-archives
+          key: flutter-archive-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/scripts/install-flutter.sh') }}
+      - name: Install Flutter (pinned, checksum verified)
+        run: .github/scripts/install-flutter.sh "$HOME/.cache/housecairn-ci/flutter-archives"
+      - name: Cache the pub packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+      - name: Get the locked packages (flutter pub get --enforce-lockfile)
+        run: flutter pub get --enforce-lockfile
+      - name: The phone against the server (flutter test test_e2e)
+        env:
+          HC_E2E_URL: http://127.0.0.1:8000
+        run: flutter test --reporter expanded test_e2e
+      - name: Server log on failure
+        if: failure()
+        run: docker logs housecairn 2>&1 | tail -n 200
 
   android:
     name: Android build

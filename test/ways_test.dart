@@ -494,7 +494,7 @@ void main() {
       },
     );
 
-    test('nothing in lib/ implements it', () {
+    test('only the server transport of lot 4b implements it in lib/', () {
       final implementers = [
         for (final file
             in Directory('lib')
@@ -505,7 +505,8 @@ void main() {
               .hasMatch(file.readAsStringSync()))
             file.path,
       ];
-      expect(implementers, isEmpty);
+      // The relay's transport comes with lots 5 and 6.
+      expect(implementers, ['lib/sync/server_transport.dart']);
     });
   });
 
@@ -547,7 +548,8 @@ void main() {
       expect(found, isEmpty);
     });
 
-    test('dart:io stays where the files are, and nothing opens a socket', () {
+    test('dart:io stays where the files are, and only the server transport '
+        'opens a connection', () {
       final io = [
         for (final MapEntry(:key, :value) in imports.entries)
           if (value.contains('dart:io')) key,
@@ -556,6 +558,9 @@ void main() {
         'lib/core/photo_source.dart',
         'lib/data/repository.dart',
         'lib/main.dart',
+        // The third way (lot 4b): requests to the address typed, nothing
+        // else (test/server_transport_test.dart).
+        'lib/sync/server_http_io.dart',
       ]);
       final sockets = RegExp(
         r'\b(Socket|RawSocket|SecureSocket|ServerSocket|HttpClient|'
@@ -563,12 +568,13 @@ void main() {
       );
       final found = [
         for (final MapEntry(:key, :value) in sources.entries)
-          if (sockets.hasMatch(
-            value
-                .split('\n')
-                .where((l) => !l.trimLeft().startsWith('//'))
-                .join('\n'),
-          ))
+          if (key != 'lib/sync/server_http_io.dart' &&
+              sockets.hasMatch(
+                value
+                    .split('\n')
+                    .where((l) => !l.trimLeft().startsWith('//'))
+                    .join('\n'),
+              ))
             key,
       ];
       expect(found, isEmpty);
