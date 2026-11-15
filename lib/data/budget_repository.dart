@@ -640,10 +640,12 @@ extension BudgetRepository on Repository {
   File projectFile(ProjectFileRow row) =>
       File('${homeDirectory(row.homeId).path}/${row.id}');
 
-  /// Stores a photo of a project ([quoteId] null; already re-encoded) or a
-  /// file of a quote (a PDF or a photo, as picked), then the row
-  /// (`add_file`). The name shown is cleaned of any path; it is never used on
-  /// disk. A failure leaves no file.
+  /// Stores a photo of a project ([quoteId] null) or a file of a quote (a PDF
+  /// or a photo), then the row (`add_file`). A PDF is kept as picked; every
+  /// image is re-encoded by [processPhoto] first (upright, no metadata, the
+  /// location included, at most 2560 px), as the web does on upload. The name
+  /// shown is cleaned of any path; it is never used on disk. A failure leaves
+  /// no file.
   Future<String> addProjectFile(
     String projectId, {
     required String name,
@@ -673,12 +675,26 @@ extension BudgetRepository on Repository {
     if (!isImage && contentType != 'application/pdf') {
       throw const Refused(Refusal.fileTypeRefused);
     }
+    var stored = bytes;
+    var storedType = contentType;
+    if (isImage) {
+      try {
+        stored = processPhoto(bytes).image;
+      } on PhotoRefused catch (refused) {
+        throw Refused(
+          refused.problem == PhotoProblem.unreadable
+              ? Refusal.photoUnreadable
+              : Refusal.photoTooLarge,
+        );
+      }
+      storedType = 'image/jpeg';
+    }
     final shown = _fileName(name);
     final id = newId();
     final directory = homeDirectory(owner.homeId)..createSync(recursive: true);
     final file = File('${directory.path}/$id');
     try {
-      file.writeAsBytesSync(bytes, flush: true);
+      file.writeAsBytesSync(stored, flush: true);
       await db.transaction(
         () => _put(
           'project_files',
@@ -689,12 +705,12 @@ extension BudgetRepository on Repository {
             'name': shown,
             'file': jsonEncode({
               'id': id,
-              'size': bytes.length,
-              'content_type': contentType,
+              'size': stored.length,
+              'content_type': storedType,
             }),
-            'content_type': contentType,
+            'content_type': storedType,
             'is_image': isImage,
-            'size_bytes': bytes.length,
+            'size_bytes': stored.length,
             'deleted_at': null,
           },
           homeId: owner.homeId,

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:decimal/decimal.dart';
@@ -7,7 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/domain/budget.dart' as budget;
 import 'package:housecairn_mobile/domain/day.dart';
+import 'package:housecairn_mobile/domain/photos.dart';
+import 'package:image/image.dart' as img;
 
+import 'support/fakes.dart';
 import 'support/fixture.dart';
 
 Decimal d(String s) => Decimal.parse(s);
@@ -265,6 +269,57 @@ void main() {
         ),
         throwsA(isA<Refused>()),
       );
+    });
+
+    test('a photo of a quote or a project is re-encoded without metadata, '
+        'a PDF is kept', () async {
+      final quote = await repo.createQuote(project, const QuoteInput());
+      final raw = jpegWithGps(orientation: 1);
+      expect(jpegMetadata(raw), containsAll(['Exif', 'COM']));
+      final onQuote = await repo.addProjectFile(
+        project,
+        name: 'site.jpg',
+        bytes: raw,
+        contentType: 'image/jpeg',
+        quoteId: quote,
+      );
+      final onProject = await repo.addProjectFile(
+        project,
+        name: 'wall.png',
+        bytes: raw,
+        contentType: 'image/png',
+      );
+      final rows = {for (final f in await repo.filesOf(project)) f.id: f};
+      for (final id in [onQuote, onProject]) {
+        final stored = repo.projectFile(rows[id]!).readAsBytesSync();
+        expect(jpegMetadata(stored), isEmpty);
+        final exif = img.decodeJpgExif(stored);
+        expect(exif == null || exif.isEmpty, isTrue);
+        expect(
+          latin1.decode(stored, allowInvalid: true),
+          isNot(contains('Fake')),
+        );
+        expect(stored, isNot(raw));
+        expect(rows[id]!.isImage, isTrue);
+        expect(rows[id]!.contentType, 'image/jpeg');
+        expect(rows[id]!.sizeBytes, stored.length);
+      }
+      // A file that is not an image is refused, and leaves no file.
+      final before = repo.projectFile(rows[onQuote]!).parent.listSync().length;
+      await expectLater(
+        repo.addProjectFile(
+          project,
+          name: 'broken.jpg',
+          bytes: Uint8List.fromList([1, 2, 3, 4, 5]),
+          contentType: 'image/jpeg',
+          quoteId: quote,
+        ),
+        throwsA(
+          isA<Refused>().having((r) => r.reason, 'r', Refusal.photoUnreadable),
+        ),
+      );
+      expect(repo.projectFile(rows[onQuote]!).parent.listSync().length, before);
+      expect((await repo.filesOf(project)).length, 2);
     });
 
     test('envelopes are per home and year, in the currency of each', () async {

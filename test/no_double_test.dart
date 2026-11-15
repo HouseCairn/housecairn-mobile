@@ -20,6 +20,8 @@ const checked = [
   'lib/ui/budget_parts.dart',
   'lib/ui/budget_screens.dart',
   'lib/ui/project_screens.dart',
+  'lib/ui/report_screens.dart',
+  'lib/ui/task_screen.dart',
 ];
 
 final floating = RegExp(
