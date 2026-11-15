@@ -40,6 +40,9 @@ enum HcIcons {
   templates([_R(5, 4, 14, 17, 2), _P('M9 9h6'), _P('M9 13h6'), _P('M9 17h4')]),
   reminders([_P('M6 17.5V11l2.5-5h7L18 11v6.5Z'), _P('M10 21h4')]),
 
+  /// Not in the web set: a problem reported (More, Reports).
+  reports([_P('M12 4L21 20H3Z'), _P('M12 10v4'), _C(12, 17, 0.6)]),
+
   /// Not in the web set, which writes "+" in text: the same stroke.
   add([_P('M12 5v14'), _P('M5 12h14')]);
 

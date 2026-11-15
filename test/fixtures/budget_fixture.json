@@ -1,0 +1,232 @@
+{
+  "$comment": "Neutral rows of two homes, loaded by the web (tool/budget_figures.py) and by the app (test/budget_web_test.dart); every budget figure of the two must be equal. Cases: odd cents shared between three rooms, an abandoned project with an accepted quote, a line paid above its quotes, task estimates beyond the lines, a stock article without a price, a task late from last year, an open task with no date, a fixed series every 48 years, a project dated by its first quote, a done occurrence with no cost.",
+  "today": "2026-06-15",
+  "homes": [
+    {
+      "key": "a",
+      "name": "Example home",
+      "currency": "EUR",
+      "rooms": [
+        {"key": "kitchen", "name": "Kitchen"},
+        {"key": "bathroom", "name": "Bathroom"},
+        {"key": "garage", "name": "Garage"}
+      ],
+      "articles": [
+        {"key": "filter", "name": "Ventilation filter", "unit_price": "12.50"},
+        {"key": "paint", "name": "White paint", "unit_price": null}
+      ],
+      "projects": [
+        {
+          "key": "repaint",
+          "title": "Repaint the kitchen",
+          "status": "in_progress",
+          "created": "2026-02-15",
+          "rooms": ["kitchen", "bathroom"],
+          "lines": [
+            {"key": "paint", "label": "Paint", "nature": "material", "planned": "300.00", "paid": "120.00"},
+            {"key": "painter", "label": "Painter", "nature": "labour", "planned": "1000.00", "paid": "0.00"}
+          ],
+          "quotes": [
+            {"line": "painter", "amount": "1200.01", "status": "accepted", "issued_on": "2026-02-20"},
+            {"line": null, "amount": "900.00", "status": "received", "issued_on": "2026-02-10"}
+          ]
+        },
+        {
+          "key": "shed",
+          "title": "Garden shed",
+          "status": "idea",
+          "created": "2025-07-01",
+          "rooms": [],
+          "lines": [
+            {"key": "budget", "label": "Budget", "nature": "other", "planned": "2500.00", "paid": "0.00"}
+          ],
+          "quotes": []
+        },
+        {
+          "key": "floor",
+          "title": "Old floor",
+          "status": "abandoned",
+          "created": "2026-03-01",
+          "rooms": ["garage"],
+          "lines": [
+            {"key": "tiles", "label": "Tiles", "nature": "material", "planned": "800.00", "paid": "50.00"}
+          ],
+          "quotes": [
+            {"line": "tiles", "amount": "60.00", "status": "accepted", "issued_on": "2026-03-05"}
+          ]
+        },
+        {
+          "key": "fan",
+          "title": "Bathroom fan",
+          "status": "done",
+          "created": "2026-01-05",
+          "rooms": ["bathroom", "garage", "kitchen"],
+          "lines": [
+            {"key": "fan", "label": "Fan", "nature": "rental", "planned": "100.00", "paid": "110.00"},
+            {"key": "fitting", "label": "Fitting", "nature": "labour", "planned": "50.00", "paid": "0.00"}
+          ],
+          "quotes": [
+            {"line": "fan", "amount": "99.99", "status": "accepted", "issued_on": "2025-12-30"},
+            {"line": "fitting", "amount": "40.01", "status": "accepted", "issued_on": "2026-01-02"}
+          ]
+        }
+      ],
+      "tasks": [
+        {
+          "key": "filter",
+          "title": "Clean the ventilation filter",
+          "room": "kitchen",
+          "material_budget": "5.00",
+          "labour_budget": null,
+          "repeat": {"mode": "fixed", "unit": "month", "interval": 3},
+          "series_start": "2026-01-10",
+          "materials": [["filter", "1"]],
+          "occurrences": [
+            ["done", "2026-01-10", "2026-01-12", "18.40"],
+            ["done", "2026-04-10", "2026-04-11", null],
+            ["planned", "2026-07-10", null, null]
+          ]
+        },
+        {
+          "key": "boiler",
+          "title": "Service the boiler",
+          "room": "garage",
+          "material_budget": null,
+          "labour_budget": "120.00",
+          "repeat": {"mode": "after_last", "unit": "year", "interval": 1},
+          "series_start": null,
+          "materials": [],
+          "occurrences": [
+            ["done", "2025-10-01", "2025-10-03", "135.00"],
+            ["planned", "2026-10-03", null, null]
+          ]
+        },
+        {
+          "key": "smoke",
+          "title": "Test the smoke detector",
+          "room": null,
+          "material_budget": null,
+          "labour_budget": null,
+          "repeat": {"mode": "fixed", "unit": "week", "interval": 2},
+          "series_start": "2026-06-01",
+          "materials": [],
+          "occurrences": [
+            ["planned", "2026-06-15", null, null]
+          ]
+        },
+        {
+          "key": "seal",
+          "title": "Seal the bath",
+          "room": "bathroom",
+          "material_budget": "0.24",
+          "labour_budget": null,
+          "repeat": {"mode": "fixed", "unit": "year", "interval": 48},
+          "series_start": "2024-05-01",
+          "materials": [],
+          "occurrences": [
+            ["postponed", "2025-11-20", null, null]
+          ]
+        },
+        {
+          "key": "door",
+          "title": "Fix the door",
+          "room": null,
+          "material_budget": "30.00",
+          "labour_budget": "45.50",
+          "repeat": {"mode": "once", "unit": "month", "interval": 1},
+          "series_start": null,
+          "materials": [],
+          "occurrences": [
+            ["planned", null, null, null]
+          ]
+        },
+        {
+          "key": "gutter",
+          "title": "Clear the gutter",
+          "room": "garage",
+          "material_budget": null,
+          "labour_budget": null,
+          "repeat": {"mode": "once", "unit": "month", "interval": 1},
+          "series_start": null,
+          "materials": [["paint", "1"]],
+          "occurrences": [
+            ["done", "2026-02-01", "2026-02-01", "42.00"],
+            ["skipped", "2026-03-01", null, null]
+          ]
+        },
+        {
+          "key": "walls",
+          "title": "Prepare the walls",
+          "room": "kitchen",
+          "material_budget": "80.00",
+          "labour_budget": "200.00",
+          "repeat": {"mode": "once", "unit": "month", "interval": 1},
+          "series_start": null,
+          "project": "repaint",
+          "materials": [["filter", "2"], ["paint", "3"]],
+          "occurrences": [
+            ["done", "2026-03-01", "2026-03-02", "95.00"]
+          ]
+        },
+        {
+          "key": "lights",
+          "title": "Put up the shed lights",
+          "room": null,
+          "material_budget": "40.00",
+          "labour_budget": "2600.00",
+          "repeat": {"mode": "once", "unit": "month", "interval": 1},
+          "series_start": null,
+          "project": "shed",
+          "materials": [],
+          "occurrences": [
+            ["planned", "2027-04-01", null, null]
+          ]
+        }
+      ],
+      "envelopes": {"2026": "5000.00", "2025": "1000.00"}
+    },
+    {
+      "key": "b",
+      "name": "Example flat",
+      "currency": "CHF",
+      "rooms": [
+        {"key": "living", "name": "Living room"}
+      ],
+      "articles": [
+        {"key": "bulb", "name": "Bulb", "unit_price": "3.35"}
+      ],
+      "projects": [
+        {
+          "key": "floor",
+          "title": "Oil the floor",
+          "status": "planned",
+          "created": "2026-05-10",
+          "rooms": ["living"],
+          "lines": [
+            {"key": "oil", "label": "Oil", "nature": "material", "planned": "85.50", "paid": "0.00"}
+          ],
+          "quotes": [
+            {"line": "oil", "amount": "90.00", "status": "accepted", "issued_on": "2026-05-12"}
+          ]
+        }
+      ],
+      "tasks": [
+        {
+          "key": "bulbs",
+          "title": "Change the bulbs",
+          "room": "living",
+          "material_budget": null,
+          "labour_budget": null,
+          "repeat": {"mode": "fixed", "unit": "month", "interval": 6},
+          "series_start": "2026-02-01",
+          "materials": [["bulb", "3"]],
+          "occurrences": [
+            ["done", "2026-02-01", "2026-02-03", "9.90"],
+            ["planned", "2026-08-01", null, null]
+          ]
+        }
+      ],
+      "envelopes": {"2026": "120.00"}
+    }
+  ]
+}

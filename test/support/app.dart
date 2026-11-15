@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/app.dart';
+import 'package:housecairn_mobile/core/document_source.dart';
 import 'package:housecairn_mobile/core/notifier.dart';
 import 'package:housecairn_mobile/core/photo_source.dart';
 import 'package:housecairn_mobile/data/repository.dart';
@@ -42,6 +43,7 @@ Future<AppState> pumpApp(
   String locale = 'en',
   Future<void> Function(Repository repository)? seed,
   PhotoSource? photoSource,
+  DocumentSource? documentSource,
   Notifier? notifier,
   UrlOpener? openUrl,
   bool firstStart = false,
@@ -53,6 +55,7 @@ Future<AppState> pumpApp(
   final state = AppState(
     repository,
     photoSource: photoSource,
+    documentSource: documentSource,
     notifier: notifier,
     // Synchronous, so that the widget tests do not wait for an isolate.
     photoProcessor: (bytes) async => processPhoto(bytes),

@@ -121,6 +121,33 @@ which adds tables and indexes only. What lot 3a settled within the rules above:
   undo writes entries for what was taken and ends the draws. No line of the ledger is ever
   changed or erased (`stock/models.py:175`).
 
+
+## Schema 4 (lot 3b)
+
+Schema 4 adds the projects and the budget (`lib/data/tables.dart`): `projects`,
+`project_rooms` (one row per room of a project), `budget_lines`, `quotes`, `project_files`,
+`project_links`, `project_tasks`, `annual_envelopes` and `reports`, and four nullable columns:
+`tasks.material_budget`, `tasks.labour_budget`, `occurrences.actual_cost` and
+`rooms.paint_article_id`. The guided step from schema 3 adds those columns and tables and their
+indexes; no row of schema 3 changes (`test/drift/housecairn/migration_test.dart`, from files of
+schemas 2 and 3 with data). What lot 3b settled within the rules above:
+
+- **Amounts** (`planned`, `paid`, `amount` of a quote and of an envelope, the budgets of a task,
+  the real cost) are `TEXT` with two decimals below 10^10, read as `Decimal`
+  (`projects/models.py` `money_field`); `test/no_double_test.dart` covers the budget's files.
+- **Nothing derived is stored**: the committed amount of a line is the sum of its accepted
+  quotes, and every figure of the budget is worked out on read by `lib/domain/budget.dart`, a port
+  of the web's `budget/services.py` checked against the web's own figures for the same rows
+  (`test/budget_web_test.dart`, `tool/budget_figures.py`, element `budget` of
+  `tool/web_alignment.json`).
+- **An accepted quote has a line of its project** (the web's `quote_accepted_has_line`); the
+  repository refuses it otherwise, and any other status clears the line.
+- **Deterministic ids**: a room of a project (`projects.project_rooms:<project>:<room>`), the
+  project of a task (`projects.projecttask:<task>`: a task is in one project at most) and the
+  envelope of a year (`projects.annualenvelope:<year>`), in the home's namespace.
+- **Files**: the file of a project's photo or of a quote is in the home's directory, named by
+  the id of its row; its name as the person saw it is kept for the screens only. A link of
+  inspiration is kept as typed: the app never reads the page (no network in `lib/`).
 ## Consequences
 
 - Every write goes through one repository layer that updates the row, `field_clock` and

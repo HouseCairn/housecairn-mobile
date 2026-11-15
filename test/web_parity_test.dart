@@ -29,6 +29,8 @@ import 'package:housecairn_mobile/ui/contractor_screens.dart';
 import 'package:housecairn_mobile/ui/homes_screen.dart';
 import 'package:housecairn_mobile/ui/item_screens.dart';
 import 'package:housecairn_mobile/ui/messages.dart';
+import 'package:housecairn_mobile/ui/project_screens.dart';
+import 'package:housecairn_mobile/ui/report_screens.dart';
 import 'package:housecairn_mobile/ui/rooms.dart';
 import 'package:housecairn_mobile/ui/stock_screens.dart';
 import 'package:housecairn_mobile/ui/task_screen.dart';
@@ -38,6 +40,7 @@ import 'support/app.dart';
 import 'support/fakes.dart';
 import 'support/goldens.dart';
 import 'support/lot2b.dart';
+import 'support/lot3b.dart' show openSection;
 
 const capture = bool.fromEnvironment('PARITY_CAPTURE');
 
@@ -50,6 +53,7 @@ class Demo {
   late String plumber;
   late String filter;
   late String shop;
+  late String paintProject;
 
   /// The day the web was measured on: the rows' dates are relative to it
   /// (`today` of test/parity/web_fr_390.json).
@@ -149,6 +153,41 @@ class Demo {
       ),
     );
     await r.recordMovement(paint, kind: 'entry', quantity: '2.5');
+    // The projects of the web's demonstration (`load_demo_data.py`), and the
+    // open report tool/web_parity.py's instance adds (lot 3b).
+    paintProject = await r.createProject(
+      home,
+      ProjectInput(
+        title: 'Repeindre le salon',
+        goal: "Murs et plafond, avant l'hiver.",
+        status: 'planned',
+        estimatedMinutes: 960,
+        roomIds: [rooms['Salon']!],
+      ),
+    );
+    for (final (label, nature, planned) in [
+      ('Peinture et sous-couche', 'material', '240'),
+      ('Peintre (plafond)', 'labour', '650'),
+    ]) {
+      await r.createLine(
+        paintProject,
+        LineInput(label: label, nature: nature, planned: planned, paid: '0'),
+      );
+    }
+    await r.createProject(
+      home,
+      ProjectInput(
+        title: 'Refaire la salle de bain',
+        priority: 'low',
+        roomIds: [rooms['Salle de bain']!],
+      ),
+    );
+    await r.createReport(
+      home,
+      title: 'Le robinet de la cuisine fuit',
+      roomId: rooms['Cuisine'],
+      place: 'Cuisine',
+    );
   }
 }
 
@@ -541,6 +580,42 @@ final screens = <Screen>[
     ),
     measure: (t) => measure(t, field: true),
   ),
+  (
+    name: 'projects',
+    open: (tester, demo) => openSection(tester, 'Projets'),
+    measure: (t) => measure(t, add: 'Ajouter un projet'),
+  ),
+  (
+    name: 'project',
+    open: (tester, demo) => openScreen(
+      tester,
+      ProjectScreen(homeId: demo.home, projectId: demo.paintProject),
+    ),
+    measure: (t) => measure(t),
+  ),
+  (
+    name: 'project_form',
+    open: (tester, demo) =>
+        openScreen(tester, ProjectFormScreen(homeId: demo.home)),
+    measure: (t) => measure(t, field: true),
+  ),
+  (
+    name: 'budget',
+    open: (tester, demo) => openSection(tester, 'Budget'),
+    measure: (t) => measure(t),
+  ),
+  (
+    name: 'reports',
+    open: (tester, demo) =>
+        openScreen(tester, ReportsScreen(homeId: demo.home)),
+    measure: (t) => measure(t, add: 'Signaler un problème'),
+  ),
+  (
+    name: 'report_form',
+    open: (tester, demo) =>
+        openScreen(tester, ReportFormScreen(homeId: demo.home)),
+    measure: (t) => measure(t, field: true),
+  ),
 ];
 
 /// Tolerances, in logical pixels: a font size is exact; a box may differ by
@@ -579,6 +654,31 @@ const absences = <String, String>{
   'item.row_text_font': 'the card of the item writes its room and kind in the style of a row text, the web as `.small` (same size and weight)',
   'item.row_text_weight': 'the card of the item writes its room and kind in the style of a row text, the web as `.small` (same size and weight)',
   'item.row_text_line': 'the card of the item writes its room and kind in the style of a row text, the web as `.small` (same size and weight)',
+  'projects.h2_font': 'the web groups the projects of a tab under their status and heads its envelope card; the app lists them in the tab, the envelope in its own card',
+  'projects.h2_weight': 'the web groups the projects of a tab under their status and heads its envelope card; the app lists them in the tab, the envelope in its own card',
+  'projects.label_font': 'the web has a search field and filters above the projects; the app has the tabs only',
+  'projects.field_height': 'the web has a search field and filters above the projects; the app has the tabs only',
+  'project.label_font': 'the web adds a line, a quote or a task by forms on the page; the app opens a form',
+  'project.field_height': 'the web adds a line, a quote or a task by forms on the page; the app opens a form',
+  'budget.label_font':
+      'the web chooses the year in a select; the app by the arrows of the year',
+  'budget.field_height':
+      'the web chooses the year in a select; the app by the arrows of the year',
+  'reports.pill_font':
+      'the web filters the reports by links in pills; the app by tabs',
+  'reports.pill_weight':
+      'the web filters the reports by links in pills; the app by tabs',
+};
+
+/// Measures of one screen the app keeps apart from the web on purpose,
+/// `<screen>.<measure>`, with the value the app must have and the reason.
+const screenAdaptations = <String, ({double app, String why})>{
+  'projects.add_gap': (
+    app: 12,
+    why:
+        'the web\'s button sits right under "Compare the checked projects", '
+        'which the app does not have: 12 under the list, as on other screens',
+  ),
 };
 
 /// Rows whose title takes a second line in the app, with the reason: the
@@ -648,7 +748,10 @@ void main() {
           );
           return;
         }
-        final expected = adaptations[key]?.app ?? (webValue as num).toDouble();
+        final expected =
+            screenAdaptations['${screen.name}.$key']?.app ??
+            adaptations[key]?.app ??
+            (webValue as num).toDouble();
         final actual = (appValue as num).toDouble();
         if ((actual - expected).abs() > tol) {
           failures.add('$key: app $actual, expected $expected (web $webValue)');

@@ -1,0 +1,1227 @@
+{
+ "source": {"repository": "HouseCairn/housecairn", "commit": "a76837fe30b5a313980184703454654a45b1f031", "housecairn": "0.3.2", "fixture": "test/fixtures/budget_fixture.json"},
+ "today": "2026-06-15",
+ "homes": {
+  "a": {
+   "currency": "EUR",
+   "years": [
+    2027,
+    2026,
+    2025
+   ],
+   "by_year": [
+    {
+     "year": 2027,
+     "envelope": null,
+     "projects": {
+      "planned": "5140.00",
+      "committed": "0.00",
+      "paid": "0.00",
+      "engaged": "0.00",
+      "to_pay": "0.00",
+      "gap": "5140.00"
+     },
+     "upkeep": {
+      "planned": "190.00",
+      "committed": "0.00",
+      "paid": "0.00",
+      "engaged": "0.00",
+      "to_pay": "0.00",
+      "gap": "190.00"
+     },
+     "total": {
+      "planned": "5330.00",
+      "committed": "0.00",
+      "paid": "0.00",
+      "engaged": "0.00",
+      "to_pay": "0.00",
+      "gap": "5330.00"
+     }
+    },
+    {
+     "year": 2026,
+     "envelope": "5000.00",
+     "projects": {
+      "planned": "1300.00",
+      "committed": "1260.01",
+      "paid": "170.00",
+      "engaged": "1380.01",
+      "to_pay": "1210.01",
+      "gap": "-80.01"
+     },
+     "upkeep": {
+      "planned": "265.74",
+      "committed": "0.00",
+      "paid": "60.40",
+      "engaged": "60.40",
+      "to_pay": "0.00",
+      "gap": "205.34"
+     },
+     "total": {
+      "planned": "1565.74",
+      "committed": "1260.01",
+      "paid": "230.40",
+      "engaged": "1440.41",
+      "to_pay": "1210.01",
+      "gap": "125.33"
+     }
+    },
+    {
+     "year": 2025,
+     "envelope": "1000.00",
+     "projects": {
+      "planned": "150.00",
+      "committed": "140.00",
+      "paid": "110.00",
+      "engaged": "150.01",
+      "to_pay": "40.01",
+      "gap": "-0.01"
+     },
+     "upkeep": {
+      "planned": "120.00",
+      "committed": "0.00",
+      "paid": "135.00",
+      "engaged": "135.00",
+      "to_pay": "0.00",
+      "gap": "-15.00"
+     },
+     "total": {
+      "planned": "270.00",
+      "committed": "140.00",
+      "paid": "245.00",
+      "engaged": "285.01",
+      "to_pay": "40.01",
+      "gap": "-15.01"
+     }
+    }
+   ],
+   "envelope": {
+    "2027": {
+     "envelope": null,
+     "total": {
+      "planned": "5330.00",
+      "committed": "0.00",
+      "paid": "0.00",
+      "engaged": "0.00",
+      "to_pay": "0.00",
+      "gap": "5330.00"
+     },
+     "set_aside": "5330.00",
+     "spent": "0.00",
+     "left": "5330.00",
+     "left_over": "0.00",
+     "percent": 0,
+     "left_to_plan": null,
+     "left_to_spend": null
+    },
+    "2026": {
+     "envelope": "5000.00",
+     "total": {
+      "planned": "1565.74",
+      "committed": "1260.01",
+      "paid": "230.40",
+      "engaged": "1440.41",
+      "to_pay": "1210.01",
+      "gap": "125.33"
+     },
+     "set_aside": "5000.00",
+     "spent": "1440.41",
+     "left": "3559.59",
+     "left_over": "0.00",
+     "percent": 29,
+     "left_to_plan": "3434.26",
+     "left_to_spend": "3559.59"
+    },
+    "2025": {
+     "envelope": "1000.00",
+     "total": {
+      "planned": "270.00",
+      "committed": "140.00",
+      "paid": "245.00",
+      "engaged": "285.01",
+      "to_pay": "40.01",
+      "gap": "-15.01"
+     },
+     "set_aside": "1000.00",
+     "spent": "285.01",
+     "left": "714.99",
+     "left_over": "0.00",
+     "percent": 29,
+     "left_to_plan": "730.00",
+     "left_to_spend": "714.99"
+    }
+   },
+   "by_room": {
+    "2027": [
+     {
+      "room": "kitchen",
+      "amounts": {
+       "planned": "70.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "70.00"
+      },
+      "projects": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      },
+      "upkeep": {
+       "planned": "70.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "70.00"
+      }
+     },
+     {
+      "room": "bathroom",
+      "amounts": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      },
+      "projects": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      },
+      "upkeep": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      }
+     },
+     {
+      "room": "garage",
+      "amounts": {
+       "planned": "120.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "120.00"
+      },
+      "projects": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      },
+      "upkeep": {
+       "planned": "120.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "120.00"
+      }
+     },
+     {
+      "room": null,
+      "amounts": {
+       "planned": "5140.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "5140.00"
+      },
+      "projects": {
+       "planned": "5140.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "5140.00"
+      },
+      "upkeep": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      }
+     }
+    ],
+    "2026": [
+     {
+      "room": "kitchen",
+      "amounts": {
+       "planned": "720.00",
+       "committed": "600.01",
+       "paid": "78.40",
+       "engaged": "678.41",
+       "to_pay": "600.01",
+       "gap": "41.59"
+      },
+      "projects": {
+       "planned": "650.00",
+       "committed": "600.01",
+       "paid": "60.00",
+       "engaged": "660.01",
+       "to_pay": "600.01",
+       "gap": "-10.01"
+      },
+      "upkeep": {
+       "planned": "70.00",
+       "committed": "0.00",
+       "paid": "18.40",
+       "engaged": "18.40",
+       "to_pay": "0.00",
+       "gap": "51.60"
+      }
+     },
+     {
+      "room": "bathroom",
+      "amounts": {
+       "planned": "650.24",
+       "committed": "600.00",
+       "paid": "60.00",
+       "engaged": "660.00",
+       "to_pay": "600.00",
+       "gap": "-9.76"
+      },
+      "projects": {
+       "planned": "650.00",
+       "committed": "600.00",
+       "paid": "60.00",
+       "engaged": "660.00",
+       "to_pay": "600.00",
+       "gap": "-10.00"
+      },
+      "upkeep": {
+       "planned": "0.24",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.24"
+      }
+     },
+     {
+      "room": "garage",
+      "amounts": {
+       "planned": "120.00",
+       "committed": "60.00",
+       "paid": "92.00",
+       "engaged": "102.00",
+       "to_pay": "10.00",
+       "gap": "18.00"
+      },
+      "projects": {
+       "planned": "0.00",
+       "committed": "60.00",
+       "paid": "50.00",
+       "engaged": "60.00",
+       "to_pay": "10.00",
+       "gap": "-60.00"
+      },
+      "upkeep": {
+       "planned": "120.00",
+       "committed": "0.00",
+       "paid": "42.00",
+       "engaged": "42.00",
+       "to_pay": "0.00",
+       "gap": "78.00"
+      }
+     },
+     {
+      "room": null,
+      "amounts": {
+       "planned": "75.50",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "75.50"
+      },
+      "projects": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      },
+      "upkeep": {
+       "planned": "75.50",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "75.50"
+      }
+     }
+    ],
+    "2025": [
+     {
+      "room": "kitchen",
+      "amounts": {
+       "planned": "50.00",
+       "committed": "46.67",
+       "paid": "36.67",
+       "engaged": "50.01",
+       "to_pay": "13.34",
+       "gap": "-0.01"
+      },
+      "projects": {
+       "planned": "50.00",
+       "committed": "46.67",
+       "paid": "36.67",
+       "engaged": "50.01",
+       "to_pay": "13.34",
+       "gap": "-0.01"
+      },
+      "upkeep": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      }
+     },
+     {
+      "room": "bathroom",
+      "amounts": {
+       "planned": "50.00",
+       "committed": "46.67",
+       "paid": "36.67",
+       "engaged": "50.00",
+       "to_pay": "13.34",
+       "gap": "0.00"
+      },
+      "projects": {
+       "planned": "50.00",
+       "committed": "46.67",
+       "paid": "36.67",
+       "engaged": "50.00",
+       "to_pay": "13.34",
+       "gap": "0.00"
+      },
+      "upkeep": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      }
+     },
+     {
+      "room": "garage",
+      "amounts": {
+       "planned": "170.00",
+       "committed": "46.66",
+       "paid": "171.66",
+       "engaged": "185.00",
+       "to_pay": "13.33",
+       "gap": "-15.00"
+      },
+      "projects": {
+       "planned": "50.00",
+       "committed": "46.66",
+       "paid": "36.66",
+       "engaged": "50.00",
+       "to_pay": "13.33",
+       "gap": "0.00"
+      },
+      "upkeep": {
+       "planned": "120.00",
+       "committed": "0.00",
+       "paid": "135.00",
+       "engaged": "135.00",
+       "to_pay": "0.00",
+       "gap": "-15.00"
+      }
+     },
+     {
+      "room": null,
+      "amounts": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      },
+      "projects": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      },
+      "upkeep": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      }
+     }
+    ]
+   },
+   "by_task": {
+    "2027": {
+     "unlisted": 1,
+     "total": {
+      "planned": "190.00",
+      "committed": "0.00",
+      "paid": "0.00",
+      "engaged": "0.00",
+      "to_pay": "0.00",
+      "gap": "190.00"
+     },
+     "lines": [
+      {
+       "task": "filter",
+       "amounts": {
+        "planned": "70.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "70.00"
+       },
+       "estimate": "17.50",
+       "annual_cost": "70.00",
+       "stock_estimate": "12.50",
+       "unpriced_materials": 0,
+       "total_paid": "18.40",
+       "missing_costs": 0,
+       "projected": 4
+      },
+      {
+       "task": "boiler",
+       "amounts": {
+        "planned": "120.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "120.00"
+       },
+       "estimate": "120.00",
+       "annual_cost": "120.00",
+       "stock_estimate": "0.00",
+       "unpriced_materials": 0,
+       "total_paid": "135.00",
+       "missing_costs": 0,
+       "projected": 1
+      },
+      {
+       "task": "seal",
+       "amounts": {
+        "planned": "0.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "0.00"
+       },
+       "estimate": "0.24",
+       "annual_cost": "0.01",
+       "stock_estimate": "0.00",
+       "unpriced_materials": 0,
+       "total_paid": "0.00",
+       "missing_costs": 0,
+       "projected": 0
+      },
+      {
+       "task": "door",
+       "amounts": {
+        "planned": "0.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "0.00"
+       },
+       "estimate": "75.50",
+       "annual_cost": null,
+       "stock_estimate": "0.00",
+       "unpriced_materials": 0,
+       "total_paid": "0.00",
+       "missing_costs": 0,
+       "projected": 0
+      },
+      {
+       "task": "gutter",
+       "amounts": {
+        "planned": "0.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "0.00"
+       },
+       "estimate": null,
+       "annual_cost": null,
+       "stock_estimate": "0.00",
+       "unpriced_materials": 1,
+       "total_paid": "42.00",
+       "missing_costs": 0,
+       "projected": 0
+      }
+     ]
+    },
+    "2026": {
+     "unlisted": 1,
+     "total": {
+      "planned": "265.74",
+      "committed": "0.00",
+      "paid": "60.40",
+      "engaged": "60.40",
+      "to_pay": "0.00",
+      "gap": "205.34"
+     },
+     "lines": [
+      {
+       "task": "filter",
+       "amounts": {
+        "planned": "70.00",
+        "committed": "0.00",
+        "paid": "18.40",
+        "engaged": "18.40",
+        "to_pay": "0.00",
+        "gap": "51.60"
+       },
+       "estimate": "17.50",
+       "annual_cost": "70.00",
+       "stock_estimate": "12.50",
+       "unpriced_materials": 0,
+       "total_paid": "18.40",
+       "missing_costs": 1,
+       "projected": 1
+      },
+      {
+       "task": "boiler",
+       "amounts": {
+        "planned": "120.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "120.00"
+       },
+       "estimate": "120.00",
+       "annual_cost": "120.00",
+       "stock_estimate": "0.00",
+       "unpriced_materials": 0,
+       "total_paid": "135.00",
+       "missing_costs": 0,
+       "projected": 0
+      },
+      {
+       "task": "seal",
+       "amounts": {
+        "planned": "0.24",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "0.24"
+       },
+       "estimate": "0.24",
+       "annual_cost": "0.01",
+       "stock_estimate": "0.00",
+       "unpriced_materials": 0,
+       "total_paid": "0.00",
+       "missing_costs": 0,
+       "projected": 0
+      },
+      {
+       "task": "door",
+       "amounts": {
+        "planned": "75.50",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "75.50"
+       },
+       "estimate": "75.50",
+       "annual_cost": null,
+       "stock_estimate": "0.00",
+       "unpriced_materials": 0,
+       "total_paid": "0.00",
+       "missing_costs": 0,
+       "projected": 0
+      },
+      {
+       "task": "gutter",
+       "amounts": {
+        "planned": "0.00",
+        "committed": "0.00",
+        "paid": "42.00",
+        "engaged": "42.00",
+        "to_pay": "0.00",
+        "gap": "-42.00"
+       },
+       "estimate": null,
+       "annual_cost": null,
+       "stock_estimate": "0.00",
+       "unpriced_materials": 1,
+       "total_paid": "42.00",
+       "missing_costs": 0,
+       "projected": 0
+      }
+     ]
+    },
+    "2025": {
+     "unlisted": 1,
+     "total": {
+      "planned": "120.00",
+      "committed": "0.00",
+      "paid": "135.00",
+      "engaged": "135.00",
+      "to_pay": "0.00",
+      "gap": "-15.00"
+     },
+     "lines": [
+      {
+       "task": "filter",
+       "amounts": {
+        "planned": "0.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "0.00"
+       },
+       "estimate": "17.50",
+       "annual_cost": "70.00",
+       "stock_estimate": "12.50",
+       "unpriced_materials": 0,
+       "total_paid": "18.40",
+       "missing_costs": 0,
+       "projected": 0
+      },
+      {
+       "task": "boiler",
+       "amounts": {
+        "planned": "120.00",
+        "committed": "0.00",
+        "paid": "135.00",
+        "engaged": "135.00",
+        "to_pay": "0.00",
+        "gap": "-15.00"
+       },
+       "estimate": "120.00",
+       "annual_cost": "120.00",
+       "stock_estimate": "0.00",
+       "unpriced_materials": 0,
+       "total_paid": "135.00",
+       "missing_costs": 0,
+       "projected": 0
+      },
+      {
+       "task": "seal",
+       "amounts": {
+        "planned": "0.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "0.00"
+       },
+       "estimate": "0.24",
+       "annual_cost": "0.01",
+       "stock_estimate": "0.00",
+       "unpriced_materials": 0,
+       "total_paid": "0.00",
+       "missing_costs": 0,
+       "projected": 0
+      },
+      {
+       "task": "door",
+       "amounts": {
+        "planned": "0.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "0.00"
+       },
+       "estimate": "75.50",
+       "annual_cost": null,
+       "stock_estimate": "0.00",
+       "unpriced_materials": 0,
+       "total_paid": "0.00",
+       "missing_costs": 0,
+       "projected": 0
+      },
+      {
+       "task": "gutter",
+       "amounts": {
+        "planned": "0.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "0.00"
+       },
+       "estimate": null,
+       "annual_cost": null,
+       "stock_estimate": "0.00",
+       "unpriced_materials": 1,
+       "total_paid": "42.00",
+       "missing_costs": 0,
+       "projected": 0
+      }
+     ]
+    }
+   },
+   "by_nature": {
+    "2027": [
+     {
+      "nature": "material",
+      "amounts": {
+       "planned": "110.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "110.00"
+      }
+     },
+     {
+      "nature": "labour",
+      "amounts": {
+       "planned": "2720.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "2720.00"
+      }
+     },
+     {
+      "nature": "rental",
+      "amounts": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      }
+     },
+     {
+      "nature": "other",
+      "amounts": {
+       "planned": "2500.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "2500.00"
+      }
+     }
+    ],
+    "2026": [
+     {
+      "nature": "material",
+      "amounts": {
+       "planned": "400.24",
+       "committed": "60.00",
+       "paid": "188.40",
+       "engaged": "198.40",
+       "to_pay": "10.00",
+       "gap": "201.84"
+      }
+     },
+     {
+      "nature": "labour",
+      "amounts": {
+       "planned": "1165.50",
+       "committed": "1200.01",
+       "paid": "0.00",
+       "engaged": "1200.01",
+       "to_pay": "1200.01",
+       "gap": "-34.51"
+      }
+     },
+     {
+      "nature": "rental",
+      "amounts": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      }
+     },
+     {
+      "nature": "other",
+      "amounts": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "42.00",
+       "engaged": "42.00",
+       "to_pay": "0.00",
+       "gap": "-42.00"
+      }
+     }
+    ],
+    "2025": [
+     {
+      "nature": "material",
+      "amounts": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      }
+     },
+     {
+      "nature": "labour",
+      "amounts": {
+       "planned": "170.00",
+       "committed": "40.01",
+       "paid": "135.00",
+       "engaged": "175.01",
+       "to_pay": "40.01",
+       "gap": "-5.01"
+      }
+     },
+     {
+      "nature": "rental",
+      "amounts": {
+       "planned": "100.00",
+       "committed": "99.99",
+       "paid": "110.00",
+       "engaged": "110.00",
+       "to_pay": "0.00",
+       "gap": "-10.00"
+      }
+     },
+     {
+      "nature": "other",
+      "amounts": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      }
+     }
+    ]
+   },
+   "by_project": {
+    "total": {
+     "planned": "6590.00",
+     "committed": "1400.01",
+     "paid": "280.00",
+     "engaged": "1530.02",
+     "to_pay": "1250.02",
+     "gap": "5059.98"
+    },
+    "lines": [
+     {
+      "project": "shed",
+      "amounts": {
+       "planned": "5140.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "5140.00"
+      },
+      "year": 2027,
+      "status": "idea",
+      "tasks_planned": "2640.00"
+     },
+     {
+      "project": "fan",
+      "amounts": {
+       "planned": "150.00",
+       "committed": "140.00",
+       "paid": "110.00",
+       "engaged": "150.01",
+       "to_pay": "40.01",
+       "gap": "-0.01"
+      },
+      "year": 2025,
+      "status": "done",
+      "tasks_planned": "0.00"
+     },
+     {
+      "project": "repaint",
+      "amounts": {
+       "planned": "1300.00",
+       "committed": "1200.01",
+       "paid": "120.00",
+       "engaged": "1320.01",
+       "to_pay": "1200.01",
+       "gap": "-20.01"
+      },
+      "year": 2026,
+      "status": "in_progress",
+      "tasks_planned": "305.00"
+     },
+     {
+      "project": "floor",
+      "amounts": {
+       "planned": "0.00",
+       "committed": "60.00",
+       "paid": "50.00",
+       "engaged": "60.00",
+       "to_pay": "10.00",
+       "gap": "-60.00"
+      },
+      "year": 2026,
+      "status": "abandoned",
+      "tasks_planned": "0.00"
+     }
+    ]
+   },
+   "rolling": {
+    "since": "2025-06-16",
+    "until": "2026-06-15",
+    "upkeep": {
+     "planned": "155.00",
+     "committed": "0.00",
+     "paid": "195.40",
+     "engaged": "195.40",
+     "to_pay": "0.00",
+     "gap": "-40.40"
+    },
+    "missing": 1
+   }
+  },
+  "b": {
+   "currency": "CHF",
+   "years": [
+    2026
+   ],
+   "by_year": [
+    {
+     "year": 2026,
+     "envelope": "120.00",
+     "projects": {
+      "planned": "85.50",
+      "committed": "90.00",
+      "paid": "0.00",
+      "engaged": "90.00",
+      "to_pay": "90.00",
+      "gap": "-4.50"
+     },
+     "upkeep": {
+      "planned": "20.10",
+      "committed": "0.00",
+      "paid": "9.90",
+      "engaged": "9.90",
+      "to_pay": "0.00",
+      "gap": "10.20"
+     },
+     "total": {
+      "planned": "105.60",
+      "committed": "90.00",
+      "paid": "9.90",
+      "engaged": "99.90",
+      "to_pay": "90.00",
+      "gap": "5.70"
+     }
+    }
+   ],
+   "envelope": {
+    "2026": {
+     "envelope": "120.00",
+     "total": {
+      "planned": "105.60",
+      "committed": "90.00",
+      "paid": "9.90",
+      "engaged": "99.90",
+      "to_pay": "90.00",
+      "gap": "5.70"
+     },
+     "set_aside": "120.00",
+     "spent": "99.90",
+     "left": "20.10",
+     "left_over": "0.00",
+     "percent": 83,
+     "left_to_plan": "14.40",
+     "left_to_spend": "20.10"
+    }
+   },
+   "by_room": {
+    "2026": [
+     {
+      "room": "living",
+      "amounts": {
+       "planned": "105.60",
+       "committed": "90.00",
+       "paid": "9.90",
+       "engaged": "99.90",
+       "to_pay": "90.00",
+       "gap": "5.70"
+      },
+      "projects": {
+       "planned": "85.50",
+       "committed": "90.00",
+       "paid": "0.00",
+       "engaged": "90.00",
+       "to_pay": "90.00",
+       "gap": "-4.50"
+      },
+      "upkeep": {
+       "planned": "20.10",
+       "committed": "0.00",
+       "paid": "9.90",
+       "engaged": "9.90",
+       "to_pay": "0.00",
+       "gap": "10.20"
+      }
+     }
+    ]
+   },
+   "by_task": {
+    "2026": {
+     "unlisted": 0,
+     "total": {
+      "planned": "20.10",
+      "committed": "0.00",
+      "paid": "9.90",
+      "engaged": "9.90",
+      "to_pay": "0.00",
+      "gap": "10.20"
+     },
+     "lines": [
+      {
+       "task": "bulbs",
+       "amounts": {
+        "planned": "20.10",
+        "committed": "0.00",
+        "paid": "9.90",
+        "engaged": "9.90",
+        "to_pay": "0.00",
+        "gap": "10.20"
+       },
+       "estimate": "10.05",
+       "annual_cost": "20.10",
+       "stock_estimate": "10.05",
+       "unpriced_materials": 0,
+       "total_paid": "9.90",
+       "missing_costs": 0,
+       "projected": 0
+      }
+     ]
+    }
+   },
+   "by_nature": {
+    "2026": [
+     {
+      "nature": "material",
+      "amounts": {
+       "planned": "105.60",
+       "committed": "90.00",
+       "paid": "9.90",
+       "engaged": "99.90",
+       "to_pay": "90.00",
+       "gap": "5.70"
+      }
+     },
+     {
+      "nature": "labour",
+      "amounts": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      }
+     },
+     {
+      "nature": "rental",
+      "amounts": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      }
+     },
+     {
+      "nature": "other",
+      "amounts": {
+       "planned": "0.00",
+       "committed": "0.00",
+       "paid": "0.00",
+       "engaged": "0.00",
+       "to_pay": "0.00",
+       "gap": "0.00"
+      }
+     }
+    ]
+   },
+   "by_project": {
+    "total": {
+     "planned": "85.50",
+     "committed": "90.00",
+     "paid": "0.00",
+     "engaged": "90.00",
+     "to_pay": "90.00",
+     "gap": "-4.50"
+    },
+    "lines": [
+     {
+      "project": "floor",
+      "amounts": {
+       "planned": "85.50",
+       "committed": "90.00",
+       "paid": "0.00",
+       "engaged": "90.00",
+       "to_pay": "90.00",
+       "gap": "-4.50"
+      },
+      "year": 2026,
+      "status": "planned",
+      "tasks_planned": "0.00"
+     }
+    ]
+   },
+   "rolling": {
+    "since": "2025-06-16",
+    "until": "2026-06-15",
+    "upkeep": {
+     "planned": "10.05",
+     "committed": "0.00",
+     "paid": "9.90",
+     "engaged": "9.90",
+     "to_pay": "0.00",
+     "gap": "0.15"
+    },
+    "missing": 0
+   }
+  }
+ }
+}

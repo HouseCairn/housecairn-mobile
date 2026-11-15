@@ -17,7 +17,11 @@ part 'database.g.dart';
 /// photos, contractors, tasks and occurrences, `field_clock` and the local
 /// settings of the phone (lib/data/tables.dart). Schema 3 (lot 3a) adds the
 /// stock: articles, their rooms and compatible items, suppliers, movements,
-/// the materials of tasks and the draws of done occurrences. Migrations are drift's
+/// the materials of tasks and the draws of done occurrences. Schema 4 (lot 3b)
+/// adds projects with their rooms, budget lines, quotes, files, links and
+/// tasks, the annual envelopes and the reports, and four nullable columns:
+/// the two budgets of a task, the real cost of an occurrence, the paint left
+/// of a room. Migrations are drift's
 /// guided migrations: `dart run drift_dev make-migrations` keeps one schema
 /// file per version in `drift_schemas/` and generates the step-by-step code
 /// (`database.steps.dart`) and the migration tests under `test/drift/`.
@@ -38,6 +42,15 @@ part 'database.g.dart';
     Movements,
     TaskMaterials,
     MaterialDraws,
+    Projects,
+    ProjectRooms,
+    BudgetLines,
+    Quotes,
+    ProjectFiles,
+    ProjectLinks,
+    ProjectTasks,
+    AnnualEnvelopes,
+    Reports,
     FieldClock,
     LocalSettings,
   ],
@@ -51,7 +64,7 @@ class AppDatabase extends _$AppDatabase implements Db {
       AppDatabase(driftDatabase(name: 'housecairn'));
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -93,6 +106,37 @@ class AppDatabase extends _$AppDatabase implements Db {
               schema.movementArticle,
               schema.materialTask,
               schema.drawOccurrence,
+            ]) {
+              await m.create(index);
+            }
+          },
+          from3To4: (m, schema) async {
+            // Four nullable columns and new tables: no row of schema 3 moves.
+            await m.addColumn(schema.rooms, schema.rooms.paintArticleId);
+            await m.addColumn(schema.tasks, schema.tasks.materialBudget);
+            await m.addColumn(schema.tasks, schema.tasks.labourBudget);
+            await m.addColumn(
+              schema.occurrences,
+              schema.occurrences.actualCost,
+            );
+            for (final table in [
+              schema.projects,
+              schema.projectRooms,
+              schema.budgetLines,
+              schema.quotes,
+              schema.projectFiles,
+              schema.projectLinks,
+              schema.projectTasks,
+              schema.annualEnvelopes,
+              schema.reports,
+            ]) {
+              await m.createTable(table);
+            }
+            for (final index in [
+              schema.projectHomeStatus,
+              schema.lineProject,
+              schema.quoteProject,
+              schema.reportHomeStatus,
             ]) {
               await m.create(index);
             }

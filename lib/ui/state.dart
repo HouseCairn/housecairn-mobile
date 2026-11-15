@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../core/document_source.dart';
 import '../core/notifier.dart';
 import '../core/photo_source.dart';
 import '../data/database.dart';
@@ -52,6 +53,7 @@ class AppState extends ChangeNotifier {
   AppState(
     this.repository, {
     this.photoSource,
+    this.documentSource,
     this.notifier,
     this.photoProcessor = processInIsolate,
     this.loadTemplates = loadBundledTemplates,
@@ -62,6 +64,10 @@ class AppState extends ChangeNotifier {
 
   /// The camera and the gallery; `null` where there are none (tests).
   final PhotoSource? photoSource;
+
+  /// The Files app (iOS) or the document picker (Android), for the file of a
+  /// quote; `null` where there are none (tests).
+  final DocumentSource? documentSource;
 
   /// The local notifications; `null` where there are none (tests).
   final Notifier? notifier;

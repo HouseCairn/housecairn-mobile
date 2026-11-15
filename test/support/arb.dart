@@ -118,8 +118,18 @@ List<String> textsNotInArb(
       .where((text) => !patterns.any((pattern) => pattern.hasMatch(text)))
       // The date of a task, alone in its pill as on the web: formatted, no message.
       .where((text) => !_isDate(text, locale))
+      // An amount or a year alone (the budget, lot 3b): figures, no message.
+      .where((text) => !_isFigure(text))
       .toList();
 }
+
+/// An amount of money in a currency (`€12.50`, `12,50 €`, `CHF 12.50`) or a
+/// number, as the budget shows them alone: data, not a message.
+bool _isFigure(String text) => RegExp(
+  r'^-?(\p{Sc}|[A-Z]{3})?[\s\u00a0\u202f]?-?\d[\d\s\u00a0\u202f.,’]*'
+  r'[\s\u00a0\u202f]?(\p{Sc}|[A-Z]{3})?$',
+  unicode: true,
+).hasMatch(text);
 
 /// A date as the app writes it (`yMMMd` of [locale]).
 bool _isDate(String text, String locale) {
