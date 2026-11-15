@@ -126,6 +126,7 @@ class HcDateField extends StatelessWidget {
     required this.value,
     required this.onChanged,
     required this.noDate,
+    this.clearable = true,
   });
 
   final String label;
@@ -134,6 +135,9 @@ class HcDateField extends StatelessWidget {
 
   /// What is shown when there is no date.
   final String noDate;
+
+  /// Whether the date may be removed (a movement always has one).
+  final bool clearable;
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +166,7 @@ class HcDateField extends StatelessWidget {
             },
             child: Text(l10n.taskChooseDate),
           ),
-          if (value != null)
+          if (value != null && clearable)
             TextButton(
               onPressed: () => onChanged(null),
               child: Text(l10n.taskClearDate),

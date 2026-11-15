@@ -496,6 +496,7 @@ class _MovementFormState extends State<MovementForm> {
             label: l10n.movementDate,
             value: _on ?? today,
             noDate: formatDay(context, today),
+            clearable: false,
             onChanged: (day) => setState(() => _on = day),
           ),
           hcText(l10n.movementNote, _note, key: const Key('movement-note')),

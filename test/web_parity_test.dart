@@ -419,6 +419,17 @@ Future<Measures> measureLong(
   );
   await tester.pumpAndSettle();
   final bottom = measure(tester, add: add);
+  // Back to the top, for the capture.
+  await tester.fling(
+    find
+        .byWidgetPredicate(
+          (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+        )
+        .last,
+    const Offset(0, 4000),
+    4000,
+  );
+  await tester.pumpAndSettle();
   return {
     for (final key in {...top.keys, ...bottom.keys})
       key: top[key] ?? bottom[key],
