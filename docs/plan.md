@@ -24,8 +24,10 @@
   once the web pull request is merged and carries the same field names and values. The first
   is the lot of the maintainer's feedback of 2026-11-15 (web pull request
   [#160](https://github.com/HouseCairn/housecairn/pull/160)): the list of every item, the
-  manufacturer's warranty (schema 5), the millilitre, one line of materials, the material
-  budget worked out from the stock and sheets saved as they are changed.
+  manufacturer's warranty (schema 5), the millilitre, one line of materials and sheets saved
+  as they are changed. The material budget worked out from the stock, and the Equipment
+  screen in the 390 px parity check, follow in a lot of their own once a web release
+  (v0.4.0) has them, since the app is aligned on web releases only.
 - **Device** below means a test that needs a real phone or a macOS machine, which CI cannot run;
   the maintainer runs it, and the lot lists the exact steps.
 
