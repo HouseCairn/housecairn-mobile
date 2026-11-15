@@ -8,8 +8,9 @@ import 'dart:typed_data';
 /// The keys of sync (device keys, epoch keys, recovery seed) are never in the
 /// database but in the iOS Keychain or the Android Keystore
 /// (docs/adr/0002-local-storage-and-migrations.md, "Encryption at rest").
-/// Lot 5 implements this interface with `flutter_secure_storage`. Lot 1
-/// defines it only.
+/// `SecureStore` (`secure_store.dart`) implements it with
+/// `flutter_secure_storage`, from lot 4b, which keeps the access to a
+/// Housecairn server in it; lot 5 adds the keys of sync.
 abstract interface class Store {
   /// The value under [key], or `null` when there is none.
   Future<Uint8List?> read(String key);

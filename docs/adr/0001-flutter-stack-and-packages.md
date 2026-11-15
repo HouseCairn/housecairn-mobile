@@ -119,5 +119,5 @@ BSD-3-Clause).
   `lib/core/`: `Db` the local database (drift), `Crypto` the primitives of
   [protocol.md](../protocol.md) section 1 (sodium), `Notifier` the local notifications
   (flutter_local_notifications), `Store` the secrets at rest in the Keychain or Keystore
-  (flutter_secure_storage); and `Clock`, the time of the phone, so that tests choose it.
+  (flutter_secure_storage, from lot 4b: the access to a Housecairn server); and `Clock`, the time of the phone, so that tests choose it.
 - `firebase_messaging` brings Google Play services on Android; the store listing says so.
