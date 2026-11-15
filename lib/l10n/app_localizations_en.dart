@@ -1879,4 +1879,217 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paintArticleNone => 'None';
+
+  @override
+  String get tasksTabAll => 'All';
+
+  @override
+  String get tasksTitle => 'Tasks';
+
+  @override
+  String get tasksFilterShow => 'Show';
+
+  @override
+  String get tasksToDo => 'To do';
+
+  @override
+  String get tasksDoneFilter => 'Done';
+
+  @override
+  String get tasksAllRooms => 'All rooms';
+
+  @override
+  String get tasksNone => 'Nothing to do. Add a task to start.';
+
+  @override
+  String tasksHidden(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tasks are hidden until their date gets closer.',
+      one: '$count task is hidden until its date gets closer.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tasksShowHidden => 'Show them';
+
+  @override
+  String get pagePrevious => 'Previous';
+
+  @override
+  String get pageNext => 'Next';
+
+  @override
+  String pageOf(int number, int total) {
+    return 'Page $number of $total';
+  }
+
+  @override
+  String get historyFilters => 'Filters';
+
+  @override
+  String get historySearch => 'Search';
+
+  @override
+  String get historyAllItems => 'All items';
+
+  @override
+  String get historyEveryone => 'Everyone';
+
+  @override
+  String get historyOutcome => 'Outcome';
+
+  @override
+  String get historyDoneOrSkipped => 'Done or skipped';
+
+  @override
+  String get historyOutcomeDone => 'Done';
+
+  @override
+  String get historyOutcomeSkipped => 'Skipped';
+
+  @override
+  String get historyFrom => 'From';
+
+  @override
+  String get historyTo => 'To';
+
+  @override
+  String get historyClear => 'Clear';
+
+  @override
+  String get historyNothingMatches => 'Nothing matches.';
+
+  @override
+  String get historyNothingDone => 'Nothing done yet.';
+
+  @override
+  String historyEntries(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries',
+      one: '$count entry',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String historyCost(String total, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries',
+      one: '$count entry',
+    );
+    return 'real cost: $total, entered on $_temp0';
+  }
+
+  @override
+  String get seasonSection => 'In season';
+
+  @override
+  String get taskDelete => 'Delete the task';
+
+  @override
+  String taskDeleteTitle(String name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get taskDeleteBody =>
+      'The task, its history and its files disappear from the screens.';
+
+  @override
+  String get taskDuration => 'Estimated duration';
+
+  @override
+  String get taskDurationUnit => 'Unit of the duration';
+
+  @override
+  String get unitMinutes => 'minutes';
+
+  @override
+  String get unitHours => 'hours';
+
+  @override
+  String get taskHideDays => 'Hide until this many days before';
+
+  @override
+  String get taskHideDaysHelp => '0 shows the task as soon as it exists.';
+
+  @override
+  String get errHideDays => 'Give a number of days from 0 to 365.';
+
+  @override
+  String get errDuration =>
+      'Give a duration of at least 1 and at most one year.';
+
+  @override
+  String get taskProcedure => 'How to do it';
+
+  @override
+  String get taskAddRoom => 'Add a room…';
+
+  @override
+  String get taskNewRoom => 'New room';
+
+  @override
+  String get taskNewRoomName => 'Name of the new room';
+
+  @override
+  String get taskNewRoomKind => 'Type of room';
+
+  @override
+  String get taskAddItem => 'Add an item…';
+
+  @override
+  String get taskNewItem => 'New item';
+
+  @override
+  String get taskNewItemName => 'Name of the new item';
+
+  @override
+  String get taskAddContractor => 'Add a contractor…';
+
+  @override
+  String get taskNewContractor => 'New contractor';
+
+  @override
+  String get taskNewContractorName => 'Name of the new contractor';
+
+  @override
+  String get taskPostponedPill => 'Postponed';
+
+  @override
+  String get taskHighPriority => 'High priority';
+
+  @override
+  String get taskLowPriority => 'Low priority';
+
+  @override
+  String get taskWhen => 'When';
+
+  @override
+  String get taskPhotosOfItem => 'Photos of the item';
+
+  @override
+  String get taskPhotosOfRoom => 'Photos of the room';
+
+  @override
+  String get taskAllPhotosOfItem => 'All photos of the item';
+
+  @override
+  String get taskAllPhotosOfRoom => 'All photos of the room';
+
+  @override
+  String get occurrenceTitle => 'Details of what was done';
+
+  @override
+  String get occurrenceDoneOn => 'Done on';
+
+  @override
+  String get occurrenceDetails => 'Details';
 }

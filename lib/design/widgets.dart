@@ -97,6 +97,7 @@ class HcRow extends StatelessWidget {
     required this.title,
     this.text,
     this.pills = const [],
+    this.moreText,
     this.leading,
     this.trailing,
     this.onTap,
@@ -105,6 +106,9 @@ class HcRow extends StatelessWidget {
   final String title;
   final String? text;
   final List<Widget> pills;
+
+  /// A second line of text, under the pills (`.row-text` after `.pill`).
+  final String? moreText;
   final Widget? leading;
 
   /// Defaults to a chevron when the row opens something.
@@ -138,7 +142,12 @@ class HcRow extends StatelessWidget {
                 const SizedBox(width: HcSpace.s3),
               ],
               Expanded(
-                child: _RowBody(title: title, text: text, pills: pills),
+                child: _RowBody(
+                  title: title,
+                  text: text,
+                  pills: pills,
+                  moreText: moreText,
+                ),
               ),
               if (end != null) ...[const SizedBox(width: HcSpace.s3), end],
             ],
@@ -150,11 +159,17 @@ class HcRow extends StatelessWidget {
 }
 
 class _RowBody extends StatelessWidget {
-  const _RowBody({required this.title, this.text, this.pills = const []});
+  const _RowBody({
+    required this.title,
+    this.text,
+    this.pills = const [],
+    this.moreText,
+  });
 
   final String title;
   final String? text;
   final List<Widget> pills;
+  final String? moreText;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -169,6 +184,10 @@ class _RowBody extends StatelessWidget {
       if (pills.isNotEmpty) ...[
         const SizedBox(height: HcSpace.s1),
         Wrap(spacing: HcSpace.s2, runSpacing: HcSpace.s1, children: pills),
+      ],
+      if (moreText != null && moreText!.isNotEmpty) ...[
+        const SizedBox(height: HcComponent.rowTextGap),
+        Text(moreText!, style: HcText.rowText),
       ],
     ],
   );

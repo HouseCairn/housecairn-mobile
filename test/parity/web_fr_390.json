@@ -78,6 +78,19 @@
        "height": 90.84375
       }
      ]
+    },
+    {
+     "heading": "DE SAISON (1)",
+     "rows": [
+      {
+       "title": "Traiter la terrasse",
+       "text": "Jardin",
+       "pills": [
+        "5 déc. 2026"
+       ],
+       "height": 90.84375
+      }
+     ]
     }
    ],
    "body_font": 16,
@@ -90,7 +103,7 @@
    },
    "add_button": {
     "x": 16,
-    "y": 812.125,
+    "y": 953.21875,
     "w": 358,
     "h": 45.1875
    },
@@ -105,7 +118,7 @@
    "content_left": 16,
    "field_height": null,
    "label_font": null,
-   "doc_height": 953,
+   "doc_height": 1094,
    "url": "/"
   },
   "task": {
@@ -959,7 +972,7 @@
    "content_left": 16,
    "field_height": 50,
    "label_font": 14,
-   "doc_height": 2415,
+   "doc_height": 2444,
    "url": "/h/<id>/budget/"
   },
   "reports": {
@@ -1040,6 +1053,211 @@
    "label_font": 14,
    "doc_height": 844,
    "url": "/h/<id>/reports/new/"
+  },
+  "tasks": {
+   "h1_font": 24,
+   "h1_box": {
+    "x": 16,
+    "y": 68,
+    "w": 358,
+    "h": 30
+   },
+   "h2_font": null,
+   "h2_weight": null,
+   "row_title_font": 16,
+   "row_text_font": 13,
+   "row_title_weight": 600,
+   "row_text_weight": 400,
+   "row_title_line": 20.8,
+   "row_text_line": 17.55,
+   "pill_font": 13,
+   "pill_weight": 700,
+   "sections": [
+    {
+     "heading": "",
+     "rows": [
+      {
+       "title": "Tester le détecteur de fumée",
+       "text": "Entrée",
+       "pills": [
+        "3 jours de retard"
+       ],
+       "height": 90.84375
+      },
+      {
+       "title": "Nettoyer le filtre de la VMC",
+       "text": "Salle de bain",
+       "pills": [
+        "Aujourd'hui"
+       ],
+       "height": 91.84375
+      },
+      {
+       "title": "Détartrer la bouilloire",
+       "text": "Cuisine",
+       "pills": [
+        "Aujourd'hui"
+       ],
+       "height": 91.84375
+      },
+      {
+       "title": "Entretien annuel de la chaudière",
+       "text": "Buanderie",
+       "pills": [
+        "21 nov. 2026"
+       ],
+       "height": 91.84375
+      },
+      {
+       "title": "Nettoyer les gouttières",
+       "text": "Jardin",
+       "pills": [
+        "27 nov. 2026"
+       ],
+       "height": 91.84375
+      },
+      {
+       "title": "Purger les radiateurs",
+       "text": "Salon",
+       "pills": [
+        "5 déc. 2026"
+       ],
+       "height": 91.84375
+      },
+      {
+       "title": "Traiter la terrasse",
+       "text": "Jardin",
+       "pills": [
+        "5 déc. 2026"
+       ],
+       "height": 91.84375
+      }
+     ]
+    }
+   ],
+   "body_font": 16,
+   "row_height": 90.84375,
+   "done_button": {
+    "x": 310,
+    "y": 255.421875,
+    "w": 51,
+    "h": 48
+   },
+   "add_button": {
+    "x": 16,
+    "y": 935.90625,
+    "w": 358,
+    "h": 45.1875
+   },
+   "add_radius": 12,
+   "add_class": "button button-block",
+   "add_font": 16,
+   "add_text": "Ajouter une tâche",
+   "add_gap": 8,
+   "done_font": 14,
+   "appbar_height": 60,
+   "nav_height": 64,
+   "content_left": 16,
+   "field_height": 50,
+   "label_font": 14,
+   "doc_height": 1122,
+   "url": "/h/<id>/tasks/"
+  },
+  "history": {
+   "h1_font": 24,
+   "h1_box": {
+    "x": 16,
+    "y": 68,
+    "w": 358,
+    "h": 30
+   },
+   "h2_font": null,
+   "h2_weight": null,
+   "row_title_font": 16,
+   "row_text_font": 13,
+   "row_title_weight": 600,
+   "row_text_weight": 400,
+   "row_title_line": 20.8,
+   "row_text_line": 17.55,
+   "pill_font": 13,
+   "pill_weight": 700,
+   "sections": [
+    {
+     "heading": "",
+     "rows": [
+      {
+       "title": "Faire vérifier les extincteurs",
+       "text": "Cuisine",
+       "pills": [
+        "Ignorée · 15 nov. 2026"
+       ],
+       "height": 91.84375
+      },
+      {
+       "title": "Changer la pile du détecteur",
+       "text": "Entrée",
+       "pills": [
+        "Fait · 13 nov. 2026"
+       ],
+       "height": 111.390625
+      }
+     ]
+    }
+   ],
+   "body_font": 16,
+   "row_height": 91.84375,
+   "done_button": null,
+   "add_button": null,
+   "add_radius": null,
+   "add_class": null,
+   "add_font": null,
+   "add_text": null,
+   "add_gap": null,
+   "done_font": null,
+   "appbar_height": 60,
+   "nav_height": 64,
+   "content_left": 16,
+   "field_height": 50,
+   "label_font": 14,
+   "doc_height": 844,
+   "url": "/h/<id>/tasks/?status=done"
+  },
+  "occurrence_form": {
+   "h1_font": 24,
+   "h1_box": {
+    "x": 16,
+    "y": 116,
+    "w": 358,
+    "h": 30
+   },
+   "h2_font": null,
+   "h2_weight": null,
+   "row_title_font": null,
+   "row_text_font": null,
+   "row_title_weight": null,
+   "row_text_weight": null,
+   "row_title_line": null,
+   "row_text_line": null,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
+   "body_font": 16,
+   "row_height": null,
+   "done_button": null,
+   "add_button": null,
+   "add_radius": null,
+   "add_class": null,
+   "add_font": null,
+   "add_text": null,
+   "add_gap": null,
+   "done_font": null,
+   "appbar_height": 60,
+   "nav_height": 64,
+   "content_left": 16,
+   "field_height": 50,
+   "label_font": 14,
+   "doc_height": 844,
+   "url": "/h/<id>/tasks/<id>/occurrences/<id>/edit/"
   }
  }
 }

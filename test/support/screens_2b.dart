@@ -99,6 +99,7 @@ typedef Labels = ({
   String budgetRooms,
   String budgetProjects,
   String budgetUpkeep,
+  String doneFilter,
 });
 
 const labels = {
@@ -112,6 +113,7 @@ const labels = {
     budgetRooms: 'Rooms',
     budgetProjects: 'Projects',
     budgetUpkeep: 'Upkeep',
+    doneFilter: 'Done',
   ),
   'fr': (
     rooms: 'Pièces',
@@ -123,5 +125,6 @@ const labels = {
     budgetRooms: 'Pièces',
     budgetProjects: 'Projets',
     budgetUpkeep: 'Entretien',
+    doneFilter: 'Faites',
   ),
 };

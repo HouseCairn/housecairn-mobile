@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-// The accessibility guidelines of Flutter on every screen of the app (lots 3a
-// and 3b included), at
+// The accessibility guidelines of Flutter on every screen of the app (lots 3a,
+// 3b and 3c included), at
 // 360 px, in English and French: tap targets of 48 dp on Android and 44 pt on
 // iOS (the app draws 48 for both), every target labelled, and text contrast
 // (docs/spec.md, accessibility; docs/adr/0011-design-from-the-web-app.md).
@@ -14,29 +14,32 @@ import 'support/fakes.dart';
 import 'support/lot2b.dart';
 import 'support/lot3a.dart';
 import 'support/lot3b.dart';
+import 'support/lot3c.dart';
 import 'support/screens_2b.dart';
 
 void main() {
   for (final MapEntry(key: locale, value: l) in labels.entries) {
-    final pages = <(String, Future<void> Function(WidgetTester, Lot3b))>[
+    final pages = <(String, Future<void> Function(WidgetTester, Lot3c))>[
       ('today', (tester, data) async {}),
       ('homes', (tester, data) => openScreen(tester, const HomesScreen())),
       for (final (page, open) in screens2b)
-        (page, (tester, data) => open(tester, data.base.base, l)),
+        (page, (tester, data) => open(tester, data.base.base.base, l)),
       for (final (page, open) in screens3a)
-        (page, (tester, data) => open(tester, data.base, l)),
+        (page, (tester, data) => open(tester, data.base.base, l)),
       for (final (page, open) in screens3b)
+        (page, (tester, data) => open(tester, data.base, l)),
+      for (final (page, open) in screens3c)
         (page, (tester, data) => open(tester, data, l)),
     ];
     for (final (page, open) in pages) {
       testWidgets('$page meets the guidelines, $locale', (tester) async {
         final semantics = tester.ensureSemantics();
         await onPhone(tester);
-        late Lot3b data;
+        late Lot3c data;
         final state = await pumpApp(
           tester,
           locale: locale,
-          seed: (r) async => data = await Lot3b.seed(r),
+          seed: (r) async => data = await Lot3c.seed(r),
           photoSource: cameraWith(),
           notifier: FakeNotifier(),
         );
