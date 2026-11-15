@@ -1,13 +1,35 @@
 # Housecairn mobile
 
-![status: foundations](https://img.shields.io/badge/status-foundations-lightgrey.svg)
+**Plan your home's maintenance and renovation work, room by room.**
+
+[Housecairn](https://github.com/HouseCairn/housecairn) keeps the list of everything your house needs, from recurring upkeep
+such as the smoke detector battery to projects such as repainting the living
+room. For each job it knows the room, the date, the supplies and the planned
+cost, and anyone in the household marks it done in one tap. It is free software
+that you host yourself, works on its own, and connects to Home Assistant if you
+use it.
+
+This repository is the phone app, for iOS and Android: the same planning on the
+phone, offline first. **It is in development and not published on the App Store
+or Google Play yet** (see [Status](#status)).
+
+![status: in development](https://img.shields.io/badge/status-in%20development-lightgrey.svg)
 ![stage: alpha](https://img.shields.io/badge/stage-alpha-orange.svg)
 
-A phone app for iOS and Android that answers the question
-[Housecairn](https://github.com/HouseCairn/housecairn) answers on the web: **what to do in the
-home, where, when, with what and for how much**. Recurring upkeep (the battery of a smoke
-alarm, the filter of the ventilation) and one-off work (repaint the living room) in one place,
-with a planned budget, a stock of materials and a history.
+<p align="center">
+  <img src="test/goldens/today_en_x2.png" width="240"
+       alt="The Today screen of the app, rendered by its screenshot test with test data: the boiler service, 3 days late, and the smoke alarm, due today, each with a Done button, and a New task button.">
+</p>
+
+<sub>Rendered by the app's screenshot test (`test/goldens/`), with test data, not on a
+phone.</sub>
+
+For example, on the phone:
+
+- test the smoke detector every six months, without remembering the last time;
+- clean the ventilation filter every three months;
+- book the yearly boiler service;
+- one app for several homes: a main home, a second home, a rented flat.
 
 ## What it is
 
@@ -29,12 +51,15 @@ application (Paperless-ngx, Sure, Apprise), calendar feeds.
 
 ## Status
 
-**Early.** Lot 2b adds the rooms, items, contractors, task templates, photos and local reminders to the foundations. The documents below frame the app; the code has its foundations (lot 1 of
-the [plan](docs/plan.md)): the Flutter project for Android and iOS, the app shell with its
-five sections and an About screen, English and French, the empty database, and the
-continuous integration (checks, tests, licences of every dependency, an Android APK and an
-unsigned iOS build on every pull request). No feature yet, and nothing is released; the
-first builds will be alpha. How to build and test: [CONTRIBUTING.md](CONTRIBUTING.md).
+**In development, not published.** The app is not on the App Store or Google Play, and no
+version is released; the first builds will be alpha. Merged so far, from the
+[plan](docs/plan.md): the foundations (lot 1: the Flutter project for Android and iOS, the
+app shell, English and French, the continuous integration with an Android APK and an
+unsigned iOS build on every pull request), the data, the recurrence and several homes with
+the Today, Task and Homes screens (lot 2a), the look of the web application (lot 2d), and
+the rooms, items, contractors, task templates, photos and local reminders (lot 2b).
+Budget, stock, projects and family sync are still to come. How to build and
+test: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 | Document | What it settles |
 | --- | --- |
@@ -50,6 +75,18 @@ first builds will be alpha. How to build and test: [CONTRIBUTING.md](CONTRIBUTIN
   application, whose data model this app follows.
 - `HouseCairn/housecairn-relay`: the relay, in its own repository from lot 6 of the plan.
 - Documentation of the web application: <https://docs.housecairn.app>.
+
+## The Housecairn repositories
+
+- [housecairn](https://github.com/HouseCairn/housecairn): the web application, to install first.
+- [home-assistant-addons](https://github.com/HouseCairn/home-assistant-addons): Housecairn as a Home Assistant app (add-on).
+- [home-assistant-housecairn](https://github.com/HouseCairn/home-assistant-housecairn): the Home Assistant integration (HACS).
+- [housecairn-mobile](https://github.com/HouseCairn/housecairn-mobile): the phone app for iOS and Android, in development, not on the stores yet (this repository).
+- [website](https://github.com/HouseCairn/website): the site <https://housecairn.app>.
+
+Website: <https://housecairn.app>. Documentation, in English and French:
+<https://docs.housecairn.app>.
+
 
 ## How it is made
 
