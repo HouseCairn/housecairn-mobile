@@ -196,7 +196,9 @@ Local notifications only, scheduled by the phone from its own data
 - Reminders cover every **active** home, not only the current one; none for an archived home.
   When the family has two active homes or more, each reminder **names its home** in its title
   ("Second home: change the smoke alarm battery") and the daily summary groups by home.
-  Opening a reminder makes its home the current one.
+  Opening a reminder makes its home the current one, also when the tap starts the app (the
+  app was not running). The Android channel is named in the language of the app, and the
+  iOS permission texts (camera, photos) are in English and French (`InfoPlist.strings`).
 - iOS keeps 64 pending local notifications per app (documented by the plugin, see ADR 0001):
   the phone schedules the nearest 60 and a daily summary for the rest, and reschedules on
   every start, every sync and on a background refresh.
@@ -217,7 +219,9 @@ all homes together, counting photos, files and the sync data.
 - **Re-encoded on the phone before anything is stored**, as the web does
   (`rooms/images.py:75-101`): turned upright, every metadata removed but the colour profile,
   location included; longest side at most 2560 px (`rooms/conf.py:17`), JPEG at quality 85; a
-  thumbnail of 360 px (`rooms/conf.py:18`) made on each phone. A PDF is kept as it is.
+  thumbnail of 360 px (`rooms/conf.py:18`) made on each phone. A PDF is kept as it is. The
+  file the camera or the gallery hands over keeps the location, so it is deleted as soon as
+  it is read.
 - **Synced** as an encrypted blob with its own key, uploaded before the change that shows it
   ([protocol](protocol.md#29-files-photos-and-pdf)). Other phones download photos in the
   background on Wi-Fi, and at once when one is opened; until then they show a placeholder.

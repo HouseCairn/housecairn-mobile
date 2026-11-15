@@ -96,7 +96,7 @@ work runs in an isolate. `image` is pinned at 4.12.0 and not 4.13.x: the version
 2026-11-14 are younger than the seven days of the rule below. `yaml` and `url_launcher` are
 added. `dbus`, a transitive package of the Linux part of `flutter_local_notifications` that no
 iOS or Android build contains, is MPL-2.0 and gets one named exception in
-`tool/licenses/exceptions.txt`; the maintainer is asked to confirm it
+`tool/licenses/exceptions.txt`; the exception was accepted on 2026-11-15
 ([plan](../plan.md)).
 
 ## Consequences

@@ -501,10 +501,10 @@ raised by [ADR 0010](adr/0010-three-ways-to-use-the-app.md) (numbered 4 to 14) w
 3. **End of a subscription**: proposed in [ADR 0006](adr/0006-subscription.md), 30 days during
    which the space is read only, then deletion, with notices at 7 days and 1 day; to confirm
    or change.
-4. **A licence exception for `dbus`** (lot 2b): the Linux part of `flutter_local_notifications`
+4. **A licence exception for `dbus`** (lot 2b), **accepted on 2026-11-15**: the Linux part of `flutter_local_notifications`
    pulls `dbus` (MPL-2.0, a file-level weak copyleft) into `pubspec.lock`; no iOS or Android
    build contains it and the app changes none of its files. The check reads the GNU licences
    that the MPL text names as secondary licences as if they applied, so the package has one
-   named exception in `tool/licenses/exceptions.txt`, with its reason. To confirm, or to
-   replace the notification package.
+   named exception in `tool/licenses/exceptions.txt`, with its reason. Its scope stays that
+   package; replacing the notification package would end it.
 

@@ -354,10 +354,10 @@ void main() {
 
     test('a launch tap on a home that is gone opens nothing', () async {
       await start();
-      await state.choose(homes.main);
+      await state.choose(homes.second);
       notifier.launch = 'unknown-home/some-task';
       await state.openLaunchReminder();
-      expect(state.current!.id, homes.main);
+      expect(state.current!.id, homes.second);
     });
 
     test('opening a reminder makes its home the current one', () async {
