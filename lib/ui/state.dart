@@ -15,6 +15,7 @@ import '../domain/photos.dart';
 import '../domain/reminders.dart';
 import '../domain/templates.dart';
 import '../l10n/app_localizations.dart';
+import '../sync/mode.dart';
 
 /// Re-encodes a photo off the main isolate (a photo of 12 megapixels takes a
 /// second or two); tests give [processPhoto] itself.
@@ -68,6 +69,17 @@ class AppState extends ChangeNotifier {
   final Future<TemplateLibrary> Function() loadTemplates;
   final UrlOpener openUrl;
 
+  /// Whether the data was read once; until then the app shows nothing.
+  bool loaded = false;
+
+  /// The way the phone is used (docs/adr/0010): alone when none is stored.
+  SyncMode syncMode = SyncMode.alone;
+
+  /// The first start: no way chosen and no home, so the app asks how it is
+  /// to be used before it makes the first home. A phone with homes and no
+  /// way (a build of lot 2) is alone and never asked.
+  bool firstStart = false;
+
   List<HomeRow> homes = const [];
   HomeRow? current;
   bool todayAllHomes = false;
@@ -88,12 +100,19 @@ class AppState extends ChangeNotifier {
   /// The selector is shown from two active homes on (`homes/current.py:31-32`).
   bool get showsSelector => activeHomes.length >= 2;
 
-  /// Reads the homes again, and makes the first home at the first start.
-  /// Reminders are planned again from the data as it is now.
+  /// Reads the homes again. With no way chosen and no home it is the first
+  /// start: [firstStart] is set and nothing is made until [startAlone]; with
+  /// a way chosen and no home, the first home is made. Reminders are planned
+  /// again from the data as it is now.
   Future<void> refresh({String? firstHomeName}) async {
-    if (firstHomeName != null && (await repository.homes()).isEmpty) {
+    final stored = await repository.storedSyncMode();
+    final empty = (await repository.homes()).isEmpty;
+    firstStart = stored == null && empty;
+    if (firstHomeName != null && stored != null && empty) {
       await repository.createHome(name: firstHomeName);
     }
+    syncMode = stored ?? SyncMode.alone;
+    loaded = true;
     homes = await repository.homes();
     current = await repository.currentHome();
     todayAllHomes = await repository.todayShowsAllHomes();
@@ -101,6 +120,13 @@ class AppState extends ChangeNotifier {
     revision++;
     notifyListeners();
     await reschedule();
+  }
+
+  /// The first start, "Alone on this phone": stores the way, then makes the
+  /// first home, named [firstHomeName].
+  Future<void> startAlone(String firstHomeName) async {
+    await repository.setSyncMode(SyncMode.alone);
+    await refresh(firstHomeName: firstHomeName);
   }
 
   Future<void> choose(String homeId) async {

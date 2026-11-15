@@ -6,6 +6,7 @@ import 'design/theme.dart';
 import 'l10n/app_localizations.dart';
 import 'ui/shell.dart';
 import 'ui/state.dart';
+import 'ui/ways.dart';
 
 /// The app: theme, languages, the homes of the phone and the shell with its
 /// five sections.
@@ -42,8 +43,9 @@ class HousecairnApp extends StatelessWidget {
   }
 }
 
-/// Reads the homes once the language is known, and makes the first home,
-/// named in that language, at the first start (docs/spec.md, "Homes").
+/// Reads the homes once the language is known. At the first start it shows
+/// the three ways to use the app; the first home, named in that language, is
+/// made when the person chooses one (docs/spec.md, "Homes"; ADR 0010).
 class _FirstStart extends StatefulWidget {
   const _FirstStart({required this.child});
 
@@ -75,5 +77,10 @@ class _FirstStartState extends State<_FirstStart> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    final state = AppScope.of(context);
+    if (!state.loaded) return const Scaffold();
+    if (state.firstStart) return const WaysScreen();
+    return widget.child;
+  }
 }

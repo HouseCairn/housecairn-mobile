@@ -855,4 +855,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errPhotoTooLarge => 'This photo is too large (20 MiB at most).';
+
+  @override
+  String get waysTitle => 'How do you want to use Housecairn?';
+
+  @override
+  String get waysContinue => 'Continue';
+
+  @override
+  String get waysGroup => 'How you use Housecairn';
+
+  @override
+  String get wayAloneTitle => 'Alone on this phone';
+
+  @override
+  String get wayAloneText =>
+      'Your homes stay on this phone. Nothing is sent anywhere. You can turn on sharing later.';
+
+  @override
+  String get wayFamilyTitle => 'Family sync';
+
+  @override
+  String get wayFamilyText =>
+      'Share your homes with the phones of your family. Everything is encrypted on your phones before it leaves them: our server cannot read it. Needs a subscription.';
+
+  @override
+  String get wayServerTitle => 'My Housecairn server';
+
+  @override
+  String get wayServerText =>
+      'Use the homes of your own Housecairn, the web application or the Home Assistant add-on. Your server stores your homes and can read them, like its web pages do. Everything of this phone is kept on the server; a one-time purchase unlocks it.';
+
+  @override
+  String get wayComingLater => 'Coming later';
+
+  @override
+  String get wayInUse => 'In use';
 }

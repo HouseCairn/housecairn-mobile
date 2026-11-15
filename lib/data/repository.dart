@@ -14,6 +14,7 @@ import '../domain/day.dart';
 import '../domain/photos.dart';
 import '../domain/recurrence.dart' as recurrence;
 import '../domain/reminders.dart';
+import '../sync/mode.dart';
 import 'database.dart';
 
 /// Why the repository refused a change. Each value has its message in the
@@ -486,6 +487,24 @@ class Repository {
           );
     }
   }
+
+  // ---------- the way the app is used ----------
+
+  /// The way written in `local_settings`, `null` when none is: a phone that
+  /// has not chosen yet (the first start), or one of a lot 2 build. A way
+  /// that is stored but not available in this build (a forged value, or one
+  /// of a later build) reads as none: it cannot be put in use.
+  Future<SyncMode?> storedSyncMode() async {
+    final mode = SyncMode.parse(await _setting('sync_mode'));
+    return mode != null && wayAvailable(mode) ? mode : null;
+  }
+
+  /// The way the phone is used: alone when none is written
+  /// (docs/adr/0010-three-ways-to-use-the-app.md).
+  Future<SyncMode> syncMode() async => await storedSyncMode() ?? SyncMode.alone;
+
+  Future<void> setSyncMode(SyncMode mode) =>
+      _setSetting('sync_mode', mode.stored);
 
   // ---------- homes ----------
 
