@@ -97,8 +97,8 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
     final l10n = AppLocalizations.of(context);
     final library = _library;
     final language = Localizations.localeOf(context).languageCode;
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.addFromTemplate)),
+    return HcScaffold(
+      title: l10n.addFromTemplate,
       body: library == null
           ? const SizedBox.shrink()
           : HcScreenList(

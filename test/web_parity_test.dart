@@ -392,11 +392,13 @@ Measures measure(
   bool field = false,
 }) {
   final m = <String, Object?>{};
-  final title = find.descendant(
-    of: find.byType(AppBar).last,
-    matching: find.byType(Text),
-  );
-  m['h1_font'] = drawnSize(tester, title.first);
+  // The title is the `h1` at the top of the content (HcLargeTitle, lot D4).
+  // Once scrolled to the end of a long screen (measureLong), the title is
+  // away: the measure taken at the top has it.
+  final title = find.byKey(const Key('page-title'));
+  if (title.evaluate().isNotEmpty) {
+    m['h1_font'] = drawnSize(tester, title.last);
+  }
   m['nav_height'] = rectOf(tester, find.byType(NavigationBar)).height;
   if (rowTitle != null) {
     m['row_title_font'] = drawnSize(tester, find.text(rowTitle).first);
@@ -752,9 +754,6 @@ const adaptations = <String, ({double app, String why})>{
   // 48, the touch target of Android and of the app (accessibility), where
   // the web's buttons are 44 high plus their border (45.19).
   'add_button.h': (app: 48, why: 'touch target of 48 dp'),
-  // The page title sits in the app bar of the platform (back button, title,
-  // actions), not under the brand bar of the web.
-  'h1_font': (app: 24, why: 'title in the app bar'),
   // NavigationBar of 64 dp, plus the line above it; the web's bar is 64 px
   // with its line and the safe area, which the app's Scaffold adds itself.
   'nav_height': (app: 64, why: 'bar of the platform'),

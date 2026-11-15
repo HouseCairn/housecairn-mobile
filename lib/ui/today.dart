@@ -89,11 +89,9 @@ class _TodayScreenState extends State<TodayScreen> {
           : l10n.todayComingUp;
       groups[group]!.add(entry);
     }
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.navToday),
-        actions: const [HomeSelector(withAllHomes: true)],
-      ),
+    return HcScaffold(
+      title: l10n.navToday,
+      actions: const [HomeSelector(withAllHomes: true)],
       body: entries == null
           ? const SizedBox.shrink()
           : HcScreenList(
@@ -118,10 +116,7 @@ class _TodayScreenState extends State<TodayScreen> {
                       labels: [l10n.navToday, l10n.tasksTabAll],
                       current: 0,
                       onSelect: (_) => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) =>
-                              TaskListScreen(homeId: state.current!.id),
-                        ),
+                        hcRoute(TaskListScreen(homeId: state.current!.id)),
                       ),
                     ),
                   ),
@@ -154,11 +149,8 @@ class _TodayScreenState extends State<TodayScreen> {
                   HcAddButton(
                     key: const Key('today-add'),
                     label: l10n.addTask,
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => TaskScreen(homeId: state.current!.id),
-                      ),
-                    ),
+                    onPressed: () => Navigator.of(context)
+                        .push(hcRoute(TaskScreen(homeId: state.current!.id))),
                   ),
               ],
             ),

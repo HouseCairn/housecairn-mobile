@@ -35,7 +35,10 @@ const _newChoice = '+new';
 /// preview of the next five dates (`tasks/recurrence.py:341-351`); the
 /// photos of its place; the history, whose done lines open their details; the
 /// deletion.
-class TaskScreen extends StatefulWidget {
+class TaskScreen extends StatefulWidget implements HcFormScreen {
+  @override
+  bool get opensAsSheet => taskId == null;
+
   const TaskScreen({
     super.key,
     required this.homeId,
@@ -469,8 +472,8 @@ class _TaskScreenState extends State<TaskScreen> {
                   child: TextButton(
                     key: const Key('task-photos-link'),
                     onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => isItem
+                      hcRoute(
+                        isItem
                             ? ItemScreen(homeId: widget.homeId, itemId: place)
                             : RoomScreen(homeId: widget.homeId, roomId: place),
                       ),
@@ -515,8 +518,8 @@ class _TaskScreenState extends State<TaskScreen> {
               moreText: o.completionNote.isEmpty ? null : o.completionNote,
               onTap: o.status == 'done' && writable
                   ? () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => OccurrenceScreen(
+                      hcRoute(
+                        OccurrenceScreen(
                           homeId: widget.homeId,
                           occurrenceId: o.id,
                         ),
@@ -547,11 +550,9 @@ class _TaskScreenState extends State<TaskScreen> {
     final wide = MediaQuery.textScalerOf(context).scale(1) > 1.3;
     final next = _preview(hemisphere);
     final newRoom = _roomId == _newChoice;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.taskId == null ? l10n.newTask : l10n.task),
-        actions: [HcBarAction(label: l10n.save, onPressed: _save)],
-      ),
+    return HcScaffold(
+      title: widget.taskId == null ? l10n.newTask : l10n.task,
+      actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
         key: _form,
         child: HcScreenList(

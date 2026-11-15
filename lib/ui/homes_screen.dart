@@ -23,11 +23,10 @@ class HomesScreen extends StatelessWidget {
     final state = AppScope.of(context);
     final active = state.homes.where((h) => h.archivedAt == null);
     final archived = state.homes.where((h) => h.archivedAt != null);
-    void open(HomeRow? home) => Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => HomeScreen(homeId: home?.id)),
-    );
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.homes)),
+    void open(HomeRow? home) =>
+        Navigator.of(context).push(hcRoute(HomeScreen(homeId: home?.id)));
+    return HcScaffold(
+      title: l10n.homes,
       body: HcScreenList(
         children: [
           const SizedBox(height: HcSpace.s2),
@@ -161,13 +160,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final home = _home(state);
     final archived = home?.archivedAt != null;
     final editable = !archived;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(home?.name ?? l10n.newHome),
-        actions: [
-          if (editable) HcBarAction(label: l10n.save, onPressed: _save),
-        ],
-      ),
+    return HcScaffold(
+      title: home?.name ?? l10n.newHome,
+      actions: [if (editable) HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
         key: _form,
         child: HcScreenList(

@@ -59,10 +59,34 @@ class AppLocalizationsFr extends AppLocalizations {
   String get aboutLicences => 'Licences open source';
 
   @override
-  String get moreHouseholdGroup => 'Foyer';
+  String get moreHomeGroup => 'Logement';
 
   @override
-  String get homes => 'Logements';
+  String get moreMeGroup => 'Moi';
+
+  @override
+  String get moreReportsText => 'Problèmes signalés dans ce logement';
+
+  @override
+  String get moreContractorsText =>
+      'Les personnes et entreprises qui interviennent dans le logement';
+
+  @override
+  String get moreHomesText => 'Ajouter un logement ou en ouvrir un autre';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get moreNotificationsText =>
+      'Quand le téléphone vous rappelle une tâche';
+
+  @override
+  String get reportPhotoHelp =>
+      'La photo est facultative. Sa localisation et ses autres métadonnées sont supprimées.';
+
+  @override
+  String get homes => 'Mes logements';
 
   @override
   String get homeSelectorTooltip => 'Choisir un logement';
@@ -1828,7 +1852,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reportsEmpty => 'Rien à traiter.';
 
   @override
-  String get reportWhere => 'Où';
+  String get reportWhere => 'Où ?';
 
   @override
   String get reportedOn => 'Signalé le';
@@ -1855,10 +1879,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reopen => 'Rouvrir';
 
   @override
-  String get sendReport => 'Envoyer';
+  String get sendReport => 'Envoyer le signalement';
 
   @override
-  String get whatIsWrong => 'Ce qui ne va pas';
+  String get whatIsWrong => 'Qu\'est-ce qui ne va pas ?';
 
   @override
   String get errSayWhatIsWrong => 'Dites ce qui ne va pas.';

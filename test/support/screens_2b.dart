@@ -5,9 +5,9 @@ import 'package:housecairn_mobile/ui/contractor_screens.dart';
 import 'package:housecairn_mobile/ui/item_screens.dart';
 import 'package:housecairn_mobile/ui/photos.dart';
 import 'package:housecairn_mobile/ui/rooms.dart';
+import 'package:housecairn_mobile/ui/reminders_row.dart';
 import 'package:housecairn_mobile/ui/templates_screen.dart';
 
-import 'app.dart';
 import 'lot2b.dart';
 
 /// The screens of lot 2b, each opened as the app opens it. `page` is the
@@ -81,10 +81,8 @@ final screens2b =
       ),
       (
         'reminders',
-        (tester, data, l) async {
-          await tester.tap(destination(l.more));
-          await tester.pumpAndSettle();
-        },
+        // The switch of the reminders is on Notifications (More, Me).
+        (tester, data, l) => openScreen(tester, const NotificationsScreen()),
       ),
     ];
 

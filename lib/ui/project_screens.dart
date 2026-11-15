@@ -29,7 +29,7 @@ const projectTabs = [
 ];
 
 void _open(BuildContext context, Widget screen) =>
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
+    Navigator.of(context).push(hcRoute(screen));
 
 /// Projects (`projects/project_list.html`): the tabs by status, the envelope
 /// of the year, the projects of the tab with their budget and gap.
@@ -47,11 +47,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final home = AppScope.of(context).current;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.navProjects),
-        actions: const [HomeSelector()],
-      ),
+    return HcScaffold(
+      title: l10n.navProjects,
+      actions: const [HomeSelector()],
       body: home == null
           ? const SizedBox.shrink()
           : DataView<(List<ProjectEntry>, Map<int, Decimal>)>(
@@ -249,14 +247,14 @@ class ProjectScreen extends StatelessWidget {
     return DataView<_ProjectData?>(
       load: _load,
       builder: (context, data) {
-        if (data == null) return Scaffold(appBar: AppBar());
+        if (data == null) return HcScaffold();
         final p = data.project;
         final currency = data.home.currency;
         final writable = data.home.archivedAt == null;
         String m(Decimal v) => moneyIn(context, currency, v);
         final total = budget.sumOf(data.lines.map((l) => l.amounts));
-        return Scaffold(
-          appBar: AppBar(title: Text(p.title)),
+        return HcScaffold(
+          title: p.title,
           body: HcScreenList(
             children: [
               const SizedBox(height: HcSpace.s2),
@@ -630,7 +628,10 @@ Future<String?> _ask(BuildContext context, String title, String label) async {
 
 /// The form of a project (`projects/project_form.html`): only the title is
 /// required; a budget on creation becomes its first line.
-class ProjectFormScreen extends StatefulWidget {
+class ProjectFormScreen extends StatefulWidget implements HcFormScreen {
+  @override
+  bool get opensAsSheet => true;
+
   const ProjectFormScreen({super.key, required this.homeId, this.projectId});
 
   final String homeId;
@@ -713,13 +714,9 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.projectId == null ? l10n.addProject : l10n.editProject,
-        ),
-        actions: [HcBarAction(label: l10n.save, onPressed: _save)],
-      ),
+    return HcScaffold(
+      title: widget.projectId == null ? l10n.addProject : l10n.editProject,
+      actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
         key: _form,
         child: HcScreenList(
@@ -783,7 +780,10 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
 }
 
 /// The form of a budget line (`projects/line_form.html`).
-class LineFormScreen extends StatefulWidget {
+class LineFormScreen extends StatefulWidget implements HcFormScreen {
+  @override
+  bool get opensAsSheet => true;
+
   const LineFormScreen({
     super.key,
     required this.homeId,
@@ -879,11 +879,9 @@ class _LineFormScreenState extends State<LineFormScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     const number = TextInputType.numberWithOptions(decimal: true);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.lineId == null ? l10n.addLine : l10n.editLine),
-        actions: [HcBarAction(label: l10n.save, onPressed: _save)],
-      ),
+    return HcScaffold(
+      title: widget.lineId == null ? l10n.addLine : l10n.editLine,
+      actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
         key: _form,
         child: HcScreenList(
@@ -949,7 +947,10 @@ class _LineFormScreenState extends State<LineFormScreen> {
 /// The form of a quote (`projects/quote_form.html`): an accepted quote is
 /// committed on a line of its project and cannot be saved without one. Its
 /// files: a PDF from the Files app or the document picker, or a photo.
-class QuoteFormScreen extends StatefulWidget {
+class QuoteFormScreen extends StatefulWidget implements HcFormScreen {
+  @override
+  bool get opensAsSheet => true;
+
   const QuoteFormScreen({
     super.key,
     required this.homeId,
@@ -1084,13 +1085,9 @@ class _QuoteFormScreenState extends State<QuoteFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.quoteId == null ? l10n.addQuote : l10n.editQuote),
-        actions: [
-          if (_writable) HcBarAction(label: l10n.save, onPressed: _save),
-        ],
-      ),
+    return HcScaffold(
+      title: widget.quoteId == null ? l10n.addQuote : l10n.editQuote,
+      actions: [if (_writable) HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
         key: _form,
         child: HcScreenList(
@@ -1206,7 +1203,10 @@ class _QuoteFormScreenState extends State<QuoteFormScreen> {
 
 /// The annual envelope (`projects/envelope_form.html`): what the household
 /// wants to spend on work in a year, in the currency of the home.
-class EnvelopeFormScreen extends StatefulWidget {
+class EnvelopeFormScreen extends StatefulWidget implements HcFormScreen {
+  @override
+  bool get opensAsSheet => true;
+
   const EnvelopeFormScreen({super.key, required this.homeId});
 
   final String homeId;
@@ -1269,11 +1269,9 @@ class _EnvelopeFormScreenState extends State<EnvelopeFormScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final now = AppScope.of(context).repository.today().year;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.annualEnvelope),
-        actions: [HcBarAction(label: l10n.save, onPressed: _save)],
-      ),
+    return HcScaffold(
+      title: l10n.annualEnvelope,
+      actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
         key: _form,
         child: HcScreenList(

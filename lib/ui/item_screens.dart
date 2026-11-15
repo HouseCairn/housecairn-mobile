@@ -49,8 +49,7 @@ class ItemScreen extends StatelessWidget {
       builder: (context, data) {
         final (item, room, provider) = data;
         if (item == null) {
-          return Scaffold(
-            appBar: AppBar(),
+          return HcScaffold(
             body: HcScreenList(children: [HcEmpty(l10n.errNotFound)]),
           );
         }
@@ -60,25 +59,23 @@ class ItemScreen extends StatelessWidget {
             provider != null ||
             item.contractNumber.isNotEmpty ||
             item.contractUrl.isNotEmpty;
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(item.name),
-            actions: [
-              if (writable)
-                HcBarAction(
-                  label: l10n.edit,
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => ItemFormScreen(
-                        homeId: homeId,
-                        roomId: item.roomId,
-                        itemId: itemId,
-                      ),
+        return HcScaffold(
+          title: item.name,
+          actions: [
+            if (writable)
+              HcBarAction(
+                label: l10n.edit,
+                onPressed: () => Navigator.of(context).push(
+                  hcRoute(
+                    ItemFormScreen(
+                      homeId: homeId,
+                      roomId: item.roomId,
+                      itemId: itemId,
                     ),
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
           body: HcScreenList(
             children: [
               const SizedBox(height: HcSpace.s2),
@@ -145,8 +142,8 @@ class ItemScreen extends StatelessWidget {
                             if (provider != null)
                               TextButton(
                                 onPressed: () => Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) => ContractorScreen(
+                                  hcRoute(
+                                    ContractorScreen(
                                       homeId: homeId,
                                       contractorId: provider.id,
                                     ),
@@ -222,7 +219,10 @@ class _LinkRow extends StatelessWidget {
 }
 
 /// The form of an item.
-class ItemFormScreen extends StatefulWidget {
+class ItemFormScreen extends StatefulWidget implements HcFormScreen {
+  @override
+  bool get opensAsSheet => true;
+
   const ItemFormScreen({
     super.key,
     required this.homeId,
@@ -366,11 +366,9 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.itemId == null ? l10n.newItem : l10n.editItem),
-        actions: [HcBarAction(label: l10n.save, onPressed: _save)],
-      ),
+    return HcScaffold(
+      title: widget.itemId == null ? l10n.newItem : l10n.editItem,
+      actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
         key: _form,
         child: HcScreenList(

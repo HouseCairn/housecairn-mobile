@@ -59,10 +59,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutLicences => 'Open source licences';
 
   @override
-  String get moreHouseholdGroup => 'Household';
+  String get moreHomeGroup => 'Home';
 
   @override
-  String get homes => 'Homes';
+  String get moreMeGroup => 'Me';
+
+  @override
+  String get moreReportsText => 'Problems reported in this home';
+
+  @override
+  String get moreContractorsText =>
+      'The people and companies who work on the home';
+
+  @override
+  String get moreHomesText => 'Add a home or open another one';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get moreNotificationsText => 'When the phone reminds you of a task';
+
+  @override
+  String get reportPhotoHelp =>
+      'A photo is optional. Its location and other metadata are removed.';
+
+  @override
+  String get homes => 'My homes';
 
   @override
   String get homeSelectorTooltip => 'Choose a home';
@@ -1814,7 +1837,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportsEmpty => 'Nothing to deal with.';
 
   @override
-  String get reportWhere => 'Where';
+  String get reportWhere => 'Where?';
 
   @override
   String get reportedOn => 'Reported on';
@@ -1841,10 +1864,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reopen => 'Reopen';
 
   @override
-  String get sendReport => 'Send';
+  String get sendReport => 'Send the report';
 
   @override
-  String get whatIsWrong => 'What is wrong';
+  String get whatIsWrong => 'What is wrong?';
 
   @override
   String get errSayWhatIsWrong => 'Say what is wrong.';

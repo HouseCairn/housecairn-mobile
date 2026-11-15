@@ -17,7 +17,6 @@ import 'reminders_row.dart';
 import 'rooms.dart';
 import 'shell.dart';
 import 'state.dart';
-import 'templates_screen.dart';
 import 'today.dart';
 import 'ways.dart';
 
@@ -40,8 +39,9 @@ class EmptySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(title: Text(title(l10n)), actions: const [HomeSelector()]),
+    return HcScaffold(
+      title: title(l10n),
+      actions: const [HomeSelector()],
       body: HcScreenList(
         children: [
           const SizedBox(height: HcSpace.s4),
@@ -52,42 +52,24 @@ class EmptySection extends StatelessWidget {
   }
 }
 
-/// More: everything that is not in the four other sections, by groups: the
-/// household (Homes), Help (About) and the way the app is used.
+/// More, in the groups of the web and in their order (design/patterns.md of
+/// the web, More): Home, Me, Help, then the group of the app, last. An entry
+/// has its icon and the subtitle of the web (`core/more.py`); an entry the
+/// app does not have yet is left out, never moved to another group.
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.navMore)),
+    void open(Widget screen) => Navigator.of(context).push(hcRoute(screen));
+    return HcScaffold(
+      title: l10n.navMore,
       body: HcScreenList(
         children: [
-          HcSectionHeading(l10n.moreHouseholdGroup),
+          HcSectionHeading(l10n.moreHomeGroup),
           HcCardList(
             children: [
-              HcRow(
-                leading: const HcIcon(HcIcons.homes, color: HcColors.primary),
-                title: l10n.homes,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (context) => const HomesScreen(),
-                  ),
-                ),
-              ),
-              HcRow(
-                leading: const HcIcon(
-                  HcIcons.contractors,
-                  color: HcColors.primary,
-                ),
-                title: l10n.contractors,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (context) => const ContractorsScreen(),
-                  ),
-                ),
-              ),
               if (AppScope.of(context).current case final home?)
                 HcRow(
                   key: const Key('more-reports'),
@@ -96,38 +78,51 @@ class MoreScreen extends StatelessWidget {
                     color: HcColors.primary,
                   ),
                   title: l10n.reports,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (context) => ReportsScreen(homeId: home.id),
-                    ),
-                  ),
+                  text: l10n.moreReportsText,
+                  onTap: () => open(ReportsScreen(homeId: home.id)),
                 ),
               HcRow(
+                key: const Key('more-contractors'),
                 leading: const HcIcon(
-                  HcIcons.templates,
+                  HcIcons.contractors,
                   color: HcColors.primary,
                 ),
-                title: l10n.addFromTemplate,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (context) => const TemplatesScreen(),
-                  ),
-                ),
+                title: l10n.contractors,
+                text: l10n.moreContractorsText,
+                onTap: () => open(const ContractorsScreen()),
               ),
-              const RemindersRow(),
+              HcRow(
+                key: const Key('more-homes'),
+                leading: const HcIcon(HcIcons.homes, color: HcColors.primary),
+                title: l10n.homes,
+                text: l10n.moreHomesText,
+                onTap: () => open(const HomesScreen()),
+              ),
+            ],
+          ),
+          HcSectionHeading(l10n.moreMeGroup),
+          HcCardList(
+            children: [
+              HcRow(
+                key: const Key('more-notifications'),
+                leading: const HcIcon(
+                  HcIcons.reminders,
+                  color: HcColors.primary,
+                ),
+                title: l10n.notifications,
+                text: l10n.moreNotificationsText,
+                onTap: () => open(const NotificationsScreen()),
+              ),
             ],
           ),
           HcSectionHeading(l10n.moreHelpGroup),
           HcCardList(
             children: [
               HcRow(
+                key: const Key('more-about'),
                 leading: const HcIcon(HcIcons.info, color: HcColors.primary),
                 title: l10n.about,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (context) => const AboutScreen(),
-                  ),
-                ),
+                onTap: () => open(const AboutScreen()),
               ),
             ],
           ),

@@ -188,16 +188,58 @@ abstract class AppLocalizations {
   /// **'Open source licences'**
   String get aboutLicences;
 
-  /// Heading of the group Household of the More screen.
+  /// Heading of the group Home of More (web: core/more.py, msgctxt "group of More").
   ///
   /// In en, this message translates to:
-  /// **'Household'**
-  String get moreHouseholdGroup;
+  /// **'Home'**
+  String get moreHomeGroup;
 
-  /// Entry of More and title of the Homes screen. Web catalogue: Logements.
+  /// Heading of the group Me of More (web: core/more.py).
   ///
   /// In en, this message translates to:
-  /// **'Homes'**
+  /// **'Me'**
+  String get moreMeGroup;
+
+  /// Subtitle of Reports in More (web: core/more.py).
+  ///
+  /// In en, this message translates to:
+  /// **'Problems reported in this home'**
+  String get moreReportsText;
+
+  /// Subtitle of Contractors in More (web: core/more.py).
+  ///
+  /// In en, this message translates to:
+  /// **'The people and companies who work on the home'**
+  String get moreContractorsText;
+
+  /// Subtitle of My homes in More (web: core/more.py).
+  ///
+  /// In en, this message translates to:
+  /// **'Add a home or open another one'**
+  String get moreHomesText;
+
+  /// Entry of Me in More, and title of its screen (web: core/more.py).
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// Subtitle of Notifications in More. The web says where and when reminders go; the phone has only its own alarms.
+  ///
+  /// In en, this message translates to:
+  /// **'When the phone reminds you of a task'**
+  String get moreNotificationsText;
+
+  /// Help under the photo of the report form (web: reports/report_form.html, without the size, which the phone does not limit).
+  ///
+  /// In en, this message translates to:
+  /// **'A photo is optional. Its location and other metadata are removed.'**
+  String get reportPhotoHelp;
+
+  /// Entry of More and title of the Homes screen. Web catalogue: Mes logements.
+  ///
+  /// In en, this message translates to:
+  /// **'My homes'**
   String get homes;
 
   /// Tooltip of the home selector of the app bar.
@@ -3107,7 +3149,7 @@ abstract class AppLocalizations {
   /// Web catalogue (projects, budget or reports): Où.
   ///
   /// In en, this message translates to:
-  /// **'Where'**
+  /// **'Where?'**
   String get reportWhere;
 
   /// Web catalogue (projects, budget or reports): Signalé le.
@@ -3158,16 +3200,16 @@ abstract class AppLocalizations {
   /// **'Reopen'**
   String get reopen;
 
-  /// Action of the form of a report (web: Send the report), short for the app bar.
+  /// Action of the form of a report, the web's label (reports/report_form.html).
   ///
   /// In en, this message translates to:
-  /// **'Send'**
+  /// **'Send the report'**
   String get sendReport;
 
   /// Web catalogue (projects, budget or reports): ce qui ne va pas.
   ///
   /// In en, this message translates to:
-  /// **'What is wrong'**
+  /// **'What is wrong?'**
   String get whatIsWrong;
 
   /// Web catalogue (projects, budget or reports): Dites ce qui ne va pas.

@@ -79,14 +79,16 @@ Finder scrollableOf(Finder screen) => find
 Future<void> openMore(WidgetTester tester, String label, String entry) async {
   await tester.tap(destination(label));
   await tester.pumpAndSettle();
+  await tester.ensureVisible(find.text(entry));
+  await tester.pumpAndSettle();
   await tester.tap(find.text(entry));
   await tester.pumpAndSettle();
 }
 
 void main() {
   const labels = {
-    'en': (today: 'Today', more: 'More', homes: 'Homes'),
-    'fr': (today: "Aujourd'hui", more: 'Plus', homes: 'Logements'),
+    'en': (today: 'Today', more: 'More', homes: 'My homes'),
+    'fr': (today: "Aujourd'hui", more: 'Plus', homes: 'Mes logements'),
   };
 
   for (final MapEntry(key: locale, value: l) in labels.entries) {
@@ -359,6 +361,8 @@ void main() {
 
           await openMore(tester, l.more, l.homes);
           check('Homes');
+          await tester.ensureVisible(find.text('Second home'));
+          await tester.pumpAndSettle();
           await tester.tap(find.text('Second home'));
           await tester.pumpAndSettle();
           check('Home');
@@ -366,6 +370,8 @@ void main() {
           // large scale: close it so the tap really opens the dialog.
           ScaffoldMessenger.of(tester.element(find.byType(Scaffold).first))
               .removeCurrentSnackBar();
+          await tester.pumpAndSettle();
+          await tester.ensureVisible(find.text(t('Delete', 'Supprimer')));
           await tester.pumpAndSettle();
           await tester.tap(find.text(t('Delete', 'Supprimer')));
           await tester.pumpAndSettle();

@@ -46,8 +46,8 @@ void main() {
   });
 
   const labels = {
-    'en': (more: 'More', homes: 'Homes'),
-    'fr': (more: 'Plus', homes: 'Logements'),
+    'en': (more: 'More', homes: 'My homes'),
+    'fr': (more: 'Plus', homes: 'Mes logements'),
   };
 
   for (final MapEntry(key: locale, value: l) in labels.entries) {
@@ -89,6 +89,8 @@ void main() {
         await onPhone(tester, textScale: scale);
         await pumpApp(tester, locale: locale, seed: seed);
         await tester.tap(destination(l.more));
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(find.text(l.homes));
         await tester.pumpAndSettle();
         await tester.tap(find.text(l.homes));
         await tester.pumpAndSettle();
