@@ -118,6 +118,16 @@ the phone, which then also appear in its web pages; unlocked by a single in-app 
 way whose lot is not merged yet is shown, disabled. What each way guarantees, the moves between
 them and what the screen says are in ADR 0010.
 
+In the app of lot 2c only the first way exists. The first-start screen shows the three, "Alone on
+this phone" selected, the two others disabled with "Coming later" (a tap on them opens nothing);
+the third says that the server stores the homes and can read them, that everything of the phone
+is kept on it, and that a one-time purchase unlocks it, with no price. Choosing the first way
+stores `sync_mode` = `alone` in `local_settings` (never synced; absent means alone), then the
+first home is made. A phone that already has homes and no `sync_mode`, an install of a lot 2 build,
+never sees the screen and is alone. More shows the way in use and the other two, disabled. The
+transport of the later ways is the interface `SyncTransport` (`lib/sync/transport.dart`),
+defined and not implemented; the app opens no network connection.
+
 ## Homes
 
 Several homes from v1, as on the web, where most households have one home and some have two or

@@ -1194,4 +1194,40 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get remove => 'Retirer';
+
+  @override
+  String get waysTitle => 'Comment voulez-vous utiliser Housecairn ?';
+
+  @override
+  String get waysContinue => 'Continuer';
+
+  @override
+  String get waysGroup => 'Utilisation de Housecairn';
+
+  @override
+  String get wayAloneTitle => 'Seul sur ce téléphone';
+
+  @override
+  String get wayAloneText =>
+      'Vos logements restent sur ce téléphone. Rien n\'est envoyé nulle part. Vous pourrez activer le partage plus tard.';
+
+  @override
+  String get wayFamilyTitle => 'Synchronisation en famille';
+
+  @override
+  String get wayFamilyText =>
+      'Partagez vos logements avec les téléphones de votre famille. Tout est chiffré sur vos téléphones avant d\'en sortir : notre serveur ne peut pas le lire. Nécessite un abonnement.';
+
+  @override
+  String get wayServerTitle => 'Mon serveur Housecairn';
+
+  @override
+  String get wayServerText =>
+      'Utilisez les logements de votre propre Housecairn, l\'application web ou le module complémentaire Home Assistant. Votre serveur enregistre vos logements et peut les lire, comme ses pages web. Tout ce qui est sur ce téléphone est conservé sur le serveur ; un achat unique le débloque.';
+
+  @override
+  String get wayComingLater => 'Prévu plus tard';
+
+  @override
+  String get wayInUse => 'Utilisé';
 }

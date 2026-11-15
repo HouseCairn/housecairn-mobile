@@ -2065,6 +2065,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove'**
   String get remove;
+
+  /// Title of the first-start screen, above the three ways to use the app.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you want to use Housecairn?'**
+  String get waysTitle;
+
+  /// Button of the first-start screen: starts with the selected way.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get waysContinue;
+
+  /// Heading of the group of More that shows the way the app is used, and the two others.
+  ///
+  /// In en, this message translates to:
+  /// **'How you use Housecairn'**
+  String get waysGroup;
+
+  /// First way to use the app: everything stays on the phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Alone on this phone'**
+  String get wayAloneTitle;
+
+  /// Explains the first way (alone on this phone).
+  ///
+  /// In en, this message translates to:
+  /// **'Your homes stay on this phone. Nothing is sent anywhere. You can turn on sharing later.'**
+  String get wayAloneText;
+
+  /// Second way to use the app: sync through the end-to-end encrypted relay.
+  ///
+  /// In en, this message translates to:
+  /// **'Family sync'**
+  String get wayFamilyTitle;
+
+  /// Explains the second way (family sync through the relay). The relay cannot read the data.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your homes with the phones of your family. Everything is encrypted on your phones before it leaves them: our server cannot read it. Needs a subscription.'**
+  String get wayFamilyText;
+
+  /// Third way to use the app: the person's own Housecairn server, web application or Home Assistant add-on.
+  ///
+  /// In en, this message translates to:
+  /// **'My Housecairn server'**
+  String get wayServerTitle;
+
+  /// Explains the third way (my Housecairn server). Must say that the server stores and can read the homes, that all the homes of the phone are kept on it, and that a one-time purchase unlocks the way. Never a price.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the homes of your own Housecairn, the web application or the Home Assistant add-on. Your server stores your homes and can read them, like its web pages do. Everything of this phone is kept on the server; a one-time purchase unlocks it.'**
+  String get wayServerText;
+
+  /// Label of a way to use the app that is not available yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming later'**
+  String get wayComingLater;
+
+  /// Label of the way to use the app that this phone is in.
+  ///
+  /// In en, this message translates to:
+  /// **'In use'**
+  String get wayInUse;
 }
 
 class _AppLocalizationsDelegate

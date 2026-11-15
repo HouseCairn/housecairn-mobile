@@ -11,6 +11,7 @@ import 'package:housecairn_mobile/design/icons.dart';
 import 'package:housecairn_mobile/design/widgets.dart';
 import 'package:housecairn_mobile/domain/photos.dart';
 import 'package:housecairn_mobile/domain/templates.dart';
+import 'package:housecairn_mobile/sync/mode.dart';
 import 'package:housecairn_mobile/ui/state.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -32,7 +33,10 @@ Future<void> onPhone(
 }
 
 /// Starts the app in [locale] on a repository of its own, after [seed] has
-/// written its data (none: the first start, which makes the first home).
+/// written its data (none: the first home is made at start). The way to use
+/// the app is "alone" unless [firstStart] is set: then none is stored, as on
+/// a new install, and the app asks (lot 2c); with homes in [seed] it is the
+/// install of a build of lot 2.
 Future<AppState> pumpApp(
   WidgetTester tester, {
   String locale = 'en',
@@ -40,10 +44,12 @@ Future<AppState> pumpApp(
   PhotoSource? photoSource,
   Notifier? notifier,
   UrlOpener? openUrl,
+  bool firstStart = false,
 }) async {
   final repository = await openRepository();
   addTearDown(repository.db.close);
   if (seed != null) await seed(repository);
+  if (!firstStart) await repository.setSyncMode(SyncMode.alone);
   final state = AppState(
     repository,
     photoSource: photoSource,
