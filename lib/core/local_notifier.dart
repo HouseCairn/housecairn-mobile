@@ -90,6 +90,7 @@ class LocalNotifier implements Notifier {
     required String title,
     required String body,
     required DateTime at,
+    required String channel,
     String? payload,
   }) async {
     await _init();
@@ -99,17 +100,26 @@ class LocalNotifier implements Notifier {
       body: body,
       scheduledDate: tz.TZDateTime.from(at, tz.local),
       payload: payload,
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,
-          'Reminders',
+          channel,
           importance: Importance.defaultImportance,
         ),
-        iOS: DarwinNotificationDetails(),
+        iOS: const DarwinNotificationDetails(),
       ),
       // Inexact: a day-level reminder needs no exact-alarm permission.
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
+  }
+
+  @override
+  Future<String?> launchPayload() async {
+    await _init();
+    final details = await _plugin.getNotificationAppLaunchDetails();
+    if (details == null || !details.didNotificationLaunchApp) return null;
+    final payload = details.notificationResponse?.payload;
+    return payload == null || payload.isEmpty ? null : payload;
   }
 
   @override

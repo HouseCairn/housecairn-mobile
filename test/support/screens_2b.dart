@@ -3,6 +3,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/ui/contractor_screens.dart';
 import 'package:housecairn_mobile/ui/item_screens.dart';
+import 'package:housecairn_mobile/ui/photos.dart';
 import 'package:housecairn_mobile/ui/rooms.dart';
 import 'package:housecairn_mobile/ui/templates_screen.dart';
 
@@ -37,6 +38,41 @@ final screens2b =
         (tester, data, l) => openScreen(
           tester,
           ContractorScreen(homeId: data.homes.main, contractorId: data.plumber),
+        ),
+      ),
+      (
+        'room_form',
+        (tester, data, l) => openScreen(
+          tester,
+          RoomFormScreen(homeId: data.homes.main, roomId: data.kitchen),
+        ),
+      ),
+      (
+        'item_form',
+        (tester, data, l) => openScreen(
+          tester,
+          ItemFormScreen(
+            homeId: data.homes.main,
+            roomId: data.cellar,
+            itemId: data.boiler,
+          ),
+        ),
+      ),
+      (
+        'contractor_form',
+        (tester, data, l) => openScreen(
+          tester,
+          ContractorFormScreen(
+            homeId: data.homes.main,
+            contractorId: data.plumber,
+          ),
+        ),
+      ),
+      (
+        'photo',
+        (tester, data, l) => openScreen(
+          tester,
+          PhotoScreen(photoId: data.photo, writable: true),
         ),
       ),
       (

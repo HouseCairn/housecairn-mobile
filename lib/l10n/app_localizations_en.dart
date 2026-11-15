@@ -616,6 +616,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Housecairn is not allowed to use the camera or the photos. You can allow it in the settings of your phone.';
 
   @override
+  String get photoNoCamera =>
+      'This phone has no camera to use. You can pick a photo from the gallery instead.';
+
+  @override
   String get contractors => 'Contractors';
 
   @override

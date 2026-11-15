@@ -620,6 +620,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Housecairn n\'a pas le droit d\'utiliser l\'appareil photo ou les photos. Vous pouvez l\'autoriser dans les réglages du téléphone.';
 
   @override
+  String get photoNoCamera =>
+      'Ce téléphone n\'a pas d\'appareil photo utilisable. Vous pouvez choisir une photo dans la galerie.';
+
+  @override
   String get contractors => 'Intervenants';
 
   @override

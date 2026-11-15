@@ -376,6 +376,8 @@
   "@photoNotHere": {"description": "Placeholder of a photo whose file is not on this phone."},
   "photoDenied": "Housecairn is not allowed to use the camera or the photos. You can allow it in the settings of your phone.",
   "@photoDenied": {"description": "Message when the person refused the camera or the gallery."},
+  "photoNoCamera": "This phone has no camera to use. You can pick a photo from the gallery instead.",
+  "@photoNoCamera": {"description": "Message when the phone has no camera."},
   "contractors": "Contractors",
   "@contractors": {"description": "Entry of More and title of the screen of contractors. Web catalogue: Intervenants."},
   "contractorsEmpty": "No contractor yet. People and companies who work in this home, with their trade and how to reach them, are kept here.",

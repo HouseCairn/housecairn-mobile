@@ -66,7 +66,9 @@ class _FirstStartState extends State<_FirstStart> {
     state.l10n = l10n;
     if (!_started) {
       _started = true;
-      state.refresh(firstHomeName: l10n.firstHomeName);
+      state
+          .refresh(firstHomeName: l10n.firstHomeName)
+          .then((_) => state.openLaunchReminder());
     } else if (languageChanged) {
       state.reschedule();
     }

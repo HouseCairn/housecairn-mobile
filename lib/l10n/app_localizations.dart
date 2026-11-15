@@ -1226,6 +1226,12 @@ abstract class AppLocalizations {
   /// **'Housecairn is not allowed to use the camera or the photos. You can allow it in the settings of your phone.'**
   String get photoDenied;
 
+  /// Message when the phone has no camera.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone has no camera to use. You can pick a photo from the gallery instead.'**
+  String get photoNoCamera;
+
   /// Entry of More and title of the screen of contractors. Web catalogue: Intervenants.
   ///
   /// In en, this message translates to:

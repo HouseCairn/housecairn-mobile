@@ -36,10 +36,21 @@ class FakeNotifier implements Notifier {
     required String title,
     required String body,
     required DateTime at,
+    required String channel,
     String? payload,
   }) async {
     scheduled[id] = ScheduledNotification(id, title, body, at, payload);
+    channels.add(channel);
   }
+
+  /// The channel names given with each notification scheduled so far.
+  final channels = <String>{};
+
+  /// The payload of the notification that started the app, if any.
+  String? launch;
+
+  @override
+  Future<String?> launchPayload() async => launch;
 
   @override
   Future<void> cancel(int id) async => scheduled.remove(id);
@@ -72,18 +83,22 @@ class ScheduledNotification {
 
 /// A [PhotoSource] that gives the bytes it was given, or refuses.
 class FakePhotoSource implements PhotoSource {
-  FakePhotoSource({this.photo, this.denied = false});
+  FakePhotoSource({this.photo, this.denied = false, this.noCamera = false});
 
   Uint8List? photo;
 
   /// The person refuses the camera and the gallery.
   bool denied;
+
+  /// The phone has no camera (the gallery still works).
+  bool noCamera;
   int taken = 0;
   int picked = 0;
 
   @override
   Future<Uint8List?> takePhoto() async {
     taken++;
+    if (noCamera) throw const PhotoCameraUnavailable();
     if (denied) throw const PhotoPermissionDenied();
     return photo;
   }
@@ -97,8 +112,8 @@ class FakePhotoSource implements PhotoSource {
 }
 
 /// The GPS position written in [jpegWithGps].
-const gpsLatitude = 43.5;
-const gpsLongitude = 5.0;
+const gpsLatitude = 51.4778;
+const gpsLongitude = 0.0;
 
 /// A JPEG of [width] by [height] pixels as a camera makes it: with an EXIF
 /// block that holds a GPS position, the make of the camera and an orientation

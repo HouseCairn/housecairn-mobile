@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-// Golden files of the screens of lot 2b (Rooms, Room, Item, Contractors,
-// Contractor, Add from a template, Reminders) at 360 px, in English and
+// Golden files of the screens of lot 2b (Rooms, Room, Room form, Item, Item
+// form, Contractors, Contractor, Contractor form, Photo, Add from a template,
+// Reminders) at 360 px, in English and
 // French, at text scale 1 and 2, as lot 2d did for the screens of lot 2a. The
 // same screens are checked for the tap target and contrast guidelines of
 // Flutter (`accessibility_test.dart`). Regenerate after a deliberate change:

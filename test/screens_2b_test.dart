@@ -296,7 +296,7 @@ void main() {
         await tapText(tester, l.contractors);
         expect(find.byType(ContractorsScreen), findsOneWidget);
         expect(
-          find.text('${tradeLabel(l, 'plumber')} · +33 4 00 00 00 00'),
+          find.text('${tradeLabel(l, 'plumber')} · +33 1 99 00 12 34'),
           findsOneWidget,
         );
         expect(find.text('Second plumber'), findsNothing);
@@ -306,7 +306,7 @@ void main() {
         await tapKey(tester, 'contractor-call');
         await tapKey(tester, 'contractor-write');
         expect(opened, [
-          Uri(scheme: 'tel', path: '+33 4 00 00 00 00'),
+          Uri(scheme: 'tel', path: '+33 1 99 00 12 34'),
           Uri(scheme: 'mailto', path: 'plumber@example.com'),
         ]);
       });
@@ -338,7 +338,7 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.text(l.errPhoneInvalid), findsOneWidget);
           expect(find.text(l.errEmailInvalid), findsOneWidget);
-          await type(tester, 'contractor-phone', '04 90 00 00 00');
+          await type(tester, 'contractor-phone', '01 99 00 12 34');
           await type(tester, 'contractor-email', 'pool@example.com');
           await tapKey(tester, 'contractor-trade');
           await tester.tap(find.text(l.tradeOther).last);
@@ -351,7 +351,7 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.text('Pool Co'), findsOneWidget);
           expect(
-            find.text('Pool maintenance · 04 90 00 00 00'),
+            find.text('Pool maintenance · 01 99 00 12 34'),
             findsOneWidget,
           );
         },
@@ -517,6 +517,26 @@ void main() {
           // And the app still works.
           await addFromSheet(tester, l.photoPick);
           expect(find.text(l.photoDenied), findsOneWidget);
+        });
+
+        testWidgets('no camera on the phone: said, the gallery still works', (
+          tester,
+        ) async {
+          final source = cameraWith();
+          source.noCamera = true;
+          await start(tester, photos: source);
+          await tapText(tester, 'Main kitchen');
+          await addFromSheet(tester, l.photoTake);
+          expect(find.text(l.photoNoCamera), findsOneWidget);
+          expect(
+            await stateOf(tester).repository.photosOf(roomId: data.kitchen),
+            hasLength(1),
+          );
+          await addFromSheet(tester, l.photoPick);
+          expect(
+            await stateOf(tester).repository.photosOf(roomId: data.kitchen),
+            hasLength(2),
+          );
         });
 
         testWidgets('a file that is not a photo is refused with a message', (

@@ -302,10 +302,10 @@ void main() {
           name: 'Acme',
           trade: 'other',
           tradeOther: 'Pool maintenance',
-          phone: '+33 (0)4 90.00/00-00',
+          phone: '+33 (0)1 99.00/12-34',
           email: 'office@example.com',
           address: '1 Example street',
-          note: 'Ask for Sam',
+          note: 'Ask for the manager',
         ),
       );
       final names = (await repo.contractors(homes.main)).map((c) => c.name);
@@ -316,7 +316,7 @@ void main() {
       Future<void> save(ContractorInput input) =>
           repo.addContractor(homes.main, input);
       expect(
-        () => save(const ContractorInput(name: 'X', phone: '04 90 abc')),
+        () => save(const ContractorInput(name: 'X', phone: '01 99 abc')),
         refusedWith(Refusal.phoneInvalid),
       );
       expect(

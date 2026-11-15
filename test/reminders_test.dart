@@ -11,6 +11,7 @@ import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/domain/day.dart';
 import 'package:housecairn_mobile/domain/reminders.dart';
 import 'package:housecairn_mobile/l10n/app_localizations_en.dart';
+import 'package:housecairn_mobile/l10n/app_localizations_fr.dart';
 import 'package:housecairn_mobile/ui/state.dart';
 
 import 'support/fakes.dart';
@@ -321,6 +322,42 @@ void main() {
       await state.refresh();
       expect(state.remindersOn, isFalse);
       expect(await repository.remindersEnabled(), isFalse);
+    });
+
+    test('the Android channel is named in the language of the app', () async {
+      await start();
+      await state.setReminders(true);
+      expect(notifier.channels, {'Reminders'});
+      state.l10n = AppLocalizationsFr();
+      await state.reschedule();
+      expect(notifier.channels, {'Reminders', 'Rappels'});
+    });
+
+    test('the tap that started the app on a reminder opens its home', () async {
+      await start();
+      await state.choose(homes.main);
+      notifier.launch = '${homes.second}/some-task';
+      await state.openLaunchReminder();
+      expect(state.current!.id, homes.second);
+      // Once per start: a later choice is not undone.
+      await state.choose(homes.main);
+      await state.openLaunchReminder();
+      expect(state.current!.id, homes.main);
+    });
+
+    test('an app started otherwise opens nothing', () async {
+      await start();
+      await state.choose(homes.main);
+      await state.openLaunchReminder();
+      expect(state.current!.id, homes.main);
+    });
+
+    test('a launch tap on a home that is gone opens nothing', () async {
+      await start();
+      await state.choose(homes.main);
+      notifier.launch = 'unknown-home/some-task';
+      await state.openLaunchReminder();
+      expect(state.current!.id, homes.main);
     });
 
     test('opening a reminder makes its home the current one', () async {

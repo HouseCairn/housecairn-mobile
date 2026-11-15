@@ -58,6 +58,8 @@ class PhotoSection extends StatelessWidget {
       );
     } on PhotoPermissionDenied {
       say(l10n.photoDenied);
+    } on PhotoCameraUnavailable {
+      say(l10n.photoNoCamera);
     } on PhotoRefused catch (refused) {
       say(
         refused.problem == PhotoProblem.unreadable
@@ -171,8 +173,8 @@ class _Thumbnail extends StatelessWidget {
               color: HcColors.sageSoft,
               child: source == null
                   ? null
-                  : Image.memory(
-                      source.readAsBytesSync(),
+                  : Image.file(
+                      source,
                       fit: BoxFit.cover,
                       excludeFromSemantics: true,
                       errorBuilder: (_, _, _) => const SizedBox.shrink(),
@@ -267,8 +269,8 @@ class _PhotoScreenState extends State<PhotoScreen> {
           if (file != null && file.existsSync())
             ClipRRect(
               borderRadius: BorderRadius.circular(HcRadius.lg),
-              child: Image.memory(
-                file.readAsBytesSync(),
+              child: Image.file(
+                file,
                 fit: BoxFit.contain,
                 semanticLabel: photoCategoryLabel(l10n, _category),
                 errorBuilder: (_, _, _) => const SizedBox.shrink(),

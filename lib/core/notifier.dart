@@ -18,11 +18,15 @@ abstract interface class Notifier {
 
   /// Schedules a notification [id] at [at] (an instant), inexactly: Android
   /// may deliver it a little later (no exact-alarm permission is asked).
+  ///
+  /// [channel] is the name of the notification channel that Android shows in
+  /// the settings of the phone, in the language of the app.
   Future<void> schedule({
     required int id,
     required String title,
     required String body,
     required DateTime at,
+    required String channel,
     String? payload,
   });
 
@@ -31,6 +35,12 @@ abstract interface class Notifier {
 
   /// Cancels every pending notification of the app.
   Future<void> cancelAll();
+
+  /// The payload of the notification whose tap started the app, when it was
+  /// not running (`null` when the app was started otherwise). A tap on a
+  /// notification while the app runs reaches the `onOpen` of the notifier
+  /// instead.
+  Future<String?> launchPayload();
 
   /// Identifiers of the notifications still pending.
   Future<List<int>> pending();

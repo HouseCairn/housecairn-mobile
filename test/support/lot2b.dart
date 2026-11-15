@@ -17,6 +17,7 @@ import 'fixture.dart';
 class Lot2b {
   late TwoHomes homes;
   late String kitchen;
+  late String cellar;
   late String boiler;
   late String plumber;
   late String photo;
@@ -48,14 +49,14 @@ class Lot2b {
       const ContractorInput(
         name: 'Main plumber',
         trade: 'plumber',
-        phone: '+33 4 00 00 00 00',
+        phone: '+33 1 99 00 12 34',
         email: 'plumber@example.com',
         address: '1 Example street\n00000 Example City',
         note: 'Ask for the morning',
       ),
     );
-    final cellar = rooms.firstWhere((r) => r.name == 'Main cellar').id;
-    data.boiler = (await repository.itemsOf(cellar)).first.id;
+    data.cellar = rooms.firstWhere((r) => r.name == 'Main cellar').id;
+    data.boiler = (await repository.itemsOf(data.cellar)).first.id;
     await repository.updateItem(
       data.boiler,
       ItemInput(

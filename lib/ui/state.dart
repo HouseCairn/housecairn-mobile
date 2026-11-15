@@ -174,6 +174,7 @@ class AppState extends ChangeNotifier {
             title: reminder.title,
             body: reminder.body,
             at: reminder.at,
+            channel: words.remindersChannel,
             payload: reminder.payload,
           );
         }
@@ -188,6 +189,18 @@ class AppState extends ChangeNotifier {
   Future<void> openReminder(String payload) async {
     final homeId = payload.split('/').first;
     if (activeHomes.any((h) => h.id == homeId)) await choose(homeId);
+  }
+
+  bool _launchChecked = false;
+
+  /// Handles the tap that started the app when a notification was tapped
+  /// while the app was not running: the same as a tap while it runs. Once per
+  /// start; call it when the homes are read.
+  Future<void> openLaunchReminder() async {
+    if (_launchChecked) return;
+    _launchChecked = true;
+    final payload = await notifier?.launchPayload();
+    if (payload != null) await openReminder(payload);
   }
 }
 
