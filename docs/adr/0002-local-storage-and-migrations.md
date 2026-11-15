@@ -144,7 +144,7 @@ schemas 2 and 3 with data). What lot 3b settled within the rules above:
   repository refuses it otherwise, and any other status clears the line.
 - **Deterministic ids**: a room of a project (`projects.project_rooms:<project>:<room>`), the
   project of a task (`projects.projecttask:<task>`: a task is in one project at most) and the
-  envelope of a year (`projects.annualenvelope:<year>`), in the home's namespace.
+  envelope of a year (`projects.annualenvelope:<year>`, `envelope:<year>` in four digits since schema 6, as ADR 0003 and the web name it), in the home's namespace.
 - **Files**: the file of a project's photo or of a quote is in the home's directory, named by
   the id of its row; its name as the person saw it is kept for the screens only. A link of
   inspiration is kept as typed: the app never reads the page (no network in `lib/`).

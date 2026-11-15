@@ -175,6 +175,38 @@ class AppDatabase extends _$AppDatabase implements Db {
             ]) {
               await m.createTable(table);
             }
+            // The id of an annual envelope becomes the one of ADR 0003 and of
+            // the web (`envelope:` and four digits, was
+            // `projects.annualenvelope:<year>`): the rows and their clocks
+            // take it, nothing else moves. No other phone had them: sync did
+            // not exist before this schema.
+            final envelopes = await customSelect(
+              'SELECT id, home_id, year FROM annual_envelopes',
+            ).get();
+            for (final row in envelopes) {
+              final old = row.data['id'] as Uint8List;
+              final home = const UuidConverter().fromSql(
+                row.data['home_id'] as Uint8List,
+              );
+              final String newId;
+              try {
+                newId = envelopeIdOf(home, row.data['year'] as int);
+              } on FormatException {
+                // A home id that is not an RFC 4122 UUID (never made by the
+                // app): the row keeps the id it has.
+                continue;
+              }
+              final id = uuidBytes(newId);
+              await customStatement(
+                'UPDATE annual_envelopes SET id = ? WHERE id = ?',
+                [id, old],
+              );
+              await customStatement(
+                'UPDATE field_clock SET row_id = ? WHERE entity = '
+                "'projects.annualenvelope' AND row_id = ?",
+                [id, old],
+              );
+            }
           },
         ),
       );

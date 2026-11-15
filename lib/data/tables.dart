@@ -18,6 +18,16 @@ class UuidConverter extends TypeConverter<String, Uint8List> {
 /// The bytes of the UUID [id], for SQL written by the repository.
 Uint8List uuidBytes(String id) => const UuidConverter().toSql(id);
 
+/// The id of the annual envelope of [year] in [home]:
+/// `uuid5(home, "envelope:" + year)`, the year in four decimal digits
+/// (docs/adr/0003-sync-protocol.md, "Deterministic identifiers").
+String envelopeIdOf(String home, int year) {
+  if (year < 0 || year > 9999) {
+    throw ArgumentError.value(year, 'year', 'four decimal digits');
+  }
+  return const Uuid().v5(home, 'envelope:${year.toString().padLeft(4, '0')}');
+}
+
 /// Columns of every table of the model (`core/models.py:28-38` of the web):
 /// the UUID key, the instants of creation, change and soft deletion, in UTC
 /// milliseconds.

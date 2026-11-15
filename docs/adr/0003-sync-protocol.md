@@ -140,6 +140,11 @@ settled within the decision above:
   after "start again" (410), as the first operations of a pull from the start.
 - **References to another home** are kept and read as empty (`Repository.referenceIn`, and the
   lists of a room or an item).
+- **The id of an annual envelope** is now `uuid5(home, "envelope:" + year)` with four digits, as
+  above and as the web makes it; schema 5 named it `projects.annualenvelope:<year>`, and the step
+  to schema 6 gives the envelopes of then the new id with their clocks (no other phone had them).
+  `test/sync_ids_test.dart` compares every id with the vectors the web publishes
+  (`test/fixtures/sync_ids.json`, a copy of the web's).
 - **`min_sv`**: a phone below it sends nothing and keeps its changes in `op_log`; the screens that
   say so come with the way that turns sync on (lots 4b and 5).
 

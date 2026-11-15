@@ -18,6 +18,7 @@ import 'dart:typed_data';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/data/database.dart';
+import 'package:uuid/uuid.dart';
 
 import 'generated/schema.dart';
 
@@ -261,6 +262,32 @@ void main() {
       "INSERT INTO local_settings (key, value) VALUES ('device_id', ?)",
       ['09090909090909090909090909090909'],
     );
+    // An envelope under the id of schema 5, and its clock.
+    const home1 = '6f1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d';
+    raw.execute(
+      'INSERT INTO homes (id, created_at, updated_at, name, currency, '
+      'hemisphere) VALUES (?, 1, 1, ?, ?, ?)',
+      [Uint8List.fromList(Uuid.parse(home1)), 'Third home', 'EUR', 'north'],
+    );
+    final oldEnvelope = Uint8List.fromList(
+      Uuid.parse(const Uuid().v5(home1, 'projects.annualenvelope:2027')),
+    );
+    raw.execute(
+      'INSERT INTO annual_envelopes (id, created_at, updated_at, home_id, '
+      'year, amount) VALUES (?, 4, 4, ?, 2027, ?)',
+      [oldEnvelope, Uint8List.fromList(Uuid.parse(home1)), '1250.50'],
+    );
+    raw.execute(
+      'INSERT INTO field_clock (entity, row_id, field, hlc, device) '
+      'VALUES (?, ?, ?, ?, ?)',
+      [
+        'projects.annualenvelope',
+        oldEnvelope,
+        'amount',
+        '0193a1b2c3d40003',
+        id(9),
+      ],
+    );
     const before = [
       'homes',
       'tasks',
@@ -270,7 +297,11 @@ void main() {
     ];
     String dump() => [
       for (final table in before)
-        for (final row in raw.select('SELECT * FROM $table ORDER BY 1, 2'))
+        for (final row in raw.select(
+          'SELECT * FROM $table '
+          '${table == 'field_clock' ? "WHERE entity != 'projects.annualenvelope' " : ''}'
+          'ORDER BY 1, 2',
+        ))
           '$table $row',
     ].join('\n');
     final dumped = dump();
@@ -293,6 +324,29 @@ void main() {
         reason: table,
       );
     }
+    // The envelope takes the id of ADR 0003 and of the web, with its
+    // clock; its fields are unchanged.
+    final envelope = raw
+        .select(
+          'SELECT id, home_id, year, amount, updated_at FROM annual_envelopes',
+        )
+        .single;
+    expect(
+      Uuid.unparse(envelope['id'] as Uint8List),
+      const Uuid().v5(home1, 'envelope:2027'),
+    );
+    expect(
+      [envelope['year'], envelope['amount'], envelope['updated_at']],
+      [2027, '1250.50', 4],
+    );
+    final clock = raw
+        .select(
+          'SELECT row_id, hlc FROM field_clock '
+          "WHERE entity = 'projects.annualenvelope'",
+        )
+        .single;
+    expect(clock['row_id'], envelope['id']);
+    expect(clock['hlc'], '0193a1b2c3d40003');
     expect(await db.integrityCheck(), 'ok');
     await db.close();
   });
