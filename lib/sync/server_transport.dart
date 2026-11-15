@@ -223,6 +223,10 @@ class ServerTransport implements SyncTransport {
   /// The page size of the feed.
   static const pageSize = 500;
 
+  /// Operations of the phone per push: each may become two on the wire
+  /// ([wire]), and the server takes 500 (`ops_per_push`).
+  static const pushSize = 200;
+
   ServerSyncState? _cached;
 
   Future<ServerSyncState> _state() async =>
@@ -347,8 +351,20 @@ class ServerTransport implements SyncTransport {
     }
   }
 
-  Never _unexpected(ServerReply reply) =>
-      throw StateError('Unexpected answer ${reply.status} (${_code(reply)}).');
+  Never _unexpected(ServerReply reply) {
+    Object? detail;
+    try {
+      final json = _json(reply);
+      detail = json['index'] == null
+          ? json['detail']
+          : '${json['detail']} (operation ${json['index']})';
+    } on FormatException {
+      detail = null;
+    }
+    throw StateError(
+      'Unexpected answer ${reply.status} (${_code(reply)}): $detail',
+    );
+  }
 
   // ---------- SyncTransport ----------
 
@@ -423,32 +439,83 @@ class ServerTransport implements SyncTransport {
       (byHome[home] ??= []).add(op);
     }
     for (final MapEntry(key: home, value: ops) in byHome.entries) {
-      for (var start = 0; start < ops.length; start += pageSize) {
+      for (var start = 0; start < ops.length; start += pushSize) {
         final chunk = ops.sublist(
           start,
-          start + pageSize > ops.length ? ops.length : start + pageSize,
+          start + pushSize > ops.length ? ops.length : start + pushSize,
         );
         final number = s.nextPush++;
+        final wired = <Map<String, Object?>>[];
+        final sources = <SyncOperation>[];
+        for (final op in chunk) {
+          for (final w in wire(op)) {
+            wired.add(w);
+            sources.add(op);
+          }
+        }
         final body = jsonEncode({
           'push': number,
           'sv': schemaVersion,
           'device': device,
-          'ops': [for (final op in chunk) _wire(op)],
+          'ops': wired,
         });
         s.unanswered = (home: home, number: number, body: body);
         await _save(s);
-        await _sendPush(s, home, number, body, chunk, lost);
+        await _sendPush(s, home, number, body, sources, lost);
       }
     }
     return PushResult(lost: lost);
   }
 
-  /// The operation as the server reads it: the keys of section 2.2 only;
-  /// the device is the push's, and `sv` the body's.
-  static Map<String, Object?> _wire(SyncOperation op) => {
-    for (final MapEntry(:key, :value) in op.entries)
-      if (key != Op.device && key != Op.schema) key: value,
+  /// The types whose `created_at` the server takes from the phone (web
+  /// v0.4.0, `send=CREATED` in `stock/syncing.py` and `reports/syncing.py`).
+  static const _createdAtSent = {
+    'stock.article',
+    'stock.supplier',
+    'stock.movement',
+    'reports.report',
   };
+
+  /// A column the server keeps for itself (web `sync.pushing`, `server_owned`:
+  /// `created_at` and `updated_at` but where it takes `created_at`): an
+  /// operation that sets one is rejected `forbidden` as a whole, so the
+  /// phone does not send it. The server writes its own.
+  static bool _serverOwned(String? type, String field) =>
+      field == 'updated_at' ||
+      (field == 'created_at' && !_createdAtSent.contains(type));
+
+  /// The operation as the server reads it: the keys of section 2.2 only
+  /// (the device is the push's, and `sv` the body's), and `deleted_at`,
+  /// which the phone writes as a field of a `put`, as the `delete` or
+  /// `restore` of section 2.2 (web ADR 0077: "deleted_at is written by a
+  /// delete or a restore"). One operation of the phone may so be two.
+  static List<Map<String, Object?>> wire(SyncOperation op) {
+    final base = {
+      for (final MapEntry(:key, :value) in op.entries)
+        if (key != Op.device && key != Op.schema && key != Op.fields)
+          key: value,
+    };
+    final fields = <String, Object?>{
+      for (final MapEntry(:key, :value)
+          in ((op[Op.fields] as Map?)?.cast<String, Object?>() ?? const {})
+              .entries)
+        if (!_serverOwned(op[Op.type] as String?, key)) key: value,
+    };
+    if (op[Op.kind] == Op.put && fields.isEmpty) return const [];
+    if (op[Op.kind] != Op.put || !fields.containsKey('deleted_at')) {
+      return [
+        {...base, if (op[Op.fields] != null) Op.fields: fields},
+      ];
+    }
+    final deleted = fields.remove('deleted_at');
+    return [
+      if (fields.isNotEmpty) {...base, Op.fields: fields},
+      if (deleted != null)
+        {...base, Op.kind: Op.delete}
+      else if (fields.isEmpty)
+        {...base, Op.kind: Op.restore},
+    ];
+  }
 
   Future<void> _sendPush(
     ServerSyncState s,

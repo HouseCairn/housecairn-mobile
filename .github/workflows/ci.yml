@@ -176,10 +176,11 @@ jobs:
         run: |
           docker run --detach --name housecairn --publish 127.0.0.1:8000:8000 \
             --env ALLOWED_HOSTS=127.0.0.1 \
+            --env SECURE_SSL_REDIRECT=false \
             --env HOUSECAIRN_FORWARDED_ALLOW_IPS=192.0.2.1 \
             "$HC_SERVER_IMAGE"
           for _ in $(seq 1 90); do
-            if curl --silent --fail http://127.0.0.1:8000/api/v1/sync/info >/dev/null; then
+            if curl --silent --fail --max-redirs 0 http://127.0.0.1:8000/api/v1/sync/info >/dev/null; then
               exit 0
             fi
             sleep 2

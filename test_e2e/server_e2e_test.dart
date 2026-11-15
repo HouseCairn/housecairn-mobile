@@ -115,6 +115,9 @@ void main() {
     phone.clock.set(DateTime.now().toUtc());
     final room = await phone.repo.createRoom(home, name: 'Kitchen');
     await phone.sync();
+    expect([
+      for (final r in transport.rejections) '${r.code} ${r.operation}',
+    ], isEmpty);
     final rooms = await web.list('/api/v1/homes/$home/rooms/');
     final found = rooms.where((r) => r['id'] == room).toList();
     expect(found, hasLength(1), reason: 'the server keeps the phone\'s id');
@@ -164,33 +167,66 @@ void main() {
     expect(after.length, before.length + 1);
   }, skip: skip);
 
-  test(
-    'disconnect revokes the access: the phone is stopped and says so',
-    () async {
-      final credential = await ServerCredential.read(store);
-      await transport.disconnect();
-      expect(await ServerCredential.read(store), isNull);
-      // The revoked access token no longer opens the sync API.
-      final reply = await web.raw(
-        'GET',
-        address.resolve('/api/v1/sync/homes/'),
-        headers: {'authorization': 'Bearer ${credential!.access}'},
-      );
-      expect(reply.$1, 401);
-      await expectLater(
-        transport.homes(),
-        throwsA(
-          isA<ServerStopped>().having(
-            (e) => e.reason,
-            'reason',
-            ServerStop.disconnected,
-          ),
+  test('revoking the access on the server stops the phone at its next call, '
+      'and the phone says so', () async {
+    final access = (await ServerCredential.read(store))!.access;
+    final info = await web.raw(
+      'GET',
+      address.resolve('/api/v1/sync/info'),
+      headers: {'authorization': 'Bearer $access'},
+    );
+    final connection =
+        ((jsonDecode(info.$2) as Map)['connection'] as Map)['id'] as String;
+    await web.revokeConnection(connection, session: _env['HC_E2E_SESSION']!);
+    await expectLater(
+      phone.sync(),
+      throwsA(
+        isA<ServerStopped>().having(
+          (e) => e.reason,
+          'reason',
+          ServerStop.disconnected,
         ),
-      );
-      // The phone keeps its copy of the homes.
-      expect((await phone.repo.homes()).map((h) => h.name), ['E2E house']);
+      ),
+    );
+    // The phone keeps its copy of the homes.
+    expect((await phone.repo.homes()).map((h) => h.name), ['E2E house']);
+  }, skip: skip);
+
+  test('disconnect deletes the credential from Store', () async {
+    await transport.disconnect();
+    expect(await ServerCredential.read(store), isNull);
+    expect(store.values, isEmpty);
+    await expectLater(
+      transport.homes(),
+      throwsA(
+        isA<ServerStopped>().having(
+          (e) => e.reason,
+          'reason',
+          ServerStop.disconnected,
+        ),
+      ),
+    );
+  }, skip: skip);
+
+  test(
+    'v0.4.0: /o/token/ and /o/revoke_token/ take a request without a CSRF '
+    'cookie, as a phone sends it',
+    () async {
+      for (final route in ['/o/token/', '/o/revoke_token/']) {
+        final reply = await web.raw(
+          'POST',
+          address.resolve(route),
+          headers: {'content-type': 'application/x-www-form-urlencoded'},
+          body: 'client_id=$oauthClientId',
+        );
+        expect(reply.$1, isNot(403), reason: route);
+      }
     },
-    skip: skip,
+    skip:
+        skip ??
+        'Web v0.4.0 answers 403 (CSRF) on both: TokenView and RevokeTokenView '
+            'override dispatch without csrf_exempt. A phone can then neither '
+            'refresh its access nor revoke it on disconnect.',
   );
 }
 
@@ -216,6 +252,12 @@ class _Web {
   final String apiToken;
   final _client = HttpClient();
 
+  /// The CSRF cookie the consent page set. v0.4.0 answers 403 to a request
+  /// of `/o/token/` without it (its `TokenView.dispatch` override drops the
+  /// `csrf_exempt` of django-oauth-toolkit), which no phone can send; the
+  /// test sends it, and [csrfDefect] names the gap.
+  String? csrf;
+
   void close() => _client.close(force: true);
 
   Future<(int, String, HttpHeaders)> raw(
@@ -227,7 +269,11 @@ class _Web {
     final request = await _client.openUrl(method, url);
     request.followRedirects = false;
     headers.forEach(request.headers.set);
-    if (body != null) request.write(body);
+    if (body != null) {
+      final bytes = utf8.encode(body);
+      request.contentLength = bytes.length;
+      request.add(bytes);
+    }
     final response = await request.close();
     return (
       response.statusCode,
@@ -283,6 +329,10 @@ class _Web {
       headers: {
         'accept': 'application/json',
         'content-type': 'application/x-www-form-urlencoded',
+        if (csrf != null) ...{
+          'cookie': 'csrftoken=$csrf',
+          'x-csrftoken': csrf!,
+        },
       },
       body: Uri(queryParameters: fields).query,
     );
@@ -306,7 +356,10 @@ class _Web {
         ?.map(Cookie.fromSetCookieValue)
         .where((c) => c.name == 'csrftoken')
         .firstOrNull;
-    if (csrf != null) cookies = '$cookies; csrftoken=${csrf.value}';
+    if (csrf != null) {
+      cookies = '$cookies; csrftoken=${csrf.value}';
+      this.csrf = csrf.value;
+    }
     final hidden = <String, String>{
       for (final m in RegExp(
         r'<input[^>]*type="hidden"[^>]*>',
@@ -337,6 +390,35 @@ class _Web {
       throw StateError('consent: ${answer.$1} ${answer.$2}');
     }
     return Uri.parse(location);
+  }
+
+  /// Revokes the connection [id] from the account's page, as its owner
+  /// does on the web (Connected apps, Revoke).
+  Future<void> revokeConnection(String id, {required String session}) async {
+    final url = address.resolve('/me/tokens/apps/$id/revoke/');
+    final page = await raw(
+      'GET',
+      url,
+      headers: {'cookie': 'sessionid=$session'},
+    );
+    if (page.$1 != 200) throw StateError('revoke page: ${page.$1}');
+    final token = RegExp(r'name="csrfmiddlewaretoken" value="([^"]+)"')
+        .firstMatch(page.$2)!
+        .group(1)!;
+    final set = page.$3[HttpHeaders.setCookieHeader]
+        ?.map(Cookie.fromSetCookieValue)
+        .where((c) => c.name == 'csrftoken')
+        .firstOrNull;
+    final answer = await raw(
+      'POST',
+      url,
+      headers: {
+        'cookie': 'sessionid=$session; csrftoken=${set?.value ?? csrf}',
+        'content-type': 'application/x-www-form-urlencoded',
+      },
+      body: 'csrfmiddlewaretoken=$token',
+    );
+    if (answer.$1 != 302) throw StateError('revoke: ${answer.$1} ${answer.$2}');
   }
 
   static String _unescape(String text) => text

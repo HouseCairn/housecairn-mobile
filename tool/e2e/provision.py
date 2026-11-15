@@ -15,15 +15,15 @@ into environment variables. Nothing here is a secret outside the throwaway conta
 import json
 
 from django.contrib.auth import BACKEND_SESSION_KEY, HASH_SESSION_KEY, SESSION_KEY, get_user_model
+from allauth.account.models import EmailAddress
 from django.contrib.sessions.backends.db import SessionStore
 
 from housecairn.apitokens import services as token_services
 from housecairn.homes import services as home_services
 
 User = get_user_model()
-user = User.objects.create_user(
-    username="e2e", email="e2e@example.com", password="e2e-password-not-secret"
-)
+user = User.objects.create_user(email="e2e@example.com", password="e2e-password-not-secret")
+EmailAddress.objects.create(user=user, email=user.email, verified=True, primary=True)
 first = home_services.create_home(user, name="E2E house")
 second = home_services.create_home(user, name="E2E flat")
 

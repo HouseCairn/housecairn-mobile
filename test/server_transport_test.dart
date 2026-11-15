@@ -222,6 +222,71 @@ void main() {
     });
   });
 
+  group('the operation on the wire', () {
+    Map<String, Object?> put(String type, Map<String, Object?> f) => {
+      Op.type: type,
+      Op.home: home,
+      Op.id: '11111111-1111-4111-8111-111111111111',
+      Op.kind: Op.put,
+      Op.clock: '0193a1b2c3d40001',
+      Op.device: device,
+      Op.schema: 6,
+      Op.fields: f,
+    };
+
+    test('deleted_at set is a delete, cleared alone is a restore, cleared '
+        'with other fields is left out', () {
+      expect(
+        ServerTransport.wire(
+          put('rooms.room', {'deleted_at': '0193a1b2c3d40001'}),
+        ).map((o) => o[Op.kind]),
+        [Op.delete],
+      );
+      expect(
+        ServerTransport.wire(put('rooms.room', {'deleted_at': null}))
+            .map((o) => o[Op.kind]),
+        [Op.restore],
+      );
+      final created = ServerTransport.wire(
+        put('rooms.room', {'name': 'Kitchen', 'deleted_at': null}),
+      );
+      expect(created.single[Op.fields], {'name': 'Kitchen'});
+      final both = ServerTransport.wire(
+        put('rooms.room', {'name': 'Old', 'deleted_at': '0193a1b2c3d40001'}),
+      );
+      expect(both.map((o) => o[Op.kind]), [Op.put, Op.delete]);
+      expect(both.last.containsKey(Op.fields), isFalse);
+    });
+
+    test('the columns the server keeps are not sent; created_at is, where '
+        'the server takes it', () {
+      final room = ServerTransport.wire(
+        put('rooms.room', {
+          'name': 'Kitchen',
+          'created_at': '0193a1b2c3d40001',
+          'updated_at': '0193a1b2c3d40001',
+        }),
+      );
+      expect(room.single[Op.fields], {'name': 'Kitchen'});
+      final movement = ServerTransport.wire(
+        put('stock.movement', {
+          'quantity': '1',
+          'created_at': '0193a1b2c3d40001',
+        }),
+      );
+      expect(
+        (movement.single[Op.fields]! as Map).keys,
+        unorderedEquals(['quantity', 'created_at']),
+      );
+      expect(
+        ServerTransport.wire(
+          put('rooms.room', {'updated_at': '0193a1b2c3d40001'}),
+        ),
+        isEmpty,
+      );
+    });
+  });
+
   group('pull', () {
     test(
       'a first pull reads the snapshot, then the feed after covers',
