@@ -22,6 +22,7 @@ import 'database.dart';
 
 part 'budget_repository.dart';
 part 'stock_repository.dart';
+part 'task_repository.dart';
 
 /// Why the repository refused a change. Each value has its message in the
 /// ARB files (lib/ui/messages.dart); the web gives the same refusals.
@@ -196,6 +197,7 @@ class TaskInput {
     this.itemId,
     this.estimatedMinutes,
     this.procedure = '',
+    this.contractorId,
   });
 
   /// Minutes the task takes, if known (`tasks/models.py` `estimated_minutes`).
@@ -219,6 +221,9 @@ class TaskInput {
   final int hideDaysBefore;
   final String? roomId;
   final String? itemId;
+
+  /// The contractor in charge, one of the home's.
+  final String? contractorId;
 }
 
 /// What a room is made of, as its forms edit it (`rooms/models.py:67-91`).
@@ -1582,7 +1587,9 @@ class Repository {
         (input.season == recurrence.custom && start == null)) {
       throw const Refused(Refusal.seasonMonthsRequired);
     }
-    if (input.notes.length > 5000) throw const Refused(Refusal.tooLong);
+    if (input.notes.length > 5000 || input.procedure.length > 20000) {
+      throw const Refused(Refusal.tooLong);
+    }
     return {
       'title': title,
       'room_id': input.roomId,
@@ -1590,6 +1597,7 @@ class Repository {
       'priority': input.priority,
       'estimated_minutes': input.estimatedMinutes,
       'procedure': input.procedure,
+      'contractor_id': input.contractorId,
       'notes': input.notes,
       'repeat_mode': input.repeatMode,
       'repeat_unit': input.repeatUnit,
@@ -1601,11 +1609,20 @@ class Repository {
     };
   }
 
+  /// A task's contractor is one of its home.
+  Future<void> _checkContractor(String? id, String homeId) async {
+    if (id == null) return;
+    if ((await contractor(id))?.homeId != homeId) {
+      throw const Refused(Refusal.notInHome);
+    }
+  }
+
   /// Creates a task and its first occurrence, due on [TaskInput.dueOn] or
   /// with no date (`tasks/services.py:384-404`).
   Future<String> createTask(String homeId, TaskInput input) async {
     final home = await _writableHome(homeId);
     final fields = _taskFields(input, home);
+    await _checkContractor(input.contractorId, homeId);
     _checkDate(input.dueOn);
     if (input.dueOn == null && input.repeatMode == recurrence.fixed) {
       throw const Refused(Refusal.fixedNeedsDate);
@@ -1657,6 +1674,7 @@ class Repository {
     if (current == null) throw const Refused(Refusal.notFound);
     final home = await _writableHome(current.homeId);
     final fields = _taskFields(input, home);
+    await _checkContractor(input.contractorId, current.homeId);
     final open = await openOccurrencesOf(taskId);
     final occurrence = open.isEmpty ? null : open.first;
     final oldDue = occurrence?.dueOn;
@@ -1895,6 +1913,7 @@ class Repository {
       final untouched =
           next.status == 'planned' &&
           next.postponedFrom == null &&
+          next.actualCost == null &&
           next.completionNote.isEmpty;
       if (!untouched) throw const Refused(Refusal.nextChanged);
     }
@@ -1903,12 +1922,17 @@ class Repository {
       // (`tasks/services.py:635`).
       await _returnDraws(found);
       for (final next in following) {
-        await _put('occurrences', next.id, {'deleted_at': _now()});
+        // Detached before it goes, as the web does (`_withdraw`).
+        await _put('occurrences', next.id, {
+          'follows': null,
+          'deleted_at': _now(),
+        });
       }
       await _put('occurrences', id, {
         'status': found.statusBefore.isEmpty ? 'planned' : found.statusBefore,
         'status_before': '',
         'completed_on': null,
+        'actual_cost': null,
         'completion_note': '',
       });
     });

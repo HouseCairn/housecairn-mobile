@@ -7,7 +7,10 @@ chromium`), against a local instance filled by `manage.py load_demo_data
 --owner demo@example.com --language fr` (an account made beforehand, password
 `demo-password-for-local-captures`, its language set to French in its preferences), the
 translations compiled (`manage.py compilemessages`), with one item in the utility room and
-one contractor added (the names of test/web_parity_test.dart), and three stock items
+one contractor added (the names of test/web_parity_test.dart), the tasks of
+lot 3c (a task done two days ago with its cost and a note, a task skipped, a task in season
+beyond the week, a task hidden until its date gets closer; `Demo.seed` of
+test/web_parity_test.dart lists them), and three stock items
 ('Filtre de VMC', 'Pile 9 V', 'Peinture blanche') with a supplier ("Magasin d'exemple", for
 the first) and movements (the first one left low), and one open report ('Le robinet de la
 cuisine fuit', in the kitchen):
@@ -71,6 +74,20 @@ MEASURE = """
         height: li.getBoundingClientRect().height,
       })),
     }));
+  // A list with no heading (the list of all tasks, the history): its rows as
+  // one section without a title.
+  const plain = [...document.querySelectorAll('main > .task-list > li')];
+  if (!sections.length && plain.length) {
+    sections.push({
+      heading: '',
+      rows: plain.map((li) => ({
+        title: text(li.querySelector('.row-title')),
+        text: text(li.querySelector('.row-text')),
+        pills: [...li.querySelectorAll('.pill')].map(text),
+        height: li.getBoundingClientRect().height,
+      })),
+    });
+  }
   const add = addSel ? q(addSel) : null;
   const row = q('main .task-row') || q('main .list > li') || q('main ul.list li');
   const card = q('main .task-list') || q('main .list') || q('main .card-list') || q('main .card');
@@ -192,6 +209,24 @@ with sync_playwright() as p:
     screens["budget"] = (f"{H}/budget/", None)
     screens["reports"] = (f"{H}/reports/", "main a[href*='/reports/new/']")
     screens["report_form"] = (f"{H}/reports/new/", None)
+    # Lot 3c: all the tasks, the history and the details of what was done.
+    screens["tasks"] = (f"{H}/tasks/", "main a.button-block[href*='/tasks/new/']")
+    screens["history"] = (f"{H}/tasks/?status=done", None)
+    page.goto(base + f"{H}/tasks/?status=done")
+    changed = next(
+        (href.split("?")[0] for title, href in page.eval_on_selector_all(
+            "main a.row[href]",
+            "els => els.map(e => [e.querySelector('.row-title')?.innerText.trim(),"
+            " e.getAttribute('href')])")
+         if title == "Changer la pile du détecteur"),
+        None)
+    if changed is None:
+        raise SystemExit(f"no done task 'Changer la pile du détecteur' on {H}/tasks/?status=done")
+    page.goto(base + changed)
+    edit = page.eval_on_selector_all(
+        "main a[href]", "els => els.map(e => e.getAttribute('href'))")
+    edit = next(h.split("?")[0] for h in edit if re.search(r"/occurrences/[0-9a-f-]{36}/edit/", h))
+    screens["occurrence_form"] = (edit, None)
     result = {}
     for name, (path, add) in screens.items():
         page.goto(base + path)

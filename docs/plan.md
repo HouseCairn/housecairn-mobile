@@ -269,7 +269,7 @@ upkeep); reports and "make a task".
 **Device**: PDF of a quote attached from the Files app (iOS) and the document picker (Android).
 
 **Delivered in two pull requests, in this order** (orchestrator's decision of 2026-11-15, as lot 2
-was split): **3a**, the stock: articles, suppliers, movements and inventory, the materials of a
+was split; the parity report of the web and the app then added lot 3c below): **3a**, the stock: articles, suppliers, movements and inventory, the materials of a
 task and the draws taken by Done and given back by Undo, and their screens, with the criteria of
 this lot on the stock, on amounts without `double` and on two homes in two currencies; **3b**,
 projects, budget lines, quotes, the annual envelope, the budget views and reports.
@@ -278,6 +278,50 @@ The budget figures are compared with the web's by `test/budget_web_test.dart`, o
 element `budget`, checked in CI).
 
 **Depends on**: lot 2.
+
+## Lot 3c. Tasks as the web has them
+
+**Scope** (the parity report of the web and the app, proposed lot 3c): what the web does with
+tasks and the app did not, with the behaviour of `tasks/services.py` and `tasks/agenda.py`, and
+no migration (the columns `priority`, `estimated_minutes`, `procedure`, `contractor_id`,
+`hide_days_before`, `completion_note` and `completed_on` were in schema 4 already). Spec lines it
+carries: [Screens of v1](spec.md#screens-of-v1), 1 (Today, in season), 2 (Task: form, history,
+photos) and the Task row of the [data model](spec.md#taken-as-they-are) (priority, duration,
+procedure, contractor, masking).
+- **All the tasks**: the tab All beside Today, on one home (the web has no such list across
+  homes): the open tasks, the oldest date first and no date last, 30 to a page, filtered by room,
+  with the ones hidden until their date gets closer counted and shown on demand
+  (`TaskListView`, `open_occurrences`).
+- **The history of the home**: the choice Done of the same list: done and skipped, the most
+  recent first (a skipped one has the day it was closed), filtered by words (title and note),
+  room, item, contractor, outcome and days, with the count and the real cost of the whole
+  selection (`history`, `cost_of`). *Done by* comes with the members of the family (lot 5).
+- **In season** on Today: a task of a season that is on, due beyond the week or without a date
+  (`today_sections`), instead of in No date.
+- **In the form**: priority, estimated duration (a number and a unit, minutes in the data, one
+  minute to one year), procedure, contractor, days of masking, and the adding of a room, an item or
+  a contractor with the task, in the same transaction (all or none).
+- **On the page of a task**: Done, Skip this time, Postpone and Undo of its occurrence; the
+  photos of its item (else of its room), read only, with the way to their sheet; the details of a
+  done occurrence (the day, the real cost, the note: `update_occurrence`); the deletion after a
+  confirmation.
+
+**Acceptance**:
+- The lists of the repository (`test/repository_tasks_test.dart`) equal the web's on the same
+  data: an open list of the home only, ordered, paged by 30, with its hidden count; a history
+  filtered by each field, whose cost counts the entries where one was typed; In season leaving out
+  a season that is over, a hidden task and a task within the week; the details refused in the
+  future, out of range, for a skip, with a wrong amount, in an archived home. Two homes: nothing of
+  one is ever in the other.
+- Screens aligned with the web at 390 px (`test/web_parity_test.dart`, the screens `tasks`,
+  `history`, `occurrence_form`, and Today with its section In season, measured against the
+  demonstration of the web plus the tasks `Demo.seed` lists), with the accessibility guidelines
+  and the goldens at 360 px, in English and French, at text scale 1 and 2.
+- A room, an item and a contractor added with the task join the home with it or not at all.
+
+**Delivered in one pull request.**
+
+**Depends on**: lot 3b.
 
 ## Lot 4. Sync engine (without network, without crypto)
 

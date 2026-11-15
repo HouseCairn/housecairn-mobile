@@ -3229,6 +3229,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'None'**
   String get paintArticleNone;
+
+  /// Tab of Today beside Today: the list of every task of the home. Web catalogue: Toutes.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get tasksTabAll;
+
+  /// Title of the list of every task of the home. Web catalogue: Tâches.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get tasksTitle;
+
+  /// Label of the choice between the tasks to do and the history. Web catalogue: Afficher.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get tasksFilterShow;
+
+  /// Choice of the list of tasks: the open ones. Web catalogue: À faire.
+  ///
+  /// In en, this message translates to:
+  /// **'To do'**
+  String get tasksToDo;
+
+  /// Choice of the list of tasks: the history of what was done. Web catalogue: Faites.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get tasksDoneFilter;
+
+  /// Choice of the room filter: no filter. Web catalogue: Toutes les pièces.
+  ///
+  /// In en, this message translates to:
+  /// **'All rooms'**
+  String get tasksAllRooms;
+
+  /// Empty list of tasks. Web catalogue: Rien à faire. Ajoutez une tâche pour commencer.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to do. Add a task to start.'**
+  String get tasksNone;
+
+  /// Line under the list: tasks hidden until their date gets closer. Web catalogue: tâche masquée jusqu'à ce que sa date approche.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} task is hidden until its date gets closer.} other{{count} tasks are hidden until their date gets closer.}}'**
+  String tasksHidden(int count);
+
+  /// Button that shows the hidden tasks. Web catalogue: Les afficher.
+  ///
+  /// In en, this message translates to:
+  /// **'Show them'**
+  String get tasksShowHidden;
+
+  /// Button to the previous page of a list. Web catalogue: Précédent.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get pagePrevious;
+
+  /// Button to the next page of a list. Web catalogue: Suivant.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get pageNext;
+
+  /// Position in a paged list. Web catalogue: Page %(number)s sur %(total)s.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {number} of {total}'**
+  String pageOf(int number, int total);
+
+  /// Heading of the filters of the history. Web catalogue: Filtres.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get historyFilters;
+
+  /// Label of the search field of the history. Web catalogue: Rechercher.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get historySearch;
+
+  /// Choice of the item filter: no filter. Web catalogue: Tous les éléments.
+  ///
+  /// In en, this message translates to:
+  /// **'All items'**
+  String get historyAllItems;
+
+  /// Choice of the contractor filter: no filter. Web catalogue: Tout le monde.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get historyEveryone;
+
+  /// Label of the filter on done or skipped. Web catalogue: Résultat.
+  ///
+  /// In en, this message translates to:
+  /// **'Outcome'**
+  String get historyOutcome;
+
+  /// Choice of the outcome filter: no filter. Web catalogue: Faites ou ignorées.
+  ///
+  /// In en, this message translates to:
+  /// **'Done or skipped'**
+  String get historyDoneOrSkipped;
+
+  /// Choice of the outcome filter: what was done. Web catalogue: Faites.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get historyOutcomeDone;
+
+  /// Choice of the outcome filter: what was skipped. Web catalogue: Ignorée.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get historyOutcomeSkipped;
+
+  /// Label of the first day of the history filter. Web catalogue: Du.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get historyFrom;
+
+  /// Label of the last day of the history filter. Web catalogue: Au.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get historyTo;
+
+  /// Button that removes the filters of the history. Web catalogue: Effacer.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get historyClear;
+
+  /// Empty history under a filter. Web catalogue: Rien ne correspond.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches.'**
+  String get historyNothingMatches;
+
+  /// Empty history. Web catalogue: Rien de fait pour l'instant.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing done yet.'**
+  String get historyNothingDone;
+
+  /// Number of entries of the history. Web catalogue: entrée.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} entry} other{{count} entries}}'**
+  String historyEntries(int count);
+
+  /// What the selection of the history really cost, over the entries where a cost was typed. Web catalogue: coût réel.
+  ///
+  /// In en, this message translates to:
+  /// **'real cost: {total}, entered on {count, plural, one{{count} entry} other{{count} entries}}'**
+  String historyCost(String total, int count);
+
+  /// Group of Today: tasks of a season that is on, further than a week or without a date. Web catalogue: De saison.
+  ///
+  /// In en, this message translates to:
+  /// **'In season'**
+  String get seasonSection;
+
+  /// Button that deletes a task. Web catalogue: Supprimer la tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the task'**
+  String get taskDelete;
+
+  /// Title of the confirmation before a task is deleted. Web catalogue: Supprimer %(name)s ?
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}?'**
+  String taskDeleteTitle(String name);
+
+  /// Body of the confirmation before a task is deleted. Web catalogue: La tâche, son historique et ses fichiers disparaissent des écrans.
+  ///
+  /// In en, this message translates to:
+  /// **'The task, its history and its files disappear from the screens.'**
+  String get taskDeleteBody;
+
+  /// Label of the duration of a task. Web catalogue: Durée estimée.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated duration'**
+  String get taskDuration;
+
+  /// Label of the unit of the duration of a task. Web catalogue: Unité.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit of the duration'**
+  String get taskDurationUnit;
+
+  /// Unit of a duration. Web catalogue: minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'minutes'**
+  String get unitMinutes;
+
+  /// Unit of a duration. Web catalogue: heures.
+  ///
+  /// In en, this message translates to:
+  /// **'hours'**
+  String get unitHours;
+
+  /// Label of the days a task stays hidden before its date. Web catalogue: masquer jusqu'à ce nombre de jours avant.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide until this many days before'**
+  String get taskHideDays;
+
+  /// Help of the days a task stays hidden. Web catalogue: 0 affiche la tâche dès qu'elle existe.
+  ///
+  /// In en, this message translates to:
+  /// **'0 shows the task as soon as it exists.'**
+  String get taskHideDaysHelp;
+
+  /// Error of the days a task stays hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Give a number of days from 0 to 365.'**
+  String get errHideDays;
+
+  /// Error of the duration of a task.
+  ///
+  /// In en, this message translates to:
+  /// **'Give a duration of at least 1 and at most one year.'**
+  String get errDuration;
+
+  /// Label of the procedure of a task, in Markdown. Web catalogue: Comment faire.
+  ///
+  /// In en, this message translates to:
+  /// **'How to do it'**
+  String get taskProcedure;
+
+  /// Last choice of the rooms of a task form: a new room. Web catalogue: Ajouter une pièce….
+  ///
+  /// In en, this message translates to:
+  /// **'Add a room…'**
+  String get taskAddRoom;
+
+  /// Heading of the fields of a room added with a task. Web catalogue: Nouvelle pièce.
+  ///
+  /// In en, this message translates to:
+  /// **'New room'**
+  String get taskNewRoom;
+
+  /// Label of the name of a room added with a task. Web catalogue: Nom de la nouvelle pièce.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of the new room'**
+  String get taskNewRoomName;
+
+  /// Label of the kind of a room added with a task. Web catalogue: Type de pièce.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of room'**
+  String get taskNewRoomKind;
+
+  /// Last choice of the items of a task form: a new item. Web catalogue: Ajouter un élément….
+  ///
+  /// In en, this message translates to:
+  /// **'Add an item…'**
+  String get taskAddItem;
+
+  /// Heading of the fields of an item added with a task. Web catalogue: Nouvel élément.
+  ///
+  /// In en, this message translates to:
+  /// **'New item'**
+  String get taskNewItem;
+
+  /// Label of the name of an item added with a task. Web catalogue: Nom du nouvel élément.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of the new item'**
+  String get taskNewItemName;
+
+  /// Last choice of the contractors of a task form: a new contractor. Web catalogue: Ajouter un intervenant….
+  ///
+  /// In en, this message translates to:
+  /// **'Add a contractor…'**
+  String get taskAddContractor;
+
+  /// Heading of the fields of a contractor added with a task. Web catalogue: Nouvel intervenant.
+  ///
+  /// In en, this message translates to:
+  /// **'New contractor'**
+  String get taskNewContractor;
+
+  /// Label of the name of a contractor added with a task. Web catalogue: Nom du nouvel intervenant.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of the new contractor'**
+  String get taskNewContractorName;
+
+  /// Pill of a task whose date was moved. Web catalogue: Reportée.
+  ///
+  /// In en, this message translates to:
+  /// **'Postponed'**
+  String get taskPostponedPill;
+
+  /// Pill of a task of high priority. Web catalogue: Priorité haute.
+  ///
+  /// In en, this message translates to:
+  /// **'High priority'**
+  String get taskHighPriority;
+
+  /// Pill of a task of low priority. Web catalogue: Priorité basse.
+  ///
+  /// In en, this message translates to:
+  /// **'Low priority'**
+  String get taskLowPriority;
+
+  /// Heading of the repetition and the dates of a task. Web catalogue: Quand.
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get taskWhen;
+
+  /// Heading of the photos of the item of a task. Web catalogue: Photos de l'élément.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos of the item'**
+  String get taskPhotosOfItem;
+
+  /// Heading of the photos of the room of a task. Web catalogue: Photos de la pièce.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos of the room'**
+  String get taskPhotosOfRoom;
+
+  /// Link to the item, which holds all its photos. Web catalogue: Toutes les photos de l'élément.
+  ///
+  /// In en, this message translates to:
+  /// **'All photos of the item'**
+  String get taskAllPhotosOfItem;
+
+  /// Link to the room, which holds all its photos. Web catalogue: Toutes les photos de la pièce.
+  ///
+  /// In en, this message translates to:
+  /// **'All photos of the room'**
+  String get taskAllPhotosOfRoom;
+
+  /// Title of the screen that completes a done occurrence. Web catalogue: Détails de ce qui a été fait.
+  ///
+  /// In en, this message translates to:
+  /// **'Details of what was done'**
+  String get occurrenceTitle;
+
+  /// Label of the day a task was done. Web catalogue: fait le.
+  ///
+  /// In en, this message translates to:
+  /// **'Done on'**
+  String get occurrenceDoneOn;
+
+  /// Button of a done line of the history of a task, to complete it. Web catalogue: Détails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get occurrenceDetails;
 }
 
 class _AppLocalizationsDelegate

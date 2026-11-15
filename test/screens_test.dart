@@ -48,6 +48,9 @@ const fixtureTexts = [
   'Main boiler',
   'Second boiler',
   'Main cellar',
+  // The contractors of the fixture, in the list of the task form.
+  'Main plumber',
+  'Second plumber',
   'Second kitchen',
   'Second cellar',
   'Second smoke alarm',
@@ -324,7 +327,7 @@ void main() {
           final history = heading(t('History', 'Historique'));
           final nextDates = heading(t('Next dates', 'Prochaines dates'));
           var sawNextDates = nextDates.evaluate().isNotEmpty;
-          for (var i = 0; i < 20 && history.evaluate().isEmpty; i++) {
+          for (var i = 0; i < 40 && history.evaluate().isEmpty; i++) {
             await tester.drag(list, const Offset(0, -250));
             await tester.pumpAndSettle();
             sawNextDates |= nextDates.evaluate().isNotEmpty;

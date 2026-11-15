@@ -3,16 +3,14 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../data/repository.dart';
-import '../design/icons.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
-import '../domain/day.dart';
 import '../l10n/app_localizations.dart';
 import 'home_selector.dart';
-import 'messages.dart';
+import 'open_task_row.dart';
 import 'state.dart';
-import 'stock_screens.dart';
 import 'report_screens.dart';
+import 'task_list_screen.dart';
 import 'task_screen.dart';
 
 /// Today (docs/spec.md, "Screens of v1"): overdue, today, coming up within a
@@ -29,6 +27,7 @@ class TodayScreen extends StatefulWidget {
 
 class _TodayScreenState extends State<TodayScreen> {
   List<TodayEntry>? _entries;
+  List<TodayEntry> _season = const [];
   int _reports = 0;
   int _revision = -1;
 
@@ -43,95 +42,26 @@ class _TodayScreenState extends State<TodayScreen> {
   }
 
   Future<void> _load(AppState state) async {
-    final entries = await state.repository.todayEntries(
-      homeId: state.todayAllHomes ? null : state.current?.id,
-    );
+    final homeId = state.todayAllHomes ? null : state.current?.id;
+    final entries = await state.repository.todayEntries(homeId: homeId);
+    final season = await state.repository.seasonEntries(homeId: homeId);
     final current = state.current;
     final reports = current == null
         ? 0
         : await state.repository.openReportCount([current.id]);
     if (mounted) {
       setState(() {
-        _entries = entries;
+        // A task of a season that is on, without a date, is in the section In
+        // season and not in No date (`today_sections`).
+        final seasonal = {for (final e in season) e.occurrence.id};
+        _entries = [
+          for (final e in entries)
+            if (!seasonal.contains(e.occurrence.id)) e,
+        ];
+        _season = season;
         _reports = reports;
       });
     }
-  }
-
-  Future<void> _run(Future<void> Function() action) async {
-    final state = AppScope.of(context);
-    try {
-      await action();
-    } on Refused catch (refused) {
-      if (mounted) showRefusal(context, refused);
-    }
-    await state.refresh();
-  }
-
-  void _offerUndo(String message, String occurrenceId) {
-    final l10n = AppLocalizations.of(context);
-    final state = AppScope.of(context);
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          action: SnackBarAction(
-            label: l10n.undo,
-            onPressed: () => _run(() => state.repository.undo(occurrenceId)),
-          ),
-        ),
-      );
-  }
-
-  Future<void> _done(TodayEntry entry) async {
-    final l10n = AppLocalizations.of(context);
-    final repository = AppScope.of(context).repository;
-    Closing? closed;
-    await _run(() async {
-      closed = await repository.complete(entry.occurrence.id);
-    });
-    if (closed != null && mounted) {
-      final short = closed!.short;
-      _offerUndo(
-        [
-          l10n.doneMessage(entry.task.title),
-          if (short.isNotEmpty)
-            shortageMessage(
-              l10n,
-              Localizations.localeOf(context).toLanguageTag(),
-              short,
-            ),
-        ].join(' '),
-        entry.occurrence.id,
-      );
-    }
-  }
-
-  Future<void> _skip(TodayEntry entry) async {
-    final l10n = AppLocalizations.of(context);
-    final repository = AppScope.of(context).repository;
-    var closed = false;
-    await _run(() async {
-      await repository.skip(entry.occurrence.id);
-      closed = true;
-    });
-    if (closed && mounted) {
-      _offerUndo(l10n.skippedMessage(entry.task.title), entry.occurrence.id);
-    }
-  }
-
-  Future<void> _postpone(TodayEntry entry) async {
-    final repository = AppScope.of(context).repository;
-    final today = repository.today();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: asDateTime(today.addDays(1)),
-      firstDate: asDateTime(today),
-      lastDate: asDateTime(today.addYears(dateSpanYears)),
-    );
-    if (picked == null || !mounted) return;
-    await _run(() => repository.postpone(entry.occurrence.id, Day.of(picked)));
   }
 
   @override
@@ -146,6 +76,7 @@ class _TodayScreenState extends State<TodayScreen> {
       l10n.todayToday: [],
       l10n.todayComingUp: [],
       l10n.todayNoDate: [],
+      l10n.seasonSection: _season,
     };
     for (final entry in entries ?? const <TodayEntry>[]) {
       final due = entry.dueOn;
@@ -177,7 +108,24 @@ class _TodayScreenState extends State<TodayScreen> {
                       homeId: state.current!.id,
                     ),
                   ),
-                if (entries.isEmpty)
+                // Today beside All, the list of every task of the home
+                // (`tab_bar "today"`); across homes there is no such list.
+                if (state.current != null && !state.todayAllHomes)
+                  Padding(
+                    padding: const EdgeInsets.only(top: HcSpace.s3),
+                    child: HcTabs(
+                      key: const Key('today-tabs'),
+                      labels: [l10n.navToday, l10n.tasksTabAll],
+                      current: 0,
+                      onSelect: (_) => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) =>
+                              TaskListScreen(homeId: state.current!.id),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (entries.isEmpty && _season.isEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: HcSpace.s4),
                     child: HcEmpty(l10n.todayEmpty),
@@ -193,13 +141,10 @@ class _TodayScreenState extends State<TodayScreen> {
                     HcCardList(
                       children: [
                         for (final entry in rows)
-                          _TodayRow(
+                          OpenTaskRow(
                             entry: entry,
                             today: today,
                             namesHome: named,
-                            onDone: () => _done(entry),
-                            onSkip: () => _skip(entry),
-                            onPostpone: () => _postpone(entry),
                           ),
                       ],
                     ),
@@ -217,76 +162,6 @@ class _TodayScreenState extends State<TodayScreen> {
                   ),
               ],
             ),
-    );
-  }
-}
-
-enum _RowAction { skip, postpone }
-
-/// A row of Today: the task, its home on All homes, its date in a pill, Done
-/// in one tap, and skip and postpone in its menu.
-class _TodayRow extends StatelessWidget {
-  const _TodayRow({
-    required this.entry,
-    required this.today,
-    required this.namesHome,
-    required this.onDone,
-    required this.onSkip,
-    required this.onPostpone,
-  });
-
-  final TodayEntry entry;
-  final Day today;
-  final bool namesHome;
-  final VoidCallback onDone;
-  final VoidCallback onSkip;
-  final VoidCallback onPostpone;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final due = entry.dueOn;
-    final place = [
-      if (namesHome) entry.home.name,
-      ?entry.roomName,
-      ?entry.itemName,
-    ];
-    return HcTaskRow(
-      key: Key('today-${entry.occurrence.id}'),
-      title: entry.task.title,
-      // The room and the item under the title, as the web's row; on All
-      // homes, the home first.
-      text: place.isEmpty ? null : place.join(' · '),
-      pill: duePill(
-        context,
-        due,
-        today,
-        postponed: entry.occurrence.status == 'postponed',
-      ),
-      overdue: due != null && due < today,
-      doneLabel: l10n.actionDone,
-      onDone: onDone,
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) =>
-              TaskScreen(homeId: entry.home.id, taskId: entry.task.id),
-        ),
-      ),
-      more: PopupMenuButton<_RowAction>(
-        tooltip: l10n.actionMore,
-        icon: const HcIcon(HcIcons.more, color: HcColors.textMuted),
-        onSelected: (action) => switch (action) {
-          _RowAction.skip => onSkip(),
-          _RowAction.postpone => onPostpone(),
-        },
-        itemBuilder: (context) => [
-          PopupMenuItem(value: _RowAction.skip, child: Text(l10n.actionSkip)),
-          PopupMenuItem(
-            value: _RowAction.postpone,
-            child: Text(l10n.actionPostpone),
-          ),
-        ],
-      ),
     );
   }
 }

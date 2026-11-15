@@ -33,6 +33,8 @@ import 'package:housecairn_mobile/ui/project_screens.dart';
 import 'package:housecairn_mobile/ui/report_screens.dart';
 import 'package:housecairn_mobile/ui/rooms.dart';
 import 'package:housecairn_mobile/ui/stock_screens.dart';
+import 'package:housecairn_mobile/ui/occurrence_screen.dart';
+import 'package:housecairn_mobile/ui/task_list_screen.dart';
 import 'package:housecairn_mobile/ui/task_screen.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -54,6 +56,7 @@ class Demo {
   late String filter;
   late String shop;
   late String paintProject;
+  late String doneOccurrence;
 
   /// The day the web was measured on: the rows' dates are relative to it
   /// (`today` of test/parity/web_fr_390.json).
@@ -111,6 +114,69 @@ class Demo {
       );
       clock.advance(const Duration(seconds: 1));
     }
+    // The two tasks of the web's demonstration beyond the week of Today, and
+    // those tool/web_parity.py's instance adds (lot 3c): one done two days ago
+    // with its cost and a note, one skipped, one in season (the month of the
+    // day, beyond the week) and one hidden until its date gets closer.
+    // The people of the history are left out: they come with lot 5.
+    for (final (title, room, days) in [
+      ('Nettoyer les gouttières', 'Jardin', 12),
+      ('Purger les radiateurs', 'Salon', 20),
+    ]) {
+      await r.createTask(
+        home,
+        TaskInput(
+          title: title,
+          dueOn: today.addDays(days),
+          roomId: rooms[room],
+        ),
+      );
+      clock.advance(const Duration(seconds: 1));
+    }
+    final changed = await r.createTask(
+      home,
+      TaskInput(
+        title: 'Changer la pile du détecteur',
+        dueOn: today.addDays(-4),
+        roomId: rooms['Entrée'],
+      ),
+    );
+    doneOccurrence = (await r.openOccurrencesOf(changed)).single.id;
+    await r.complete(doneOccurrence, on: today.addDays(-2));
+    await r.updateOccurrence(
+      doneOccurrence,
+      actualCost: '12.50',
+      note: 'Pile neuve',
+    );
+    final extinguishers = await r.createTask(
+      home,
+      TaskInput(
+        title: 'Faire vérifier les extincteurs',
+        dueOn: today.addDays(-9),
+        roomId: rooms['Cuisine'],
+      ),
+    );
+    await r.skip((await r.openOccurrencesOf(extinguishers)).single.id);
+    await r.createTask(
+      home,
+      TaskInput(
+        title: 'Traiter la terrasse',
+        dueOn: today.addDays(20),
+        roomId: rooms['Jardin'],
+        season: 'custom',
+        seasonStartMonth: webToday.month,
+        seasonEndMonth: webToday.month,
+      ),
+    );
+    await r.createTask(
+      home,
+      TaskInput(
+        title: 'Ramoner le conduit',
+        dueOn: today.addDays(30),
+        roomId: rooms['Salon'],
+        hideDaysBefore: 10,
+      ),
+    );
     // The stock added to the web's demonstration by tool/web_parity.py's
     // instance (its docstring): three articles, a supplier, movements.
     filter = await r.addArticle(
@@ -230,26 +296,71 @@ double drawnSize(WidgetTester tester, Finder text) {
 Finder withStyle(TextStyle style) =>
     find.byWidgetPredicate((w) => w is Text && w.style == style);
 
+/// The rows `tool/web_parity.py` reads as `.task-row`: a task row, or a line
+/// of the history (an `HcRow` keyed `history-<id>`).
+Finder taskRows() => find.byWidgetPredicate(
+  (w) =>
+      w is HcTaskRow ||
+      (w is HcRow &&
+          w.key is ValueKey<String> &&
+          (w.key! as ValueKey<String>).value.startsWith('history-')),
+);
+
 /// What a list shows, section by section, as `tool/web_parity.py` reads the
 /// web's `section` elements: the heading (in capitals, with its count), then
 /// for each row its title, its place, its pills and its height.
 List<Map<String, Object?>> sectionsOf(WidgetTester tester) {
   String text(Finder f) => tester.widget<Text>(f.first).data ?? '';
+  Map<String, Object?> rowOf(Element row) {
+    final within = find.byWidget(row.widget);
+    final title = find.descendant(
+      of: within,
+      matching: withStyle(HcText.rowTitle),
+    );
+    final rowText = find.descendant(
+      of: within,
+      matching: withStyle(HcText.rowText),
+    );
+    return {
+      'title': text(title),
+      'text': rowText.evaluate().isEmpty ? '' : text(rowText),
+      'pills': [
+        for (final pill
+            in find
+                .descendant(of: within, matching: find.byType(HcPill))
+                .evaluate())
+          tester.widget<HcPill>(find.byWidget(pill.widget)).label,
+      ],
+      'height': tester.getRect(within).height,
+      'title_lines':
+          (tester.getSize(title).height /
+                  (HcFont.sizeBase * HcComponent.rowLineHeight))
+              .round(),
+    };
+  }
+
   final headings = find.byType(HcSectionHeading).evaluate().toList();
   final lists = find
       .byType(HcCardList)
       .evaluate()
       .where(
         (l) => find
-            .descendant(
-              of: find.byWidget(l.widget),
-              matching: find.byType(HcTaskRow),
-            )
+            .descendant(of: find.byWidget(l.widget), matching: taskRows())
             .evaluate()
             .isNotEmpty,
       )
       .toList();
   if (lists.isEmpty) return [];
+  // A list with no heading (all the tasks, the history): its rows are one
+  // section without a title, as `tool/web_parity.py` reads it.
+  if (headings.isEmpty) {
+    return [
+      {
+        'heading': '',
+        'rows': [for (final row in taskRows().evaluate()) rowOf(row)],
+      },
+    ];
+  }
   return [
     for (var i = 0; i < headings.length && i < lists.length; i++)
       {
@@ -264,54 +375,10 @@ List<Map<String, Object?>> sectionsOf(WidgetTester tester) {
               in find
                   .descendant(
                     of: find.byWidget(lists[i].widget),
-                    matching: find.byType(HcTaskRow),
+                    matching: taskRows(),
                   )
                   .evaluate())
-            {
-              'title': text(
-                find.descendant(
-                  of: find.byWidget(row.widget),
-                  matching: withStyle(HcText.rowTitle),
-                ),
-              ),
-              'text':
-                  find
-                      .descendant(
-                        of: find.byWidget(row.widget),
-                        matching: withStyle(HcText.rowText),
-                      )
-                      .evaluate()
-                      .isEmpty
-                  ? ''
-                  : text(
-                      find.descendant(
-                        of: find.byWidget(row.widget),
-                        matching: withStyle(HcText.rowText),
-                      ),
-                    ),
-              'pills': [
-                for (final pill
-                    in find
-                        .descendant(
-                          of: find.byWidget(row.widget),
-                          matching: find.byType(HcPill),
-                        )
-                        .evaluate())
-                  tester.widget<HcPill>(find.byWidget(pill.widget)).label,
-              ],
-              'height': tester.getRect(find.byWidget(row.widget)).height,
-              'title_lines':
-                  (tester
-                              .getSize(
-                                find.descendant(
-                                  of: find.byWidget(row.widget),
-                                  matching: withStyle(HcText.rowTitle),
-                                ),
-                              )
-                              .height /
-                          (HcFont.sizeBase * HcComponent.rowLineHeight))
-                      .round(),
-            },
+            rowOf(row),
         ],
       },
   ];
@@ -357,9 +424,9 @@ Measures measure(
     m['${name}_weight'] = style.weight;
     if (name.startsWith('row_')) m['${name}_line'] = style.line;
   }
-  final taskRows = find.byType(HcTaskRow);
-  if (taskRows.evaluate().isNotEmpty) {
-    m['row_height'] = rectOf(tester, taskRows.first).height;
+  final rows = taskRows();
+  if (rows.evaluate().isNotEmpty) {
+    m['row_height'] = rectOf(tester, rows.first).height;
   }
   m['sections'] = sectionsOf(tester);
   final cards = find.byType(HcCardList);
@@ -410,7 +477,12 @@ Measures measure(
             .isNotEmpty;
     // The gap to the list above it, as the web's margin between the two.
     final above = [
-      for (final e in [...cards.evaluate(), ...find.byType(HcEmpty).evaluate()])
+      for (final e in [
+        ...cards.evaluate(),
+        ...find.byType(HcEmpty).evaluate(),
+        // The line of the hidden tasks, which the web's button follows.
+        ...find.byKey(const Key('tasks-hidden')).evaluate(),
+      ])
         if (tester.getRect(find.byElementPredicate((x) => x == e)).bottom <=
             r.top + 0.5)
           tester.getRect(find.byElementPredicate((x) => x == e)).bottom,
@@ -475,11 +547,36 @@ Future<Measures> measureLong(
   };
 }
 
+/// Measures a list longer than the phone on a view tall enough to build it
+/// whole (a list builds only what is near the screen, and the sections of
+/// a long list would be measured by halves), then puts the phone back.
+Future<Measures> measureTall(
+  WidgetTester tester, {
+  required String add,
+  bool field = false,
+  bool done = false,
+  String? rowTitle,
+}) async {
+  final size = tester.view.physicalSize;
+  tester.view.physicalSize = Size(size.width, size.height * 4);
+  await tester.pumpAndSettle();
+  final m = measure(
+    tester,
+    add: add,
+    field: field,
+    done: done,
+    rowTitle: rowTitle,
+  );
+  tester.view.physicalSize = size;
+  await tester.pumpAndSettle();
+  return m;
+}
+
 final screens = <Screen>[
   (
     name: 'today',
     open: (tester, demo) async {},
-    measure: (t) => measure(
+    measure: (t) => measureTall(
       t,
       rowTitle: 'Tester le détecteur de fumée',
       add: 'Ajouter une tâche',
@@ -489,6 +586,32 @@ final screens = <Screen>[
   (
     name: 'task_form',
     open: (tester, demo) => openScreen(tester, TaskScreen(homeId: demo.home)),
+    measure: (t) => measure(t, field: true),
+  ),
+  (
+    name: 'tasks',
+    open: (tester, demo) =>
+        openScreen(tester, TaskListScreen(homeId: demo.home)),
+    measure: (t) =>
+        measureTall(t, add: 'Ajouter une tâche', field: true, done: true),
+  ),
+  (
+    name: 'history',
+    open: (tester, demo) async {
+      await openScreen(tester, TaskListScreen(homeId: demo.home));
+      await tester.tap(find.byKey(const Key('tasks-status')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Faites').last);
+      await tester.pumpAndSettle();
+    },
+    measure: (t) => measure(t, field: true),
+  ),
+  (
+    name: 'occurrence_form',
+    open: (tester, demo) => openScreen(
+      tester,
+      OccurrenceScreen(homeId: demo.home, occurrenceId: demo.doneOccurrence),
+    ),
     measure: (t) => measure(t, field: true),
   ),
   (

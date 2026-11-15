@@ -27,7 +27,16 @@ class PhotoSection extends StatelessWidget {
     this.roomId,
     this.itemId,
     required this.writable,
+    this.heading,
+    this.hideEmpty = false,
   });
+
+  /// The heading, when it is not simply Photos.
+  final String? heading;
+
+  /// Shows nothing at all when there is no photo, as the photos of the place
+  /// of a task do.
+  final bool hideEmpty;
 
   final String homeId;
   final String? roomId;
@@ -99,38 +108,45 @@ class PhotoSection extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return DataView<List<PhotoRow>>(
       load: (r) => r.photosOf(roomId: roomId, itemId: itemId),
-      builder: (context, photos) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          HcSectionHeading(l10n.photos),
-          if (photos.isEmpty)
-            HcEmpty(l10n.photosEmpty)
-          else
-            LayoutBuilder(
-              builder: (context, box) {
-                final gap = HcSpace.s2;
-                final side = (box.maxWidth - gap * (_columns - 1)) / _columns;
-                return Wrap(
-                  spacing: gap,
-                  runSpacing: gap,
-                  children: [
-                    for (final photo in photos)
-                      _Thumbnail(photo: photo, side: side, writable: writable),
-                  ],
-                );
-              },
+      builder: (context, photos) => hideEmpty && photos.isEmpty
+          ? const SizedBox.shrink()
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                HcSectionHeading(heading ?? l10n.photos),
+                if (photos.isEmpty)
+                  HcEmpty(l10n.photosEmpty)
+                else
+                  LayoutBuilder(
+                    builder: (context, box) {
+                      final gap = HcSpace.s2;
+                      final side =
+                          (box.maxWidth - gap * (_columns - 1)) / _columns;
+                      return Wrap(
+                        spacing: gap,
+                        runSpacing: gap,
+                        children: [
+                          for (final photo in photos)
+                            _Thumbnail(
+                              photo: photo,
+                              side: side,
+                              writable: writable,
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                if (writable) ...[
+                  const SizedBox(height: HcSpace.s3),
+                  OutlinedButton.icon(
+                    key: const Key('photo-add'),
+                    onPressed: () => _choose(context),
+                    icon: const HcIcon(HcIcons.add, color: HcColors.primary),
+                    label: Text(l10n.addPhoto),
+                  ),
+                ],
+              ],
             ),
-          if (writable) ...[
-            const SizedBox(height: HcSpace.s3),
-            OutlinedButton.icon(
-              key: const Key('photo-add'),
-              onPressed: () => _choose(context),
-              icon: const HcIcon(HcIcons.add, color: HcColors.primary),
-              label: Text(l10n.addPhoto),
-            ),
-          ],
-        ],
-      ),
     );
   }
 }

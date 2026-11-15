@@ -172,9 +172,15 @@ Homes and Settings shows the current home.
 1. **Today**: overdue, coming up within the horizon (1 week by default, `tasks/models.py:421-426`),
    in season, and open reports, of the current home or of **All homes**; with All homes each row
    names its home. Grouped by urgency, room or home (or person, with sync). Done is one tap,
-   with an undo bar; skip and postpone from the same row.
-2. **Task**: form with only the title required; repetition with a preview of the next five
-   dates (`tasks/recurrence.py:341-351`); materials; history of occurrences; photos.
+   with an undo bar; skip and postpone from the same row. In season lists the tasks of a season
+   that is on, due beyond the week or without a date (`tasks/agenda.py`, `today_sections`). On one
+   home, a tab **All** opens the list of every task (by room, the hidden ones on demand, 30 to a
+   page) and, under Done, the history with its real cost (`tasks/task_list.html`).
+2. **Task**: form with only the title required (priority, duration, procedure, contractor,
+   masking, and a room, an item or a contractor added with the task); repetition with a preview
+   of the next five dates (`tasks/recurrence.py:341-351`); materials; the page shows Done, Skip,
+   Postpone and Undo; history of occurrences, each done one opening its details (day, real cost,
+   note); photos of the item or the room; deletion.
 3. **Add from a template**: the bundled library, filtered by the equipment ticked.
 4. **Rooms**: list in the household's order; a room shows its memory, items, photos, tasks.
 5. **Item**: details, warranty state (`rooms/models.py:182-186`), contract, links, photos, tasks.
