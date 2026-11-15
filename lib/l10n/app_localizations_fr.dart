@@ -2308,4 +2308,127 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get taskAddSubmit => 'Ajouter la tâche';
+
+  @override
+  String get unitMillilitreChoice => 'Millilitre (mL)';
+
+  @override
+  String get unitMillilitre => 'mL';
+
+  @override
+  String get errWarrantyDuration => 'Une garantie dure de 1 à 99 mois ou ans.';
+
+  @override
+  String get equipmentTab => 'Équipements';
+
+  @override
+  String get itemsSearch =>
+      'Rechercher par nom, marque, modèle ou numéro de série';
+
+  @override
+  String get itemsEveryRoom => 'Toutes les pièces';
+
+  @override
+  String itemsNext(String title) {
+    return 'Prochaine : $title';
+  }
+
+  @override
+  String get itemsNoTask => 'Aucune tâche à venir';
+
+  @override
+  String itemsWarrantyUntil(String date) {
+    return 'garantie jusqu\'au $date';
+  }
+
+  @override
+  String itemsWarrantyEnded(String date) {
+    return 'garantie terminée le $date';
+  }
+
+  @override
+  String get itemsAllEmpty =>
+      'Aucun élément pour l\'instant. Ajoutez-en un depuis la page d\'une pièce.';
+
+  @override
+  String get itemsNoMatch => 'Aucun élément ne correspond.';
+
+  @override
+  String get itemManufacturerWarranty => 'Garantie constructeur';
+
+  @override
+  String get itemPurchasedOn => 'Acheté le';
+
+  @override
+  String get warrantyDuration => 'Garantie : durée';
+
+  @override
+  String get warrantyDurationUnit => 'Garantie : en';
+
+  @override
+  String get warrantyProvider => 'Garantie : donnée par';
+
+  @override
+  String get warrantyProviderName =>
+      'Garantie : nom du fabricant ou du magasin';
+
+  @override
+  String get warrantyStartsOn => 'Garantie : départ le';
+
+  @override
+  String get warrantyMonthsChoice => 'mois';
+
+  @override
+  String get warrantyYearsChoice => 'ans';
+
+  @override
+  String get warrantyByManufacturer => 'Le fabricant';
+
+  @override
+  String get warrantyByShop => 'Le magasin';
+
+  @override
+  String warrantyMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mois',
+      one: '$count mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String warrantyYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ans',
+      one: '$count an',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String warrantyFrom(String date) {
+    return 'depuis le $date';
+  }
+
+  @override
+  String get warrantyDurationHelp =>
+      'La garantie du fabricant ou du magasin, en mois ou en années.';
+
+  @override
+  String get warrantyProviderNameHelp =>
+      'Exemple : Acme, ou le magasin où vous l\'avez acheté.';
+
+  @override
+  String get warrantyStartsOnHelp => 'Vide : à partir de la date d\'achat.';
+
+  @override
+  String get warrantyEndsOnHelp =>
+      'Calculée à partir du départ et de la durée. Ne la saisissez que si vous ne les connaissez pas.';
+
+  @override
+  String get saved => 'Enregistré';
 }

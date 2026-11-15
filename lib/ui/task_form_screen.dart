@@ -13,6 +13,7 @@ import '../domain/day.dart';
 import '../domain/durations.dart' as durations;
 import '../domain/recurrence.dart' as recurrence;
 import '../l10n/app_localizations.dart';
+import 'autosave.dart';
 import 'budget_parts.dart';
 import 'choices.dart';
 import 'messages.dart';
@@ -55,8 +56,41 @@ class TaskFormScreen extends StatefulWidget {
   State<TaskFormScreen> createState() => _TaskFormScreenState();
 }
 
-class _TaskFormScreenState extends State<TaskFormScreen> {
+class _TaskFormScreenState extends State<TaskFormScreen>
+    with AutosaveSheet<TaskFormScreen> {
   final _form = GlobalKey<FormState>();
+
+  @override
+  GlobalKey<FormState> get sheetForm => _form;
+
+  /// An existing task saves itself, unless a room, an item or a contractor
+  /// is to be added with it: that waits for the button, all or none.
+  @override
+  bool get existing =>
+      widget.taskId != null &&
+      _roomId != _newChoice &&
+      _itemId != _newChoice &&
+      _contractorId != _newChoice;
+
+  @override
+  Future<void> writeSheet(Repository repository) async {
+    final typed = int.tryParse(_duration.text.trim());
+    final minutes = typed == null
+        ? null
+        : durations.toMinutes(typed, _durationUnit);
+    await repository.atomic(() async {
+      await repository.updateTask(
+        widget.taskId!,
+        _input(_roomId, _itemId, _contractorId, minutes),
+      );
+      await repository.setTaskBudgets(
+        widget.taskId!,
+        material: _material.text,
+        labour: _labour.text,
+      );
+    });
+  }
+
   final _title = TextEditingController();
   final _interval = TextEditingController(text: '1');
   final _notes = TextEditingController();
@@ -168,6 +202,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
       _ready = true;
     });
     await _loadPlaces();
+    sheetLoaded();
   }
 
   @override
@@ -216,6 +251,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   );
 
   Future<void> _save() async {
+    cancelAutosave();
     if (!_form.currentState!.validate()) return;
     final state = AppScope.of(context);
     final navigator = Navigator.of(context);
@@ -299,7 +335,9 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
       firstDate: asDateTime(today.addYears(-dateSpanYears)),
       lastDate: asDateTime(today.addYears(dateSpanYears)),
     );
-    if (picked != null) setState(() => _due = Day.of(picked));
+    if (picked == null) return;
+    setState(() => _due = Day.of(picked));
+    sheetChanged(now: true);
   }
 
   List<Day> _preview(String hemisphere) {
@@ -430,7 +468,10 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
               ),
               if (_due != null)
                 TextButton(
-                  onPressed: () => setState(() => _due = null),
+                  onPressed: () {
+                    setState(() => _due = null);
+                    sheetChanged(now: true);
+                  },
                   child: Text(l10n.taskClearDate),
                 ),
             ],
@@ -746,9 +787,10 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     final wide = MediaQuery.textScalerOf(context).scale(1) > 1.3;
     final title = widget.taskId == null ? l10n.taskAddTitle : l10n.taskEditTask;
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(actions: [Center(child: savedStatus())]),
       body: Form(
         key: _form,
+        onChanged: sheetChanged,
         child: HcScreenList(
           children: [
             Semantics(

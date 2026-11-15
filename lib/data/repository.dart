@@ -17,6 +17,7 @@ import '../domain/photos.dart';
 import '../domain/recurrence.dart' as recurrence;
 import '../domain/reminders.dart';
 import '../domain/stock.dart' as stock;
+import '../domain/warranty.dart' as warranty;
 import '../sync/mode.dart';
 import 'database.dart';
 
@@ -75,6 +76,10 @@ enum Refusal {
 
   /// The row does not exist (or not in this home).
   notFound,
+
+  /// A warranty of less than 1 or more than 99 months or years
+  /// (`MAX_WARRANTY_DURATION`, `rooms/models.py`).
+  warrantyDurationOutOfRange,
 
   /// A phone number: digits, spaces and `+ ( ) - . /` only
   /// (`tasks/models.py:112`).
@@ -285,6 +290,12 @@ class ItemInput {
     this.serialNumber = '',
     this.installedOn,
     this.warrantyEndsOn,
+    this.purchasedOn,
+    this.warrantyDuration,
+    this.warrantyDurationUnit = warranty.warrantyYear,
+    this.warrantyProvider = '',
+    this.warrantyProviderName = '',
+    this.warrantyStartsOn,
     this.contractContractorId,
     this.contractNumber = '',
     this.contractUrl = '',
@@ -298,7 +309,24 @@ class ItemInput {
   final String model;
   final String serialNumber;
   final Day? installedOn;
+
+  /// The end typed; with a duration and a start, the repository works it
+  /// out instead (web ADR 0080).
   final Day? warrantyEndsOn;
+  final Day? purchasedOn;
+
+  /// Months or years of the manufacturer's warranty, 1 to 99, if known.
+  final int? warrantyDuration;
+
+  /// `month` or `year` (lib/domain/warranty.dart).
+  final String warrantyDurationUnit;
+
+  /// `manufacturer`, `shop` or `''`, and the name of who gives it.
+  final String warrantyProvider;
+  final String warrantyProviderName;
+
+  /// The start of the warranty; `null` counts from [purchasedOn].
+  final Day? warrantyStartsOn;
   final String? contractContractorId;
   final String contractNumber;
   final String contractUrl;
@@ -346,6 +374,25 @@ class TaskEntry {
 
   Day? get dueOn =>
       occurrence?.dueOn == null ? null : Day.parse(occurrence!.dueOn!);
+}
+
+/// A row of the list of every item (`rooms/services.py` `ItemRow`).
+class ItemListEntry {
+  const ItemListEntry({
+    required this.item,
+    required this.room,
+    required this.warranty,
+    this.next,
+  });
+
+  final ItemRow item;
+  final RoomRow room;
+
+  /// `none`, `active` or `expired`.
+  final String warranty;
+
+  /// Its next task, if one is to come.
+  final TaskEntry? next;
 }
 
 /// An occurrence just closed and the one that follows it, if any.
@@ -1112,6 +1159,31 @@ class Repository {
     }
     _checkDate(input.installedOn);
     _checkDate(input.warrantyEndsOn);
+    _checkDate(input.purchasedOn);
+    _checkDate(input.warrantyStartsOn);
+    final duration = input.warrantyDuration;
+    if (duration != null &&
+        (duration < 1 || duration > warranty.maxWarrantyDuration)) {
+      throw const Refused(Refusal.warrantyDurationOutOfRange);
+    }
+    // An empty unit is a year, as the web's form takes it.
+    final unit = input.warrantyDurationUnit.isEmpty
+        ? warranty.warrantyYear
+        : input.warrantyDurationUnit;
+    _oneOf(unit, warranty.warrantyUnits);
+    if (input.warrantyProvider.isNotEmpty) {
+      _oneOf(input.warrantyProvider, warranty.warrantyProviders);
+    }
+    // With a duration and a start, the end is worked out; without them, the
+    // end typed stays (`_end_the_warranty`, `rooms/services.py`).
+    final ends =
+        warranty.warrantyEnd(
+          warranty.warrantyStart(input.warrantyStartsOn, input.purchasedOn),
+          duration,
+          unit,
+        ) ??
+        input.warrantyEndsOn;
+    _checkDate(ends);
     return {
       'name': _name(input.name, 120),
       'kind': input.kind,
@@ -1119,7 +1191,13 @@ class Repository {
       'model': _text(input.model, 120),
       'serial_number': _text(input.serialNumber, 120),
       'installed_on': input.installedOn,
-      'warranty_ends_on': input.warrantyEndsOn,
+      'purchased_on': input.purchasedOn,
+      'warranty_duration': duration,
+      'warranty_duration_unit': unit,
+      'warranty_provider': input.warrantyProvider,
+      'warranty_provider_name': _text(input.warrantyProviderName, 120),
+      'warranty_starts_on': input.warrantyStartsOn,
+      'warranty_ends_on': ends,
       'contract_contractor_id': contractor,
       'contract_number': _text(input.contractNumber, 120),
       'contract_url': input.contractUrl.trim().isEmpty
@@ -1315,6 +1393,49 @@ class Repository {
       final byDate = x.compareTo(y);
       return byDate != 0 ? byDate : a.task.title.compareTo(b.task.title);
     });
+    return entries;
+  }
+
+  /// Every item of the home, all rooms together, by room (in the household's
+  /// order) then name; only those of [roomId] when given, and those whose
+  /// name, brand, model or serial number holds [query], whatever its case
+  /// (`rooms/services.py` `item_rows`). Each with its room, its warranty at
+  /// [today] and its next task: the open occurrence of its tasks due the
+  /// soonest, the late ones first, one without a date last.
+  Future<List<ItemListEntry>> itemList(
+    String homeId, {
+    String? roomId,
+    String query = '',
+  }) async {
+    final today = this.today();
+    final rooms = await this.rooms(homeId);
+    final words = query.trim().toLowerCase();
+    final entries = <ItemListEntry>[];
+    for (final room in rooms) {
+      if (roomId != null && room.id != roomId) continue;
+      for (final item in await itemsOf(room.id)) {
+        if (words.isNotEmpty &&
+            ![
+              item.name,
+              item.brand,
+              item.model,
+              item.serialNumber,
+            ].any((t) => t.toLowerCase().contains(words))) {
+          continue;
+        }
+        final next = (await tasksOf(itemId: item.id))
+            .where((e) => e.occurrence != null)
+            .firstOrNull;
+        entries.add(
+          ItemListEntry(
+            item: item,
+            room: room,
+            warranty: warrantyState(item, today),
+            next: next,
+          ),
+        );
+      }
+    }
     return entries;
   }
 

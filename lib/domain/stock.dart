@@ -7,8 +7,18 @@ import 'package:decimal/decimal.dart';
 /// amount never passes through floating point (docs/adr/0002, web ADR 0051;
 /// `test/no_double_test.dart` checks it).
 
-/// The units of an article: a short list plus Other (`stock/models.py:24-33`).
-const units = ['piece', 'litre', 'metre', 'kilogram', 'roll', 'box', 'other'];
+/// The units of an article: a short list plus Other (`stock/models.py:24-33`),
+/// the millilitre included (web ADR 0080 lot, no conversion between units).
+const units = [
+  'piece',
+  'litre',
+  'millilitre',
+  'metre',
+  'kilogram',
+  'roll',
+  'box',
+  'other',
+];
 
 /// The kinds of a movement (`stock/models.py` `MovementKind`).
 const entryKind = 'entry';

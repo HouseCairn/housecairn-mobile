@@ -3775,6 +3775,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add the task'**
   String get taskAddSubmit;
+
+  /// Web catalogue (stock): Millilitre (mL).
+  ///
+  /// In en, this message translates to:
+  /// **'Millilitre (mL)'**
+  String get unitMillilitreChoice;
+
+  /// Unit after a quantity, the same in the singular and the plural. Web catalogue (stock): mL.
+  ///
+  /// In en, this message translates to:
+  /// **'mL'**
+  String get unitMillilitre;
+
+  /// Error of the item form: the duration of the warranty is out of range (MAX_WARRANTY_DURATION of the web).
+  ///
+  /// In en, this message translates to:
+  /// **'A warranty lasts from 1 to 99 months or years.'**
+  String get errWarrantyDuration;
+
+  /// Tab of Rooms: every item of the home. Web catalogue (context tab): Équipements.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment'**
+  String get equipmentTab;
+
+  /// Search field of the list of every item. Web catalogue: Rechercher par nom, marque, modèle ou numéro de série.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, brand, model or serial number'**
+  String get itemsSearch;
+
+  /// First choice of the room filter of the list of every item. Web catalogue: Toutes les pièces.
+  ///
+  /// In en, this message translates to:
+  /// **'Every room'**
+  String get itemsEveryRoom;
+
+  /// Line of an item in the list of every item: its next task. Web catalogue: Prochaine :.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {title}'**
+  String itemsNext(String title);
+
+  /// Line of an item without an open task. Web catalogue: Aucune tâche à venir.
+  ///
+  /// In en, this message translates to:
+  /// **'No task to come'**
+  String get itemsNoTask;
+
+  /// Pill of an item under warranty, in the list of every item. Web catalogue: garantie jusqu'au.
+  ///
+  /// In en, this message translates to:
+  /// **'warranty until {date}'**
+  String itemsWarrantyUntil(String date);
+
+  /// Pill of an item whose warranty ended, in the list of every item. Web catalogue: garantie terminée le.
+  ///
+  /// In en, this message translates to:
+  /// **'warranty ended {date}'**
+  String itemsWarrantyEnded(String date);
+
+  /// Empty list of every item. Web catalogue: Aucun élément pour l'instant.
+  ///
+  /// In en, this message translates to:
+  /// **'No item yet. Add one from the page of a room.'**
+  String get itemsAllEmpty;
+
+  /// The filters of the list of every item leave nothing. Web catalogue: Aucun élément ne correspond.
+  ///
+  /// In en, this message translates to:
+  /// **'No item matches.'**
+  String get itemsNoMatch;
+
+  /// Line and section of an item. Web catalogue: Garantie constructeur.
+  ///
+  /// In en, this message translates to:
+  /// **'Manufacturer\'s warranty'**
+  String get itemManufacturerWarranty;
+
+  /// Field of an item. Web catalogue: Acheté le.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchased on'**
+  String get itemPurchasedOn;
+
+  /// Field of an item. Web catalogue: garantie : durée.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty: duration'**
+  String get warrantyDuration;
+
+  /// Field of an item: months or years. Web catalogue: garantie : en.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty: in'**
+  String get warrantyDurationUnit;
+
+  /// Field of an item. Web catalogue: garantie : donnée par.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty: given by'**
+  String get warrantyProvider;
+
+  /// Field of an item. Web catalogue: garantie : nom du fabricant ou du magasin.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty: name of the manufacturer or shop'**
+  String get warrantyProviderName;
+
+  /// Field of an item. Web catalogue: garantie : départ le.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty: starts on'**
+  String get warrantyStartsOn;
+
+  /// Unit of a warranty. Web catalogue (rooms): mois.
+  ///
+  /// In en, this message translates to:
+  /// **'months'**
+  String get warrantyMonthsChoice;
+
+  /// Unit of a warranty. Web catalogue (rooms): ans.
+  ///
+  /// In en, this message translates to:
+  /// **'years'**
+  String get warrantyYearsChoice;
+
+  /// Who gives a warranty. Web catalogue: Le fabricant.
+  ///
+  /// In en, this message translates to:
+  /// **'The manufacturer'**
+  String get warrantyByManufacturer;
+
+  /// Who gives a warranty. Web catalogue: Le magasin.
+  ///
+  /// In en, this message translates to:
+  /// **'The shop'**
+  String get warrantyByShop;
+
+  /// Duration of a warranty. Web catalogue: %(counter)s mois.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} month} other{{count} months}}'**
+  String warrantyMonths(int count);
+
+  /// Duration of a warranty. Web catalogue: %(counter)s an / ans.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} year} other{{count} years}}'**
+  String warrantyYears(int count);
+
+  /// Start of a warranty, after its duration. Web catalogue: depuis le.
+  ///
+  /// In en, this message translates to:
+  /// **'from {date}'**
+  String warrantyFrom(String date);
+
+  /// Help of the item form. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'The warranty of the manufacturer or of the shop, in months or years.'**
+  String get warrantyDurationHelp;
+
+  /// Help of the item form. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: Acme, or the shop where you bought it.'**
+  String get warrantyProviderNameHelp;
+
+  /// Help of the item form. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty: from the purchase date.'**
+  String get warrantyStartsOnHelp;
+
+  /// Help of the item form. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Worked out from the start and the duration. Type it only when you do not know them.'**
+  String get warrantyEndsOnHelp;
+
+  /// Discreet status of a sheet saved as it is changed, said by the screen reader. Web catalogue (core): Enregistré.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get saved;
 }
 
 class _AppLocalizationsDelegate
