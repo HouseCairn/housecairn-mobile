@@ -39,49 +39,52 @@ class _EquipmentListState extends State<EquipmentList> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final home = widget.home;
-    return DataView<(List<RoomRow>, List<ItemListEntry>)>(
-      key: ValueKey('${home.id}|${_query.text}|$_room'),
-      load: (r) async => (
-        await r.rooms(home.id),
-        await r.itemList(home.id, roomId: _room, query: _query.text),
+    // The search field and the room choice live in the outer view, keyed by
+    // the home only, so that typing never rebuilds the field (it would lose
+    // its focus and close the keyboard); only the list below is read again
+    // when the words or the room change.
+    return DataView<List<RoomRow>>(
+      key: ValueKey(home.id),
+      load: (r) => r.rooms(home.id),
+      builder: (context, rooms) => HcScreenList(
+        children: [
+          widget.tabs,
+          HcField(
+            label: l10n.itemsSearch,
+            child: TextField(
+              key: const Key('equipment-search'),
+              controller: _query,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) => setState(() {}),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+          hcChoice<String?>(
+            l10n.room,
+            rooms.any((r) => r.id == _room) ? _room : null,
+            [
+              (null, l10n.itemsEveryRoom),
+              for (final r in rooms) (r.id, r.name),
+            ],
+            (v) => setState(() => _room = v),
+            key: const Key('equipment-room'),
+          ),
+          DataView<List<ItemListEntry>>(
+            key: ValueKey('${home.id}|${_query.text}|$_room'),
+            load: (r) => r.itemList(home.id, roomId: _room, query: _query.text),
+            builder: (context, entries) {
+              final everything = _query.text.trim().isEmpty && _room == null;
+              return entries.isEmpty
+                  ? HcEmpty(everything ? l10n.itemsAllEmpty : l10n.itemsNoMatch)
+                  : HcCardList(
+                      children: [
+                        for (final entry in entries) _row(context, l10n, entry),
+                      ],
+                    );
+            },
+          ),
+        ],
       ),
-      builder: (context, data) {
-        final (rooms, entries) = data;
-        final everything = _query.text.trim().isEmpty && _room == null;
-        return HcScreenList(
-          children: [
-            widget.tabs,
-            HcField(
-              label: l10n.itemsSearch,
-              child: TextField(
-                key: const Key('equipment-search'),
-                controller: _query,
-                textInputAction: TextInputAction.search,
-                onSubmitted: (_) => setState(() {}),
-                onChanged: (_) => setState(() {}),
-              ),
-            ),
-            hcChoice<String?>(
-              l10n.room,
-              rooms.any((r) => r.id == _room) ? _room : null,
-              [
-                (null, l10n.itemsEveryRoom),
-                for (final r in rooms) (r.id, r.name),
-              ],
-              (v) => setState(() => _room = v),
-              key: const Key('equipment-room'),
-            ),
-            if (entries.isEmpty)
-              HcEmpty(everything ? l10n.itemsAllEmpty : l10n.itemsNoMatch)
-            else
-              HcCardList(
-                children: [
-                  for (final entry in entries) _row(context, l10n, entry),
-                ],
-              ),
-          ],
-        );
-      },
     );
   }
 

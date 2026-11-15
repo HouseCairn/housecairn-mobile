@@ -103,6 +103,54 @@ void main() {
       expect(data.kitchen, isNotEmpty);
     });
 
+    testWidgets('the search of Equipment keeps its focus while the words '
+        'go on, and the list follows, $locale', (tester) async {
+      await start(tester);
+      await openEquipment(tester);
+      final field = find.byKey(const Key('equipment-search'));
+      final before = tester.state<EditableTextState>(
+        find.descendant(of: field, matching: find.byType(EditableText)),
+      );
+      bool focused() => tester
+          .widget<EditableText>(
+            find.descendant(of: field, matching: find.byType(EditableText)),
+          )
+          .focusNode
+          .hasPrimaryFocus;
+
+      await tester.tap(field);
+      await tester.pumpAndSettle();
+      expect(focused(), isTrue);
+      // Two entries in a row, without the field being tapped again.
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: 'ac',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(focused(), isTrue);
+      expect(find.text('Coffee machine'), findsOneWidget);
+      expect(find.text('Main boiler'), findsNothing);
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: 'acme',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(focused(), isTrue);
+      expect(find.text('Coffee machine'), findsOneWidget);
+      expect(find.text('Main boiler'), findsNothing);
+      expect(
+        tester.state<EditableTextState>(
+          find.descendant(of: field, matching: find.byType(EditableText)),
+        ),
+        same(before),
+      );
+      expect(tester.testTextInput.hasAnyClients, isTrue);
+    });
+
     testWidgets('the sheet of an item shows its warranty worked out, and '
         'saves itself as it is changed, $locale', (tester) async {
       final (state, data) = await start(tester);
