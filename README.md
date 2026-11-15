@@ -18,7 +18,7 @@ or Google Play yet** (see [Status](#status)).
 
 <p align="center">
   <img src="test/goldens/today_en_x2.png" width="240"
-       alt="The Today screen of the app, rendered by its screenshot test with test data: the boiler service, 3 days late, and the smoke alarm, due today, each with a Done button, and a New task button.">
+       alt="The Today screen of the app, rendered by its screenshot test with test data: the boiler service, 3 days late, and the smoke alarm, due today, each with a Done button, and an Add a task button after the list.">
 </p>
 
 <sub>Rendered by the app's screenshot test (`test/goldens/`), with test data, not on a

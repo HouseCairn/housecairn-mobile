@@ -97,7 +97,7 @@ void main() {
         );
         expect(state.homes.single.name, t('My home', 'Ma maison'));
         expect(selector(), findsNothing);
-        await tester.tap(find.byType(FloatingActionButton));
+        await tapAdd(tester, 'today-add');
         await tester.pumpAndSettle();
         await tester.enterText(
           find.byKey(const Key('task-title')),
@@ -126,7 +126,7 @@ void main() {
     ) async {
       await onPhone(tester);
       final state = await pumpApp(tester, locale: locale);
-      await tester.tap(find.byType(FloatingActionButton));
+      await tapAdd(tester, 'today-add');
       await tester.pumpAndSettle();
       await tester.tap(find.text(t('Save', 'Enregistrer')));
       await tester.pumpAndSettle();
@@ -235,7 +235,7 @@ void main() {
       await onPhone(tester);
       final state = await pumpApp(tester, locale: locale);
       await openMore(tester, l.more, l.homes);
-      await tester.tap(find.byType(FloatingActionButton));
+      await tapAdd(tester, 'home-add');
       await tester.pumpAndSettle();
       await tester.enterText(find.byKey(const Key('home-name')), 'Second home');
       await tester.enterText(find.byKey(const Key('home-currency')), 'chf');
@@ -327,7 +327,7 @@ void main() {
           expect(sawNextDates, isTrue, reason: 'the preview of five dates');
           await back(tester);
 
-          await tester.tap(find.byType(FloatingActionButton));
+          await tapAdd(tester, 'today-add');
           await tester.pumpAndSettle();
           check('New task');
           await back(tester);

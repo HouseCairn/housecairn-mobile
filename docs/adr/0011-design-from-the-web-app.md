@@ -38,7 +38,13 @@ Manrope. It has no dark theme (`color-scheme: light`, `base.css`).
   above, the primary, secondary and danger buttons (12 px corners), the bar with the five
   sections and the icons of the web, the home selector, the undo bar in sage.
 - **Icons.** The outline icons of the web (24 px grid, 2 px stroke), drawn from the same shapes
-  (`lib/design/icons.dart`); a `+` is added for the floating button, in the same stroke.
+  (`lib/design/icons.dart`); a `+` is added, in the same stroke.
+- **The add buttons, where the web has them** (`HcAddButton`): "Add a task" a primary block
+  button after the list of Today, "Add a contractor" the same after the contractors, "Add a
+  home" and the "Add a task" of a room or an item secondary block buttons, "Add a room" a
+  secondary button as wide as its label; each after its list, 12 px under it, scrolling with
+  it. The app has no floating button: the maintainer found the app, on the same iPhone as the
+  web, laid out differently because of it.
 
 **Adapted to the phone, and why.**
 
@@ -46,15 +52,14 @@ Manrope. It has no dark theme (`color-scheme: light`, `base.css`).
 | --- | --- | --- |
 | Brand bar, then the page title as `h1` in the page | The title in the app bar, in the `h1` style; the selector of the current home at its end | The app bar is where a phone shows the title and the back button; the brand is the app icon |
 | Back link at the top of the page | The back button of the app bar, the system back of Android, the back gesture of iOS (`MaterialPageRoute`) | What each platform's users expect; the gesture comes with the route |
-| "Add a task", a block button after the list | A floating button, primary colour, 12 px corners | Reachable with the thumb whatever the length of the list |
-| Targets of 44 px, Done of 48 px | 48 px for every target (`touch-target-lg`) | The minimum of Android, and the size Material's own widgets keep |
+| Targets of 44 px, Done of 48 px | 48 px for every target (`touch-target-lg`): buttons 48 high where the web's are 45.2 (44 and a border), fields 48 where the web's are 50 | The minimum of Android, and the size Material's own widgets keep |
 | Hover colours | None (`hoverColor` transparent); a sand ripple on press | No hover on a touch screen |
 | Undo banner above the bar | Floating snack bar above the bar, sage, border, action in the primary colour | The same place and look, with the platform's announcement to screen readers |
 | Skip and Postpone on the task page | Also in the menu of each row of Today, behind the `…` icon of the web | Lot 2a already offered them there; one tap fewer |
 | Number and unit side by side, the unit under the number when too narrow (`.field-pair`) | Side by side, stacked from a text size of 1.3 | The same rule, decided by the text size of the phone |
 | Text sizes scale with the browser | Text sizes scale with the phone; the labels of the bar keep their size, and the Save action of the app bar grows up to 1.3 times | Five labels side by side at 360 px, as the tab bar of iOS does; a larger Save pushes the back button out of the bar |
 | Safe area of the bar (`env(safe-area-inset-bottom)`) | `Scaffold` and `NavigationBar` keep the safe areas | The same rule, done by the framework |
-| Room list: a search form, "Change the order" with up and down buttons, a block "Add a room" | The list and a floating "Add a room"; no search, no reordering (rooms keep the household's order, then their creation) | Search and a reordering screen are not in the plan of lot 2b; the order is the web's, `position` then creation |
+| Room list: a search form, "Change the order" with up and down buttons, "Add a room" | The list and "Add a room" after it; no search, no reordering (rooms keep the household's order, then their creation) | Search and a reordering screen are not in the plan of lot 2b; the order is the web's, `position` then creation |
 | Room page: photos filtered by category chips, the stock of the room, the label tools | Photos as one grid (the category is on each photo, and on its own screen); no stock, no labels | Stock is lot 3; labels are not in v1 |
 | Photo: an upload form (file field) | A sheet with Take a photo and Choose from the gallery, permission asked at that moment; the photo is re-encoded before it is stored | A phone has a camera, and the location must not leave it |
 | Contractor: a vCard download | Call and Write buttons on the card (`tel:`, `mailto:`) | What a phone does with a number; the spec asks for call and e-mail |
@@ -63,6 +68,20 @@ Manrope. It has no dark theme (`color-scheme: light`, `base.css`).
 **Not taken.** No dark theme: the web has none. No page title and back link inside the page,
 no breadcrumbs, no computer layout with a column on the left: the app is a phone app. The help
 link of the web (to its documentation site) waits for a lot that decides the app's help.
+
+**Same rendering as the web, measured** (`test/web_parity_test.dart`). Checking the tokens
+and the CSS by reading the code was not enough: the maintainer, on an iPhone, found the app
+smaller and laid out differently from the web opened on the same phone. The test opens each
+screen at 390 x 844 logical pixels (an iPhone) in French, with the web's demonstration data,
+and compares what it measures on the render tree with what `tool/web_parity.py` measured in a
+headless browser on the web at 390 x 844 CSS pixels (`test/parity/web_fr_390.json`): the
+drawn size of the page title, row titles, labels and buttons, the left margin, the height of
+the bar, of the fields and of the buttons, the place, width, height and gap of the add button
+and that it scrolls with the list. A CSS pixel and a logical pixel are the same unit on a
+phone (a point on iOS, a dp on Android), and the app applies no scale of its own: the text
+scaler is the phone's, untouched except in the bottom bar and the Save action (above). The
+differences kept on purpose are listed in the test (`adaptations`) with their reason; every
+other measure must equal the web's, within 0.01 px for a text size and 1.5 px for a box.
 
 **Rules for the next screens** (lot 2b on): a screen uses the components of `lib/design/` and
 the themed Material widgets, and writes no colour, text style or size of its own;
