@@ -16,13 +16,23 @@ import 'messages.dart';
 import 'parts.dart';
 import 'photos.dart';
 import 'state.dart';
+import 'stock_screens.dart';
 import 'task_screen.dart';
 import 'templates_screen.dart';
 
 /// Rooms (docs/spec.md, "Screens of v1"): the rooms of the current home in the
-/// household's order, each with its kind and how many items it holds.
-class RoomsScreen extends StatelessWidget {
+/// household's order, each with its kind and how many items it holds; and
+/// its second tab, the stock of the home (lib/ui/stock_screens.dart), as the
+/// web's section Rooms has the tabs Rooms and Stock.
+class RoomsScreen extends StatefulWidget {
   const RoomsScreen({super.key});
+
+  @override
+  State<RoomsScreen> createState() => _RoomsScreenState();
+}
+
+class _RoomsScreenState extends State<RoomsScreen> {
+  int _tab = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +40,19 @@ class RoomsScreen extends StatelessWidget {
     final state = AppScope.of(context);
     final home = state.current;
     final writable = home != null && home.archivedAt == null;
+    final tabs = RoomsTabs(
+      current: _tab,
+      onSelect: (i) => setState(() => _tab = i),
+    );
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.navRooms),
+        title: Text(_tab == 0 ? l10n.navRooms : l10n.stock),
         actions: const [HomeSelector()],
       ),
       body: home == null
           ? const SizedBox.shrink()
+          : _tab == 1
+          ? StockList(key: ValueKey('stock-${home.id}'), home: home, tabs: tabs)
           : DataView<(List<RoomRow>, Map<String, int>)>(
               key: ValueKey(home.id),
               load: (r) async =>
@@ -45,7 +61,7 @@ class RoomsScreen extends StatelessWidget {
                 final (rooms, counts) = data;
                 return HcScreenList(
                   children: [
-                    const SizedBox(height: HcSpace.s2),
+                    tabs,
                     if (rooms.isEmpty)
                       HcEmpty(l10n.roomsEmpty)
                     else

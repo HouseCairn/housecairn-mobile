@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:decimal/decimal.dart';
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
@@ -14,7 +15,10 @@ import '../domain/day.dart';
 import '../domain/photos.dart';
 import '../domain/recurrence.dart' as recurrence;
 import '../domain/reminders.dart';
+import '../domain/stock.dart' as stock;
 import 'database.dart';
+
+part 'stock_repository.dart';
 
 /// Why the repository refused a change. Each value has its message in the
 /// ARB files (lib/ui/messages.dart); the web gives the same refusals.
@@ -102,12 +106,37 @@ enum Refusal {
 
   /// A photo above 20 MiB or 40 million pixels.
   photoTooLarge,
+
+  /// A quantity or an amount that is not a number with at most two decimals
+  /// below 10^8 (`max_digits=10, decimal_places=2`, `stock/models.py:20-21`).
+  quantityInvalid,
+
+  /// A quantity of zero or less where more is needed
+  /// (`stock/services.py` `record_movement`, `tasks/materials.py` `_positive`).
+  quantityNotPositive,
+
+  /// An exit of more than the stock holds (`stock/services.py`
+  /// `record_movement`); [Refused.available] says how much there is.
+  stockShort,
+
+  /// The unit Other needs to say which unit (`stock/models.py` `clean`).
+  unitOtherRequired,
+
+  /// The article is already listed on the task (`tasks/materials.py`
+  /// `add_material`).
+  materialListed,
+
+  /// A task lists at most 50 articles (`tasks/materials.py:28`).
+  tooManyMaterials,
 }
 
 class Refused implements Exception {
-  const Refused(this.reason);
+  const Refused(this.reason, [this.available]);
 
   final Refusal reason;
+
+  /// With [Refusal.stockShort]: what the stock holds.
+  final Decimal? available;
 
   @override
   String toString() => 'Refused: ${reason.name}';
@@ -281,10 +310,14 @@ class TaskEntry {
 
 /// An occurrence just closed and the one that follows it, if any.
 class Closing {
-  const Closing(this.occurrenceId, this.nextId);
+  const Closing(this.occurrenceId, this.nextId, [this.short = const []]);
 
   final String occurrenceId;
   final String? nextId;
+
+  /// The articles the stock could not give in full (`tasks/materials.py`
+  /// `Shortage`); the closing is never refused for them.
+  final List<Shortage> short;
 }
 
 /// A row of Today: an open occurrence, its task and its home.
@@ -328,10 +361,24 @@ const entityOf = {
   'contractors': 'tasks.contractor',
   'tasks': 'tasks.task',
   'occurrences': 'tasks.occurrence',
+  'articles': 'stock.article',
+  'article_rooms': 'stock.article_rooms',
+  'article_items': 'stock.article_compatible_items',
+  'suppliers': 'stock.supplier',
+  'movements': 'stock.movement',
+  'task_materials': 'tasks.taskmaterial',
+  'material_draws': 'tasks.materialdraw',
 };
 
 /// The tables whose rows belong to a home, children first.
 const homeTables = [
+  'material_draws',
+  'task_materials',
+  'movements',
+  'suppliers',
+  'article_items',
+  'article_rooms',
+  'articles',
   'occurrences',
   'tasks',
   'photos',
@@ -1686,6 +1733,7 @@ class Repository {
     _checkDate(on);
     final closedOn = on ?? today;
     String? nextId;
+    var short = const <Shortage>[];
     await db.transaction(() async {
       await _put('occurrences', id, {
         'status_before': found.status,
@@ -1693,6 +1741,9 @@ class Repository {
         if (status == 'done') 'completed_on': closedOn,
         if (status == 'done') 'completion_note': note,
       });
+      // Done takes the materials of the task from the stock, in the same
+      // transaction (`tasks/services.py:558`); a skip takes nothing.
+      if (status == 'done') short = await _drawForDone(found, closedOn);
       final due = recurrence.nextDue(
         _ruleOf(owner),
         anchor: owner.seriesStart == null
@@ -1725,7 +1776,7 @@ class Repository {
         create: existing == null,
       );
     });
-    return Closing(id, nextId);
+    return Closing(id, nextId, short);
   }
 
   /// Done, today unless [on]; creates the next occurrence of a task that
@@ -1777,6 +1828,9 @@ class Repository {
       if (!untouched) throw const Refused(Refusal.nextChanged);
     }
     await db.transaction(() async {
+      // What the closing took goes back to the stock, by entries
+      // (`tasks/services.py:635`).
+      await _returnDraws(found);
       for (final next in following) {
         await _put('occurrences', next.id, {'deleted_at': _now()});
       }

@@ -7,7 +7,9 @@ chromium`), against a local instance filled by `manage.py load_demo_data
 --owner demo@example.com --language fr` (an account made beforehand, password
 `demo-password-for-local-captures`, its language set to French in its preferences), the
 translations compiled (`manage.py compilemessages`), with one item in the utility room and
-one contractor added (the names of test/web_parity_test.dart):
+one contractor added (the names of test/web_parity_test.dart), and three stock items
+('Filtre de VMC', 'Pile 9 V', 'Peinture blanche') with a supplier ("Magasin d'exemple", for
+the first) and movements (the first one left low):
 
     uv run python tool/web_parity.py <capture directory> [<base URL>]
 
@@ -157,6 +159,21 @@ with sync_playwright() as p:
         screens["contractor_form"] = (f"{H}/contractors/new/", None)
     except SystemExit as e:
         print(e)
+    # The detail of the stock item with a supplier and movements (the low one).
+    page.goto(base + f"{H}/stock/")
+    article = next(
+        (href.split("?")[0] for title, href in page.eval_on_selector_all(
+            "main a.row[href]",
+            "els => els.map(e => [e.querySelector('.row-title')?.innerText.trim(),"
+            " e.getAttribute('href')])")
+         if title == "Filtre de VMC" and re.search(r"/stock/[0-9a-f-]{36}/(\?|$)", href)),
+        None)
+    if article is None:
+        raise SystemExit(f"no stock item 'Filtre de VMC' on {H}/stock/")
+    screens["stock"] = (f"{H}/stock/", "main a[href*='/stock/new/']")
+    screens["article"] = (article, "main a[href*='/suppliers/new/']")
+    screens["article_form"] = (f"{H}/stock/new/", None)
+    screens["supplier_form"] = (article + "suppliers/new/", None)
     result = {}
     for name, (path, add) in screens.items():
         page.goto(base + path)

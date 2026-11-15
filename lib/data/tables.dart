@@ -159,6 +159,91 @@ class Occurrences extends Table with ModelColumns, HomeOwned {
   BlobColumn get follows => blob().map(const UuidConverter()).nullable()();
 }
 
+/// `stock.article` (`stock/models.py:68-122`): something kept in stock. Its
+/// stock is the sum of its movements, computed, never stored. Quantities and
+/// amounts are decimal strings with two places, never `REAL`
+/// (docs/adr/0002-local-storage-and-migrations.md). [label] is the file
+/// reference of the photo of its label (docs/protocol.md, section 2.9).
+@DataClassName('ArticleRow')
+@TableIndex(name: 'article_home_name', columns: {#homeId, #name})
+class Articles extends Table with ModelColumns, HomeOwned {
+  TextColumn get name => text()();
+  TextColumn get manufacturerReference =>
+      text().withDefault(const Constant(''))();
+  TextColumn get dimensions => text().withDefault(const Constant(''))();
+  TextColumn get storageLocation => text().withDefault(const Constant(''))();
+  TextColumn get unit => text().withDefault(const Constant(''))();
+  TextColumn get unitOther => text().withDefault(const Constant(''))();
+  TextColumn get threshold => text().nullable()();
+  TextColumn get unitPrice => text().nullable()();
+  TextColumn get notes => text().withDefault(const Constant(''))();
+  TextColumn get label => text().nullable()();
+}
+
+/// `stock.article_rooms`: a room where an article is used. The id is
+/// deterministic (docs/adr/0003-sync-protocol.md, "Deterministic ids").
+@DataClassName('ArticleRoomRow')
+class ArticleRooms extends Table with ModelColumns, HomeOwned {
+  BlobColumn get articleId => blob().map(const UuidConverter())();
+  BlobColumn get roomId => blob().map(const UuidConverter())();
+}
+
+/// `stock.article_compatible_items`: an item an article fits.
+@DataClassName('ArticleItemRow')
+class ArticleItems extends Table with ModelColumns, HomeOwned {
+  BlobColumn get articleId => blob().map(const UuidConverter())();
+  BlobColumn get itemId => blob().map(const UuidConverter())();
+}
+
+/// `stock.supplier` (`stock/models.py:148-157`).
+@DataClassName('SupplierRow')
+class Suppliers extends Table with ModelColumns, HomeOwned {
+  BlobColumn get articleId => blob().map(const UuidConverter())();
+  TextColumn get name => text()();
+  TextColumn get reference => text().withDefault(const Constant(''))();
+  TextColumn get url => text().withDefault(const Constant(''))();
+  TextColumn get lastPrice => text().nullable()();
+}
+
+/// `stock.movement` (`stock/models.py:168-197`): a line of the ledger, never
+/// changed. [quantity] is what the person typed (for an inventory, the
+/// count); its effect on the stock is derived from the lines before it, in
+/// the order of their clocks, and never stored
+/// (docs/adr/0003-sync-protocol.md, "Derived").
+@DataClassName('MovementRow')
+@TableIndex(name: 'movement_article', columns: {#articleId})
+class Movements extends Table with ModelColumns, HomeOwned {
+  BlobColumn get articleId => blob().map(const UuidConverter())();
+  TextColumn get kind => text()();
+  TextColumn get quantity => text()();
+  TextColumn get occurredOn => text()();
+  TextColumn get note => text().withDefault(const Constant(''))();
+
+  /// The occurrence whose closing, or its undoing, wrote this line.
+  BlobColumn get occurrenceId => blob().map(const UuidConverter()).nullable()();
+}
+
+/// `tasks.taskmaterial` (`tasks/models.py:284-318`): an article a task needs,
+/// one line per article and task, by a deterministic id.
+@DataClassName('TaskMaterialRow')
+@TableIndex(name: 'material_task', columns: {#taskId})
+class TaskMaterials extends Table with ModelColumns, HomeOwned {
+  BlobColumn get taskId => blob().map(const UuidConverter())();
+  BlobColumn get articleId => blob().map(const UuidConverter())();
+  TextColumn get quantity => text()();
+}
+
+/// `tasks.materialdraw` (`tasks/models.py:375-411`): what a done occurrence
+/// took of an article. [drawn] is never above [wanted].
+@DataClassName('MaterialDrawRow')
+@TableIndex(name: 'draw_occurrence', columns: {#occurrenceId})
+class MaterialDraws extends Table with ModelColumns, HomeOwned {
+  BlobColumn get occurrenceId => blob().map(const UuidConverter())();
+  BlobColumn get articleId => blob().map(const UuidConverter())();
+  TextColumn get wanted => text()();
+  TextColumn get drawn => text()();
+}
+
 /// The clock of the last write of each field
 /// (docs/adr/0002-local-storage-and-migrations.md): written in the same
 /// transaction as the row, by the repository, so that turning sync on later
