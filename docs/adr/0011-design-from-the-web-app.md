@@ -115,6 +115,18 @@ background the components draw against WCAG 2.2 AA (4.5:1). Golden files of each
 360 px, in English and French, at text scale 1 and 2 (`test/goldens/`), drawn with the bundled
 font, make every change of look visible in review; they hold the data of the test fixture only.
 
+**Screen patterns, shared with the web** (change of 2026-11-15). This record aligns the atoms
+(tokens, font, type, components); the anatomy of a screen (the record page that opens to read,
+with Done, Postpone and Skip at its top and its form behind Edit; label-value rows and figures;
+the header; forms in sections; filters; empty, loading and error states; the groups of More), the
+glossary of the shared terms and the list of the iOS adaptations are in
+[`design/patterns.md` of the web](https://github.com/HouseCairn/housecairn/blob/main/design/patterns.md),
+the reference for both. On an iPhone the app uses the controls of iOS that the list allows, one by
+one; on Android it keeps Material. A screen of the app follows that document; where this record
+and that document disagree on a screen, that document is right. `design/glossary.json` is a copy
+of the web's glossary, and `test/glossary_test.dart` checks that the ARB keys that show a term say
+it in English and French, with the keys known to differ listed with their lot.
+
 ## Consequences
 
 - The app looks like the web application on a phone; the components of lot 2b exist before its
