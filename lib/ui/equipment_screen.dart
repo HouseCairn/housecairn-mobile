@@ -121,11 +121,8 @@ class _EquipmentListState extends State<EquipmentList> {
                   tone: HcPillTone.sand,
                 ),
       ],
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => ItemScreen(homeId: widget.home.id, itemId: item.id),
-        ),
-      ),
+      onTap: () => Navigator.of(context)
+          .push(hcRoute(ItemScreen(homeId: widget.home.id, itemId: item.id))),
     );
   }
 }

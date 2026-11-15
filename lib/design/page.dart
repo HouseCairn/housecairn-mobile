@@ -25,10 +25,16 @@ class HcScaffold extends StatefulWidget {
     this.body = const SizedBox.shrink(),
     this.floatingActionButton,
     this.bottomNavigationBar,
+    this.drawsTitle = true,
   });
 
   /// The `h1` of the screen; null for a screen still loading.
   final String? title;
+
+  /// Whether the list of the content draws [title] as its first line; false
+  /// for a screen that draws its `h1` itself (the page of a task, under its
+  /// pills, lot D2). The title still folds into the bar on iOS.
+  final bool drawsTitle;
 
   /// The action of the bar: Edit on a record, the save of a form, or the
   /// selector of the home on a section root.
@@ -94,7 +100,10 @@ class _HcScaffoldState extends State<HcScaffold> {
       ),
       body: NotificationListener<ScrollNotification>(
         onNotification: _onScroll,
-        child: HcPageTitle(title: title, child: widget.body),
+        child: HcPageTitle(
+          title: widget.drawsTitle ? title : null,
+          child: widget.body,
+        ),
       ),
       floatingActionButton: widget.floatingActionButton,
       bottomNavigationBar: widget.bottomNavigationBar,
@@ -140,16 +149,20 @@ class HcLargeTitle extends StatelessWidget {
 
 /// A screen that is a form: on iOS it opens as a modal sheet ([hcRoute]).
 abstract interface class HcFormScreen {
-  /// Whether it opens as a sheet. The task screen is still the page of the
-  /// task until it has its own page to read (lot D2): only its creation is a
-  /// sheet.
+  /// Whether it opens as a sheet. The task screen is the page of a task that
+  /// exists (lot D2): only its creation is a sheet; the form of the task,
+  /// opened by Edit the task, always is.
   bool get opensAsSheet;
 }
 
 /// The route of [page]: a page, or a modal sheet for a form on iOS
 /// (design/patterns.md, Platform adaptations 7). On Android a form stays a
 /// page, its back button being Cancel.
-Route<void> hcRoute(Widget page) => MaterialPageRoute<void>(
+Route<void> hcRoute(Widget page) => hcRouteOf<void>(page);
+
+/// [hcRoute] for a screen that gives back a [T] when it closes (the form of
+/// a task says whether the task is kept).
+Route<T> hcRouteOf<T>(Widget page) => MaterialPageRoute<T>(
   builder: (_) => page,
   fullscreenDialog:
       (page as Object) is HcFormScreen &&

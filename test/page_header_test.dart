@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/design/widgets.dart';
 import 'package:housecairn_mobile/ui/report_screens.dart';
+import 'package:housecairn_mobile/ui/task_screen.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'support/app.dart';
@@ -67,6 +68,28 @@ void main() {
     expect(find.byType(ReportFormScreen), findsNothing);
     debugDefaultTargetPlatformOverride = null;
   });
+
+  test(
+    'on iOS the page of a task is a page, its form and a new one sheets',
+    () {
+      // The page of a task is to read (lot D2); Edit the task and a new task
+      // open the form, a sheet on iOS (lot D4).
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      bool sheet(Route<Object?> route) =>
+          (route as PageRoute<Object?>).fullscreenDialog;
+      expect(
+        sheet(hcRoute(const TaskScreen(homeId: 'h', taskId: 't'))),
+        isFalse,
+      );
+      expect(sheet(hcRoute(const TaskScreen(homeId: 'h'))), isTrue);
+      expect(
+        sheet(hcRouteOf<bool>(const TaskFormScreen(homeId: 'h', taskId: 't'))),
+        isTrue,
+      );
+      debugDefaultTargetPlatformOverride = null;
+    },
+  );
 
   testWidgets('on Android a form stays a page, its back button is Cancel', (
     tester,
