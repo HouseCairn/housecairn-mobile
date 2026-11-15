@@ -112,6 +112,41 @@ types, new optional fields, new choice values), the rule of [ADR 0002](0002-loca
   once is written as operations with deterministic ids, so two phones that migrate
   concurrently produce the same result.
 
+## Implementation (lot 4)
+
+The engine is `lib/sync/engine.dart` (`SyncEngine`, behind the `SyncTransport` of lot 2c) on the
+sync side of the repository, `lib/data/sync_repository.dart`; it has no network code. What lot 4
+settled within the decision above:
+
+- **Operations in the engine** carry two keys besides those of protocol section 2.2: `d`, the
+  writer's device in `b64` (the `device` of the batch header on a relay, `server_device` for an
+  edit made on a server), and `sv`, the writer's schema version (the `sv` of the batch header). A
+  pull mixes the operations of several devices, and the tie of two clocks needs the device. Local
+  changes are written as `put`; `delete` and `restore` are read as the field `deleted_at`.
+- **Out of order**: an operation on a row whose creation has not arrived yet makes the row with
+  its required columns empty, filled when the creation comes; the result is the same in any
+  order. An operation whose home differs from the home of the row already there is dropped (a row
+  never changes home; ids are random or `uuid5` in the home's namespace, so this only happens
+  with a forged operation).
+- **Repairs are writes**: after each batch the repair rules write through the repository, with a
+  clock of the phone that repairs, like any change. Two phones that repair the same data write
+  the same values; each then receives the other's write, and they end equal. The rule "two open
+  occurrences" reads "a phone marked it done" as `completed_on` set. The undo taken back uses what
+  the undo changed, kept on the phone that made it (`local_settings`, never synced), and its
+  materials are taken from the stock again. The accepted quote without a line and the stock below
+  zero change nothing.
+- **Snapshots** are the merged rows with each field's value, clock and writer, tombstones
+  included, and the operations kept in `pending`. A transport gives a snapshot to a new phone, or
+  after "start again" (410), as the first operations of a pull from the start.
+- **References to another home** are kept and read as empty (`Repository.referenceIn`, and the
+  lists of a room or an item).
+- **`min_sv`**: a phone below it sends nothing and keeps its changes in `op_log`; the screens that
+  say so come with the way that turns sync on (lots 4b and 5).
+
+Tests: `test/sync_property_test.dart` (random histories of 2 to 5 phones over two homes, purges
+mixed in, through a double of the relay and of a server, `test/support/sync_doubles.dart`) and
+`test/sync_cases_test.dart` (each case above by name).
+
 ## Consequences
 
 - No central order, no lock, no conflict screen in the common case; the price is that two

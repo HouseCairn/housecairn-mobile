@@ -22,6 +22,10 @@ const checked = [
   'lib/ui/project_screens.dart',
   'lib/ui/report_screens.dart',
   'lib/ui/task_screen.dart',
+  // Sync carries amounts as decimal strings and never converts them (lot 4).
+  'lib/sync/operation.dart',
+  'lib/sync/engine.dart',
+  'lib/data/sync_repository.dart',
 ];
 
 final floating = RegExp(

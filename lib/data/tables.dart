@@ -402,3 +402,90 @@ class LocalSettings extends Table {
   @override
   Set<Column<Object>> get primaryKey => {key};
 }
+
+/// The operations this phone wrote and the engine has not yet seen taken by
+/// the other side (docs/adr/0002-local-storage-and-migrations.md, schema 6):
+/// [seq] orders them on this phone, [body] is the operation of
+/// docs/protocol.md section 2.2 as JSON. Written by the repository in the
+/// transaction of the change; removed once the transport took them.
+@DataClassName('OpLogRow')
+class OpLog extends Table {
+  IntColumn get seq => integer().autoIncrement()();
+  BlobColumn get device => blob()();
+  TextColumn get hlc => text()();
+  BlobColumn get homeId => blob().map(const UuidConverter()).nullable()();
+  TextColumn get body => text()();
+
+  @override
+  String get tableName => 'op_log';
+}
+
+/// The fields of a row that this version of the app does not know, kept and
+/// sent again (docs/adr/0003-sync-protocol.md, "Versions of the schema"):
+/// [json] maps each field to its value; their clocks are in `field_clock`.
+/// Rows of `family.*` types, which have no table yet, live here entirely.
+@DataClassName('ExtraRow')
+class Extra extends Table {
+  TextColumn get entity => text()();
+  BlobColumn get rowId => blob().map(const UuidConverter())();
+  BlobColumn get homeId => blob().map(const UuidConverter()).nullable()();
+  TextColumn get json => text()();
+
+  @override
+  String get tableName => 'extra';
+
+  @override
+  Set<Column<Object>> get primaryKey => {entity, rowId};
+}
+
+/// Operations on entity types this version does not know, kept as they came
+/// and applied after an update (docs/adr/0003-sync-protocol.md). [key] is the
+/// operation's type, home, row, clock and device, so that a duplicate is one
+/// row.
+@DataClassName('PendingRow')
+class Pending extends Table {
+  TextColumn get key => text()();
+  TextColumn get entity => text()();
+  BlobColumn get homeId => blob().map(const UuidConverter()).nullable()();
+  TextColumn get body => text()();
+
+  @override
+  String get tableName => 'pending';
+
+  @override
+  Set<Column<Object>> get primaryKey => {key};
+}
+
+/// The homes purged on this phone, kept for ever: every later operation of
+/// one of them is dropped (docs/protocol.md section 2.2, "Purge of a home").
+@DataClassName('PurgedHomeRow')
+class PurgedHomes extends Table {
+  BlobColumn get homeId => blob().map(const UuidConverter())();
+
+  @override
+  String get tableName => 'purged_homes';
+
+  @override
+  Set<Column<Object>> get primaryKey => {homeId};
+}
+
+/// A long text that lost the merge, kept 30 days on this phone and never
+/// synced (docs/adr/0003-sync-protocol.md, "Long text"). [keptUntil] is in
+/// UTC milliseconds.
+@DataClassName('OtherVersionRow')
+class OtherVersions extends Table {
+  TextColumn get entity => text()();
+  BlobColumn get rowId => blob().map(const UuidConverter())();
+  BlobColumn get homeId => blob().map(const UuidConverter()).nullable()();
+  TextColumn get field => text()();
+  TextColumn get value => text()();
+  TextColumn get hlc => text()();
+  BlobColumn get device => blob()();
+  IntColumn get keptUntil => integer()();
+
+  @override
+  String get tableName => 'other_versions';
+
+  @override
+  Set<Column<Object>> get primaryKey => {entity, rowId, field, hlc, device};
+}

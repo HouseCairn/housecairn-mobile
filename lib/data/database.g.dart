@@ -16527,6 +16527,1643 @@ class LocalSettingsCompanion extends UpdateCompanion<LocalSettingRow> {
   }
 }
 
+class $OpLogTable extends OpLog with TableInfo<$OpLogTable, OpLogRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $OpLogTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _seqMeta = const VerificationMeta('seq');
+  @override
+  late final GeneratedColumn<int> seq = GeneratedColumn<int>(
+    'seq',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _deviceMeta = const VerificationMeta('device');
+  @override
+  late final GeneratedColumn<Uint8List> device = GeneratedColumn<Uint8List>(
+    'device',
+    aliasedName,
+    false,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hlcMeta = const VerificationMeta('hlc');
+  @override
+  late final GeneratedColumn<String> hlc = GeneratedColumn<String>(
+    'hlc',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String?, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: false,
+      ).withConverter<String?>($OpLogTable.$converterhomeIdn);
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'body',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [seq, device, hlc, homeId, body];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'op_log';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<OpLogRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('seq')) {
+      context.handle(
+        _seqMeta,
+        seq.isAcceptableOrUnknown(data['seq']!, _seqMeta),
+      );
+    }
+    if (data.containsKey('device')) {
+      context.handle(
+        _deviceMeta,
+        device.isAcceptableOrUnknown(data['device']!, _deviceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deviceMeta);
+    }
+    if (data.containsKey('hlc')) {
+      context.handle(
+        _hlcMeta,
+        hlc.isAcceptableOrUnknown(data['hlc']!, _hlcMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hlcMeta);
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {seq};
+  @override
+  OpLogRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OpLogRow(
+      seq: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}seq'],
+      )!,
+      device: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}device'],
+      )!,
+      hlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hlc'],
+      )!,
+      homeId: $OpLogTable.$converterhomeIdn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        ),
+      ),
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body'],
+      )!,
+    );
+  }
+
+  @override
+  $OpLogTable createAlias(String alias) {
+    return $OpLogTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+  static TypeConverter<String?, Uint8List?> $converterhomeIdn =
+      NullAwareTypeConverter.wrap($converterhomeId);
+}
+
+class OpLogRow extends DataClass implements Insertable<OpLogRow> {
+  final int seq;
+  final Uint8List device;
+  final String hlc;
+  final String? homeId;
+  final String body;
+  const OpLogRow({
+    required this.seq,
+    required this.device,
+    required this.hlc,
+    this.homeId,
+    required this.body,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['seq'] = Variable<int>(seq);
+    map['device'] = Variable<Uint8List>(device);
+    map['hlc'] = Variable<String>(hlc);
+    if (!nullToAbsent || homeId != null) {
+      map['home_id'] = Variable<Uint8List>(
+        $OpLogTable.$converterhomeIdn.toSql(homeId),
+      );
+    }
+    map['body'] = Variable<String>(body);
+    return map;
+  }
+
+  OpLogCompanion toCompanion(bool nullToAbsent) {
+    return OpLogCompanion(
+      seq: Value(seq),
+      device: Value(device),
+      hlc: Value(hlc),
+      homeId: homeId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(homeId),
+      body: Value(body),
+    );
+  }
+
+  factory OpLogRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return OpLogRow(
+      seq: serializer.fromJson<int>(json['seq']),
+      device: serializer.fromJson<Uint8List>(json['device']),
+      hlc: serializer.fromJson<String>(json['hlc']),
+      homeId: serializer.fromJson<String?>(json['homeId']),
+      body: serializer.fromJson<String>(json['body']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'seq': serializer.toJson<int>(seq),
+      'device': serializer.toJson<Uint8List>(device),
+      'hlc': serializer.toJson<String>(hlc),
+      'homeId': serializer.toJson<String?>(homeId),
+      'body': serializer.toJson<String>(body),
+    };
+  }
+
+  OpLogRow copyWith({
+    int? seq,
+    Uint8List? device,
+    String? hlc,
+    Value<String?> homeId = const Value.absent(),
+    String? body,
+  }) => OpLogRow(
+    seq: seq ?? this.seq,
+    device: device ?? this.device,
+    hlc: hlc ?? this.hlc,
+    homeId: homeId.present ? homeId.value : this.homeId,
+    body: body ?? this.body,
+  );
+  OpLogRow copyWithCompanion(OpLogCompanion data) {
+    return OpLogRow(
+      seq: data.seq.present ? data.seq.value : this.seq,
+      device: data.device.present ? data.device.value : this.device,
+      hlc: data.hlc.present ? data.hlc.value : this.hlc,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      body: data.body.present ? data.body.value : this.body,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OpLogRow(')
+          ..write('seq: $seq, ')
+          ..write('device: $device, ')
+          ..write('hlc: $hlc, ')
+          ..write('homeId: $homeId, ')
+          ..write('body: $body')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(seq, $driftBlobEquality.hash(device), hlc, homeId, body);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OpLogRow &&
+          other.seq == this.seq &&
+          $driftBlobEquality.equals(other.device, this.device) &&
+          other.hlc == this.hlc &&
+          other.homeId == this.homeId &&
+          other.body == this.body);
+}
+
+class OpLogCompanion extends UpdateCompanion<OpLogRow> {
+  final Value<int> seq;
+  final Value<Uint8List> device;
+  final Value<String> hlc;
+  final Value<String?> homeId;
+  final Value<String> body;
+  const OpLogCompanion({
+    this.seq = const Value.absent(),
+    this.device = const Value.absent(),
+    this.hlc = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.body = const Value.absent(),
+  });
+  OpLogCompanion.insert({
+    this.seq = const Value.absent(),
+    required Uint8List device,
+    required String hlc,
+    this.homeId = const Value.absent(),
+    required String body,
+  }) : device = Value(device),
+       hlc = Value(hlc),
+       body = Value(body);
+  static Insertable<OpLogRow> custom({
+    Expression<int>? seq,
+    Expression<Uint8List>? device,
+    Expression<String>? hlc,
+    Expression<Uint8List>? homeId,
+    Expression<String>? body,
+  }) {
+    return RawValuesInsertable({
+      if (seq != null) 'seq': seq,
+      if (device != null) 'device': device,
+      if (hlc != null) 'hlc': hlc,
+      if (homeId != null) 'home_id': homeId,
+      if (body != null) 'body': body,
+    });
+  }
+
+  OpLogCompanion copyWith({
+    Value<int>? seq,
+    Value<Uint8List>? device,
+    Value<String>? hlc,
+    Value<String?>? homeId,
+    Value<String>? body,
+  }) {
+    return OpLogCompanion(
+      seq: seq ?? this.seq,
+      device: device ?? this.device,
+      hlc: hlc ?? this.hlc,
+      homeId: homeId ?? this.homeId,
+      body: body ?? this.body,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (seq.present) {
+      map['seq'] = Variable<int>(seq.value);
+    }
+    if (device.present) {
+      map['device'] = Variable<Uint8List>(device.value);
+    }
+    if (hlc.present) {
+      map['hlc'] = Variable<String>(hlc.value);
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $OpLogTable.$converterhomeIdn.toSql(homeId.value),
+      );
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OpLogCompanion(')
+          ..write('seq: $seq, ')
+          ..write('device: $device, ')
+          ..write('hlc: $hlc, ')
+          ..write('homeId: $homeId, ')
+          ..write('body: $body')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ExtraTable extends Extra with TableInfo<$ExtraTable, ExtraRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExtraTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _entityMeta = const VerificationMeta('entity');
+  @override
+  late final GeneratedColumn<String> entity = GeneratedColumn<String>(
+    'entity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> rowId =
+      GeneratedColumn<Uint8List>(
+        'row_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($ExtraTable.$converterrowId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String?, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: false,
+      ).withConverter<String?>($ExtraTable.$converterhomeIdn);
+  static const VerificationMeta _jsonMeta = const VerificationMeta('json');
+  @override
+  late final GeneratedColumn<String> json = GeneratedColumn<String>(
+    'json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [entity, rowId, homeId, json];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'extra';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExtraRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('entity')) {
+      context.handle(
+        _entityMeta,
+        entity.isAcceptableOrUnknown(data['entity']!, _entityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityMeta);
+    }
+    if (data.containsKey('json')) {
+      context.handle(
+        _jsonMeta,
+        json.isAcceptableOrUnknown(data['json']!, _jsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_jsonMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {entity, rowId};
+  @override
+  ExtraRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExtraRow(
+      entity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity'],
+      )!,
+      rowId: $ExtraTable.$converterrowId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}row_id'],
+        )!,
+      ),
+      homeId: $ExtraTable.$converterhomeIdn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        ),
+      ),
+      json: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}json'],
+      )!,
+    );
+  }
+
+  @override
+  $ExtraTable createAlias(String alias) {
+    return $ExtraTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterrowId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+  static TypeConverter<String?, Uint8List?> $converterhomeIdn =
+      NullAwareTypeConverter.wrap($converterhomeId);
+}
+
+class ExtraRow extends DataClass implements Insertable<ExtraRow> {
+  final String entity;
+  final String rowId;
+  final String? homeId;
+  final String json;
+  const ExtraRow({
+    required this.entity,
+    required this.rowId,
+    this.homeId,
+    required this.json,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['entity'] = Variable<String>(entity);
+    {
+      map['row_id'] = Variable<Uint8List>(
+        $ExtraTable.$converterrowId.toSql(rowId),
+      );
+    }
+    if (!nullToAbsent || homeId != null) {
+      map['home_id'] = Variable<Uint8List>(
+        $ExtraTable.$converterhomeIdn.toSql(homeId),
+      );
+    }
+    map['json'] = Variable<String>(json);
+    return map;
+  }
+
+  ExtraCompanion toCompanion(bool nullToAbsent) {
+    return ExtraCompanion(
+      entity: Value(entity),
+      rowId: Value(rowId),
+      homeId: homeId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(homeId),
+      json: Value(json),
+    );
+  }
+
+  factory ExtraRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExtraRow(
+      entity: serializer.fromJson<String>(json['entity']),
+      rowId: serializer.fromJson<String>(json['rowId']),
+      homeId: serializer.fromJson<String?>(json['homeId']),
+      json: serializer.fromJson<String>(json['json']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'entity': serializer.toJson<String>(entity),
+      'rowId': serializer.toJson<String>(rowId),
+      'homeId': serializer.toJson<String?>(homeId),
+      'json': serializer.toJson<String>(json),
+    };
+  }
+
+  ExtraRow copyWith({
+    String? entity,
+    String? rowId,
+    Value<String?> homeId = const Value.absent(),
+    String? json,
+  }) => ExtraRow(
+    entity: entity ?? this.entity,
+    rowId: rowId ?? this.rowId,
+    homeId: homeId.present ? homeId.value : this.homeId,
+    json: json ?? this.json,
+  );
+  ExtraRow copyWithCompanion(ExtraCompanion data) {
+    return ExtraRow(
+      entity: data.entity.present ? data.entity.value : this.entity,
+      rowId: data.rowId.present ? data.rowId.value : this.rowId,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      json: data.json.present ? data.json.value : this.json,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExtraRow(')
+          ..write('entity: $entity, ')
+          ..write('rowId: $rowId, ')
+          ..write('homeId: $homeId, ')
+          ..write('json: $json')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(entity, rowId, homeId, json);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExtraRow &&
+          other.entity == this.entity &&
+          other.rowId == this.rowId &&
+          other.homeId == this.homeId &&
+          other.json == this.json);
+}
+
+class ExtraCompanion extends UpdateCompanion<ExtraRow> {
+  final Value<String> entity;
+  final Value<String> rowId;
+  final Value<String?> homeId;
+  final Value<String> json;
+  final Value<int> rowid;
+  const ExtraCompanion({
+    this.entity = const Value.absent(),
+    this.rowId = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.json = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExtraCompanion.insert({
+    required String entity,
+    required String rowId,
+    this.homeId = const Value.absent(),
+    required String json,
+    this.rowid = const Value.absent(),
+  }) : entity = Value(entity),
+       rowId = Value(rowId),
+       json = Value(json);
+  static Insertable<ExtraRow> custom({
+    Expression<String>? entity,
+    Expression<Uint8List>? rowId,
+    Expression<Uint8List>? homeId,
+    Expression<String>? json,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (entity != null) 'entity': entity,
+      if (rowId != null) 'row_id': rowId,
+      if (homeId != null) 'home_id': homeId,
+      if (json != null) 'json': json,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExtraCompanion copyWith({
+    Value<String>? entity,
+    Value<String>? rowId,
+    Value<String?>? homeId,
+    Value<String>? json,
+    Value<int>? rowid,
+  }) {
+    return ExtraCompanion(
+      entity: entity ?? this.entity,
+      rowId: rowId ?? this.rowId,
+      homeId: homeId ?? this.homeId,
+      json: json ?? this.json,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (entity.present) {
+      map['entity'] = Variable<String>(entity.value);
+    }
+    if (rowId.present) {
+      map['row_id'] = Variable<Uint8List>(
+        $ExtraTable.$converterrowId.toSql(rowId.value),
+      );
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $ExtraTable.$converterhomeIdn.toSql(homeId.value),
+      );
+    }
+    if (json.present) {
+      map['json'] = Variable<String>(json.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExtraCompanion(')
+          ..write('entity: $entity, ')
+          ..write('rowId: $rowId, ')
+          ..write('homeId: $homeId, ')
+          ..write('json: $json, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PendingTable extends Pending with TableInfo<$PendingTable, PendingRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PendingTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+    'key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entityMeta = const VerificationMeta('entity');
+  @override
+  late final GeneratedColumn<String> entity = GeneratedColumn<String>(
+    'entity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String?, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: false,
+      ).withConverter<String?>($PendingTable.$converterhomeIdn);
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'body',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [key, entity, homeId, body];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pending';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PendingRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('key')) {
+      context.handle(
+        _keyMeta,
+        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_keyMeta);
+    }
+    if (data.containsKey('entity')) {
+      context.handle(
+        _entityMeta,
+        entity.isAcceptableOrUnknown(data['entity']!, _entityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityMeta);
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {key};
+  @override
+  PendingRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PendingRow(
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      entity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity'],
+      )!,
+      homeId: $PendingTable.$converterhomeIdn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        ),
+      ),
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body'],
+      )!,
+    );
+  }
+
+  @override
+  $PendingTable createAlias(String alias) {
+    return $PendingTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+  static TypeConverter<String?, Uint8List?> $converterhomeIdn =
+      NullAwareTypeConverter.wrap($converterhomeId);
+}
+
+class PendingRow extends DataClass implements Insertable<PendingRow> {
+  final String key;
+  final String entity;
+  final String? homeId;
+  final String body;
+  const PendingRow({
+    required this.key,
+    required this.entity,
+    this.homeId,
+    required this.body,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['key'] = Variable<String>(key);
+    map['entity'] = Variable<String>(entity);
+    if (!nullToAbsent || homeId != null) {
+      map['home_id'] = Variable<Uint8List>(
+        $PendingTable.$converterhomeIdn.toSql(homeId),
+      );
+    }
+    map['body'] = Variable<String>(body);
+    return map;
+  }
+
+  PendingCompanion toCompanion(bool nullToAbsent) {
+    return PendingCompanion(
+      key: Value(key),
+      entity: Value(entity),
+      homeId: homeId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(homeId),
+      body: Value(body),
+    );
+  }
+
+  factory PendingRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PendingRow(
+      key: serializer.fromJson<String>(json['key']),
+      entity: serializer.fromJson<String>(json['entity']),
+      homeId: serializer.fromJson<String?>(json['homeId']),
+      body: serializer.fromJson<String>(json['body']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'key': serializer.toJson<String>(key),
+      'entity': serializer.toJson<String>(entity),
+      'homeId': serializer.toJson<String?>(homeId),
+      'body': serializer.toJson<String>(body),
+    };
+  }
+
+  PendingRow copyWith({
+    String? key,
+    String? entity,
+    Value<String?> homeId = const Value.absent(),
+    String? body,
+  }) => PendingRow(
+    key: key ?? this.key,
+    entity: entity ?? this.entity,
+    homeId: homeId.present ? homeId.value : this.homeId,
+    body: body ?? this.body,
+  );
+  PendingRow copyWithCompanion(PendingCompanion data) {
+    return PendingRow(
+      key: data.key.present ? data.key.value : this.key,
+      entity: data.entity.present ? data.entity.value : this.entity,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      body: data.body.present ? data.body.value : this.body,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingRow(')
+          ..write('key: $key, ')
+          ..write('entity: $entity, ')
+          ..write('homeId: $homeId, ')
+          ..write('body: $body')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(key, entity, homeId, body);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PendingRow &&
+          other.key == this.key &&
+          other.entity == this.entity &&
+          other.homeId == this.homeId &&
+          other.body == this.body);
+}
+
+class PendingCompanion extends UpdateCompanion<PendingRow> {
+  final Value<String> key;
+  final Value<String> entity;
+  final Value<String?> homeId;
+  final Value<String> body;
+  final Value<int> rowid;
+  const PendingCompanion({
+    this.key = const Value.absent(),
+    this.entity = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.body = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PendingCompanion.insert({
+    required String key,
+    required String entity,
+    this.homeId = const Value.absent(),
+    required String body,
+    this.rowid = const Value.absent(),
+  }) : key = Value(key),
+       entity = Value(entity),
+       body = Value(body);
+  static Insertable<PendingRow> custom({
+    Expression<String>? key,
+    Expression<String>? entity,
+    Expression<Uint8List>? homeId,
+    Expression<String>? body,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (key != null) 'key': key,
+      if (entity != null) 'entity': entity,
+      if (homeId != null) 'home_id': homeId,
+      if (body != null) 'body': body,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PendingCompanion copyWith({
+    Value<String>? key,
+    Value<String>? entity,
+    Value<String?>? homeId,
+    Value<String>? body,
+    Value<int>? rowid,
+  }) {
+    return PendingCompanion(
+      key: key ?? this.key,
+      entity: entity ?? this.entity,
+      homeId: homeId ?? this.homeId,
+      body: body ?? this.body,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (entity.present) {
+      map['entity'] = Variable<String>(entity.value);
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $PendingTable.$converterhomeIdn.toSql(homeId.value),
+      );
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingCompanion(')
+          ..write('key: $key, ')
+          ..write('entity: $entity, ')
+          ..write('homeId: $homeId, ')
+          ..write('body: $body, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PurgedHomesTable extends PurgedHomes
+    with TableInfo<$PurgedHomesTable, PurgedHomeRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PurgedHomesTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($PurgedHomesTable.$converterhomeId);
+  @override
+  List<GeneratedColumn> get $columns => [homeId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'purged_homes';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {homeId};
+  @override
+  PurgedHomeRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PurgedHomeRow(
+      homeId: $PurgedHomesTable.$converterhomeId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        )!,
+      ),
+    );
+  }
+
+  @override
+  $PurgedHomesTable createAlias(String alias) {
+    return $PurgedHomesTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+}
+
+class PurgedHomeRow extends DataClass implements Insertable<PurgedHomeRow> {
+  final String homeId;
+  const PurgedHomeRow({required this.homeId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['home_id'] = Variable<Uint8List>(
+        $PurgedHomesTable.$converterhomeId.toSql(homeId),
+      );
+    }
+    return map;
+  }
+
+  PurgedHomesCompanion toCompanion(bool nullToAbsent) {
+    return PurgedHomesCompanion(homeId: Value(homeId));
+  }
+
+  factory PurgedHomeRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PurgedHomeRow(homeId: serializer.fromJson<String>(json['homeId']));
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{'homeId': serializer.toJson<String>(homeId)};
+  }
+
+  PurgedHomeRow copyWith({String? homeId}) =>
+      PurgedHomeRow(homeId: homeId ?? this.homeId);
+  PurgedHomeRow copyWithCompanion(PurgedHomesCompanion data) {
+    return PurgedHomeRow(
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PurgedHomeRow(')
+          ..write('homeId: $homeId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => homeId.hashCode;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PurgedHomeRow && other.homeId == this.homeId);
+}
+
+class PurgedHomesCompanion extends UpdateCompanion<PurgedHomeRow> {
+  final Value<String> homeId;
+  final Value<int> rowid;
+  const PurgedHomesCompanion({
+    this.homeId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PurgedHomesCompanion.insert({
+    required String homeId,
+    this.rowid = const Value.absent(),
+  }) : homeId = Value(homeId);
+  static Insertable<PurgedHomeRow> custom({
+    Expression<Uint8List>? homeId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (homeId != null) 'home_id': homeId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PurgedHomesCompanion copyWith({Value<String>? homeId, Value<int>? rowid}) {
+    return PurgedHomesCompanion(
+      homeId: homeId ?? this.homeId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $PurgedHomesTable.$converterhomeId.toSql(homeId.value),
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PurgedHomesCompanion(')
+          ..write('homeId: $homeId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $OtherVersionsTable extends OtherVersions
+    with TableInfo<$OtherVersionsTable, OtherVersionRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $OtherVersionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _entityMeta = const VerificationMeta('entity');
+  @override
+  late final GeneratedColumn<String> entity = GeneratedColumn<String>(
+    'entity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> rowId =
+      GeneratedColumn<Uint8List>(
+        'row_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($OtherVersionsTable.$converterrowId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String?, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: false,
+      ).withConverter<String?>($OtherVersionsTable.$converterhomeIdn);
+  static const VerificationMeta _fieldMeta = const VerificationMeta('field');
+  @override
+  late final GeneratedColumn<String> field = GeneratedColumn<String>(
+    'field',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hlcMeta = const VerificationMeta('hlc');
+  @override
+  late final GeneratedColumn<String> hlc = GeneratedColumn<String>(
+    'hlc',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviceMeta = const VerificationMeta('device');
+  @override
+  late final GeneratedColumn<Uint8List> device = GeneratedColumn<Uint8List>(
+    'device',
+    aliasedName,
+    false,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _keptUntilMeta = const VerificationMeta(
+    'keptUntil',
+  );
+  @override
+  late final GeneratedColumn<int> keptUntil = GeneratedColumn<int>(
+    'kept_until',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    entity,
+    rowId,
+    homeId,
+    field,
+    value,
+    hlc,
+    device,
+    keptUntil,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'other_versions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<OtherVersionRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('entity')) {
+      context.handle(
+        _entityMeta,
+        entity.isAcceptableOrUnknown(data['entity']!, _entityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityMeta);
+    }
+    if (data.containsKey('field')) {
+      context.handle(
+        _fieldMeta,
+        field.isAcceptableOrUnknown(data['field']!, _fieldMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fieldMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    if (data.containsKey('hlc')) {
+      context.handle(
+        _hlcMeta,
+        hlc.isAcceptableOrUnknown(data['hlc']!, _hlcMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hlcMeta);
+    }
+    if (data.containsKey('device')) {
+      context.handle(
+        _deviceMeta,
+        device.isAcceptableOrUnknown(data['device']!, _deviceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deviceMeta);
+    }
+    if (data.containsKey('kept_until')) {
+      context.handle(
+        _keptUntilMeta,
+        keptUntil.isAcceptableOrUnknown(data['kept_until']!, _keptUntilMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_keptUntilMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {entity, rowId, field, hlc, device};
+  @override
+  OtherVersionRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OtherVersionRow(
+      entity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity'],
+      )!,
+      rowId: $OtherVersionsTable.$converterrowId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}row_id'],
+        )!,
+      ),
+      homeId: $OtherVersionsTable.$converterhomeIdn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        ),
+      ),
+      field: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}field'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
+      hlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hlc'],
+      )!,
+      device: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}device'],
+      )!,
+      keptUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}kept_until'],
+      )!,
+    );
+  }
+
+  @override
+  $OtherVersionsTable createAlias(String alias) {
+    return $OtherVersionsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterrowId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+  static TypeConverter<String?, Uint8List?> $converterhomeIdn =
+      NullAwareTypeConverter.wrap($converterhomeId);
+}
+
+class OtherVersionRow extends DataClass implements Insertable<OtherVersionRow> {
+  final String entity;
+  final String rowId;
+  final String? homeId;
+  final String field;
+  final String value;
+  final String hlc;
+  final Uint8List device;
+  final int keptUntil;
+  const OtherVersionRow({
+    required this.entity,
+    required this.rowId,
+    this.homeId,
+    required this.field,
+    required this.value,
+    required this.hlc,
+    required this.device,
+    required this.keptUntil,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['entity'] = Variable<String>(entity);
+    {
+      map['row_id'] = Variable<Uint8List>(
+        $OtherVersionsTable.$converterrowId.toSql(rowId),
+      );
+    }
+    if (!nullToAbsent || homeId != null) {
+      map['home_id'] = Variable<Uint8List>(
+        $OtherVersionsTable.$converterhomeIdn.toSql(homeId),
+      );
+    }
+    map['field'] = Variable<String>(field);
+    map['value'] = Variable<String>(value);
+    map['hlc'] = Variable<String>(hlc);
+    map['device'] = Variable<Uint8List>(device);
+    map['kept_until'] = Variable<int>(keptUntil);
+    return map;
+  }
+
+  OtherVersionsCompanion toCompanion(bool nullToAbsent) {
+    return OtherVersionsCompanion(
+      entity: Value(entity),
+      rowId: Value(rowId),
+      homeId: homeId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(homeId),
+      field: Value(field),
+      value: Value(value),
+      hlc: Value(hlc),
+      device: Value(device),
+      keptUntil: Value(keptUntil),
+    );
+  }
+
+  factory OtherVersionRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return OtherVersionRow(
+      entity: serializer.fromJson<String>(json['entity']),
+      rowId: serializer.fromJson<String>(json['rowId']),
+      homeId: serializer.fromJson<String?>(json['homeId']),
+      field: serializer.fromJson<String>(json['field']),
+      value: serializer.fromJson<String>(json['value']),
+      hlc: serializer.fromJson<String>(json['hlc']),
+      device: serializer.fromJson<Uint8List>(json['device']),
+      keptUntil: serializer.fromJson<int>(json['keptUntil']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'entity': serializer.toJson<String>(entity),
+      'rowId': serializer.toJson<String>(rowId),
+      'homeId': serializer.toJson<String?>(homeId),
+      'field': serializer.toJson<String>(field),
+      'value': serializer.toJson<String>(value),
+      'hlc': serializer.toJson<String>(hlc),
+      'device': serializer.toJson<Uint8List>(device),
+      'keptUntil': serializer.toJson<int>(keptUntil),
+    };
+  }
+
+  OtherVersionRow copyWith({
+    String? entity,
+    String? rowId,
+    Value<String?> homeId = const Value.absent(),
+    String? field,
+    String? value,
+    String? hlc,
+    Uint8List? device,
+    int? keptUntil,
+  }) => OtherVersionRow(
+    entity: entity ?? this.entity,
+    rowId: rowId ?? this.rowId,
+    homeId: homeId.present ? homeId.value : this.homeId,
+    field: field ?? this.field,
+    value: value ?? this.value,
+    hlc: hlc ?? this.hlc,
+    device: device ?? this.device,
+    keptUntil: keptUntil ?? this.keptUntil,
+  );
+  OtherVersionRow copyWithCompanion(OtherVersionsCompanion data) {
+    return OtherVersionRow(
+      entity: data.entity.present ? data.entity.value : this.entity,
+      rowId: data.rowId.present ? data.rowId.value : this.rowId,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      field: data.field.present ? data.field.value : this.field,
+      value: data.value.present ? data.value.value : this.value,
+      hlc: data.hlc.present ? data.hlc.value : this.hlc,
+      device: data.device.present ? data.device.value : this.device,
+      keptUntil: data.keptUntil.present ? data.keptUntil.value : this.keptUntil,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OtherVersionRow(')
+          ..write('entity: $entity, ')
+          ..write('rowId: $rowId, ')
+          ..write('homeId: $homeId, ')
+          ..write('field: $field, ')
+          ..write('value: $value, ')
+          ..write('hlc: $hlc, ')
+          ..write('device: $device, ')
+          ..write('keptUntil: $keptUntil')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    entity,
+    rowId,
+    homeId,
+    field,
+    value,
+    hlc,
+    $driftBlobEquality.hash(device),
+    keptUntil,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OtherVersionRow &&
+          other.entity == this.entity &&
+          other.rowId == this.rowId &&
+          other.homeId == this.homeId &&
+          other.field == this.field &&
+          other.value == this.value &&
+          other.hlc == this.hlc &&
+          $driftBlobEquality.equals(other.device, this.device) &&
+          other.keptUntil == this.keptUntil);
+}
+
+class OtherVersionsCompanion extends UpdateCompanion<OtherVersionRow> {
+  final Value<String> entity;
+  final Value<String> rowId;
+  final Value<String?> homeId;
+  final Value<String> field;
+  final Value<String> value;
+  final Value<String> hlc;
+  final Value<Uint8List> device;
+  final Value<int> keptUntil;
+  final Value<int> rowid;
+  const OtherVersionsCompanion({
+    this.entity = const Value.absent(),
+    this.rowId = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.field = const Value.absent(),
+    this.value = const Value.absent(),
+    this.hlc = const Value.absent(),
+    this.device = const Value.absent(),
+    this.keptUntil = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  OtherVersionsCompanion.insert({
+    required String entity,
+    required String rowId,
+    this.homeId = const Value.absent(),
+    required String field,
+    required String value,
+    required String hlc,
+    required Uint8List device,
+    required int keptUntil,
+    this.rowid = const Value.absent(),
+  }) : entity = Value(entity),
+       rowId = Value(rowId),
+       field = Value(field),
+       value = Value(value),
+       hlc = Value(hlc),
+       device = Value(device),
+       keptUntil = Value(keptUntil);
+  static Insertable<OtherVersionRow> custom({
+    Expression<String>? entity,
+    Expression<Uint8List>? rowId,
+    Expression<Uint8List>? homeId,
+    Expression<String>? field,
+    Expression<String>? value,
+    Expression<String>? hlc,
+    Expression<Uint8List>? device,
+    Expression<int>? keptUntil,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (entity != null) 'entity': entity,
+      if (rowId != null) 'row_id': rowId,
+      if (homeId != null) 'home_id': homeId,
+      if (field != null) 'field': field,
+      if (value != null) 'value': value,
+      if (hlc != null) 'hlc': hlc,
+      if (device != null) 'device': device,
+      if (keptUntil != null) 'kept_until': keptUntil,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  OtherVersionsCompanion copyWith({
+    Value<String>? entity,
+    Value<String>? rowId,
+    Value<String?>? homeId,
+    Value<String>? field,
+    Value<String>? value,
+    Value<String>? hlc,
+    Value<Uint8List>? device,
+    Value<int>? keptUntil,
+    Value<int>? rowid,
+  }) {
+    return OtherVersionsCompanion(
+      entity: entity ?? this.entity,
+      rowId: rowId ?? this.rowId,
+      homeId: homeId ?? this.homeId,
+      field: field ?? this.field,
+      value: value ?? this.value,
+      hlc: hlc ?? this.hlc,
+      device: device ?? this.device,
+      keptUntil: keptUntil ?? this.keptUntil,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (entity.present) {
+      map['entity'] = Variable<String>(entity.value);
+    }
+    if (rowId.present) {
+      map['row_id'] = Variable<Uint8List>(
+        $OtherVersionsTable.$converterrowId.toSql(rowId.value),
+      );
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $OtherVersionsTable.$converterhomeIdn.toSql(homeId.value),
+      );
+    }
+    if (field.present) {
+      map['field'] = Variable<String>(field.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (hlc.present) {
+      map['hlc'] = Variable<String>(hlc.value);
+    }
+    if (device.present) {
+      map['device'] = Variable<Uint8List>(device.value);
+    }
+    if (keptUntil.present) {
+      map['kept_until'] = Variable<int>(keptUntil.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OtherVersionsCompanion(')
+          ..write('entity: $entity, ')
+          ..write('rowId: $rowId, ')
+          ..write('homeId: $homeId, ')
+          ..write('field: $field, ')
+          ..write('value: $value, ')
+          ..write('hlc: $hlc, ')
+          ..write('device: $device, ')
+          ..write('keptUntil: $keptUntil, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -16557,6 +18194,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ReportsTable reports = $ReportsTable(this);
   late final $FieldClockTable fieldClock = $FieldClockTable(this);
   late final $LocalSettingsTable localSettings = $LocalSettingsTable(this);
+  late final $OpLogTable opLog = $OpLogTable(this);
+  late final $ExtraTable extra = $ExtraTable(this);
+  late final $PendingTable pending = $PendingTable(this);
+  late final $PurgedHomesTable purgedHomes = $PurgedHomesTable(this);
+  late final $OtherVersionsTable otherVersions = $OtherVersionsTable(this);
   late final Index roomHomePosition = Index(
     'room_home_position',
     'CREATE INDEX room_home_position ON rooms (home_id, position)',
@@ -16635,6 +18277,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     reports,
     fieldClock,
     localSettings,
+    opLog,
+    extra,
+    pending,
+    purgedHomes,
+    otherVersions,
     roomHomePosition,
     taskHomeCreated,
     occHomeStatusDue,
@@ -24822,6 +26469,958 @@ typedef $$LocalSettingsTableProcessedTableManager =
       LocalSettingRow,
       PrefetchHooks Function()
     >;
+typedef $$OpLogTableCreateCompanionBuilder = OpLogCompanion Function({
+  Value<int> seq,
+  required Uint8List device,
+  required String hlc,
+  Value<String?> homeId,
+  required String body,
+});
+typedef $$OpLogTableUpdateCompanionBuilder = OpLogCompanion Function({
+  Value<int> seq,
+  Value<Uint8List> device,
+  Value<String> hlc,
+  Value<String?> homeId,
+  Value<String> body,
+});
+
+class $$OpLogTableFilterComposer extends Composer<_$AppDatabase, $OpLogTable> {
+  $$OpLogTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get seq => $composableBuilder(
+    column: $table.seq,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<Uint8List> get device => $composableBuilder(
+    column: $table.device,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String?, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$OpLogTableOrderingComposer
+    extends Composer<_$AppDatabase, $OpLogTable> {
+  $$OpLogTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get seq => $composableBuilder(
+    column: $table.seq,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get device => $composableBuilder(
+    column: $table.device,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$OpLogTableAnnotationComposer
+    extends Composer<_$AppDatabase, $OpLogTable> {
+  $$OpLogTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get seq =>
+      $composableBuilder(column: $table.seq, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get device =>
+      $composableBuilder(column: $table.device, builder: (column) => column);
+
+  GeneratedColumn<String> get hlc =>
+      $composableBuilder(column: $table.hlc, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String?, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+}
+
+class $$OpLogTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OpLogTable,
+          OpLogRow,
+          $$OpLogTableFilterComposer,
+          $$OpLogTableOrderingComposer,
+          $$OpLogTableAnnotationComposer,
+          $$OpLogTableCreateCompanionBuilder,
+          $$OpLogTableUpdateCompanionBuilder,
+          (OpLogRow, BaseReferences<_$AppDatabase, $OpLogTable, OpLogRow>),
+          OpLogRow,
+          PrefetchHooks Function()
+        > {
+  $$OpLogTableTableManager(_$AppDatabase db, $OpLogTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OpLogTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OpLogTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$OpLogTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> seq = const Value.absent(),
+                Value<Uint8List> device = const Value.absent(),
+                Value<String> hlc = const Value.absent(),
+                Value<String?> homeId = const Value.absent(),
+                Value<String> body = const Value.absent(),
+              }) => OpLogCompanion(
+                seq: seq,
+                device: device,
+                hlc: hlc,
+                homeId: homeId,
+                body: body,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> seq = const Value.absent(),
+                required Uint8List device,
+                required String hlc,
+                Value<String?> homeId = const Value.absent(),
+                required String body,
+              }) => OpLogCompanion.insert(
+                seq: seq,
+                device: device,
+                hlc: hlc,
+                homeId: homeId,
+                body: body,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$OpLogTable, OpLogRow>(table),
+                  BaseReferences<_$AppDatabase, $OpLogTable, OpLogRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$OpLogTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OpLogTable,
+      OpLogRow,
+      $$OpLogTableFilterComposer,
+      $$OpLogTableOrderingComposer,
+      $$OpLogTableAnnotationComposer,
+      $$OpLogTableCreateCompanionBuilder,
+      $$OpLogTableUpdateCompanionBuilder,
+      (OpLogRow, BaseReferences<_$AppDatabase, $OpLogTable, OpLogRow>),
+      OpLogRow,
+      PrefetchHooks Function()
+    >;
+typedef $$ExtraTableCreateCompanionBuilder = ExtraCompanion Function({
+  required String entity,
+  required String rowId,
+  Value<String?> homeId,
+  required String json,
+  Value<int> rowid,
+});
+typedef $$ExtraTableUpdateCompanionBuilder = ExtraCompanion Function({
+  Value<String> entity,
+  Value<String> rowId,
+  Value<String?> homeId,
+  Value<String> json,
+  Value<int> rowid,
+});
+
+class $$ExtraTableFilterComposer extends Composer<_$AppDatabase, $ExtraTable> {
+  $$ExtraTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get rowId =>
+      $composableBuilder(
+        column: $table.rowId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String?, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get json => $composableBuilder(
+    column: $table.json,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ExtraTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExtraTable> {
+  $$ExtraTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get rowId => $composableBuilder(
+    column: $table.rowId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get json => $composableBuilder(
+    column: $table.json,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ExtraTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExtraTable> {
+  $$ExtraTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get entity =>
+      $composableBuilder(column: $table.entity, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get rowId =>
+      $composableBuilder(column: $table.rowId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String?, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumn<String> get json =>
+      $composableBuilder(column: $table.json, builder: (column) => column);
+}
+
+class $$ExtraTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExtraTable,
+          ExtraRow,
+          $$ExtraTableFilterComposer,
+          $$ExtraTableOrderingComposer,
+          $$ExtraTableAnnotationComposer,
+          $$ExtraTableCreateCompanionBuilder,
+          $$ExtraTableUpdateCompanionBuilder,
+          (ExtraRow, BaseReferences<_$AppDatabase, $ExtraTable, ExtraRow>),
+          ExtraRow,
+          PrefetchHooks Function()
+        > {
+  $$ExtraTableTableManager(_$AppDatabase db, $ExtraTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExtraTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExtraTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExtraTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> entity = const Value.absent(),
+                Value<String> rowId = const Value.absent(),
+                Value<String?> homeId = const Value.absent(),
+                Value<String> json = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExtraCompanion(
+                entity: entity,
+                rowId: rowId,
+                homeId: homeId,
+                json: json,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String entity,
+                required String rowId,
+                Value<String?> homeId = const Value.absent(),
+                required String json,
+                Value<int> rowid = const Value.absent(),
+              }) => ExtraCompanion.insert(
+                entity: entity,
+                rowId: rowId,
+                homeId: homeId,
+                json: json,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ExtraTable, ExtraRow>(table),
+                  BaseReferences<_$AppDatabase, $ExtraTable, ExtraRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ExtraTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExtraTable,
+      ExtraRow,
+      $$ExtraTableFilterComposer,
+      $$ExtraTableOrderingComposer,
+      $$ExtraTableAnnotationComposer,
+      $$ExtraTableCreateCompanionBuilder,
+      $$ExtraTableUpdateCompanionBuilder,
+      (ExtraRow, BaseReferences<_$AppDatabase, $ExtraTable, ExtraRow>),
+      ExtraRow,
+      PrefetchHooks Function()
+    >;
+typedef $$PendingTableCreateCompanionBuilder = PendingCompanion Function({
+  required String key,
+  required String entity,
+  Value<String?> homeId,
+  required String body,
+  Value<int> rowid,
+});
+typedef $$PendingTableUpdateCompanionBuilder = PendingCompanion Function({
+  Value<String> key,
+  Value<String> entity,
+  Value<String?> homeId,
+  Value<String> body,
+  Value<int> rowid,
+});
+
+class $$PendingTableFilterComposer
+    extends Composer<_$AppDatabase, $PendingTable> {
+  $$PendingTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String?, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PendingTableOrderingComposer
+    extends Composer<_$AppDatabase, $PendingTable> {
+  $$PendingTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PendingTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PendingTable> {
+  $$PendingTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get key =>
+      $composableBuilder(column: $table.key, builder: (column) => column);
+
+  GeneratedColumn<String> get entity =>
+      $composableBuilder(column: $table.entity, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String?, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+}
+
+class $$PendingTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PendingTable,
+          PendingRow,
+          $$PendingTableFilterComposer,
+          $$PendingTableOrderingComposer,
+          $$PendingTableAnnotationComposer,
+          $$PendingTableCreateCompanionBuilder,
+          $$PendingTableUpdateCompanionBuilder,
+          (
+            PendingRow,
+            BaseReferences<_$AppDatabase, $PendingTable, PendingRow>,
+          ),
+          PendingRow,
+          PrefetchHooks Function()
+        > {
+  $$PendingTableTableManager(_$AppDatabase db, $PendingTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PendingTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PendingTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PendingTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> key = const Value.absent(),
+                Value<String> entity = const Value.absent(),
+                Value<String?> homeId = const Value.absent(),
+                Value<String> body = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PendingCompanion(
+                key: key,
+                entity: entity,
+                homeId: homeId,
+                body: body,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String key,
+                required String entity,
+                Value<String?> homeId = const Value.absent(),
+                required String body,
+                Value<int> rowid = const Value.absent(),
+              }) => PendingCompanion.insert(
+                key: key,
+                entity: entity,
+                homeId: homeId,
+                body: body,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PendingTable, PendingRow>(table),
+                  BaseReferences<_$AppDatabase, $PendingTable, PendingRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PendingTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PendingTable,
+      PendingRow,
+      $$PendingTableFilterComposer,
+      $$PendingTableOrderingComposer,
+      $$PendingTableAnnotationComposer,
+      $$PendingTableCreateCompanionBuilder,
+      $$PendingTableUpdateCompanionBuilder,
+      (PendingRow, BaseReferences<_$AppDatabase, $PendingTable, PendingRow>),
+      PendingRow,
+      PrefetchHooks Function()
+    >;
+typedef $$PurgedHomesTableCreateCompanionBuilder =
+    PurgedHomesCompanion Function({required String homeId, Value<int> rowid});
+typedef $$PurgedHomesTableUpdateCompanionBuilder =
+    PurgedHomesCompanion Function({Value<String> homeId, Value<int> rowid});
+
+class $$PurgedHomesTableFilterComposer
+    extends Composer<_$AppDatabase, $PurgedHomesTable> {
+  $$PurgedHomesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+}
+
+class $$PurgedHomesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PurgedHomesTable> {
+  $$PurgedHomesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PurgedHomesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PurgedHomesTable> {
+  $$PurgedHomesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<String, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+}
+
+class $$PurgedHomesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PurgedHomesTable,
+          PurgedHomeRow,
+          $$PurgedHomesTableFilterComposer,
+          $$PurgedHomesTableOrderingComposer,
+          $$PurgedHomesTableAnnotationComposer,
+          $$PurgedHomesTableCreateCompanionBuilder,
+          $$PurgedHomesTableUpdateCompanionBuilder,
+          (
+            PurgedHomeRow,
+            BaseReferences<_$AppDatabase, $PurgedHomesTable, PurgedHomeRow>,
+          ),
+          PurgedHomeRow,
+          PrefetchHooks Function()
+        > {
+  $$PurgedHomesTableTableManager(_$AppDatabase db, $PurgedHomesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PurgedHomesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PurgedHomesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PurgedHomesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> homeId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => PurgedHomesCompanion(homeId: homeId, rowid: rowid),
+          createCompanionCallback: ({
+            required String homeId,
+            Value<int> rowid = const Value.absent(),
+          }) => PurgedHomesCompanion.insert(homeId: homeId, rowid: rowid),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PurgedHomesTable, PurgedHomeRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PurgedHomesTable,
+                    PurgedHomeRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PurgedHomesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PurgedHomesTable,
+      PurgedHomeRow,
+      $$PurgedHomesTableFilterComposer,
+      $$PurgedHomesTableOrderingComposer,
+      $$PurgedHomesTableAnnotationComposer,
+      $$PurgedHomesTableCreateCompanionBuilder,
+      $$PurgedHomesTableUpdateCompanionBuilder,
+      (
+        PurgedHomeRow,
+        BaseReferences<_$AppDatabase, $PurgedHomesTable, PurgedHomeRow>,
+      ),
+      PurgedHomeRow,
+      PrefetchHooks Function()
+    >;
+typedef $$OtherVersionsTableCreateCompanionBuilder =
+    OtherVersionsCompanion Function({
+      required String entity,
+      required String rowId,
+      Value<String?> homeId,
+      required String field,
+      required String value,
+      required String hlc,
+      required Uint8List device,
+      required int keptUntil,
+      Value<int> rowid,
+    });
+typedef $$OtherVersionsTableUpdateCompanionBuilder =
+    OtherVersionsCompanion Function({
+      Value<String> entity,
+      Value<String> rowId,
+      Value<String?> homeId,
+      Value<String> field,
+      Value<String> value,
+      Value<String> hlc,
+      Value<Uint8List> device,
+      Value<int> keptUntil,
+      Value<int> rowid,
+    });
+
+class $$OtherVersionsTableFilterComposer
+    extends Composer<_$AppDatabase, $OtherVersionsTable> {
+  $$OtherVersionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get rowId =>
+      $composableBuilder(
+        column: $table.rowId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String?, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get field => $composableBuilder(
+    column: $table.field,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<Uint8List> get device => $composableBuilder(
+    column: $table.device,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get keptUntil => $composableBuilder(
+    column: $table.keptUntil,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$OtherVersionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $OtherVersionsTable> {
+  $$OtherVersionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get rowId => $composableBuilder(
+    column: $table.rowId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get field => $composableBuilder(
+    column: $table.field,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get device => $composableBuilder(
+    column: $table.device,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get keptUntil => $composableBuilder(
+    column: $table.keptUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$OtherVersionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $OtherVersionsTable> {
+  $$OtherVersionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get entity =>
+      $composableBuilder(column: $table.entity, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get rowId =>
+      $composableBuilder(column: $table.rowId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String?, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumn<String> get field =>
+      $composableBuilder(column: $table.field, builder: (column) => column);
+
+  GeneratedColumn<String> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+
+  GeneratedColumn<String> get hlc =>
+      $composableBuilder(column: $table.hlc, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get device =>
+      $composableBuilder(column: $table.device, builder: (column) => column);
+
+  GeneratedColumn<int> get keptUntil =>
+      $composableBuilder(column: $table.keptUntil, builder: (column) => column);
+}
+
+class $$OtherVersionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OtherVersionsTable,
+          OtherVersionRow,
+          $$OtherVersionsTableFilterComposer,
+          $$OtherVersionsTableOrderingComposer,
+          $$OtherVersionsTableAnnotationComposer,
+          $$OtherVersionsTableCreateCompanionBuilder,
+          $$OtherVersionsTableUpdateCompanionBuilder,
+          (
+            OtherVersionRow,
+            BaseReferences<_$AppDatabase, $OtherVersionsTable, OtherVersionRow>,
+          ),
+          OtherVersionRow,
+          PrefetchHooks Function()
+        > {
+  $$OtherVersionsTableTableManager(_$AppDatabase db, $OtherVersionsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OtherVersionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OtherVersionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$OtherVersionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> entity = const Value.absent(),
+                Value<String> rowId = const Value.absent(),
+                Value<String?> homeId = const Value.absent(),
+                Value<String> field = const Value.absent(),
+                Value<String> value = const Value.absent(),
+                Value<String> hlc = const Value.absent(),
+                Value<Uint8List> device = const Value.absent(),
+                Value<int> keptUntil = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => OtherVersionsCompanion(
+                entity: entity,
+                rowId: rowId,
+                homeId: homeId,
+                field: field,
+                value: value,
+                hlc: hlc,
+                device: device,
+                keptUntil: keptUntil,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String entity,
+                required String rowId,
+                Value<String?> homeId = const Value.absent(),
+                required String field,
+                required String value,
+                required String hlc,
+                required Uint8List device,
+                required int keptUntil,
+                Value<int> rowid = const Value.absent(),
+              }) => OtherVersionsCompanion.insert(
+                entity: entity,
+                rowId: rowId,
+                homeId: homeId,
+                field: field,
+                value: value,
+                hlc: hlc,
+                device: device,
+                keptUntil: keptUntil,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$OtherVersionsTable, OtherVersionRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $OtherVersionsTable,
+                    OtherVersionRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$OtherVersionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OtherVersionsTable,
+      OtherVersionRow,
+      $$OtherVersionsTableFilterComposer,
+      $$OtherVersionsTableOrderingComposer,
+      $$OtherVersionsTableAnnotationComposer,
+      $$OtherVersionsTableCreateCompanionBuilder,
+      $$OtherVersionsTableUpdateCompanionBuilder,
+      (
+        OtherVersionRow,
+        BaseReferences<_$AppDatabase, $OtherVersionsTable, OtherVersionRow>,
+      ),
+      OtherVersionRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -24876,4 +27475,14 @@ class $AppDatabaseManager {
       $$FieldClockTableTableManager(_db, _db.fieldClock);
   $$LocalSettingsTableTableManager get localSettings =>
       $$LocalSettingsTableTableManager(_db, _db.localSettings);
+  $$OpLogTableTableManager get opLog =>
+      $$OpLogTableTableManager(_db, _db.opLog);
+  $$ExtraTableTableManager get extra =>
+      $$ExtraTableTableManager(_db, _db.extra);
+  $$PendingTableTableManager get pending =>
+      $$PendingTableTableManager(_db, _db.pending);
+  $$PurgedHomesTableTableManager get purgedHomes =>
+      $$PurgedHomesTableTableManager(_db, _db.purgedHomes);
+  $$OtherVersionsTableTableManager get otherVersions =>
+      $$OtherVersionsTableTableManager(_db, _db.otherVersions);
 }

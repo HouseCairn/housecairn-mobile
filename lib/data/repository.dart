@@ -19,10 +19,13 @@ import '../domain/reminders.dart';
 import '../domain/stock.dart' as stock;
 import '../domain/warranty.dart' as warranty;
 import '../sync/mode.dart';
+import '../sync/operation.dart';
+import '../sync/transport.dart';
 import 'database.dart';
 
 part 'budget_repository.dart';
 part 'stock_repository.dart';
+part 'sync_repository.dart';
 part 'task_repository.dart';
 
 /// Why the repository refused a change. Each value has its message in the
@@ -537,6 +540,16 @@ class Repository {
         .getSingle();
     final text = last.data['last'] as String?;
     _hlc = Hlc(clock, last: text == null ? 0 : Hlc.parse(text));
+    // The clocks of the other phones this one has merged, by the receive
+    // rule: one more than 24 hours ahead is not adopted (lot 4).
+    final others = await db
+        .customSelect(
+          'SELECT MAX(hlc) AS last FROM field_clock WHERE device != ?',
+          variables: [Variable<Uint8List>(_device)],
+        )
+        .getSingle();
+    final seen = others.data['last'] as String?;
+    if (seen != null) _hlc.receive(Hlc.parse(seen));
   }
 
   Uint8List get device => _device;
@@ -564,7 +577,10 @@ class Repository {
   }
 
   /// One operation: sets [fields] of the row [id] of [table] (creating it
-  /// when [create]), and their clocks. Runs inside the caller's transaction.
+  /// when [create]), and their clocks, and writes it in `op_log` for sync
+  /// (lot 4). Runs inside the caller's transaction. `updated_at` is the
+  /// time of the newest clock of the row, so that every phone that merged
+  /// the same operations holds the same value.
   Future<void> _put(
     String table,
     String id,
@@ -573,13 +589,16 @@ class Repository {
     bool create = false,
   }) async {
     final now = _now();
+    final clock = _hlc.next();
+    final hlc = Hlc.format(clock);
+    final changed = clock >> 16;
     final clocked = {...fields, if (create) 'created_at': now};
     if (create) {
       final columns = {
         'id': id,
         'home_id': ?homeId,
         ...clocked,
-        'updated_at': now,
+        'updated_at': changed,
       };
       await db.customInsert(
         'INSERT INTO $table (${columns.keys.join(', ')}) '
@@ -590,18 +609,18 @@ class Repository {
         ],
       );
     } else {
-      final columns = {...clocked, 'updated_at': now};
       await db.customUpdate(
-        'UPDATE $table SET ${columns.keys.map((c) => '$c = ?').join(', ')} '
+        'UPDATE $table SET '
+        '${[for (final c in clocked.keys) '$c = ?', 'updated_at = MAX(updated_at, ?)'].join(', ')} '
         'WHERE id = ?',
         variables: [
-          for (final MapEntry(:key, :value) in columns.entries)
+          for (final MapEntry(:key, :value) in clocked.entries)
             _variable(key, value),
+          Variable<int>(changed),
           Variable<Uint8List>(uuidBytes(id)),
         ],
       );
     }
-    final hlc = Hlc.format(_hlc.next());
     for (final field in clocked.keys) {
       await db.customInsert(
         'INSERT INTO field_clock (entity, row_id, field, hlc, device) '
@@ -616,6 +635,7 @@ class Repository {
         ],
       );
     }
+    await _logOperation(table, id, homeId, clocked, hlc);
   }
 
   // ---------- local settings (this phone only, never synced) ----------
@@ -800,29 +820,9 @@ class Repository {
     if (found.archivedAt == null && active.length <= 1) {
       throw const Refused(Refusal.lastActiveHome);
     }
-    final key = Variable<Uint8List>(uuidBytes(id));
-    await db.transaction(() async {
-      for (final table in homeTables) {
-        await db.customStatement(
-          'DELETE FROM field_clock WHERE entity = ? AND row_id IN '
-          '(SELECT id FROM $table WHERE home_id = ?)',
-          [entityOf[table], key.value],
-        );
-        await db.customStatement('DELETE FROM $table WHERE home_id = ?', [
-          key.value,
-        ]);
-      }
-      await db.customStatement(
-        "DELETE FROM field_clock WHERE entity = 'homes.home' AND row_id = ?",
-        [key.value],
-      );
-      await db.customStatement('DELETE FROM homes WHERE id = ?', [key.value]);
-      if (await _setting('current_home') == id) {
-        await _setSetting('current_home', null);
-      }
-    });
-    final directory = homeDirectory(id);
-    if (directory.existsSync()) directory.deleteSync(recursive: true);
+    // The same erasure as a purge of sync (lot 4): rows, clocks, what sync
+    // keeps of the home, its files, and its id among the purged homes.
+    await purgeHome(id);
   }
 
   // ---------- current home (this phone, `homes/current.py`) ----------
@@ -1371,10 +1371,18 @@ class Repository {
   /// date first and no date last (`open_occurrences_for` of the web).
   Future<List<TaskEntry>> tasksOf({String? roomId, String? itemId}) async {
     assert((roomId == null) != (itemId == null));
+    // A reference to a row of another home is read as empty
+    // (docs/adr/0003-sync-protocol.md): only tasks of the room's own home.
+    final home = await _homeOf(
+      roomId != null ? 'rooms' : 'items',
+      (roomId ?? itemId)!,
+    );
+    if (home == null) return [];
     final tasks =
         await (db.select(db.tasks)..where(
               (t) =>
                   t.deletedAt.isNull() &
+                  t.homeId.equalsValue(home) &
                   (roomId != null
                       ? t.roomId.equalsValue(roomId)
                       : t.itemId.equalsValue(itemId!)),
@@ -2039,6 +2047,9 @@ class Repository {
       if (!untouched) throw const Refused(Refusal.nextChanged);
     }
     await db.transaction(() async {
+      // Kept on this phone, so that sync can take the undo back if the next
+      // occurrence was worked on elsewhere (docs/adr/0003, lot 4).
+      await _rememberUndo(found);
       // What the closing took goes back to the stock, by entries
       // (`tasks/services.py:635`).
       await _returnDraws(found);

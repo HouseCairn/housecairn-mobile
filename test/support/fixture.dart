@@ -125,10 +125,13 @@ class TwoHomes {
 }
 
 /// The tables whose rows belong to a home, read from the schema (those with
-/// a `home_id` column) and not from the code under test.
+/// a `home_id` column and an `id`: the rows of the model, not the tables of
+/// sync) and not from the code under test.
 List<String> homeOwnedTables(Repository repo) => [
   for (final t in repo.db.allTables)
-    if (t.$columns.any((c) => c.$name == 'home_id')) t.actualTableName,
+    if (t.$columns.any((c) => c.$name == 'home_id') &&
+        t.$columns.any((c) => c.$name == 'id'))
+      t.actualTableName,
 ]..sort();
 
 /// Every row of [homeId] in every table, with the clocks of their fields,
