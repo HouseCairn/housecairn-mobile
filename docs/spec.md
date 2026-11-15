@@ -176,11 +176,19 @@ Homes and Settings shows the current home.
    that is on, due beyond the week or without a date (`tasks/agenda.py`, `today_sections`). On one
    home, a tab **All** opens the list of every task (by room, the hidden ones on demand, 30 to a
    page) and, under Done, the history with its real cost (`tasks/task_list.html`).
-2. **Task**: form with only the title required (priority, duration, procedure, contractor,
-   masking, and a room, an item or a contractor added with the task); repetition with a preview
-   of the next five dates (`tasks/recurrence.py:341-351`); materials; the page shows Done, Skip,
-   Postpone and Undo; history of occurrences, each done one opening its details (day, real cost,
-   note); photos of the item or the room; deletion.
+2. **Task**: opens on its page, to read, in the order of the web (`tasks/task_detail.html`;
+   web `design/patterns.md`, Record page): the pills of state, priority and repetition, the
+   title, the place (room and item as links), the row of actions (Done as the primary one,
+   Postpone, Skip this time, or Undo, then Edit the task), then When (repetition, due date,
+   first date of a postponed one, masking, the next three dates), How to do it, Details
+   (duration, budgets, contractor, notes), Cost (estimate, part from the stock, a year, paid so
+   far), materials, photos of the item or the room, history of occurrences, each done one
+   opening its details (day, real cost, note). Edit the task opens the form, in the order and
+   the folded sections of the web (`tasks/task_form.html`): title, room, item and due date, then
+   Repeat (with a preview of the next five dates, `tasks/recurrence.py:341-351`), Who, Time and
+   budget, How to do it; only the title is required; a room, an item or a contractor can be
+   added with the task; Save and Cancel end it, deletion is under them. The files attached to a
+   task (web: Photos and files) are not in the app yet.
 3. **Add from a template**: the bundled library, filtered by the equipment ticked.
 4. **Rooms**: list in the household's order; a room shows its memory, items, photos, tasks.
 5. **Item**: details, warranty state (`rooms/models.py:182-186`), contract, links, photos, tasks.

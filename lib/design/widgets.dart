@@ -530,3 +530,120 @@ class HcTabs extends StatelessWidget {
     ),
   );
 }
+
+/// A folded section of a form, the web's `details.form-section`: a triangle
+/// and a title (16/700) that open or fold what is optional. It starts open
+/// when one of its fields has a value ([open]).
+class HcFoldSection extends StatefulWidget {
+  const HcFoldSection({
+    super.key,
+    required this.title,
+    required this.children,
+    this.open = false,
+  });
+
+  final String title;
+  final List<Widget> children;
+  final bool open;
+
+  @override
+  State<HcFoldSection> createState() => _HcFoldSectionState();
+}
+
+class _HcFoldSectionState extends State<HcFoldSection> {
+  late bool _open = widget.open;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: HcSpace.s3),
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        color: HcColors.surface,
+        border: Border.all(color: HcColors.border),
+        borderRadius: BorderRadius.circular(HcRadius.lg),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            button: true,
+            expanded: _open,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(HcRadius.lg),
+              onTap: () => setState(() => _open = !_open),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: HcComponent.rowMinHeight,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: HcSpace.s4,
+                    vertical: HcSpace.s3,
+                  ),
+                  child: Row(
+                    children: [
+                      ExcludeSemantics(
+                        child: Icon(
+                          _open ? Icons.arrow_drop_down : Icons.arrow_right,
+                          color: HcColors.text,
+                        ),
+                      ),
+                      const SizedBox(width: HcSpace.s1),
+                      Expanded(
+                        child: Text(widget.title, style: HcText.cardTitle),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (_open)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                HcSpace.s4,
+                0,
+                HcSpace.s4,
+                HcSpace.s4,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: widget.children,
+              ),
+            ),
+        ],
+      ),
+    ),
+  );
+}
+
+/// A link in a line of text, as the web's `a`: primary, underlined, a touch
+/// target of the height of a row.
+class HcLink extends StatelessWidget {
+  const HcLink(this.text, {super.key, required this.onTap});
+
+  final String text;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    link: true,
+    child: InkWell(
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: HcLayout.touchTargetLg),
+        child: Align(
+          widthFactor: 1,
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(
+            text,
+            style: HcText.rowText.copyWith(
+              color: HcColors.primary,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}

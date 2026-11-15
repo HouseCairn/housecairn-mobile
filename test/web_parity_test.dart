@@ -392,10 +392,15 @@ Measures measure(
   bool field = false,
 }) {
   final m = <String, Object?>{};
-  final title = find.descendant(
+  final inBar = find.descendant(
     of: find.byType(AppBar).last,
     matching: find.byType(Text),
   );
+  // The h1 is in the bar, or in the page under an empty bar (the task and
+  // its form, design lot D2), as the web's.
+  final title = inBar.evaluate().isNotEmpty
+      ? inBar
+      : withStyle(HcText.pageTitle);
   m['h1_font'] = drawnSize(tester, title.first);
   m['nav_height'] = rectOf(tester, find.byType(NavigationBar)).height;
   if (rowTitle != null) {

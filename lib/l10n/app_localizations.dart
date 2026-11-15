@@ -3595,6 +3595,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Details'**
   String get occurrenceDetails;
+
+  /// Button of the page of a task that opens its form, and title of that form. Web catalogue: Modifier la tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the task'**
+  String get taskEditTask;
+
+  /// Title of the form that creates a task. Web catalogue: Ajouter une tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a task'**
+  String get taskAddTitle;
+
+  /// Label of the due date on the page of a task. Web catalogue: Échéance.
+  ///
+  /// In en, this message translates to:
+  /// **'Due on'**
+  String get taskDueOn;
+
+  /// Label of the first date of a postponed task. Web catalogue: Reportée depuis le.
+  ///
+  /// In en, this message translates to:
+  /// **'Postponed from'**
+  String get taskPostponedFrom;
+
+  /// Label of how long before its date a task stays hidden. Web catalogue: Masquée jusqu'à.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden until'**
+  String get taskHiddenUntil;
+
+  /// Value of Hidden until. Web catalogue: %(counter)s jour avant la date.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{{n} day before the date} other{{n} days before the date}}'**
+  String taskHiddenDays(int n);
+
+  /// Label of the next dates of a task. Web catalogue: Ensuite.
+  ///
+  /// In en, this message translates to:
+  /// **'Then'**
+  String get taskThen;
+
+  /// Heading of the duration, budgets, contractor and notes of a task. Web catalogue: Détails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get taskDetails;
+
+  /// Heading of the cost of a task. Web catalogue: Coût.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost'**
+  String get taskCost;
+
+  /// Part of the estimate that comes from the stock. Web catalogue: Dont articles en stock.
+  ///
+  /// In en, this message translates to:
+  /// **'Of which stock'**
+  String get taskOfWhichStock;
+
+  /// What the times done of a task cost. Web catalogue: Payé jusqu'ici.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid so far'**
+  String get taskPaidSoFar;
+
+  /// Section of the task form: priority and contractor. Web catalogue: Qui.
+  ///
+  /// In en, this message translates to:
+  /// **'Who'**
+  String get taskWho;
+
+  /// Section of the task form: duration and budgets. Web catalogue: Durée et budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Time and budget'**
+  String get taskTimeAndBudget;
+
+  /// Repetition of a task on fixed dates. Web catalogue: Tous les jours.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Every day} other{Every {n} days}}'**
+  String repeatEveryDay(int n);
+
+  /// Repetition of a task on fixed dates. Web catalogue: Toutes les semaines.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Every week} other{Every {n} weeks}}'**
+  String repeatEveryWeek(int n);
+
+  /// Repetition of a task on fixed dates. Web catalogue: Tous les mois.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Every month} other{Every {n} months}}'**
+  String repeatEveryMonth(int n);
+
+  /// Repetition of a task on fixed dates. Web catalogue: Tous les ans.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Every year} other{Every {n} years}}'**
+  String repeatEveryYear(int n);
+
+  /// Repetition counted from the day the task is done. Web catalogue: Un jour après la dernière fois.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{A day after the last time} other{{n} days after the last time}}'**
+  String repeatDaysAfter(int n);
+
+  /// Repetition counted from the day the task is done. Web catalogue: Une semaine après la dernière fois.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{A week after the last time} other{{n} weeks after the last time}}'**
+  String repeatWeeksAfter(int n);
+
+  /// Repetition counted from the day the task is done. Web catalogue: Un mois après la dernière fois.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{A month after the last time} other{{n} months after the last time}}'**
+  String repeatMonthsAfter(int n);
+
+  /// Repetition counted from the day the task is done. Web catalogue: Un an après la dernière fois.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{A year after the last time} other{{n} years after the last time}}'**
+  String repeatYearsAfter(int n);
+
+  /// Months of the season of a task, after its repetition. Web catalogue: de %(start)s à %(end)s.
+  ///
+  /// In en, this message translates to:
+  /// **'from {start} to {end}'**
+  String repeatMonths(String start, String end);
+
+  /// An estimated duration under an hour. Web catalogue: %(n)d min.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min'**
+  String durationMin(int n);
+
+  /// An estimated duration in whole hours. Web catalogue: 1 h.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h'**
+  String durationHours(int hours);
+
+  /// An estimated duration in hours and minutes, the minutes on two digits. Web catalogue: 1 h 30.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes}'**
+  String durationHoursMinutes(int hours, String minutes);
+
+  /// Part of an estimated duration. Web catalogue: %(n)d jour.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{{n} day} other{{n} days}}'**
+  String durationDays(int n);
+
+  /// Part of an estimated duration. Web catalogue: %(n)d semaine.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{{n} week} other{{n} weeks}}'**
+  String durationWeeks(int n);
+
+  /// Part of an estimated duration. Web catalogue: %(n)d mois.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{{n} month} other{{n} months}}'**
+  String durationMonths(int n);
+
+  /// Part of an estimated duration. Web catalogue: %(n)d an.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{{n} year} other{{n} years}}'**
+  String durationYears(int n);
+
+  /// Button that ends the form of a new task. Web catalogue: Ajouter la tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the task'**
+  String get taskAddSubmit;
 }
 
 class _AppLocalizationsDelegate

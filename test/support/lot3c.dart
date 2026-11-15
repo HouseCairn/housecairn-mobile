@@ -155,6 +155,20 @@ final screens3c =
         ),
       ),
       (
+        // The form of an existing task, opened by Edit the task (lot D2).
+        'task_edit',
+        (tester, data, l) async {
+          await openScreen(
+            tester,
+            TaskScreen(homeId: data.main, taskId: data.doneTask),
+          );
+          await tester.ensureVisible(find.byKey(const Key('task-edit')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('task-edit')));
+          await tester.pumpAndSettle();
+        },
+      ),
+      (
         'task_new',
         (tester, data, l) => openScreen(tester, TaskScreen(homeId: data.main)),
       ),
