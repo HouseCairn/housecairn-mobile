@@ -1230,4 +1230,667 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get wayInUse => 'Utilisé';
+
+  @override
+  String get errMoneyInvalid => 'Indiquez un montant, par exemple 1250,50.';
+
+  @override
+  String get errQuoteNeedsLine =>
+      'Choisissez la ligne de budget sur laquelle le devis est engagé.';
+
+  @override
+  String get errNotInProject =>
+      'Cette ligne de budget n\'est pas dans ce projet.';
+
+  @override
+  String get errValidityBeforeDate =>
+      'La validité ne peut pas finir avant la date du devis.';
+
+  @override
+  String get errTooManyFiles => '5 fichiers au plus pour un devis.';
+
+  @override
+  String get errFileType => 'Choisissez un PDF ou une photo.';
+
+  @override
+  String get errTaskInProject => 'Cette tâche est déjà dans un projet.';
+
+  @override
+  String get errOnePlace => 'Choisissez un seul lieu.';
+
+  @override
+  String get errReportNotOpen =>
+      'Seul un signalement ouvert peut être transformé en tâche.';
+
+  @override
+  String get errReportNotClosed =>
+      'Seul un signalement classé peut être rouvert.';
+
+  @override
+  String get projectInProgress => 'En cours';
+
+  @override
+  String get projectPlanned => 'Prévue';
+
+  @override
+  String get projectFinished => 'Terminé';
+
+  @override
+  String get projectAbandoned => 'Abandonné';
+
+  @override
+  String get projectIdea => 'Idée';
+
+  @override
+  String get projectsInProgress => 'En cours';
+
+  @override
+  String get projectsIdeas => 'Idées';
+
+  @override
+  String get projectsFinished => 'Terminés';
+
+  @override
+  String get natureMaterial => 'Fournitures';
+
+  @override
+  String get natureLabour => 'Main-d\'œuvre';
+
+  @override
+  String get natureRental => 'Location';
+
+  @override
+  String get natureOther => 'Autre';
+
+  @override
+  String get quoteRequested => 'Demandé';
+
+  @override
+  String get quoteReceived => 'Reçu';
+
+  @override
+  String get quoteAccepted => 'Accepté';
+
+  @override
+  String get quoteRejected => 'Refusé';
+
+  @override
+  String overBudgetBy(String amount) {
+    return 'Budget dépassé de $amount';
+  }
+
+  @override
+  String amountLeft(String amount) {
+    return '$amount restants';
+  }
+
+  @override
+  String get onBudget => 'Budget respecté';
+
+  @override
+  String get amountPlanned => 'Prévu';
+
+  @override
+  String get amountCommitted => 'Engagé';
+
+  @override
+  String get amountPaid => 'Payé';
+
+  @override
+  String get amountUsed => 'Consommé';
+
+  @override
+  String percentUsed(int percent) {
+    return '$percent % consommé';
+  }
+
+  @override
+  String get stillToPay => 'Reste à payer';
+
+  @override
+  String get budgetYear => 'Année';
+
+  @override
+  String envelopeOfYear(int year) {
+    return 'Enveloppe budgétaire $year';
+  }
+
+  @override
+  String get envelopeNone => 'Aucune enveloppe fixée pour cette année.';
+
+  @override
+  String get envelope => 'Enveloppe';
+
+  @override
+  String get envelopePlannedActive => 'Prévu pour les projets en cours';
+
+  @override
+  String get envelopePaidSoFar => 'Payé jusqu\'ici';
+
+  @override
+  String get envelopeLeft => 'Reste dans l\'enveloppe';
+
+  @override
+  String overTheEnvelope(String amount) {
+    return '$amount (au-delà de l\'enveloppe)';
+  }
+
+  @override
+  String get envelopeSet => 'Fixer l\'enveloppe';
+
+  @override
+  String get projectsEmpty =>
+      'Aucun projet pour l\'instant. Un projet est un chantier qui a une fin, comme refaire la salle de bain.';
+
+  @override
+  String get projectsNoneInTab => 'Aucun projet dans cet onglet.';
+
+  @override
+  String plannedAmount(String amount) {
+    return 'Prévu : $amount';
+  }
+
+  @override
+  String get noBudgetYet => 'Pas encore de budget';
+
+  @override
+  String get highPriority => 'Priorité haute';
+
+  @override
+  String get lowPriority => 'Priorité basse';
+
+  @override
+  String get addProject => 'Ajouter un projet';
+
+  @override
+  String get projectGoal => 'Objectif';
+
+  @override
+  String get roomsConcerned => 'Pièces concernées';
+
+  @override
+  String get editProject => 'Modifier le projet';
+
+  @override
+  String get deleteProject => 'Supprimer le projet';
+
+  @override
+  String get deleteProjectBody =>
+      'Le projet, ses lignes de budget, devis, liens et fichiers disparaissent des écrans ; ses tâches restent.';
+
+  @override
+  String get budgetHeading => 'Budget';
+
+  @override
+  String get linesEmpty =>
+      'Aucune ligne de budget pour l\'instant. Ajoutez-en une pour dire ce que vous prévoyez de dépenser.';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get committedExplained =>
+      'L\'engagé est la somme des devis acceptés. L\'écart est le montant prévu moins le plus élevé de l\'engagé et du payé.';
+
+  @override
+  String get addLine => 'Ajouter une ligne de budget';
+
+  @override
+  String get editLine => 'Modifier la ligne de budget';
+
+  @override
+  String get deleteLine => 'Supprimer la ligne de budget';
+
+  @override
+  String get deleteLineBody =>
+      'Ses devis acceptés reviennent à Reçu, engagés sur rien.';
+
+  @override
+  String get lineLabel => 'Libellé';
+
+  @override
+  String get nature => 'Nature';
+
+  @override
+  String get linePaidHelp =>
+      'Ce qui a été payé jusqu\'ici. Le montant engagé vient des devis acceptés.';
+
+  @override
+  String amountsAreIn(String currency) {
+    return 'Les montants sont en $currency.';
+  }
+
+  @override
+  String amountIsIn(String currency) {
+    return 'Le montant est en $currency.';
+  }
+
+  @override
+  String get quotes => 'Devis';
+
+  @override
+  String get quotesEmpty => 'Aucun devis pour l\'instant.';
+
+  @override
+  String get noContractor => 'Aucun intervenant';
+
+  @override
+  String committedOn(String line) {
+    return 'Engagé sur $line';
+  }
+
+  @override
+  String get committedOnLabel => 'Engagé sur';
+
+  @override
+  String get committedOnHelp =>
+      'La ligne de budget sur laquelle un devis accepté est engagé.';
+
+  @override
+  String filesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fichiers',
+      one: '1 fichier',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addLineToAccept =>
+      'Ajoutez une ligne de budget pour accepter un devis : son montant y est engagé.';
+
+  @override
+  String get addQuote => 'Ajouter un devis';
+
+  @override
+  String get editQuote => 'Modifier le devis';
+
+  @override
+  String get deleteQuote => 'Supprimer le devis';
+
+  @override
+  String get deleteQuoteBody =>
+      'Le devis et ses fichiers disparaissent des écrans.';
+
+  @override
+  String get amount => 'Montant';
+
+  @override
+  String get quoteDate => 'Date';
+
+  @override
+  String get validUntil => 'Valable jusqu\'au';
+
+  @override
+  String get note => 'Note';
+
+  @override
+  String get quoteFiles => 'Fichiers du devis';
+
+  @override
+  String get quoteFilesEmpty =>
+      'Aucun fichier pour l\'instant : joignez le PDF du devis.';
+
+  @override
+  String get attachQuoteFile => 'Joindre un PDF ou une photo';
+
+  @override
+  String get quoteFile => 'Fichier d\'un devis';
+
+  @override
+  String get photo => 'Photo';
+
+  @override
+  String get projectFiles => 'Fichiers';
+
+  @override
+  String get tasksHeading => 'Tâches';
+
+  @override
+  String get projectTasksEmpty =>
+      'Aucune tâche dans ce projet pour l\'instant.';
+
+  @override
+  String get taskDoneLabel => 'Fait';
+
+  @override
+  String get addProjectTask => 'Ajouter une tâche au projet';
+
+  @override
+  String get attachTask => 'Mettre une tâche existante dans le projet';
+
+  @override
+  String get inspiration => 'Inspiration';
+
+  @override
+  String get linksEmpty => 'Aucun lien pour l\'instant.';
+
+  @override
+  String get linkNotRead =>
+      'Le lien est gardé tel que vous l\'avez saisi : l\'application ne lit pas les pages. Il s\'ouvre dans le navigateur du téléphone.';
+
+  @override
+  String get addLinkButton => 'Ajouter le lien';
+
+  @override
+  String get linkPageAddress => 'Adresse de la page';
+
+  @override
+  String get linkTitle => 'Titre';
+
+  @override
+  String deleteLinkOf(String title) {
+    return 'Supprimer $title';
+  }
+
+  @override
+  String get status => 'Statut';
+
+  @override
+  String get priority => 'Priorité';
+
+  @override
+  String get priorityHigh => 'Haute';
+
+  @override
+  String get priorityNormal => 'Normale';
+
+  @override
+  String get priorityLow => 'Basse';
+
+  @override
+  String get annualEnvelope => 'Enveloppe annuelle';
+
+  @override
+  String get envelopeHelp =>
+      'Ce que vous voulez dépenser en travaux cette année, dans la devise du logement. Vide : pas d\'enveloppe.';
+
+  @override
+  String get budgetSummary => 'Synthèse';
+
+  @override
+  String get budgetRooms => 'Pièces';
+
+  @override
+  String get budgetProjects => 'Projets';
+
+  @override
+  String get budgetUpkeep => 'Entretien';
+
+  @override
+  String envelopeYear(int year) {
+    return 'Enveloppe $year';
+  }
+
+  @override
+  String get envelopeNoneSummary =>
+      'Aucune enveloppe fixée pour cette année : les chiffres sont ceux du prévu.';
+
+  @override
+  String get spent => 'Dépensé';
+
+  @override
+  String get left => 'Reste';
+
+  @override
+  String overBy(String amount) {
+    return 'Dépassement de $amount';
+  }
+
+  @override
+  String get spentAgainst => 'Dépensé par rapport à l\'enveloppe ou au prévu';
+
+  @override
+  String percentSpent(int percent) {
+    return '$percent % dépensé';
+  }
+
+  @override
+  String percentSpentOver(int percent) {
+    return '$percent % dépensé : budget dépassé';
+  }
+
+  @override
+  String get detailsOfYear => 'Détail de l\'année';
+
+  @override
+  String get plannedAll => 'Prévu, projets et entretien';
+
+  @override
+  String get leftToPlan => 'Reste à prévoir';
+
+  @override
+  String plansExceed(String amount) {
+    return '$amount (le prévu dépasse l\'enveloppe)';
+  }
+
+  @override
+  String plannedPaid(String planned, String paid) {
+    return 'prévu $planned, payé $paid';
+  }
+
+  @override
+  String get spentExplained =>
+      'Le dépensé est le plus élevé de l\'engagé et du payé, ligne par ligne.';
+
+  @override
+  String byNature(int year) {
+    return 'Par nature, $year';
+  }
+
+  @override
+  String get natureExplained =>
+      'Le coût saisi sur une tâche faite est réparti entre Matériel et Main-d\'œuvre comme son estimation ; une tâche sans estimation n\'a pas cette répartition, et son coût est compté dans Autre.';
+
+  @override
+  String get byYear => 'Par année';
+
+  @override
+  String get last12Months => '12 derniers mois';
+
+  @override
+  String rollingExplained(String since, String until) {
+    return 'Du $since au $until, l\'entretien qui a été fait. Les paiements des projets n\'ont pas de date : ils ne sont pas dans ce chiffre.';
+  }
+
+  @override
+  String get whereItStands => 'Où en est le budget';
+
+  @override
+  String missingCosts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count tâches ont été faites sans coût : leurs estimations sont comptées, rien n\'est payé.',
+      one: '1 tâche a été faite sans coût : son estimation est comptée, rien n\'est payé.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get roomsBudgetEmpty =>
+      'Pas encore de budget cette année. Donnez une ligne de budget à un projet, ou une estimation à une tâche.';
+
+  @override
+  String get noRoom => 'Aucune pièce';
+
+  @override
+  String roomsExplained(int year) {
+    return 'Les projets comptés en $year sont répartis à parts égales entre leurs pièces ; l\'entretien d\'une tâche va à sa pièce.';
+  }
+
+  @override
+  String get projectsEmptyShort => 'Aucun projet pour l\'instant.';
+
+  @override
+  String countedIn(int year) {
+    return 'Compté en $year';
+  }
+
+  @override
+  String plannedByTasks(String amount) {
+    return 'Prévu par ses tâches : $amount';
+  }
+
+  @override
+  String get projectsCountedExplained =>
+      'Chaque projet est compté dans une seule année, celle où il commence. Un projet abandonné ne prévoit plus rien : ce qui a été payé dessus apparaît comme dépensé sans prévu.';
+
+  @override
+  String get projectsPlannedExplained =>
+      'Le prévu, ce sont les lignes de budget du projet, et ce que ses tâches prévoient au-delà des lignes de même nature, matériel ou main-d\'œuvre : une estimation qu\'une ligne couvre déjà n\'est pas comptée deux fois.';
+
+  @override
+  String get upkeepEmpty =>
+      'Aucune tâche n\'a encore d\'estimation ni de coût. Donnez un budget de main-d\'œuvre ou de matériel à une tâche.';
+
+  @override
+  String get estimateEachTime => 'Estimation par fois';
+
+  @override
+  String get ofWhichStock => 'dont articles en stock';
+
+  @override
+  String get costAYear => 'Coût par an';
+
+  @override
+  String get paidInAll => 'Payé au total';
+
+  @override
+  String unpricedMaterials(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count articles n\'ont pas de prix unitaire : ils ne comptent pour rien.',
+      one: '1 article n\'a pas de prix unitaire : il ne compte pour rien.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unlistedTasks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tâches sans estimation ni coût ne sont pas listées.',
+      one: '1 tâche sans estimation ni coût n\'est pas listée.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get costAYearExplained =>
+      'Le coût par an suit la répétition : une tâche tous les 3 ans coûte un tiers de son estimation par an. Une tâche qui ne se répète pas sur le calendrier n\'en a pas.';
+
+  @override
+  String get reportOpen => 'Ouvert';
+
+  @override
+  String get reportMadeTask => 'Transformé en tâche';
+
+  @override
+  String get reportResolved => 'Résolu';
+
+  @override
+  String get reportNoAction => 'Classé sans suite';
+
+  @override
+  String problemsReported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count problèmes signalés',
+      one: '1 problème signalé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get seeReports => 'Voir les signalements';
+
+  @override
+  String get reportProblem => 'Signaler un problème';
+
+  @override
+  String get reports => 'Signalements';
+
+  @override
+  String get reportsClosed => 'Classés';
+
+  @override
+  String get reportsAll => 'Tous';
+
+  @override
+  String get reportsEmpty => 'Rien à traiter.';
+
+  @override
+  String get reportWhere => 'Où';
+
+  @override
+  String get reportedOn => 'Signalé le';
+
+  @override
+  String get closedOn => 'Classé le';
+
+  @override
+  String get reportTask => 'Tâche';
+
+  @override
+  String get reportPhoto => 'Photo du problème';
+
+  @override
+  String get makeItATask => 'En faire une tâche';
+
+  @override
+  String get markResolved => 'Marquer comme résolu';
+
+  @override
+  String get closeWithoutAction => 'Classer sans suite';
+
+  @override
+  String get reopen => 'Rouvrir';
+
+  @override
+  String get sendReport => 'Envoyer';
+
+  @override
+  String get whatIsWrong => 'Ce qui ne va pas';
+
+  @override
+  String get errSayWhatIsWrong => 'Dites ce qui ne va pas.';
+
+  @override
+  String get photoChosen => 'Photo ajoutée : en choisir une autre';
+
+  @override
+  String get materialBudget => 'Budget matériel';
+
+  @override
+  String get labourBudget => 'Budget main d\'œuvre';
+
+  @override
+  String taskBudgetHelp(String currency) {
+    return 'Ce qu\'une fois de la tâche doit coûter, en $currency. Vide : pas d\'estimation.';
+  }
+
+  @override
+  String get realCostTitle => 'Coût réel';
+
+  @override
+  String realCost(String amount) {
+    return 'Coût réel : $amount';
+  }
+
+  @override
+  String get costNotTyped => 'Aucun coût saisi : touchez pour l\'indiquer';
+
+  @override
+  String get paintArticle => 'Peinture restante en stock';
+
+  @override
+  String get paintArticleNone => 'Aucune';
 }

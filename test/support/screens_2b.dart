@@ -89,14 +89,39 @@ final screens2b =
     ];
 
 /// The few words of the navigation, by language.
-typedef Labels = ({String rooms, String more, String stock, String materials});
+typedef Labels = ({
+  String rooms,
+  String more,
+  String stock,
+  String materials,
+  String projects,
+  String budget,
+  String budgetRooms,
+  String budgetProjects,
+  String budgetUpkeep,
+});
 
 const labels = {
-  'en': (rooms: 'Rooms', more: 'More', stock: 'Stock', materials: 'MATERIALS'),
+  'en': (
+    rooms: 'Rooms',
+    more: 'More',
+    stock: 'Stock',
+    materials: 'MATERIALS',
+    projects: 'Projects',
+    budget: 'Budget',
+    budgetRooms: 'Rooms',
+    budgetProjects: 'Projects',
+    budgetUpkeep: 'Upkeep',
+  ),
   'fr': (
     rooms: 'Pièces',
     more: 'Plus',
     stock: 'Matériel',
     materials: 'FOURNITURES',
+    projects: 'Projets',
+    budget: 'Budget',
+    budgetRooms: 'Pièces',
+    budgetProjects: 'Projets',
+    budgetUpkeep: 'Entretien',
   ),
 };

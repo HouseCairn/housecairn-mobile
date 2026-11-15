@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'app.dart';
 import 'core/clock.dart';
+import 'core/document_source.dart';
 import 'core/local_notifier.dart';
 import 'core/photo_source.dart';
 import 'data/database.dart';
@@ -39,6 +40,7 @@ Future<void> main() async {
   state = AppState(
     repository,
     photoSource: ImagePickerSource(),
+    documentSource: const FilePickerSource(),
     notifier: notifier,
   );
   runApp(HousecairnApp(state: state));

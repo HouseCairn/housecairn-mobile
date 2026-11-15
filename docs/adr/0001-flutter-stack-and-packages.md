@@ -44,7 +44,7 @@ Dart 3, Material 3 widgets with the Housecairn design tokens. No web or desktop 
 | Re-encoding photos (size, metadata), in Dart | image | 4.12.0, 2026-10-11 | taosengine.com | MIT | all | <https://pub.dev/packages/image> |
 | The library of task templates (YAML) | yaml | 3.1.4, 2026-08-28 | tools.dart.dev | MIT | all | <https://pub.dev/packages/yaml> |
 | Opening a link, a phone number, an address | url_launcher | 6.3.3, 2026-10-02 | flutter.dev | BSD-3-Clause | Android, iOS, others | <https://pub.dev/packages/url_launcher> |
-| PDF picking, export file | file_picker, share_plus | 13.3.3, 2026-11-10; 13.3.1, 2026-10-01 | victorcarreras.dev; fluttercommunity.dev | MIT; BSD-3-Clause | Android, iOS, others | <https://pub.dev/packages/file_picker>, <https://pub.dev/packages/share_plus> |
+| PDF picking, export file | file_picker, share_plus | 13.3.2, 2026-11-02; 13.3.1, 2026-10-01 | victorcarreras.dev; fluttercommunity.dev | MIT; BSD-3-Clause | Android, iOS, others | <https://pub.dev/packages/file_picker>, <https://pub.dev/packages/share_plus> |
 | Backup archive (zip) | archive | 4.7.1, 2026-11-13 | taosengine.com | MIT | all | <https://pub.dev/packages/archive> |
 
 **Choices within the table, and what was rejected:**
@@ -98,6 +98,14 @@ added. `dbus`, a transitive package of the Linux part of `flutter_local_notifica
 iOS or Android build contains, is MPL-2.0 and gets one named exception in
 `tool/licenses/exceptions.txt`; the exception was accepted on 2026-11-15
 ([plan](../plan.md)).
+
+**Lot 3b, changes to the table.** `file_picker` is added, for the PDF of a quote (the Files app
+on iOS, the document picker on Android). It is pinned at 13.3.2 (2026-11-02): 13.3.3 and the
+latest versions of its platform packages are younger than the seven days of the rule below, so
+`android_file_picker` 2.1.3, `file_picker_darwin` 2.4.2, `file_picker_linux` 2.0.2,
+`file_picker_web` 4.2.0 and `windows_file_picker` 2.0.1 are kept by `pubspec.lock`
+(`flutter pub downgrade` of those five). `tool/check_licenses.dart` accepts all of them (MIT,
+BSD-3-Clause).
 
 ## Consequences
 

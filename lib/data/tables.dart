@@ -49,8 +49,8 @@ class Homes extends Table with ModelColumns {
   IntColumn get archivedAt => integer().nullable()();
 }
 
-/// `rooms.room` (`rooms/models.py:67-91`). The paint left in stock
-/// (`paint_article`) comes with the stock, in lot 3.
+/// `rooms.room` (`rooms/models.py:67-91`). [paintArticleId] is the stock
+/// article of the paint left over (schema 4, lot 3b).
 @DataClassName('RoomRow')
 @TableIndex(name: 'room_home_position', columns: {#homeId, #position})
 class Rooms extends Table with ModelColumns, HomeOwned {
@@ -65,6 +65,8 @@ class Rooms extends Table with ModelColumns, HomeOwned {
   TextColumn get floorCovering => text().withDefault(const Constant(''))();
   TextColumn get wallCovering => text().withDefault(const Constant(''))();
   TextColumn get memoryNotes => text().withDefault(const Constant(''))();
+  BlobColumn get paintArticleId =>
+      blob().map(const UuidConverter()).nullable()();
 }
 
 /// `rooms.item` (`rooms/models.py:124-157`): equipment or surface.
@@ -115,8 +117,8 @@ class Contractors extends Table with ModelColumns, HomeOwned {
 }
 
 /// `tasks.task` (`tasks/models.py:161-229`). Only the title is required. The
-/// labour and material budgets come with lot 3, the assignee with the members
-/// of the family (lot 5).
+/// labour and material budgets (schema 4) are decimal strings, null for none;
+/// the assignee comes with the members of the family (lot 5).
 @DataClassName('TaskRow')
 @TableIndex(name: 'task_home_created', columns: {#homeId, #createdAt})
 class Tasks extends Table with ModelColumns, HomeOwned {
@@ -138,10 +140,16 @@ class Tasks extends Table with ModelColumns, HomeOwned {
 
   /// First due date of a fixed series: it carries the day of the month.
   TextColumn get seriesStart => text().nullable()();
+
+  /// What one time of the task is planned to cost, in materials and in
+  /// labour (`tasks/models.py` `material_budget`, `labour_budget`).
+  TextColumn get materialBudget => text().nullable()();
+  TextColumn get labourBudget => text().nullable()();
 }
 
 /// `tasks.occurrence` (`tasks/models.py:324-346`). Dates are `YYYY-MM-DD`.
-/// The real cost comes with lot 3, `completed_by` with the members (lot 5).
+/// [actualCost] is what a done occurrence really cost (schema 4);
+/// `completed_by` comes with the members (lot 5).
 @DataClassName('OccurrenceRow')
 @TableIndex(name: 'occ_home_status_due', columns: {#homeId, #status, #dueOn})
 @TableIndex(name: 'occ_task_status', columns: {#taskId, #status})
@@ -157,6 +165,7 @@ class Occurrences extends Table with ModelColumns, HomeOwned {
 
   /// The occurrence whose closing created this one.
   BlobColumn get follows => blob().map(const UuidConverter()).nullable()();
+  TextColumn get actualCost => text().nullable()();
 }
 
 /// `stock.article` (`stock/models.py:68-122`): something kept in stock. Its
@@ -242,6 +251,114 @@ class MaterialDraws extends Table with ModelColumns, HomeOwned {
   BlobColumn get articleId => blob().map(const UuidConverter())();
   TextColumn get wanted => text()();
   TextColumn get drawn => text()();
+}
+
+/// `projects.project` (`projects/models.py:98-168`): a piece of work with an
+/// end. Only the title is required.
+@DataClassName('ProjectRow')
+@TableIndex(name: 'project_home_status', columns: {#homeId, #status})
+class Projects extends Table with ModelColumns, HomeOwned {
+  TextColumn get title => text()();
+  TextColumn get goal => text().withDefault(const Constant(''))();
+  TextColumn get status => text().withDefault(const Constant('idea'))();
+  TextColumn get priority => text().withDefault(const Constant('normal'))();
+  IntColumn get estimatedMinutes => integer().nullable()();
+  TextColumn get season => text().withDefault(const Constant(''))();
+  IntColumn get seasonStartMonth => integer().nullable()();
+  IntColumn get seasonEndMonth => integer().nullable()();
+}
+
+/// `projects.project_rooms`: a room a project concerns, by a deterministic id.
+@DataClassName('ProjectRoomRow')
+class ProjectRooms extends Table with ModelColumns, HomeOwned {
+  BlobColumn get projectId => blob().map(const UuidConverter())();
+  BlobColumn get roomId => blob().map(const UuidConverter())();
+}
+
+/// `projects.budgetline` (`projects/models.py:171-197`): planned and paid
+/// are typed; committed is the sum of the accepted quotes, never stored.
+@DataClassName('BudgetLineRow')
+@TableIndex(name: 'line_project', columns: {#projectId})
+class BudgetLines extends Table with ModelColumns, HomeOwned {
+  BlobColumn get projectId => blob().map(const UuidConverter())();
+  TextColumn get label => text()();
+  TextColumn get nature => text().withDefault(const Constant('other'))();
+  TextColumn get planned => text().withDefault(const Constant('0.00'))();
+  TextColumn get paid => text().withDefault(const Constant('0.00'))();
+}
+
+/// `projects.quote` (`projects/models.py:205-270`). An accepted quote has a
+/// budget line of its project; any other has none.
+@DataClassName('QuoteRow')
+@TableIndex(name: 'quote_project', columns: {#projectId})
+class Quotes extends Table with ModelColumns, HomeOwned {
+  BlobColumn get projectId => blob().map(const UuidConverter())();
+  BlobColumn get contractorId => blob().map(const UuidConverter()).nullable()();
+  TextColumn get amount => text().withDefault(const Constant('0.00'))();
+  TextColumn get issuedOn => text().nullable()();
+  TextColumn get validUntil => text().nullable()();
+  TextColumn get status => text().withDefault(const Constant('requested'))();
+  BlobColumn get budgetLineId => blob().map(const UuidConverter()).nullable()();
+  TextColumn get note => text().withDefault(const Constant(''))();
+}
+
+/// `projects.projectfile` (`projects/models.py:273-300`): a photo of a
+/// project or a file of one of its quotes. [file] is the file reference of
+/// docs/protocol.md, section 2.9; the file is in the home's directory, named
+/// by the row's id.
+@DataClassName('ProjectFileRow')
+class ProjectFiles extends Table with ModelColumns, HomeOwned {
+  BlobColumn get projectId => blob().map(const UuidConverter())();
+  BlobColumn get quoteId => blob().map(const UuidConverter()).nullable()();
+  TextColumn get name => text()();
+  TextColumn get file => text().nullable()();
+  TextColumn get contentType => text().withDefault(const Constant(''))();
+  BoolColumn get isImage => boolean().withDefault(const Constant(false))();
+  IntColumn get sizeBytes => integer().withDefault(const Constant(0))();
+}
+
+/// `projects.projectlink` (`projects/models.py:303-337`): a link of
+/// inspiration. The app never reads the page: no title nor picture is
+/// fetched, the link opens in the browser of the phone.
+@DataClassName('ProjectLinkRow')
+class ProjectLinks extends Table with ModelColumns, HomeOwned {
+  BlobColumn get projectId => blob().map(const UuidConverter())();
+  TextColumn get url => text()();
+  TextColumn get title => text().withDefault(const Constant(''))();
+}
+
+/// `projects.projecttask` (`projects/models.py:340-352`): a task in a
+/// project, one project at most, by a deterministic id from the task.
+@DataClassName('ProjectTaskRow')
+class ProjectTasks extends Table with ModelColumns, HomeOwned {
+  BlobColumn get projectId => blob().map(const UuidConverter())();
+  BlobColumn get taskId => blob().map(const UuidConverter())();
+}
+
+/// `projects.annualenvelope` (`projects/models.py:355-380`): what the
+/// household wants to spend on work in a year, one per year and home, by a
+/// deterministic id from the year.
+@DataClassName('EnvelopeRow')
+class AnnualEnvelopes extends Table with ModelColumns, HomeOwned {
+  IntColumn get year => integer()();
+  TextColumn get amount => text()();
+}
+
+/// `reports.report` (`reports/models.py`): a problem reported, at most one
+/// place, a photo (file reference) if there is one. [place] is written when
+/// the report is made, so that it still reads right after a rename.
+@DataClassName('ReportRow')
+@TableIndex(name: 'report_home_status', columns: {#homeId, #status})
+class Reports extends Table with ModelColumns, HomeOwned {
+  TextColumn get title => text()();
+  TextColumn get status => text().withDefault(const Constant('open'))();
+  BlobColumn get roomId => blob().map(const UuidConverter()).nullable()();
+  BlobColumn get itemId => blob().map(const UuidConverter()).nullable()();
+  BlobColumn get articleId => blob().map(const UuidConverter()).nullable()();
+  TextColumn get place => text().withDefault(const Constant(''))();
+  BlobColumn get taskId => blob().map(const UuidConverter()).nullable()();
+  IntColumn get closedAt => integer().nullable()();
+  TextColumn get photo => text().nullable()();
 }
 
 /// The clock of the last write of each field

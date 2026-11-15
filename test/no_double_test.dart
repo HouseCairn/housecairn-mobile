@@ -3,18 +3,25 @@
 // Amounts and quantities never pass through floating point (docs/plan.md,
 // lot 3; docs/adr/0002, "Amounts are TEXT"; web ADR 0051): the code of the
 // stock and of its amounts may not name `double`, convert to one, or parse
-// a number other than as a `Decimal`. Lot 3b adds the budget's files here.
+// a number other than as a `Decimal`. Lot 3b added the budget's files.
 
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// The files of the stock and of the amounts.
+/// The files of the stock, of the budget and of the amounts.
 const checked = [
   'lib/domain/stock.dart',
   'lib/data/stock_repository.dart',
   'lib/ui/stock_format.dart',
   'lib/ui/stock_screens.dart',
+  'lib/domain/budget.dart',
+  'lib/data/budget_repository.dart',
+  'lib/ui/budget_parts.dart',
+  'lib/ui/budget_screens.dart',
+  'lib/ui/project_screens.dart',
+  'lib/ui/report_screens.dart',
+  'lib/ui/task_screen.dart',
 ];
 
 final floating = RegExp(

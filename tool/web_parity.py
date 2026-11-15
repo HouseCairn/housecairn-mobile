@@ -9,7 +9,8 @@ chromium`), against a local instance filled by `manage.py load_demo_data
 translations compiled (`manage.py compilemessages`), with one item in the utility room and
 one contractor added (the names of test/web_parity_test.dart), and three stock items
 ('Filtre de VMC', 'Pile 9 V', 'Peinture blanche') with a supplier ("Magasin d'exemple", for
-the first) and movements (the first one left low):
+the first) and movements (the first one left low), and one open report ('Le robinet de la
+cuisine fuit', in the kitchen):
 
     uv run python tool/web_parity.py <capture directory> [<base URL>]
 
@@ -174,6 +175,23 @@ with sync_playwright() as p:
     screens["article"] = (article, "main a[href*='/suppliers/new/']")
     screens["article_form"] = (f"{H}/stock/new/", None)
     screens["supplier_form"] = (article + "suppliers/new/", None)
+    # Lot 3b: the projects of the demonstration, the budget and the reports.
+    page.goto(base + f"{H}/projects/")
+    project = next(
+        (href.split("?")[0] for title, href in page.eval_on_selector_all(
+            "main a[href]",
+            "els => els.map(e => [e.innerText.trim(), e.getAttribute('href')])")
+         if "Repeindre le salon" in (title or "")
+         and re.search(r"/projects/[0-9a-f-]{36}/(\?|$)", href)),
+        None)
+    if project is None:
+        raise SystemExit(f"no project 'Repeindre le salon' on {H}/projects/")
+    screens["projects"] = (f"{H}/projects/", "main a[href*='/projects/new/']")
+    screens["project"] = (project, None)
+    screens["project_form"] = (f"{H}/projects/new/", None)
+    screens["budget"] = (f"{H}/budget/", None)
+    screens["reports"] = (f"{H}/reports/", "main a[href*='/reports/new/']")
+    screens["report_form"] = (f"{H}/reports/new/", None)
     result = {}
     for name, (path, add) in screens.items():
         page.goto(base + path)

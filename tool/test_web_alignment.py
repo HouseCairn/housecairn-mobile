@@ -29,6 +29,8 @@ RECURRENCE = "src/housecairn/tasks/recurrence.py"
 TOKENS = "design/tokens.json"
 CSS = "src/housecairn/static/css/components.css"
 PARITY = "test/parity/web_fr_390.json"
+BUDGET = "test/fixtures/budget_web_figures.json"
+BUDGET_WEB = "src/housecairn/budget/services.py"
 GIT_ENV = {
     "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@example.com",
     "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@example.com",
@@ -71,6 +73,7 @@ class Case(unittest.TestCase):
         (self.app / "docs" / "spec.md").write_text("Nothing cited.\n")
         self.app_write("assets/task_templates.yaml", "templates: one\n")
         self.app_write("test/fixtures/recurrence_vectors.json", vectors(self.first).decode())
+        self.app_write(BUDGET, vectors(self.first).decode())
         self.app_write(TOKENS, json.dumps({"color": {"slate": "#1F3A3D", "app-only": "#000000"}}, indent=2) + "\n")
         self.app_write(
             PARITY, json.dumps({"web": {"repository": wa.WEB_REPOSITORY, "release": "v0.1.0", "commit": self.first}}) + "\n"
@@ -84,15 +87,19 @@ class Case(unittest.TestCase):
                 "task_templates": element(TEMPLATES, "assets/task_templates.yaml"),
                 "design_tokens": element(TOKENS, TOKENS),
                 "web_parity": element("src/housecairn/static/css", PARITY),
+                "budget": element(BUDGET_WEB, BUDGET, python="3.13.0"),
             },
         }
         self.write_reference()
 
-        saved = (wa.ROOT, wa.REFERENCE, wa.SPEC, wa.recurrence_vectors)
+        saved = (wa.ROOT, wa.REFERENCE, wa.SPEC, wa.recurrence_vectors, wa.budget_figures)
         wa.ROOT, wa.REFERENCE, wa.SPEC = self.app, self.app / "tool" / "web_alignment.json", self.app / "docs" / "spec.md"
         wa.recurrence_vectors = lambda web, commit, python: vectors(commit, self.bodies.get(commit, "v1"))
+        # The budget figures do not change with the stub releases (the vectors are the signal).
+        wa.budget_figures = lambda web, commit, python: vectors(commit)
         self.addCleanup(lambda: (setattr(wa, "ROOT", saved[0]), setattr(wa, "REFERENCE", saved[1]),
-                                 setattr(wa, "SPEC", saved[2]), setattr(wa, "recurrence_vectors", saved[3])))
+                                 setattr(wa, "SPEC", saved[2]), setattr(wa, "recurrence_vectors", saved[3]),
+                                 setattr(wa, "budget_figures", saved[4])))
         self.snapshot_before = self.snapshot()
 
     # Helpers.

@@ -35,6 +35,9 @@ class FixedClock implements Clock {
 
   DateTime _instant;
 
+  /// Sets the clock to [instant].
+  void set(DateTime instant) => _instant = instant.toUtc();
+
   /// Moves the clock by [duration].
   void advance(Duration duration) => _instant = _instant.add(duration);
 
