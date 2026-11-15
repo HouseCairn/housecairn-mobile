@@ -2131,6 +2131,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'In use'**
   String get wayInUse;
+
+  /// Web catalogue (projects, budget or reports): Indiquez un montant, par exemple 1250,50.
+  ///
+  /// In en, this message translates to:
+  /// **'Give an amount of money, such as 1250.50.'**
+  String get errMoneyInvalid;
+
+  /// Web catalogue (projects, budget or reports): Choisissez la ligne de budget sur laquelle le devis est engagé.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the budget line the quote is committed on.'**
+  String get errQuoteNeedsLine;
+
+  /// Web catalogue (projects, budget or reports): Cette ligne de budget n'est pas dans ce projet.
+  ///
+  /// In en, this message translates to:
+  /// **'This budget line is not in this project.'**
+  String get errNotInProject;
+
+  /// Web catalogue (projects, budget or reports): La validité ne peut pas finir avant la date du devis.
+  ///
+  /// In en, this message translates to:
+  /// **'The validity cannot end before the date of the quote.'**
+  String get errValidityBeforeDate;
+
+  /// Web catalogue (projects, budget or reports): %(max)d fichiers au plus pour un devis.
+  ///
+  /// In en, this message translates to:
+  /// **'At most 5 files for a quote.'**
+  String get errTooManyFiles;
+
+  /// Refusal: a file of a quote that is neither a PDF nor a photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a PDF or a photo.'**
+  String get errFileType;
+
+  /// Web catalogue (projects, budget or reports): Cette tâche est déjà dans un projet.
+  ///
+  /// In en, this message translates to:
+  /// **'This task is already in a project.'**
+  String get errTaskInProject;
+
+  /// Web catalogue (projects, budget or reports): Choisissez un seul lieu.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one place.'**
+  String get errOnePlace;
+
+  /// Web catalogue (projects, budget or reports): Seul un signalement ouvert peut être transformé en tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'Only an open report can be made into a task.'**
+  String get errReportNotOpen;
+
+  /// Web catalogue (projects, budget or reports): Seul un signalement classé peut être rouvert.
+  ///
+  /// In en, this message translates to:
+  /// **'Only a closed report can be reopened.'**
+  String get errReportNotClosed;
 }
 
 class _AppLocalizationsDelegate

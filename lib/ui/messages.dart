@@ -47,6 +47,16 @@ String refusalMessage(
   Refusal.unitOtherRequired => l10n.errUnitOther,
   Refusal.materialListed => l10n.errMaterialListed,
   Refusal.tooManyMaterials => l10n.errTooManyMaterials,
+  Refusal.moneyInvalid => l10n.errMoneyInvalid,
+  Refusal.quoteNeedsLine => l10n.errQuoteNeedsLine,
+  Refusal.notInProject => l10n.errNotInProject,
+  Refusal.validityBeforeDate => l10n.errValidityBeforeDate,
+  Refusal.tooManyFiles => l10n.errTooManyFiles,
+  Refusal.fileTypeRefused => l10n.errFileType,
+  Refusal.taskInProject => l10n.errTaskInProject,
+  Refusal.onePlace => l10n.errOnePlace,
+  Refusal.reportNotOpen => l10n.errReportNotOpen,
+  Refusal.reportNotClosed => l10n.errReportNotClosed,
 };
 
 /// Shows a refusal in a bar at the bottom of the screen.

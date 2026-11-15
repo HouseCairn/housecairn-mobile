@@ -54,6 +54,21 @@
         "test/parity/web_fr_390.json"
       ],
       "how": "measured by tool/web_parity.py in a browser at 390 x 844 on the demonstration data (a script cannot regenerate it); `check` compares the release and commit the file says it measured with this pin, so a pin moved by `update` after a change of the web files listed here makes `check` fail until the measure is taken again"
+    },
+    "budget": {
+      "release": "v0.3.2",
+      "commit": "a76837fe30b5a313980184703454654a45b1f031",
+      "python": "3.13.18",
+      "web": [
+        "src/housecairn/budget/services.py",
+        "src/housecairn/projects/services.py",
+        "src/housecairn/projects/models.py",
+        "src/housecairn/tasks/recurrence.py"
+      ],
+      "mobile": [
+        "test/fixtures/budget_web_figures.json"
+      ],
+      "how": "tool/budget_figures.py loads test/fixtures/budget_fixture.json into the web of the commit (uv sync --frozen --no-dev, this Python, a temporary SQLite database) and writes every budget figure; compared byte for byte, and test/budget_web_test.dart compares the app with it"
     }
   }
 }

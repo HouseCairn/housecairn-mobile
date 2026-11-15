@@ -493,5 +493,15 @@
   "wayComingLater": "Prévu plus tard",
   "@wayComingLater": {"description": "Label of a way to use the app that is not available yet."},
   "wayInUse": "Utilisé",
-  "@wayInUse": {"description": "Label of the way to use the app that this phone is in."}
+  "@wayInUse": {"description": "Label of the way to use the app that this phone is in."},
+  "errMoneyInvalid": "Indiquez un montant, par exemple 1250,50.",
+  "errQuoteNeedsLine": "Choisissez la ligne de budget sur laquelle le devis est engagé.",
+  "errNotInProject": "Cette ligne de budget n'est pas dans ce projet.",
+  "errValidityBeforeDate": "La validité ne peut pas finir avant la date du devis.",
+  "errTooManyFiles": "5 fichiers au plus pour un devis.",
+  "errFileType": "Choisissez un PDF ou une photo.",
+  "errTaskInProject": "Cette tâche est déjà dans un projet.",
+  "errOnePlace": "Choisissez un seul lieu.",
+  "errReportNotOpen": "Seul un signalement ouvert peut être transformé en tâche.",
+  "errReportNotClosed": "Seul un signalement classé peut être rouvert."
 }

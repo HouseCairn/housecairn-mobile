@@ -1222,4 +1222,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wayInUse => 'In use';
+
+  @override
+  String get errMoneyInvalid => 'Give an amount of money, such as 1250.50.';
+
+  @override
+  String get errQuoteNeedsLine =>
+      'Choose the budget line the quote is committed on.';
+
+  @override
+  String get errNotInProject => 'This budget line is not in this project.';
+
+  @override
+  String get errValidityBeforeDate =>
+      'The validity cannot end before the date of the quote.';
+
+  @override
+  String get errTooManyFiles => 'At most 5 files for a quote.';
+
+  @override
+  String get errFileType => 'Choose a PDF or a photo.';
+
+  @override
+  String get errTaskInProject => 'This task is already in a project.';
+
+  @override
+  String get errOnePlace => 'Choose one place.';
+
+  @override
+  String get errReportNotOpen => 'Only an open report can be made into a task.';
+
+  @override
+  String get errReportNotClosed => 'Only a closed report can be reopened.';
 }

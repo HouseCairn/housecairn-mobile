@@ -1230,4 +1230,39 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get wayInUse => 'Utilisé';
+
+  @override
+  String get errMoneyInvalid => 'Indiquez un montant, par exemple 1250,50.';
+
+  @override
+  String get errQuoteNeedsLine =>
+      'Choisissez la ligne de budget sur laquelle le devis est engagé.';
+
+  @override
+  String get errNotInProject =>
+      'Cette ligne de budget n\'est pas dans ce projet.';
+
+  @override
+  String get errValidityBeforeDate =>
+      'La validité ne peut pas finir avant la date du devis.';
+
+  @override
+  String get errTooManyFiles => '5 fichiers au plus pour un devis.';
+
+  @override
+  String get errFileType => 'Choisissez un PDF ou une photo.';
+
+  @override
+  String get errTaskInProject => 'Cette tâche est déjà dans un projet.';
+
+  @override
+  String get errOnePlace => 'Choisissez un seul lieu.';
+
+  @override
+  String get errReportNotOpen =>
+      'Seul un signalement ouvert peut être transformé en tâche.';
+
+  @override
+  String get errReportNotClosed =>
+      'Seul un signalement classé peut être rouvert.';
 }

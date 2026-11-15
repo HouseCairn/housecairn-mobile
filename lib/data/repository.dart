@@ -11,6 +11,7 @@ import 'package:uuid/uuid.dart';
 import '../core/clock.dart';
 import '../core/hlc.dart';
 import '../domain/choices.dart';
+import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
 import '../domain/photos.dart';
 import '../domain/recurrence.dart' as recurrence;
@@ -19,6 +20,7 @@ import '../domain/stock.dart' as stock;
 import '../sync/mode.dart';
 import 'database.dart';
 
+part 'budget_repository.dart';
 part 'stock_repository.dart';
 
 /// Why the repository refused a change. Each value has its message in the
@@ -129,6 +131,38 @@ enum Refusal {
 
   /// A task lists at most 50 articles (`tasks/materials.py:28`).
   tooManyMaterials,
+
+  /// An amount that is not a number with at most two decimals below 10^10
+  /// (`projects/services.py` `_money`).
+  moneyInvalid,
+
+  /// An accepted quote needs the budget line it is committed on
+  /// (`Quote.clean`, constraint `quote_accepted_has_line`).
+  quoteNeedsLine,
+
+  /// The budget line, the quote or the file is not of this project.
+  notInProject,
+
+  /// The validity of a quote ends before its date (`Quote.clean`).
+  validityBeforeDate,
+
+  /// At most five files on a quote (`MAX_FILES_PER_QUOTE`).
+  tooManyFiles,
+
+  /// A file that is neither a PDF nor a photo.
+  fileTypeRefused,
+
+  /// The task is already in a project (`attach_task`).
+  taskInProject,
+
+  /// A report has one place at most (`create_report`).
+  onePlace,
+
+  /// Only an open report can be made into a task (`make_task`).
+  reportNotOpen,
+
+  /// Only a closed report can be reopened (`reopen_report`).
+  reportNotClosed,
 }
 
 class Refused implements Exception {
@@ -369,10 +403,28 @@ const entityOf = {
   'movements': 'stock.movement',
   'task_materials': 'tasks.taskmaterial',
   'material_draws': 'tasks.materialdraw',
+  'projects': 'projects.project',
+  'project_rooms': 'projects.project_rooms',
+  'budget_lines': 'projects.budgetline',
+  'quotes': 'projects.quote',
+  'project_files': 'projects.projectfile',
+  'project_links': 'projects.projectlink',
+  'project_tasks': 'projects.projecttask',
+  'annual_envelopes': 'projects.annualenvelope',
+  'reports': 'reports.report',
 };
 
 /// The tables whose rows belong to a home, children first.
 const homeTables = [
+  'reports',
+  'annual_envelopes',
+  'project_tasks',
+  'project_links',
+  'project_files',
+  'quotes',
+  'budget_lines',
+  'project_rooms',
+  'projects',
   'material_draws',
   'task_materials',
   'movements',
