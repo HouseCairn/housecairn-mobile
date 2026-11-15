@@ -94,6 +94,33 @@ schema 1 (`lib/data/database.steps.dart`). What lot 2a settled within the rules 
 - **Photos**: the table only; the file reference is the JSON of protocol section 2.9, and the
   re-encoding and thumbnails come with lot 2b.
 
+## Schema 3 (lot 3a)
+
+Schema 3 adds the stock (`lib/data/tables.dart`): `articles`, `article_rooms` and
+`article_items` (the rooms and compatible items of an article, one row per link), `suppliers`,
+`movements`, `task_materials` and `material_draws`, created by the guided step from schema 2,
+which adds tables and indexes only. What lot 3a settled within the rules above:
+
+- **Quantities and amounts** (`quantity`, `threshold`, `unit_price`, `last_price`, `wanted`,
+  `drawn`) are `TEXT` with two decimals, read as `Decimal` (package `decimal`,
+  [ADR 0001](0001-flutter-stack-and-packages.md)); `test/no_double_test.dart` fails when the
+  code of the stock names `double`.
+- **No stock level and no effect of a movement is stored.** A movement keeps what the person
+  typed (for an inventory, the count); the effect of each line and the stock of an article are
+  computed on read from its movements in the order of the clock that created them
+  (`field_clock` of `created_at`, then device, then id), as
+  [ADR 0003](0003-sync-protocol.md) says for the ledger ("Derived"). The web stores a `delta`
+  worked out at writing time; for one phone the result is the same.
+- **Deterministic ids** for the rows that must stay one per pair: a material line
+  (`material:<task>:<article>`), a draw (`draw:<occurrence>:<article>`) and the links of an
+  article (`stock.article_rooms:…`, `stock.article_compatible_items:…`), in the home's
+  namespace ([ADR 0003](0003-sync-protocol.md)); removing one soft-deletes it, adding it again
+  brings the same row back.
+- **Done draws, undo gives back**: closing an occurrence as done writes, in the same
+  transaction, an exit per material, never above what was wanted nor below zero, and a draw row;
+  undo writes entries for what was taken and ends the draws. No line of the ledger is ever
+  changed or erased (`stock/models.py:175`).
+
 ## Consequences
 
 - Every write goes through one repository layer that updates the row, `field_clock` and

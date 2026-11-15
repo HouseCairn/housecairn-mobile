@@ -89,9 +89,14 @@ final screens2b =
     ];
 
 /// The few words of the navigation, by language.
-typedef Labels = ({String rooms, String more});
+typedef Labels = ({String rooms, String more, String stock, String materials});
 
 const labels = {
-  'en': (rooms: 'Rooms', more: 'More'),
-  'fr': (rooms: 'Pièces', more: 'Plus'),
+  'en': (rooms: 'Rooms', more: 'More', stock: 'Stock', materials: 'MATERIALS'),
+  'fr': (
+    rooms: 'Pièces',
+    more: 'Plus',
+    stock: 'Matériel',
+    materials: 'FOURNITURES',
+  ),
 };

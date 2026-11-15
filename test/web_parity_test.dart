@@ -14,6 +14,7 @@
 //   flutter test --update-goldens --dart-define=PARITY_CAPTURE=true \
 //     test/web_parity_test.dart
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -29,6 +30,7 @@ import 'package:housecairn_mobile/ui/homes_screen.dart';
 import 'package:housecairn_mobile/ui/item_screens.dart';
 import 'package:housecairn_mobile/ui/messages.dart';
 import 'package:housecairn_mobile/ui/rooms.dart';
+import 'package:housecairn_mobile/ui/stock_screens.dart';
 import 'package:housecairn_mobile/ui/task_screen.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -46,6 +48,8 @@ class Demo {
   late String utility;
   late String boiler;
   late String plumber;
+  late String filter;
+  late String shop;
 
   /// The day the web was measured on: the rows' dates are relative to it
   /// (`today` of test/parity/web_fr_390.json).
@@ -103,6 +107,48 @@ class Demo {
       );
       clock.advance(const Duration(seconds: 1));
     }
+    // The stock added to the web's demonstration by tool/web_parity.py's
+    // instance (its docstring): three articles, a supplier, movements.
+    filter = await r.addArticle(
+      home,
+      const ArticleInput(
+        name: 'Filtre de VMC',
+        unit: 'piece',
+        threshold: '2',
+        unitPrice: '12.50',
+        storageLocation: 'Garage, étagère 2',
+        manufacturerReference: 'F-100',
+      ),
+    );
+    shop = await r.addSupplier(
+      filter,
+      const SupplierInput(
+        name: "Magasin d'exemple",
+        reference: 'EX-42',
+        lastPrice: '12.50',
+      ),
+    );
+    await r.recordMovement(filter, kind: 'entry', quantity: '3');
+    await r.recordMovement(filter, kind: 'exit', quantity: '2');
+    final battery = await r.addArticle(
+      home,
+      const ArticleInput(
+        name: 'Pile 9 V',
+        unit: 'piece',
+        threshold: '2',
+        storageLocation: 'Entrée, tiroir',
+      ),
+    );
+    await r.recordMovement(battery, kind: 'entry', quantity: '4');
+    final paint = await r.addArticle(
+      home,
+      const ArticleInput(
+        name: 'Peinture blanche',
+        unit: 'litre',
+        storageLocation: 'Garage',
+      ),
+    );
+    await r.recordMovement(paint, kind: 'entry', quantity: '2.5');
   }
 }
 
@@ -350,8 +396,34 @@ Measures measure(
 typedef Screen = ({
   String name,
   Future<void> Function(WidgetTester, Demo) open,
-  Measures Function(WidgetTester) measure,
+  FutureOr<Measures> Function(WidgetTester) measure,
 });
+
+/// Measures a screen longer than the phone in two places: at the top, then
+/// scrolled to [add] (a list builds only what is near the screen); a measure
+/// taken at the top wins.
+Future<Measures> measureLong(
+  WidgetTester tester, {
+  required String add,
+  bool field = false,
+}) async {
+  final top = measure(tester, field: field);
+  await tester.scrollUntilVisible(
+    find.text(add),
+    300,
+    scrollable: find
+        .byWidgetPredicate(
+          (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+        )
+        .last,
+  );
+  await tester.pumpAndSettle();
+  final bottom = measure(tester, add: add);
+  return {
+    for (final key in {...top.keys, ...bottom.keys})
+      key: top[key] ?? bottom[key],
+  };
+}
 
 final screens = <Screen>[
   (
@@ -421,6 +493,43 @@ final screens = <Screen>[
         openScreen(tester, ContractorFormScreen(homeId: demo.home)),
     measure: (t) => measure(t, field: true),
   ),
+  (
+    name: 'stock',
+    open: (tester, demo) async {
+      await openRooms(tester, 'Pièces');
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const Key('rooms-tabs')),
+          matching: find.text('Matériel'),
+        ),
+      );
+      await tester.pumpAndSettle();
+    },
+    measure: (t) =>
+        measure(t, rowTitle: 'Filtre de VMC', add: 'Ajouter un article'),
+  ),
+  (
+    name: 'article',
+    open: (tester, demo) => openScreen(
+      tester,
+      ArticleScreen(homeId: demo.home, articleId: demo.filter),
+    ),
+    measure: (t) => measureLong(t, add: 'Ajouter un fournisseur', field: true),
+  ),
+  (
+    name: 'article_form',
+    open: (tester, demo) =>
+        openScreen(tester, ArticleFormScreen(homeId: demo.home)),
+    measure: (t) => measure(t, field: true),
+  ),
+  (
+    name: 'supplier_form',
+    open: (tester, demo) => openScreen(
+      tester,
+      SupplierFormScreen(homeId: demo.home, articleId: demo.filter),
+    ),
+    measure: (t) => measure(t, field: true),
+  ),
 ];
 
 /// Tolerances, in logical pixels: a font size is exact; a box may differ by
@@ -449,6 +558,7 @@ const adaptations = <String, ({double app, String why})>{
 const absences = <String, String>{
   'rooms.label_font':
       'the web has a search field above the rooms; the app has no search yet',
+  'stock.label_font': 'the label of the search field: this test reads labels on forms only; the app draws it with HcField, as every label',
   'room_form.h2_font':
       'the memory of the room is in this form, a screen of its own on the web',
   'room_form.h2_weight':
@@ -498,7 +608,7 @@ void main() {
       await state.choose(demo.home);
       await tester.pumpAndSettle();
       await screen.open(tester, demo);
-      final app = results[screen.name] = screen.measure(tester);
+      final app = results[screen.name] = await screen.measure(tester);
       if (capture) {
         await expectLater(
           find.byType(MaterialApp),

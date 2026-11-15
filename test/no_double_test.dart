@@ -38,7 +38,7 @@ void main() {
     expect(offences('final double price = 1;'), hasLength(1));
     expect(offences('x.toDouble()'), hasLength(1));
     expect(offences("double.parse('1.5')"), hasLength(1));
-    expect(offences("num.tryParse(text)"), hasLength(1));
+    expect(offences('num.tryParse(text)'), hasLength(1));
     expect(offences('final num n = 2;'), hasLength(1));
     expect(offences('total * 0.2'), hasLength(1));
     expect(offences("Decimal.parse('1.5')"), isEmpty);
