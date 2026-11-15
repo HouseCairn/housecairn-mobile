@@ -7,6 +7,7 @@ import '../data/database.dart';
 import '../data/repository.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
+import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/day.dart';
 import '../domain/stock.dart' as stock;
@@ -214,14 +215,12 @@ class ArticleScreen extends StatelessWidget {
             : stock.readQuantity(a.threshold!);
         final low = stock.isLow(data.level, threshold);
         final unit = unitAfter(l10n, a, data.level);
-        Widget? money(String? stored) => stored == null
+        String? money(String? stored) => stored == null
             ? null
-            : factText(
-                formatMoney(
-                  locale,
-                  data.home.currency,
-                  stock.readQuantity(stored),
-                ),
+            : formatMoney(
+                locale,
+                data.home.currency,
+                stock.readQuantity(stored),
               );
         void open(Widget screen) =>
             Navigator.of(context)
@@ -237,42 +236,41 @@ class ArticleScreen extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(bottom: HcSpace.s3),
-                      child: Wrap(
-                        spacing: HcSpace.s2,
-                        crossAxisAlignment: WrapCrossAlignment.center,
+                      child: HcFigure(
+                        formatQuantity(locale, data.level),
+                        key: const Key('article-level'),
+                        unit: unit,
+                        pill: low
+                            ? HcPill(
+                                l10n.articleLowStock,
+                                tone: HcPillTone.warning,
+                              )
+                            : null,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: HcSpace.s3),
+                      child: HcValueList(
                         children: [
-                          Text(
-                            [
-                              formatQuantity(locale, data.level),
-                              if (unit.isNotEmpty) unit,
-                            ].join(' '),
-                            key: const Key('article-level'),
-                            style: HcText.cardTitle,
-                          ),
-                          if (low)
-                            HcPill(
-                              l10n.articleLowStock,
-                              tone: HcPillTone.warning,
+                          if (threshold != null)
+                            HcValueRow(
+                              l10n.articleThreshold,
+                              formatQuantity(locale, threshold),
                             ),
+                          if (money(a.unitPrice) case final price?)
+                            HcValueRow(l10n.articleUnitPrice, price),
+                          if (a.manufacturerReference.isNotEmpty)
+                            HcValueRow(
+                              l10n.articleReference,
+                              a.manufacturerReference,
+                            ),
+                          if (a.dimensions.isNotEmpty)
+                            HcValueRow(l10n.articleDimensions, a.dimensions),
+                          if (a.storageLocation.isNotEmpty)
+                            HcValueRow(l10n.articleStorage, a.storageLocation),
                         ],
                       ),
                     ),
-                    if (threshold != null)
-                      HcFact(
-                        l10n.articleThreshold,
-                        factText(formatQuantity(locale, threshold)),
-                      ),
-                    if (money(a.unitPrice) case final price?)
-                      HcFact(l10n.articleUnitPrice, price),
-                    if (a.manufacturerReference.isNotEmpty)
-                      HcFact(
-                        l10n.articleReference,
-                        factText(a.manufacturerReference),
-                      ),
-                    if (a.dimensions.isNotEmpty)
-                      HcFact(l10n.articleDimensions, factText(a.dimensions)),
-                    if (a.storageLocation.isNotEmpty)
-                      HcFact(l10n.articleStorage, factText(a.storageLocation)),
                     if (a.notes.isNotEmpty)
                       HcFact(l10n.fieldNotes, factText(a.notes)),
                     if (writable)
@@ -351,13 +349,22 @@ class ArticleScreen extends StatelessWidget {
                               ),
                               child: Text(s.name, style: HcText.cardTitle),
                             ),
-                            if (s.reference.isNotEmpty)
-                              HcFact(
-                                l10n.supplierReference,
-                                factText(s.reference),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: HcSpace.s3,
                               ),
-                            if (money(s.lastPrice) case final price?)
-                              HcFact(l10n.supplierLastPrice, price),
+                              child: HcValueList(
+                                children: [
+                                  if (s.reference.isNotEmpty)
+                                    HcValueRow(
+                                      l10n.supplierReference,
+                                      s.reference,
+                                    ),
+                                  if (money(s.lastPrice) case final price?)
+                                    HcValueRow(l10n.supplierLastPrice, price),
+                                ],
+                              ),
+                            ),
                             if (s.url.isNotEmpty)
                               HcFact(l10n.supplierUrl, factText(s.url)),
                             if (writable)

@@ -7,6 +7,7 @@ import '../data/repository.dart';
 import '../design/icons.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
+import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/choices.dart';
 import '../domain/day.dart';
@@ -90,50 +91,51 @@ class ItemScreen extends StatelessWidget {
                       style: HcText.rowText,
                     ),
                     const SizedBox(height: HcSpace.s3),
-                    if (item.brand.isNotEmpty || item.model.isNotEmpty)
-                      HcFact(
-                        l10n.itemBrandModel,
-                        factText(
-                          [
-                            item.brand,
-                            item.model,
-                          ].where((t) => t.isNotEmpty).join(' · '),
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: HcSpace.s3),
+                      child: HcValueList(
+                        children: [
+                          if (item.brand.isNotEmpty || item.model.isNotEmpty)
+                            HcValueRow(
+                              l10n.itemBrandModel,
+                              [
+                                item.brand,
+                                item.model,
+                              ].where((t) => t.isNotEmpty).join(' · '),
+                            ),
+                          if (item.serialNumber.isNotEmpty)
+                            HcValueRow(l10n.itemSerial, item.serialNumber),
+                          if (item.installedOn != null)
+                            HcValueRow(
+                              l10n.itemInstalledOn,
+                              formatDay(context, Day.parse(item.installedOn!)),
+                            ),
+                          if (warranty != 'none')
+                            HcValueRow(
+                              l10n.itemWarranty,
+                              '',
+                              child: HcPill(
+                                warranty == 'expired'
+                                    ? l10n.warrantyEnded(
+                                        formatDay(
+                                          context,
+                                          Day.parse(item.warrantyEndsOn!),
+                                        ),
+                                      )
+                                    : l10n.warrantyUntil(
+                                        formatDay(
+                                          context,
+                                          Day.parse(item.warrantyEndsOn!),
+                                        ),
+                                      ),
+                                tone: warranty == 'expired'
+                                    ? HcPillTone.danger
+                                    : HcPillTone.sand,
+                              ),
+                            ),
+                        ],
                       ),
-                    if (item.serialNumber.isNotEmpty)
-                      HcFact(l10n.itemSerial, factText(item.serialNumber)),
-                    if (item.installedOn != null)
-                      HcFact(
-                        l10n.itemInstalledOn,
-                        factText(
-                          formatDay(context, Day.parse(item.installedOn!)),
-                        ),
-                      ),
-                    if (warranty != 'none')
-                      HcFact(
-                        l10n.itemWarranty,
-                        Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: HcPill(
-                            warranty == 'expired'
-                                ? l10n.warrantyEnded(
-                                    formatDay(
-                                      context,
-                                      Day.parse(item.warrantyEndsOn!),
-                                    ),
-                                  )
-                                : l10n.warrantyUntil(
-                                    formatDay(
-                                      context,
-                                      Day.parse(item.warrantyEndsOn!),
-                                    ),
-                                  ),
-                            tone: warranty == 'expired'
-                                ? HcPillTone.danger
-                                : HcPillTone.sand,
-                          ),
-                        ),
-                      ),
+                    ),
                     if (hasContract)
                       HcFact(
                         l10n.maintenanceContract,

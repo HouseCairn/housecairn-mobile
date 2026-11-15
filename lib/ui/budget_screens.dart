@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import '../data/repository.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
+import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/budget.dart' as budget;
 import '../l10n/app_localizations.dart';
@@ -105,40 +106,29 @@ class _BudgetScreenState extends State<BudgetScreen> {
             const SizedBox(height: HcSpace.s2),
             if (e.envelope == null)
               Text(l10n.envelopeNoneSummary, style: HcText.bodySmall),
-            HcFact(
-              e.envelope == null ? l10n.amountPlanned : l10n.envelope,
-              factText(m(e.setAside)),
-            ),
-            HcFact(l10n.spent, factText(m(e.spent))),
-            HcFact(
-              l10n.left,
-              factText(
-                e.left < budget.zero ? l10n.overBy(m(e.leftOver)) : m(e.left),
-              ),
+            HcValueList(
+              children: [
+                HcValueRow(
+                  e.envelope == null ? l10n.amountPlanned : l10n.envelope,
+                  m(e.setAside),
+                ),
+                HcValueRow(l10n.spent, m(e.spent)),
+                HcValueRow(
+                  l10n.left,
+                  e.left < budget.zero ? l10n.overBy(m(e.leftOver)) : m(e.left),
+                ),
+              ],
             ),
             if (e.percent != null)
               Padding(
-                padding: const EdgeInsets.only(top: HcSpace.s2),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Semantics(
-                      label: l10n.spentAgainst,
-                      value: '${e.percent} %',
-                      child: LinearProgressIndicator(
-                        key: const Key('envelope-gauge'),
-                        value: e.gaugeValue / 100,
-                        minHeight: HcSpace.s2,
-                      ),
-                    ),
-                    const SizedBox(height: HcSpace.s1),
-                    Text(
-                      e.left < budget.zero
-                          ? l10n.percentSpentOver(e.percent!)
-                          : l10n.percentSpent(e.percent!),
-                      style: HcText.bodySmall,
-                    ),
-                  ],
+                padding: const EdgeInsets.only(top: HcSpace.s3),
+                child: HcProgress(
+                  key: const Key('envelope-gauge'),
+                  percent: e.left < budget.zero ? e.percent! : e.gaugeValue,
+                  text: e.left < budget.zero
+                      ? l10n.percentSpentOver(e.percent!)
+                      : l10n.percentSpent(e.percent!),
+                  label: l10n.spentAgainst,
                 ),
               ),
             const SizedBox(height: HcSpace.s2),
@@ -146,29 +136,30 @@ class _BudgetScreenState extends State<BudgetScreen> {
               key: const Key('envelope-details'),
               title: l10n.detailsOfYear,
               children: [
-                if (e.envelope != null) ...[
-                  HcFact(l10n.plannedAll, factText(m(e.total.planned))),
-                  HcFact(
-                    l10n.leftToPlan,
-                    factText(
-                      e.leftToPlan! < budget.zero
-                          ? l10n.plansExceed(m(e.leftToPlan!))
-                          : m(e.leftToPlan!),
+                HcValueList(
+                  children: [
+                    if (e.envelope != null) ...[
+                      HcValueRow(l10n.plannedAll, m(e.total.planned)),
+                      HcValueRow(
+                        l10n.leftToPlan,
+                        e.leftToPlan! < budget.zero
+                            ? l10n.plansExceed(m(e.leftToPlan!))
+                            : m(e.leftToPlan!),
+                      ),
+                    ],
+                    HcValueRow(l10n.amountPaid, m(e.total.paid)),
+                    HcValueRow(
+                      l10n.budgetProjects,
+                      l10n.plannedPaid(
+                        m(e.projects.planned),
+                        m(e.projects.paid),
+                      ),
                     ),
-                  ),
-                ],
-                HcFact(l10n.amountPaid, factText(m(e.total.paid))),
-                HcFact(
-                  l10n.budgetProjects,
-                  factText(
-                    l10n.plannedPaid(m(e.projects.planned), m(e.projects.paid)),
-                  ),
-                ),
-                HcFact(
-                  l10n.budgetUpkeep,
-                  factText(
-                    l10n.plannedPaid(m(e.upkeep.planned), m(e.upkeep.paid)),
-                  ),
+                    HcValueRow(
+                      l10n.budgetUpkeep,
+                      l10n.plannedPaid(m(e.upkeep.planned), m(e.upkeep.paid)),
+                    ),
+                  ],
                 ),
                 smallNote(l10n.spentExplained),
               ],
@@ -230,10 +221,18 @@ class _BudgetScreenState extends State<BudgetScreen> {
               style: HcText.bodySmall,
             ),
             const SizedBox(height: HcSpace.s2),
-            HcFact(l10n.amountPlanned, factText(m(r.upkeep.planned))),
-            HcFact(l10n.amountPaid, factText(m(r.upkeep.paid))),
-            if (gapPills(r.upkeep, c).isNotEmpty)
-              HcFact(l10n.whereItStands, GapPill(r.upkeep, c)),
+            HcValueList(
+              children: [
+                HcValueRow(l10n.amountPlanned, m(r.upkeep.planned)),
+                HcValueRow(l10n.amountPaid, m(r.upkeep.paid)),
+                if (gapPills(r.upkeep, c).isNotEmpty)
+                  HcValueRow(
+                    l10n.whereItStands,
+                    '',
+                    child: GapPill(r.upkeep, c),
+                  ),
+              ],
+            ),
             if (r.missing > 0) smallNote(l10n.missingCosts(r.missing)),
           ],
         ),
@@ -352,18 +351,28 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   children: [
                     Text(line.label, style: HcText.cardTitle),
                     const SizedBox(height: HcSpace.s2),
-                    if (line.extra['estimate'] case final Decimal estimate)
-                      HcFact(l10n.estimateEachTime, factText(m(estimate))),
-                    if (line.extra['stock_estimate'] case final Decimal s
-                        when s != budget.zero)
-                      HcFact(l10n.ofWhichStock, factText(m(s))),
-                    if (line.extra['annual_cost'] case final Decimal a)
-                      HcFact(l10n.costAYear, factText(m(a))),
-                    AmountFacts(line.amounts, c),
-                    HcFact(
-                      l10n.paidInAll,
-                      factText(m(line.extra['total_paid']! as Decimal)),
+                    HcValueList(
+                      dense: true,
+                      children: [
+                        if (line.extra['estimate'] case final Decimal estimate)
+                          HcValueRow(
+                            l10n.estimateEachTime,
+                            m(estimate),
+                            dense: true,
+                          ),
+                        if (line.extra['stock_estimate'] case final Decimal s
+                            when s != budget.zero)
+                          HcValueRow(l10n.ofWhichStock, m(s), dense: true),
+                        if (line.extra['annual_cost'] case final Decimal a)
+                          HcValueRow(l10n.costAYear, m(a), dense: true),
+                        HcValueRow(
+                          l10n.paidInAll,
+                          m(line.extra['total_paid']! as Decimal),
+                          dense: true,
+                        ),
+                      ],
                     ),
+                    AmountFacts(line.amounts, c),
                     if ((line.extra['missing_costs']! as int) > 0)
                       smallNote(
                         l10n.missingCosts(line.extra['missing_costs']! as int),

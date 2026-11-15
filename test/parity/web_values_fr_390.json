@@ -1,0 +1,144 @@
+{
+ "$comment": "Measures of the figures of the web application at 390 x 844 CSS px, factor 3, in French, with its demonstration data, written by tool/web_parity_values.py; read by test/web_parity_values_test.dart. Measure again when the pin of web_parity moves.",
+ "web": {
+  "repository": "HouseCairn/housecairn",
+  "release": "v0.3.2",
+  "commit": "a76837fe30b5a313980184703454654a45b1f031"
+ },
+ "screens": {
+  "budget": {
+   "facts": {
+    "label": {
+     "font": 14,
+     "weight": 400,
+     "line": 21,
+     "color": "rgb(79, 96, 92)"
+    },
+    "value": {
+     "font": 16,
+     "weight": 600,
+     "line": 24,
+     "color": "rgb(27, 36, 34)"
+    },
+    "value_right_gap": 0,
+    "label_left_gap": 0,
+    "heights": [
+     36,
+     49,
+     37
+    ],
+    "separator": "1px"
+   },
+   "dense": {
+    "label": {
+     "font": 13,
+     "weight": 400,
+     "line": 19.5,
+     "color": "rgb(79, 96, 92)"
+    },
+    "value": {
+     "font": 14,
+     "weight": 400,
+     "line": 21,
+     "color": "rgb(27, 36, 34)"
+    },
+    "height": 29
+   },
+   "figure": null,
+   "progress": {
+    "height": 16,
+    "text": {
+     "font": 13,
+     "weight": 400,
+     "line": 19.5,
+     "color": "rgb(79, 96, 92)"
+    }
+   },
+   "url": "/h/<id>/budget/"
+  },
+  "project": {
+   "facts": {
+    "label": {
+     "font": 14,
+     "weight": 400,
+     "line": 21,
+     "color": "rgb(79, 96, 92)"
+    },
+    "value": {
+     "font": 16,
+     "weight": 600,
+     "line": 24,
+     "color": "rgb(27, 36, 34)"
+    },
+    "value_right_gap": 0,
+    "label_left_gap": 0,
+    "heights": [
+     36,
+     37
+    ],
+    "separator": "1px"
+   },
+   "dense": {
+    "label": {
+     "font": 13,
+     "weight": 400,
+     "line": 19.5,
+     "color": "rgb(79, 96, 92)"
+    },
+    "value": {
+     "font": 14,
+     "weight": 400,
+     "line": 21,
+     "color": "rgb(27, 36, 34)"
+    },
+    "height": 29
+   },
+   "figure": null,
+   "progress": null,
+   "url": "/h/<id>/projects/<id>/"
+  },
+  "article": {
+   "facts": {
+    "label": {
+     "font": 14,
+     "weight": 400,
+     "line": 21,
+     "color": "rgb(79, 96, 92)"
+    },
+    "value": {
+     "font": 16,
+     "weight": 600,
+     "line": 24,
+     "color": "rgb(27, 36, 34)"
+    },
+    "value_right_gap": 0,
+    "label_left_gap": 0,
+    "heights": [
+     36,
+     49,
+     46.609375,
+     57
+    ],
+    "separator": "1px"
+   },
+   "dense": null,
+   "figure": {
+    "figure": {
+     "font": 32,
+     "weight": 700,
+     "line": 48,
+     "color": "rgb(27, 36, 34)"
+    },
+    "unit": {
+     "font": 16,
+     "weight": 400,
+     "line": 24,
+     "color": "rgb(27, 36, 34)"
+    },
+    "gap": 8
+   },
+   "progress": null,
+   "url": "/h/<id>/stock/<id>/"
+  }
+ }
+}

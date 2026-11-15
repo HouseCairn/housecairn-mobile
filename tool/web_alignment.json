@@ -48,6 +48,8 @@
         "src/housecairn/templates/rooms",
         "src/housecairn/templates/homes",
         "src/housecairn/templates/stock",
+        "src/housecairn/templates/budget",
+        "src/housecairn/templates/projects",
         "src/housecairn/homes/management/commands/load_demo_data.py"
       ],
       "mobile": [

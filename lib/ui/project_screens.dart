@@ -7,6 +7,7 @@ import '../data/database.dart';
 import '../data/repository.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
+import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
@@ -92,27 +93,28 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                           const SizedBox(height: HcSpace.s2),
                           if (envelope == null)
                             Text(l10n.envelopeNone, style: HcText.bodySmall)
-                          else ...[
-                            HcFact(l10n.envelope, factText(m(envelope))),
-                            HcFact(
-                              l10n.envelopePlannedActive,
-                              factText(m(active.planned)),
+                          else
+                            HcValueList(
+                              children: [
+                                HcValueRow(l10n.envelope, m(envelope)),
+                                HcValueRow(
+                                  l10n.envelopePlannedActive,
+                                  m(active.planned),
+                                ),
+                                HcValueRow(
+                                  l10n.envelopePaidSoFar,
+                                  m(active.paid),
+                                ),
+                                HcValueRow(
+                                  l10n.envelopeLeft,
+                                  envelope - active.planned < budget.zero
+                                      ? l10n.overTheEnvelope(
+                                          m(envelope - active.planned),
+                                        )
+                                      : m(envelope - active.planned),
+                                ),
+                              ],
                             ),
-                            HcFact(
-                              l10n.envelopePaidSoFar,
-                              factText(m(active.paid)),
-                            ),
-                            HcFact(
-                              l10n.envelopeLeft,
-                              factText(
-                                envelope - active.planned < budget.zero
-                                    ? l10n.overTheEnvelope(
-                                        m(envelope - active.planned),
-                                      )
-                                    : m(envelope - active.planned),
-                              ),
-                            ),
-                          ],
                           if (writable)
                             Align(
                               alignment: AlignmentDirectional.centerStart,
@@ -279,9 +281,16 @@ class ProjectScreen extends StatelessWidget {
                     if (p.goal.isNotEmpty)
                       HcFact(l10n.projectGoal, factText(p.goal)),
                     if (data.rooms.isNotEmpty)
-                      HcFact(
-                        l10n.roomsConcerned,
-                        factText(data.rooms.map((r) => r.name).join(', ')),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: HcSpace.s3),
+                        child: HcValueList(
+                          children: [
+                            HcValueRow(
+                              l10n.roomsConcerned,
+                              data.rooms.map((r) => r.name).join(', '),
+                            ),
+                          ],
+                        ),
                       ),
                     if (writable)
                       Align(

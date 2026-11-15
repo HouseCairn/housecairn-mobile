@@ -87,7 +87,10 @@ The measure of the web's rendering (`test/parity/web_fr_390.json`, read by
 It carries the web release and commit it was taken at, which `check` compares with the pin
 `web_parity`. When a web release changes a file that draws the measured screens, `update` moves
 that pin and `check` fails until the measure is taken again (`tool/web_parity.py`, which says how)
-and `flutter test test/web_parity_test.dart` passes.
+and `flutter test test/web_parity_test.dart` passes. The figures of the budget, a project and a
+stock item are measured the same way, by `tool/web_parity_values.py` into
+`test/parity/web_values_fr_390.json`, read by `test/web_parity_values_test.dart`, which fails
+when that file was not measured at the pin `web_parity`.
 
 Every string shown to people goes in `lib/l10n/app_en.arb` (with a description) and
 `lib/l10n/app_fr.arb`; a test fails when a screen shows a string that is in neither. A new
