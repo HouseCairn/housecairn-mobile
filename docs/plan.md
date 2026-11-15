@@ -268,6 +268,12 @@ upkeep); reports and "make a task".
 
 **Device**: PDF of a quote attached from the Files app (iOS) and the document picker (Android).
 
+**Delivered in two pull requests, in this order** (orchestrator's decision of 2026-11-15, as lot 2
+was split): **3a**, the stock: articles, suppliers, movements and inventory, the materials of a
+task and the draws taken by Done and given back by Undo, and their screens, with the criteria of
+this lot on the stock, on amounts without `double` and on two homes in two currencies; **3b**,
+projects, budget lines, quotes, the annual envelope, the budget views and reports.
+
 **Depends on**: lot 2.
 
 ## Lot 4. Sync engine (without network, without crypto)

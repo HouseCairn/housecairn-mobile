@@ -15,7 +15,9 @@ part 'database.g.dart';
 ///
 /// Schema 1 had no table. Schema 2 (lot 2a) has the homes, rooms, items,
 /// photos, contractors, tasks and occurrences, `field_clock` and the local
-/// settings of the phone (lib/data/tables.dart). Migrations are drift's
+/// settings of the phone (lib/data/tables.dart). Schema 3 (lot 3a) adds the
+/// stock: articles, their rooms and compatible items, suppliers, movements,
+/// the materials of tasks and the draws of done occurrences. Migrations are drift's
 /// guided migrations: `dart run drift_dev make-migrations` keeps one schema
 /// file per version in `drift_schemas/` and generates the step-by-step code
 /// (`database.steps.dart`) and the migration tests under `test/drift/`.
@@ -29,6 +31,13 @@ part 'database.g.dart';
     Contractors,
     Tasks,
     Occurrences,
+    Articles,
+    ArticleRooms,
+    ArticleItems,
+    Suppliers,
+    Movements,
+    TaskMaterials,
+    MaterialDraws,
     FieldClock,
     LocalSettings,
   ],
@@ -42,7 +51,7 @@ class AppDatabase extends _$AppDatabase implements Db {
       AppDatabase(driftDatabase(name: 'housecairn'));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -63,6 +72,28 @@ class AppDatabase extends _$AppDatabase implements Db {
               await m.createTable(table);
             }
             for (final index in schema.entities.whereType<Index>()) {
+              await m.create(index);
+            }
+          },
+          from2To3: (m, schema) async {
+            // Only new tables and their indexes: nothing of schema 2 moves.
+            for (final table in [
+              schema.articles,
+              schema.articleRooms,
+              schema.articleItems,
+              schema.suppliers,
+              schema.movements,
+              schema.taskMaterials,
+              schema.materialDraws,
+            ]) {
+              await m.createTable(table);
+            }
+            for (final index in [
+              schema.articleHomeName,
+              schema.movementArticle,
+              schema.materialTask,
+              schema.drawOccurrence,
+            ]) {
               await m.create(index);
             }
           },

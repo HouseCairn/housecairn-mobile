@@ -106,6 +106,22 @@ abstract final class HcText {
     height: HcFont.lineHeightTight,
   );
 
+  /// `.tab`, and the current one (`.tab[aria-current]`).
+  static const tab = TextStyle(
+    fontFamily: HcFont.family,
+    fontSize: HcFont.sizeSm,
+    fontWeight: HcFont.medium,
+    height: HcFont.lineHeightTight,
+    color: HcColors.textMuted,
+  );
+  static const tabCurrent = TextStyle(
+    fontFamily: HcFont.family,
+    fontSize: HcFont.sizeSm,
+    fontWeight: HcFont.bold,
+    height: HcFont.lineHeightTight,
+    color: HcColors.primary,
+  );
+
   /// `.nav-link`.
   static const navLabel = TextStyle(
     fontFamily: HcFont.family,

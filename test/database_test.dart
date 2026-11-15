@@ -14,13 +14,13 @@ Future<Object?> pragma(AppDatabase db, String name) async {
 
 void main() {
   test(
-    'the empty database opens at schema 2 and passes integrity_check',
+    'the empty database opens at schema 3 and passes integrity_check',
     () async {
       final db = AppDatabase(NativeDatabase.memory());
       final Db asDb = db;
       await asDb.open();
-      expect(asDb.schemaVersion, 2);
-      expect(await pragma(db, 'user_version'), 2);
+      expect(asDb.schemaVersion, 3);
+      expect(await pragma(db, 'user_version'), 3);
       expect(await pragma(db, 'foreign_keys'), 1);
       expect(await asDb.integrityCheck(), 'ok');
       await asDb.close();
@@ -28,7 +28,7 @@ void main() {
   );
 
   test(
-    'a database file reopens at schema 2, in WAL mode, and stays sound',
+    'a database file reopens at schema 3, in WAL mode, and stays sound',
     () async {
       final dir = await Directory.systemTemp.createTemp('housecairn-db-');
       addTearDown(() => dir.delete(recursive: true));
@@ -40,11 +40,11 @@ void main() {
       await first.close();
       expect(file.existsSync(), isTrue);
 
-      // The file is at schema 2 and the app writes schema 2: opening it again
+      // The file is at schema 3 and the app writes schema 3: opening it again
       // neither creates nor upgrades anything.
       final second = AppDatabase(NativeDatabase(file));
       await second.open();
-      expect(await pragma(second, 'user_version'), 2);
+      expect(await pragma(second, 'user_version'), 3);
       expect(await pragma(second, 'journal_mode'), 'wal');
       expect(await pragma(second, 'foreign_keys'), 1);
       expect(await second.integrityCheck(), 'ok');
@@ -58,11 +58,11 @@ void main() {
     final file = File('${dir.path}/housecairn.sqlite');
     final first = AppDatabase(NativeDatabase(file));
     await first.open();
-    await first.customStatement('PRAGMA user_version = 3');
+    await first.customStatement('PRAGMA user_version = 4');
     await first.close();
 
-    // A file written by a newer version of the app (schema 3) is not
-    // downgraded silently: drift calls onUpgrade(3, 2), which throws.
+    // A file written by a newer version of the app (schema 4) is not
+    // downgraded silently: drift calls onUpgrade(4, 3), which throws.
     final second = AppDatabase(NativeDatabase(file));
     await expectLater(second.open(), throwsStateError);
     await second.close();

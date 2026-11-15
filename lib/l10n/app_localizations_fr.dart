@@ -864,6 +864,338 @@ class AppLocalizationsFr extends AppLocalizations {
       'Cette photo est trop grande (20 Mio au plus).';
 
   @override
+  String get errQuantityInvalid =>
+      'Donnez un nombre, avec deux décimales au plus.';
+
+  @override
+  String get errQuantityNotPositive =>
+      'La quantité doit être supérieure à zéro.';
+
+  @override
+  String errStockShort(String available) {
+    return 'Il n\'y en a que $available en stock.';
+  }
+
+  @override
+  String get errUnitOther => 'Dites de quelle unité il s\'agit.';
+
+  @override
+  String get errMaterialListed => 'Cet article figure déjà sur la tâche.';
+
+  @override
+  String get errTooManyMaterials => 'Une tâche liste 50 articles au plus.';
+
+  @override
+  String get stock => 'Matériel';
+
+  @override
+  String get stockSearch => 'Rechercher par nom, référence ou fournisseur';
+
+  @override
+  String get stockLowOnly => 'Stock bas seulement';
+
+  @override
+  String get stockLow => 'Basse';
+
+  @override
+  String get stockEmpty => 'Aucun article pour l\'instant.';
+
+  @override
+  String get stockNoMatch => 'Aucun article ne correspond.';
+
+  @override
+  String get addArticle => 'Ajouter un article';
+
+  @override
+  String get addArticleButton => 'Ajouter l\'article';
+
+  @override
+  String get editArticle => 'Modifier l\'article';
+
+  @override
+  String get deleteArticle => 'Supprimer l\'article';
+
+  @override
+  String get deleteArticleBody =>
+      'L\'article, ses fournisseurs et ses mouvements disparaissent des écrans.';
+
+  @override
+  String get articleLowStock => 'Stock bas';
+
+  @override
+  String get articleThreshold => 'Seuil';
+
+  @override
+  String get articleThresholdHelp =>
+      'Le stock est signalé quand il descend à cette quantité ou en dessous.';
+
+  @override
+  String get articleUnitPrice => 'Prix unitaire';
+
+  @override
+  String articleUnitPriceHelp(String currency) {
+    return 'Ce que coûte une unité, en $currency, pour prévoir le coût des tâches qui l\'utilisent.';
+  }
+
+  @override
+  String get articleReference => 'Référence fabricant';
+
+  @override
+  String get articleDimensions => 'Dimensions';
+
+  @override
+  String get articleStorage => 'Emplacement de rangement';
+
+  @override
+  String get articleStorageHelp => 'Par exemple : garage, deuxième étagère.';
+
+  @override
+  String get articleUnit => 'Unité';
+
+  @override
+  String get articleUnitOther => 'Quelle unité';
+
+  @override
+  String get articleUnitOtherHelp =>
+      'Seulement avec l\'unité Autre. Exemple : sac.';
+
+  @override
+  String get articleCompatible => 'Éléments compatibles';
+
+  @override
+  String get articleCompatibleHelp =>
+      'L\'équipement concerné, par exemple la chaudière pour laquelle un filtre est fait.';
+
+  @override
+  String get articleNoCompatible => 'Aucun élément compatible choisi.';
+
+  @override
+  String get articleRoomsHelp =>
+      'Où il sert, en plus des pièces de l\'équipement auquel il convient.';
+
+  @override
+  String get articleTasks => 'Demandé par des tâches';
+
+  @override
+  String get unitNone => 'Aucune';
+
+  @override
+  String get unitPieceChoice => 'Pièce';
+
+  @override
+  String get unitLitreChoice => 'Litre';
+
+  @override
+  String get unitMetreChoice => 'Mètre';
+
+  @override
+  String get unitKilogramChoice => 'Kilogramme';
+
+  @override
+  String get unitRollChoice => 'Rouleau';
+
+  @override
+  String get unitBoxChoice => 'Boîte';
+
+  @override
+  String get unitOtherChoice => 'Autre';
+
+  @override
+  String unitPiece(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'pièces',
+      one: 'pièce',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitLitre(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'litres',
+      one: 'litre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitMetre(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'mètres',
+      one: 'mètre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitKilogram(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'kilogrammes',
+      one: 'kilogramme',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitRoll(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'rouleaux',
+      one: 'rouleau',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitBox(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'boîtes',
+      one: 'boîte',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recordMovement => 'Enregistrer un mouvement';
+
+  @override
+  String get movementQuantity => 'Quantité';
+
+  @override
+  String get movementDate => 'Date';
+
+  @override
+  String get movementNote => 'Note';
+
+  @override
+  String get movementEntryAction => 'Ajouter au stock';
+
+  @override
+  String get movementExitAction => 'Sortir du stock';
+
+  @override
+  String get movementInventoryAction => 'Fixer le compte';
+
+  @override
+  String get movementHelp =>
+      '« Fixer le compte » indique ce que vous avez compté sur l\'étagère ; le stock est corrigé en conséquence.';
+
+  @override
+  String get movementRecorded => 'Mouvement enregistré.';
+
+  @override
+  String get movements => 'Mouvements';
+
+  @override
+  String get movementsEmpty => 'Aucun mouvement pour l\'instant.';
+
+  @override
+  String get movementEntry => 'Entrée';
+
+  @override
+  String get movementExit => 'Sortie';
+
+  @override
+  String get movementInventory => 'Inventaire';
+
+  @override
+  String movementCounted(String count) {
+    return 'compté : $count';
+  }
+
+  @override
+  String get suppliers => 'Fournisseurs';
+
+  @override
+  String get suppliersEmpty => 'Aucun fournisseur pour l\'instant.';
+
+  @override
+  String get addSupplier => 'Ajouter un fournisseur';
+
+  @override
+  String get addSupplierButton => 'Ajouter le fournisseur';
+
+  @override
+  String get editSupplier => 'Modifier le fournisseur';
+
+  @override
+  String editSupplierOf(String name) {
+    return 'Modifier le fournisseur $name';
+  }
+
+  @override
+  String get deleteSupplier => 'Supprimer le fournisseur';
+
+  @override
+  String get deleteSupplierBody => 'Le fournisseur disparaît de l\'article.';
+
+  @override
+  String get supplierReference => 'Référence fournisseur';
+
+  @override
+  String get supplierLastPrice => 'Dernier prix payé';
+
+  @override
+  String get supplierUrl => 'Lien d\'achat';
+
+  @override
+  String supplierHelp(String currency) {
+    return 'Le prix est en $currency, la devise du logement. Le lien est seulement enregistré : Housecairn ne l\'ouvre jamais.';
+  }
+
+  @override
+  String get materials => 'Fournitures';
+
+  @override
+  String get materialsEmpty => 'Aucun article demandé.';
+
+  @override
+  String get materialsHelp =>
+      'Marquer la tâche faite prend ces quantités dans le stock ; annuler les remet.';
+
+  @override
+  String materialNeeds(String needed, String stocked) {
+    return 'demande $needed · $stocked en stock';
+  }
+
+  @override
+  String get materialShort => 'Stock insuffisant';
+
+  @override
+  String get materialArticle => 'Article';
+
+  @override
+  String get addMaterial => 'Ajouter l\'article';
+
+  @override
+  String removeMaterial(String name) {
+    return 'Retirer $name';
+  }
+
+  @override
+  String get materialsNoArticle =>
+      'Le matériel de ce logement n\'a encore aucun article : ajoutez-en un dans Pièces, Matériel.';
+
+  @override
+  String stockShortAfterDone(String list) {
+    return 'Stock insuffisant, le stock est à zéro : $list.';
+  }
+
+  @override
+  String get remove => 'Retirer';
+
+  @override
   String get waysTitle => 'Comment voulez-vous utiliser Housecairn ?';
 
   @override

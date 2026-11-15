@@ -1550,6 +1550,522 @@ abstract class AppLocalizations {
   /// **'This photo is too large (20 MiB at most).'**
   String get errPhotoTooLarge;
 
+  /// Refusal: a quantity or an amount that is not a number of the model (max_digits 10, decimal_places 2).
+  ///
+  /// In en, this message translates to:
+  /// **'Give a number, with at most two decimals.'**
+  String get errQuantityInvalid;
+
+  /// Web catalogue (stock or tasks): La quantité doit être supérieure à zéro.
+  ///
+  /// In en, this message translates to:
+  /// **'The quantity must be more than zero.'**
+  String get errQuantityNotPositive;
+
+  /// Web catalogue (stock or tasks): Il n'y en a que %(available)s en stock.
+  ///
+  /// In en, this message translates to:
+  /// **'Only {available} in stock.'**
+  String errStockShort(String available);
+
+  /// Web catalogue (stock or tasks): Dites de quelle unité il s'agit.
+  ///
+  /// In en, this message translates to:
+  /// **'Say which unit.'**
+  String get errUnitOther;
+
+  /// Web catalogue (stock or tasks): Cet article figure déjà sur la tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'This stock item is already listed on the task.'**
+  String get errMaterialListed;
+
+  /// Web catalogue (stock or tasks): Une tâche liste %(max)s articles au plus.
+  ///
+  /// In en, this message translates to:
+  /// **'A task lists at most 50 stock items.'**
+  String get errTooManyMaterials;
+
+  /// Title of the stock section, a tab of Rooms as on the web. Web catalogue (stock or tasks): Matériel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock'**
+  String get stock;
+
+  /// Web catalogue (stock or tasks): Rechercher par nom, référence ou fournisseur.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, reference or supplier'**
+  String get stockSearch;
+
+  /// Web catalogue (stock or tasks): Stock bas seulement.
+  ///
+  /// In en, this message translates to:
+  /// **'Low stock only'**
+  String get stockLowOnly;
+
+  /// Pill of an article at or below its threshold, in the list. Web catalogue (stock or tasks): Basse.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get stockLow;
+
+  /// Web catalogue (stock or tasks): Aucun article pour l'instant.
+  ///
+  /// In en, this message translates to:
+  /// **'No stock item yet.'**
+  String get stockEmpty;
+
+  /// Web catalogue (stock or tasks): Aucun article ne correspond.
+  ///
+  /// In en, this message translates to:
+  /// **'No stock item matches.'**
+  String get stockNoMatch;
+
+  /// Web catalogue (stock or tasks): Ajouter un article.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a stock item'**
+  String get addArticle;
+
+  /// Web catalogue (stock or tasks): Ajouter l'article.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the stock item'**
+  String get addArticleButton;
+
+  /// Web catalogue (stock or tasks): Modifier l'article.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the stock item'**
+  String get editArticle;
+
+  /// Web catalogue (stock or tasks): Supprimer l'article.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the stock item'**
+  String get deleteArticle;
+
+  /// Web catalogue (stock or tasks): L'article, ses fournisseurs et ses mouvements disparaissent des écrans.
+  ///
+  /// In en, this message translates to:
+  /// **'The stock item, its suppliers and its movements disappear from the screens.'**
+  String get deleteArticleBody;
+
+  /// Web catalogue (stock or tasks): Stock bas.
+  ///
+  /// In en, this message translates to:
+  /// **'Low stock'**
+  String get articleLowStock;
+
+  /// Web catalogue (stock or tasks): Seuil.
+  ///
+  /// In en, this message translates to:
+  /// **'Threshold'**
+  String get articleThreshold;
+
+  /// Web catalogue (stock or tasks): Le stock est signalé quand il descend à cette quantité ou en dessous.
+  ///
+  /// In en, this message translates to:
+  /// **'The stock is flagged when it falls to this quantity or below.'**
+  String get articleThresholdHelp;
+
+  /// Web catalogue (stock or tasks): Prix unitaire.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit price'**
+  String get articleUnitPrice;
+
+  /// Web catalogue (stock or tasks): Ce que coûte une unité, pour prévoir le coût des tâches qui l'utilisent. The app names the currency of the home.
+  ///
+  /// In en, this message translates to:
+  /// **'What one unit costs, in {currency}, to plan the cost of the tasks that use it.'**
+  String articleUnitPriceHelp(String currency);
+
+  /// Web catalogue (stock or tasks): Référence fabricant.
+  ///
+  /// In en, this message translates to:
+  /// **'Manufacturer reference'**
+  String get articleReference;
+
+  /// Web catalogue (stock or tasks): Dimensions.
+  ///
+  /// In en, this message translates to:
+  /// **'Dimensions'**
+  String get articleDimensions;
+
+  /// Web catalogue (stock or tasks): Emplacement de rangement.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage location'**
+  String get articleStorage;
+
+  /// Web catalogue (stock or tasks): Par exemple : garage, deuxième étagère.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: garage, second shelf.'**
+  String get articleStorageHelp;
+
+  /// Web catalogue (stock or tasks): unité.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get articleUnit;
+
+  /// Web catalogue (stock or tasks): quelle unité.
+  ///
+  /// In en, this message translates to:
+  /// **'Which unit'**
+  String get articleUnitOther;
+
+  /// Web catalogue (stock or tasks): Seulement avec l'unité Autre. Exemple : sac.
+  ///
+  /// In en, this message translates to:
+  /// **'Only with the unit Other. Example: bag.'**
+  String get articleUnitOtherHelp;
+
+  /// Web catalogue (stock or tasks): Éléments compatibles.
+  ///
+  /// In en, this message translates to:
+  /// **'Compatible items'**
+  String get articleCompatible;
+
+  /// Web catalogue (stock or tasks): L'équipement concerné, par exemple la chaudière pour laquelle un filtre est fait.
+  ///
+  /// In en, this message translates to:
+  /// **'The equipment this fits, such as the boiler a filter is made for.'**
+  String get articleCompatibleHelp;
+
+  /// Web catalogue (stock or tasks): Aucun élément compatible choisi.
+  ///
+  /// In en, this message translates to:
+  /// **'No compatible item chosen.'**
+  String get articleNoCompatible;
+
+  /// Web catalogue (stock or tasks): Où il sert, en plus des pièces de l'équipement auquel il convient.
+  ///
+  /// In en, this message translates to:
+  /// **'Where it is used, besides the rooms of the equipment it fits.'**
+  String get articleRoomsHelp;
+
+  /// Web catalogue (stock or tasks): Demandé par des tâches.
+  ///
+  /// In en, this message translates to:
+  /// **'Needed by tasks'**
+  String get articleTasks;
+
+  /// The empty choice of the unit list (a dash on the web).
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get unitNone;
+
+  /// Web catalogue (stock or tasks): Pièce.
+  ///
+  /// In en, this message translates to:
+  /// **'Piece'**
+  String get unitPieceChoice;
+
+  /// Web catalogue (stock or tasks): Litre.
+  ///
+  /// In en, this message translates to:
+  /// **'Litre'**
+  String get unitLitreChoice;
+
+  /// Web catalogue (stock or tasks): Mètre.
+  ///
+  /// In en, this message translates to:
+  /// **'Metre'**
+  String get unitMetreChoice;
+
+  /// Web catalogue (stock or tasks): Kilogramme.
+  ///
+  /// In en, this message translates to:
+  /// **'Kilogram'**
+  String get unitKilogramChoice;
+
+  /// Web catalogue (stock or tasks): Rouleau.
+  ///
+  /// In en, this message translates to:
+  /// **'Roll'**
+  String get unitRollChoice;
+
+  /// Web catalogue (stock or tasks): Boîte.
+  ///
+  /// In en, this message translates to:
+  /// **'Box'**
+  String get unitBoxChoice;
+
+  /// Web catalogue (stock or tasks): Autre.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get unitOtherChoice;
+
+  /// Unit after a quantity. Web catalogue (stock or tasks): pièce / pièces.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{piece} other{pieces}}'**
+  String unitPiece(int count);
+
+  /// Unit after a quantity. Web catalogue (stock or tasks): litre / litres.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{litre} other{litres}}'**
+  String unitLitre(int count);
+
+  /// Unit after a quantity. Web catalogue (stock or tasks): mètre / mètres.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{metre} other{metres}}'**
+  String unitMetre(int count);
+
+  /// Unit after a quantity. Web catalogue (stock or tasks): kilogramme / kilogrammes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{kilogram} other{kilograms}}'**
+  String unitKilogram(int count);
+
+  /// Unit after a quantity. Web catalogue (stock or tasks): rouleau / rouleaux.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{roll} other{rolls}}'**
+  String unitRoll(int count);
+
+  /// Unit after a quantity. Web catalogue (stock or tasks): boîte / boîtes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{box} other{boxes}}'**
+  String unitBox(int count);
+
+  /// Web catalogue (stock or tasks): Enregistrer un mouvement.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a movement'**
+  String get recordMovement;
+
+  /// Web catalogue (stock or tasks): Quantité.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get movementQuantity;
+
+  /// Web catalogue (stock or tasks): Date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get movementDate;
+
+  /// Web catalogue (stock or tasks): Note.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get movementNote;
+
+  /// Web catalogue (stock or tasks): Ajouter au stock.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to stock'**
+  String get movementEntryAction;
+
+  /// Web catalogue (stock or tasks): Sortir du stock.
+  ///
+  /// In en, this message translates to:
+  /// **'Take from stock'**
+  String get movementExitAction;
+
+  /// Web catalogue (stock or tasks): Fixer le compte.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the count'**
+  String get movementInventoryAction;
+
+  /// Web catalogue (stock or tasks): « Fixer le compte » indique ce que vous avez compté sur l'étagère ; le stock est corrigé en conséquence.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the count states what you counted on the shelf; the stock is corrected to it.'**
+  String get movementHelp;
+
+  /// Web catalogue (stock or tasks): Mouvement enregistré.
+  ///
+  /// In en, this message translates to:
+  /// **'Movement recorded.'**
+  String get movementRecorded;
+
+  /// Web catalogue (stock or tasks): Mouvements.
+  ///
+  /// In en, this message translates to:
+  /// **'Movements'**
+  String get movements;
+
+  /// Web catalogue (stock or tasks): Aucun mouvement pour l'instant.
+  ///
+  /// In en, this message translates to:
+  /// **'No movement yet.'**
+  String get movementsEmpty;
+
+  /// Web catalogue (stock or tasks): Entrée.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry'**
+  String get movementEntry;
+
+  /// Web catalogue (stock or tasks): Sortie.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get movementExit;
+
+  /// Web catalogue (stock or tasks): Inventaire.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get movementInventory;
+
+  /// Web catalogue (stock or tasks): compté : %(count)s.
+  ///
+  /// In en, this message translates to:
+  /// **'counted {count}'**
+  String movementCounted(String count);
+
+  /// Web catalogue (stock or tasks): Fournisseurs.
+  ///
+  /// In en, this message translates to:
+  /// **'Suppliers'**
+  String get suppliers;
+
+  /// Web catalogue (stock or tasks): Aucun fournisseur pour l'instant.
+  ///
+  /// In en, this message translates to:
+  /// **'No supplier yet.'**
+  String get suppliersEmpty;
+
+  /// Web catalogue (stock or tasks): Ajouter un fournisseur.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a supplier'**
+  String get addSupplier;
+
+  /// Web catalogue (stock or tasks): Ajouter le fournisseur.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the supplier'**
+  String get addSupplierButton;
+
+  /// Web catalogue (stock or tasks): Modifier le fournisseur.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the supplier'**
+  String get editSupplier;
+
+  /// Label of the edit button of a supplier, with its name (the web adds it as hidden text).
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the supplier {name}'**
+  String editSupplierOf(String name);
+
+  /// Web catalogue (stock or tasks): Supprimer le fournisseur.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the supplier'**
+  String get deleteSupplier;
+
+  /// Web catalogue (stock or tasks): Le fournisseur disparaît de l'article.
+  ///
+  /// In en, this message translates to:
+  /// **'The supplier disappears from the stock item.'**
+  String get deleteSupplierBody;
+
+  /// Web catalogue (stock or tasks): Référence fournisseur.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier reference'**
+  String get supplierReference;
+
+  /// Web catalogue (stock or tasks): Dernier prix payé.
+  ///
+  /// In en, this message translates to:
+  /// **'Last price paid'**
+  String get supplierLastPrice;
+
+  /// Web catalogue (stock or tasks): Lien d'achat.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase link'**
+  String get supplierUrl;
+
+  /// Web catalogue (stock or tasks): Le prix est en %(currency)s, la devise du logement. Le lien est seulement enregistré : HouseCairn ne l'ouvre jamais.
+  ///
+  /// In en, this message translates to:
+  /// **'The price is in {currency}, the currency of the home. The link is only stored: Housecairn never opens it.'**
+  String supplierHelp(String currency);
+
+  /// Web catalogue (stock or tasks): Fournitures.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials'**
+  String get materials;
+
+  /// Web catalogue (stock or tasks): Aucun article demandé.
+  ///
+  /// In en, this message translates to:
+  /// **'No stock item needed.'**
+  String get materialsEmpty;
+
+  /// Web catalogue (stock or tasks): Marquer la tâche faite prend ces quantités dans le stock ; annuler les remet.
+  ///
+  /// In en, this message translates to:
+  /// **'Marking the task done takes these quantities from the stock; undoing puts them back.'**
+  String get materialsHelp;
+
+  /// Web catalogue (stock or tasks): demande %(needed)s · %(stocked)s en stock.
+  ///
+  /// In en, this message translates to:
+  /// **'needs {needed} · {stocked} in stock'**
+  String materialNeeds(String needed, String stocked);
+
+  /// Web catalogue (stock or tasks): Stock insuffisant.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough in stock'**
+  String get materialShort;
+
+  /// Web catalogue (stock or tasks): Article.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock item'**
+  String get materialArticle;
+
+  /// Web catalogue (stock or tasks): Ajouter l'article (task materials).
+  ///
+  /// In en, this message translates to:
+  /// **'Add the stock item'**
+  String get addMaterial;
+
+  /// Label of the button that removes an article from a task.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}'**
+  String removeMaterial(String name);
+
+  /// Shown on a task when the home has no stock item to choose.
+  ///
+  /// In en, this message translates to:
+  /// **'The stock of this home has no item yet: add one in Rooms, Stock.'**
+  String get materialsNoArticle;
+
+  /// Web catalogue (stock or tasks): Stock insuffisant, le stock est à zéro : %(list)s.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough in stock, the stock is at zero: {list}.'**
+  String stockShortAfterDone(String list);
+
+  /// Visible text of the button that removes an article from a task; its accessible label names the article (removeMaterial).
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
   /// Title of the first-start screen, above the three ways to use the app.
   ///
   /// In en, this message translates to:

@@ -445,3 +445,69 @@ class HcScreenList extends StatelessWidget {
     children: children,
   );
 }
+
+/// The tabs of a section (`components/tabs.html`, `.tabs-fit`): sister
+/// screens side by side, each a target of 48, the current one in bold with
+/// the accent line under it; a line under the whole bar.
+class HcTabs extends StatelessWidget {
+  const HcTabs({
+    super.key,
+    required this.labels,
+    required this.current,
+    required this.onSelect,
+  });
+
+  final List<String> labels;
+  final int current;
+  final ValueChanged<int> onSelect;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: HcSpace.s3),
+    child: DecoratedBox(
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: HcColors.border)),
+      ),
+      child: Row(
+        children: [
+          for (final (i, label) in labels.indexed)
+            Expanded(
+              child: Semantics(
+                selected: i == current,
+                button: true,
+                child: InkWell(
+                  onTap: i == current ? null : () => onSelect(i),
+                  child: Container(
+                    constraints: const BoxConstraints(
+                      minHeight: HcLayout.touchTargetLg,
+                    ),
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: HcSpace.s1,
+                      vertical: HcSpace.s2,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: i == current
+                              ? HcColors.accent
+                              : Colors.transparent,
+                          // 3 px on the web (`.tab`).
+                          width: HcComponent.borderWidth * 3,
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: i == current ? HcText.tabCurrent : HcText.tab,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    ),
+  );
+}

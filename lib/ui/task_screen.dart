@@ -13,6 +13,7 @@ import '../l10n/app_localizations.dart';
 import 'messages.dart';
 import 'parts.dart';
 import 'state.dart';
+import 'stock_screens.dart';
 
 /// Task (docs/spec.md, "Screens of v1"): a form where only the title is
 /// required; the repetition with a preview of the next five dates
@@ -413,6 +414,12 @@ class _TaskScreenState extends State<TaskScreen> {
                 ],
               ),
             ),
+            if (widget.taskId != null)
+              TaskMaterialsSection(
+                homeId: widget.homeId,
+                taskId: widget.taskId!,
+                writable: AppScope.of(context).current?.archivedAt == null,
+              ),
             if (next.isNotEmpty) ...[
               HcSectionHeading(l10n.taskNextDates),
               HcCardList(

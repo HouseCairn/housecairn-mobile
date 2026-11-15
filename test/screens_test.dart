@@ -55,6 +55,9 @@ const fixtureTexts = [
   'Second gutters',
   'Fix the tap',
   'Put the bins out',
+  // The stock of the fixture (lot 3a), in the materials of a task.
+  'Main filter',
+  'Second filter',
   'EUR',
   'CHF',
   '1',

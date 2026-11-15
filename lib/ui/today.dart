@@ -11,6 +11,7 @@ import '../l10n/app_localizations.dart';
 import 'home_selector.dart';
 import 'messages.dart';
 import 'state.dart';
+import 'stock_screens.dart';
 import 'task_screen.dart';
 
 /// Today (docs/spec.md, "Screens of v1"): overdue, today, coming up within a
@@ -75,13 +76,24 @@ class _TodayScreenState extends State<TodayScreen> {
   Future<void> _done(TodayEntry entry) async {
     final l10n = AppLocalizations.of(context);
     final repository = AppScope.of(context).repository;
-    var closed = false;
+    Closing? closed;
     await _run(() async {
-      await repository.complete(entry.occurrence.id);
-      closed = true;
+      closed = await repository.complete(entry.occurrence.id);
     });
-    if (closed && mounted) {
-      _offerUndo(l10n.doneMessage(entry.task.title), entry.occurrence.id);
+    if (closed != null && mounted) {
+      final short = closed!.short;
+      _offerUndo(
+        [
+          l10n.doneMessage(entry.task.title),
+          if (short.isNotEmpty)
+            shortageMessage(
+              l10n,
+              Localizations.localeOf(context).toLanguageTag(),
+              short,
+            ),
+        ].join(' '),
+        entry.occurrence.id,
+      );
     }
   }
 

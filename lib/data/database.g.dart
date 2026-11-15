@@ -5726,6 +5726,4149 @@ class OccurrencesCompanion extends UpdateCompanion<OccurrenceRow> {
   }
 }
 
+class $ArticlesTable extends Articles
+    with TableInfo<$ArticlesTable, ArticleRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ArticlesTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> id =
+      GeneratedColumn<Uint8List>(
+        'id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($ArticlesTable.$converterid);
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($ArticlesTable.$converterhomeId);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _manufacturerReferenceMeta =
+      const VerificationMeta('manufacturerReference');
+  @override
+  late final GeneratedColumn<String> manufacturerReference =
+      GeneratedColumn<String>(
+        'manufacturer_reference',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
+  static const VerificationMeta _dimensionsMeta = const VerificationMeta(
+    'dimensions',
+  );
+  @override
+  late final GeneratedColumn<String> dimensions = GeneratedColumn<String>(
+    'dimensions',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _storageLocationMeta = const VerificationMeta(
+    'storageLocation',
+  );
+  @override
+  late final GeneratedColumn<String> storageLocation = GeneratedColumn<String>(
+    'storage_location',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _unitOtherMeta = const VerificationMeta(
+    'unitOther',
+  );
+  @override
+  late final GeneratedColumn<String> unitOther = GeneratedColumn<String>(
+    'unit_other',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _thresholdMeta = const VerificationMeta(
+    'threshold',
+  );
+  @override
+  late final GeneratedColumn<String> threshold = GeneratedColumn<String>(
+    'threshold',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _unitPriceMeta = const VerificationMeta(
+    'unitPrice',
+  );
+  @override
+  late final GeneratedColumn<String> unitPrice = GeneratedColumn<String>(
+    'unit_price',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    name,
+    manufacturerReference,
+    dimensions,
+    storageLocation,
+    unit,
+    unitOther,
+    threshold,
+    unitPrice,
+    notes,
+    label,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'articles';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ArticleRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('manufacturer_reference')) {
+      context.handle(
+        _manufacturerReferenceMeta,
+        manufacturerReference.isAcceptableOrUnknown(
+          data['manufacturer_reference']!,
+          _manufacturerReferenceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('dimensions')) {
+      context.handle(
+        _dimensionsMeta,
+        dimensions.isAcceptableOrUnknown(data['dimensions']!, _dimensionsMeta),
+      );
+    }
+    if (data.containsKey('storage_location')) {
+      context.handle(
+        _storageLocationMeta,
+        storageLocation.isAcceptableOrUnknown(
+          data['storage_location']!,
+          _storageLocationMeta,
+        ),
+      );
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    }
+    if (data.containsKey('unit_other')) {
+      context.handle(
+        _unitOtherMeta,
+        unitOther.isAcceptableOrUnknown(data['unit_other']!, _unitOtherMeta),
+      );
+    }
+    if (data.containsKey('threshold')) {
+      context.handle(
+        _thresholdMeta,
+        threshold.isAcceptableOrUnknown(data['threshold']!, _thresholdMeta),
+      );
+    }
+    if (data.containsKey('unit_price')) {
+      context.handle(
+        _unitPriceMeta,
+        unitPrice.isAcceptableOrUnknown(data['unit_price']!, _unitPriceMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ArticleRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ArticleRow(
+      id: $ArticlesTable.$converterid.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}id'],
+        )!,
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      homeId: $ArticlesTable.$converterhomeId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        )!,
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      manufacturerReference: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}manufacturer_reference'],
+      )!,
+      dimensions: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dimensions'],
+      )!,
+      storageLocation: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}storage_location'],
+      )!,
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      )!,
+      unitOther: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit_other'],
+      )!,
+      threshold: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}threshold'],
+      ),
+      unitPrice: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit_price'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      )!,
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      ),
+    );
+  }
+
+  @override
+  $ArticlesTable createAlias(String alias) {
+    return $ArticlesTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterid = const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+}
+
+class ArticleRow extends DataClass implements Insertable<ArticleRow> {
+  final String id;
+  final int createdAt;
+  final int updatedAt;
+  final int? deletedAt;
+  final String homeId;
+  final String name;
+  final String manufacturerReference;
+  final String dimensions;
+  final String storageLocation;
+  final String unit;
+  final String unitOther;
+  final String? threshold;
+  final String? unitPrice;
+  final String notes;
+  final String? label;
+  const ArticleRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.homeId,
+    required this.name,
+    required this.manufacturerReference,
+    required this.dimensions,
+    required this.storageLocation,
+    required this.unit,
+    required this.unitOther,
+    this.threshold,
+    this.unitPrice,
+    required this.notes,
+    this.label,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['id'] = Variable<Uint8List>($ArticlesTable.$converterid.toSql(id));
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    {
+      map['home_id'] = Variable<Uint8List>(
+        $ArticlesTable.$converterhomeId.toSql(homeId),
+      );
+    }
+    map['name'] = Variable<String>(name);
+    map['manufacturer_reference'] = Variable<String>(manufacturerReference);
+    map['dimensions'] = Variable<String>(dimensions);
+    map['storage_location'] = Variable<String>(storageLocation);
+    map['unit'] = Variable<String>(unit);
+    map['unit_other'] = Variable<String>(unitOther);
+    if (!nullToAbsent || threshold != null) {
+      map['threshold'] = Variable<String>(threshold);
+    }
+    if (!nullToAbsent || unitPrice != null) {
+      map['unit_price'] = Variable<String>(unitPrice);
+    }
+    map['notes'] = Variable<String>(notes);
+    if (!nullToAbsent || label != null) {
+      map['label'] = Variable<String>(label);
+    }
+    return map;
+  }
+
+  ArticlesCompanion toCompanion(bool nullToAbsent) {
+    return ArticlesCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      homeId: Value(homeId),
+      name: Value(name),
+      manufacturerReference: Value(manufacturerReference),
+      dimensions: Value(dimensions),
+      storageLocation: Value(storageLocation),
+      unit: Value(unit),
+      unitOther: Value(unitOther),
+      threshold: threshold == null && nullToAbsent
+          ? const Value.absent()
+          : Value(threshold),
+      unitPrice: unitPrice == null && nullToAbsent
+          ? const Value.absent()
+          : Value(unitPrice),
+      notes: Value(notes),
+      label: label == null && nullToAbsent
+          ? const Value.absent()
+          : Value(label),
+    );
+  }
+
+  factory ArticleRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ArticleRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      homeId: serializer.fromJson<String>(json['homeId']),
+      name: serializer.fromJson<String>(json['name']),
+      manufacturerReference: serializer.fromJson<String>(
+        json['manufacturerReference'],
+      ),
+      dimensions: serializer.fromJson<String>(json['dimensions']),
+      storageLocation: serializer.fromJson<String>(json['storageLocation']),
+      unit: serializer.fromJson<String>(json['unit']),
+      unitOther: serializer.fromJson<String>(json['unitOther']),
+      threshold: serializer.fromJson<String?>(json['threshold']),
+      unitPrice: serializer.fromJson<String?>(json['unitPrice']),
+      notes: serializer.fromJson<String>(json['notes']),
+      label: serializer.fromJson<String?>(json['label']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'homeId': serializer.toJson<String>(homeId),
+      'name': serializer.toJson<String>(name),
+      'manufacturerReference': serializer.toJson<String>(manufacturerReference),
+      'dimensions': serializer.toJson<String>(dimensions),
+      'storageLocation': serializer.toJson<String>(storageLocation),
+      'unit': serializer.toJson<String>(unit),
+      'unitOther': serializer.toJson<String>(unitOther),
+      'threshold': serializer.toJson<String?>(threshold),
+      'unitPrice': serializer.toJson<String?>(unitPrice),
+      'notes': serializer.toJson<String>(notes),
+      'label': serializer.toJson<String?>(label),
+    };
+  }
+
+  ArticleRow copyWith({
+    String? id,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? homeId,
+    String? name,
+    String? manufacturerReference,
+    String? dimensions,
+    String? storageLocation,
+    String? unit,
+    String? unitOther,
+    Value<String?> threshold = const Value.absent(),
+    Value<String?> unitPrice = const Value.absent(),
+    String? notes,
+    Value<String?> label = const Value.absent(),
+  }) => ArticleRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    homeId: homeId ?? this.homeId,
+    name: name ?? this.name,
+    manufacturerReference: manufacturerReference ?? this.manufacturerReference,
+    dimensions: dimensions ?? this.dimensions,
+    storageLocation: storageLocation ?? this.storageLocation,
+    unit: unit ?? this.unit,
+    unitOther: unitOther ?? this.unitOther,
+    threshold: threshold.present ? threshold.value : this.threshold,
+    unitPrice: unitPrice.present ? unitPrice.value : this.unitPrice,
+    notes: notes ?? this.notes,
+    label: label.present ? label.value : this.label,
+  );
+  ArticleRow copyWithCompanion(ArticlesCompanion data) {
+    return ArticleRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      name: data.name.present ? data.name.value : this.name,
+      manufacturerReference: data.manufacturerReference.present
+          ? data.manufacturerReference.value
+          : this.manufacturerReference,
+      dimensions: data.dimensions.present
+          ? data.dimensions.value
+          : this.dimensions,
+      storageLocation: data.storageLocation.present
+          ? data.storageLocation.value
+          : this.storageLocation,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      unitOther: data.unitOther.present ? data.unitOther.value : this.unitOther,
+      threshold: data.threshold.present ? data.threshold.value : this.threshold,
+      unitPrice: data.unitPrice.present ? data.unitPrice.value : this.unitPrice,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      label: data.label.present ? data.label.value : this.label,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArticleRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('name: $name, ')
+          ..write('manufacturerReference: $manufacturerReference, ')
+          ..write('dimensions: $dimensions, ')
+          ..write('storageLocation: $storageLocation, ')
+          ..write('unit: $unit, ')
+          ..write('unitOther: $unitOther, ')
+          ..write('threshold: $threshold, ')
+          ..write('unitPrice: $unitPrice, ')
+          ..write('notes: $notes, ')
+          ..write('label: $label')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    name,
+    manufacturerReference,
+    dimensions,
+    storageLocation,
+    unit,
+    unitOther,
+    threshold,
+    unitPrice,
+    notes,
+    label,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ArticleRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.homeId == this.homeId &&
+          other.name == this.name &&
+          other.manufacturerReference == this.manufacturerReference &&
+          other.dimensions == this.dimensions &&
+          other.storageLocation == this.storageLocation &&
+          other.unit == this.unit &&
+          other.unitOther == this.unitOther &&
+          other.threshold == this.threshold &&
+          other.unitPrice == this.unitPrice &&
+          other.notes == this.notes &&
+          other.label == this.label);
+}
+
+class ArticlesCompanion extends UpdateCompanion<ArticleRow> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> homeId;
+  final Value<String> name;
+  final Value<String> manufacturerReference;
+  final Value<String> dimensions;
+  final Value<String> storageLocation;
+  final Value<String> unit;
+  final Value<String> unitOther;
+  final Value<String?> threshold;
+  final Value<String?> unitPrice;
+  final Value<String> notes;
+  final Value<String?> label;
+  final Value<int> rowid;
+  const ArticlesCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.manufacturerReference = const Value.absent(),
+    this.dimensions = const Value.absent(),
+    this.storageLocation = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.unitOther = const Value.absent(),
+    this.threshold = const Value.absent(),
+    this.unitPrice = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.label = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ArticlesCompanion.insert({
+    required String id,
+    required int createdAt,
+    required int updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String homeId,
+    required String name,
+    this.manufacturerReference = const Value.absent(),
+    this.dimensions = const Value.absent(),
+    this.storageLocation = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.unitOther = const Value.absent(),
+    this.threshold = const Value.absent(),
+    this.unitPrice = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.label = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       homeId = Value(homeId),
+       name = Value(name);
+  static Insertable<ArticleRow> custom({
+    Expression<Uint8List>? id,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<Uint8List>? homeId,
+    Expression<String>? name,
+    Expression<String>? manufacturerReference,
+    Expression<String>? dimensions,
+    Expression<String>? storageLocation,
+    Expression<String>? unit,
+    Expression<String>? unitOther,
+    Expression<String>? threshold,
+    Expression<String>? unitPrice,
+    Expression<String>? notes,
+    Expression<String>? label,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (homeId != null) 'home_id': homeId,
+      if (name != null) 'name': name,
+      if (manufacturerReference != null)
+        'manufacturer_reference': manufacturerReference,
+      if (dimensions != null) 'dimensions': dimensions,
+      if (storageLocation != null) 'storage_location': storageLocation,
+      if (unit != null) 'unit': unit,
+      if (unitOther != null) 'unit_other': unitOther,
+      if (threshold != null) 'threshold': threshold,
+      if (unitPrice != null) 'unit_price': unitPrice,
+      if (notes != null) 'notes': notes,
+      if (label != null) 'label': label,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ArticlesCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? homeId,
+    Value<String>? name,
+    Value<String>? manufacturerReference,
+    Value<String>? dimensions,
+    Value<String>? storageLocation,
+    Value<String>? unit,
+    Value<String>? unitOther,
+    Value<String?>? threshold,
+    Value<String?>? unitPrice,
+    Value<String>? notes,
+    Value<String?>? label,
+    Value<int>? rowid,
+  }) {
+    return ArticlesCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      homeId: homeId ?? this.homeId,
+      name: name ?? this.name,
+      manufacturerReference:
+          manufacturerReference ?? this.manufacturerReference,
+      dimensions: dimensions ?? this.dimensions,
+      storageLocation: storageLocation ?? this.storageLocation,
+      unit: unit ?? this.unit,
+      unitOther: unitOther ?? this.unitOther,
+      threshold: threshold ?? this.threshold,
+      unitPrice: unitPrice ?? this.unitPrice,
+      notes: notes ?? this.notes,
+      label: label ?? this.label,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<Uint8List>(
+        $ArticlesTable.$converterid.toSql(id.value),
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $ArticlesTable.$converterhomeId.toSql(homeId.value),
+      );
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (manufacturerReference.present) {
+      map['manufacturer_reference'] = Variable<String>(
+        manufacturerReference.value,
+      );
+    }
+    if (dimensions.present) {
+      map['dimensions'] = Variable<String>(dimensions.value);
+    }
+    if (storageLocation.present) {
+      map['storage_location'] = Variable<String>(storageLocation.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (unitOther.present) {
+      map['unit_other'] = Variable<String>(unitOther.value);
+    }
+    if (threshold.present) {
+      map['threshold'] = Variable<String>(threshold.value);
+    }
+    if (unitPrice.present) {
+      map['unit_price'] = Variable<String>(unitPrice.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArticlesCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('name: $name, ')
+          ..write('manufacturerReference: $manufacturerReference, ')
+          ..write('dimensions: $dimensions, ')
+          ..write('storageLocation: $storageLocation, ')
+          ..write('unit: $unit, ')
+          ..write('unitOther: $unitOther, ')
+          ..write('threshold: $threshold, ')
+          ..write('unitPrice: $unitPrice, ')
+          ..write('notes: $notes, ')
+          ..write('label: $label, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ArticleRoomsTable extends ArticleRooms
+    with TableInfo<$ArticleRoomsTable, ArticleRoomRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ArticleRoomsTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> id =
+      GeneratedColumn<Uint8List>(
+        'id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($ArticleRoomsTable.$converterid);
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($ArticleRoomsTable.$converterhomeId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> articleId =
+      GeneratedColumn<Uint8List>(
+        'article_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($ArticleRoomsTable.$converterarticleId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> roomId =
+      GeneratedColumn<Uint8List>(
+        'room_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($ArticleRoomsTable.$converterroomId);
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    articleId,
+    roomId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'article_rooms';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ArticleRoomRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ArticleRoomRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ArticleRoomRow(
+      id: $ArticleRoomsTable.$converterid.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}id'],
+        )!,
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      homeId: $ArticleRoomsTable.$converterhomeId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        )!,
+      ),
+      articleId: $ArticleRoomsTable.$converterarticleId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}article_id'],
+        )!,
+      ),
+      roomId: $ArticleRoomsTable.$converterroomId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}room_id'],
+        )!,
+      ),
+    );
+  }
+
+  @override
+  $ArticleRoomsTable createAlias(String alias) {
+    return $ArticleRoomsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterid = const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterarticleId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterroomId =
+      const UuidConverter();
+}
+
+class ArticleRoomRow extends DataClass implements Insertable<ArticleRoomRow> {
+  final String id;
+  final int createdAt;
+  final int updatedAt;
+  final int? deletedAt;
+  final String homeId;
+  final String articleId;
+  final String roomId;
+  const ArticleRoomRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.homeId,
+    required this.articleId,
+    required this.roomId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['id'] = Variable<Uint8List>(
+        $ArticleRoomsTable.$converterid.toSql(id),
+      );
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    {
+      map['home_id'] = Variable<Uint8List>(
+        $ArticleRoomsTable.$converterhomeId.toSql(homeId),
+      );
+    }
+    {
+      map['article_id'] = Variable<Uint8List>(
+        $ArticleRoomsTable.$converterarticleId.toSql(articleId),
+      );
+    }
+    {
+      map['room_id'] = Variable<Uint8List>(
+        $ArticleRoomsTable.$converterroomId.toSql(roomId),
+      );
+    }
+    return map;
+  }
+
+  ArticleRoomsCompanion toCompanion(bool nullToAbsent) {
+    return ArticleRoomsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      homeId: Value(homeId),
+      articleId: Value(articleId),
+      roomId: Value(roomId),
+    );
+  }
+
+  factory ArticleRoomRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ArticleRoomRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      homeId: serializer.fromJson<String>(json['homeId']),
+      articleId: serializer.fromJson<String>(json['articleId']),
+      roomId: serializer.fromJson<String>(json['roomId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'homeId': serializer.toJson<String>(homeId),
+      'articleId': serializer.toJson<String>(articleId),
+      'roomId': serializer.toJson<String>(roomId),
+    };
+  }
+
+  ArticleRoomRow copyWith({
+    String? id,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? homeId,
+    String? articleId,
+    String? roomId,
+  }) => ArticleRoomRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    homeId: homeId ?? this.homeId,
+    articleId: articleId ?? this.articleId,
+    roomId: roomId ?? this.roomId,
+  );
+  ArticleRoomRow copyWithCompanion(ArticleRoomsCompanion data) {
+    return ArticleRoomRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      articleId: data.articleId.present ? data.articleId.value : this.articleId,
+      roomId: data.roomId.present ? data.roomId.value : this.roomId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArticleRoomRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('articleId: $articleId, ')
+          ..write('roomId: $roomId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    articleId,
+    roomId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ArticleRoomRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.homeId == this.homeId &&
+          other.articleId == this.articleId &&
+          other.roomId == this.roomId);
+}
+
+class ArticleRoomsCompanion extends UpdateCompanion<ArticleRoomRow> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> homeId;
+  final Value<String> articleId;
+  final Value<String> roomId;
+  final Value<int> rowid;
+  const ArticleRoomsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.articleId = const Value.absent(),
+    this.roomId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ArticleRoomsCompanion.insert({
+    required String id,
+    required int createdAt,
+    required int updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String homeId,
+    required String articleId,
+    required String roomId,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       homeId = Value(homeId),
+       articleId = Value(articleId),
+       roomId = Value(roomId);
+  static Insertable<ArticleRoomRow> custom({
+    Expression<Uint8List>? id,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<Uint8List>? homeId,
+    Expression<Uint8List>? articleId,
+    Expression<Uint8List>? roomId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (homeId != null) 'home_id': homeId,
+      if (articleId != null) 'article_id': articleId,
+      if (roomId != null) 'room_id': roomId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ArticleRoomsCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? homeId,
+    Value<String>? articleId,
+    Value<String>? roomId,
+    Value<int>? rowid,
+  }) {
+    return ArticleRoomsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      homeId: homeId ?? this.homeId,
+      articleId: articleId ?? this.articleId,
+      roomId: roomId ?? this.roomId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<Uint8List>(
+        $ArticleRoomsTable.$converterid.toSql(id.value),
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $ArticleRoomsTable.$converterhomeId.toSql(homeId.value),
+      );
+    }
+    if (articleId.present) {
+      map['article_id'] = Variable<Uint8List>(
+        $ArticleRoomsTable.$converterarticleId.toSql(articleId.value),
+      );
+    }
+    if (roomId.present) {
+      map['room_id'] = Variable<Uint8List>(
+        $ArticleRoomsTable.$converterroomId.toSql(roomId.value),
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArticleRoomsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('articleId: $articleId, ')
+          ..write('roomId: $roomId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ArticleItemsTable extends ArticleItems
+    with TableInfo<$ArticleItemsTable, ArticleItemRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ArticleItemsTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> id =
+      GeneratedColumn<Uint8List>(
+        'id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($ArticleItemsTable.$converterid);
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($ArticleItemsTable.$converterhomeId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> articleId =
+      GeneratedColumn<Uint8List>(
+        'article_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($ArticleItemsTable.$converterarticleId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> itemId =
+      GeneratedColumn<Uint8List>(
+        'item_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($ArticleItemsTable.$converteritemId);
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    articleId,
+    itemId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'article_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ArticleItemRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ArticleItemRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ArticleItemRow(
+      id: $ArticleItemsTable.$converterid.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}id'],
+        )!,
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      homeId: $ArticleItemsTable.$converterhomeId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        )!,
+      ),
+      articleId: $ArticleItemsTable.$converterarticleId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}article_id'],
+        )!,
+      ),
+      itemId: $ArticleItemsTable.$converteritemId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}item_id'],
+        )!,
+      ),
+    );
+  }
+
+  @override
+  $ArticleItemsTable createAlias(String alias) {
+    return $ArticleItemsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterid = const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterarticleId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converteritemId =
+      const UuidConverter();
+}
+
+class ArticleItemRow extends DataClass implements Insertable<ArticleItemRow> {
+  final String id;
+  final int createdAt;
+  final int updatedAt;
+  final int? deletedAt;
+  final String homeId;
+  final String articleId;
+  final String itemId;
+  const ArticleItemRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.homeId,
+    required this.articleId,
+    required this.itemId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['id'] = Variable<Uint8List>(
+        $ArticleItemsTable.$converterid.toSql(id),
+      );
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    {
+      map['home_id'] = Variable<Uint8List>(
+        $ArticleItemsTable.$converterhomeId.toSql(homeId),
+      );
+    }
+    {
+      map['article_id'] = Variable<Uint8List>(
+        $ArticleItemsTable.$converterarticleId.toSql(articleId),
+      );
+    }
+    {
+      map['item_id'] = Variable<Uint8List>(
+        $ArticleItemsTable.$converteritemId.toSql(itemId),
+      );
+    }
+    return map;
+  }
+
+  ArticleItemsCompanion toCompanion(bool nullToAbsent) {
+    return ArticleItemsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      homeId: Value(homeId),
+      articleId: Value(articleId),
+      itemId: Value(itemId),
+    );
+  }
+
+  factory ArticleItemRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ArticleItemRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      homeId: serializer.fromJson<String>(json['homeId']),
+      articleId: serializer.fromJson<String>(json['articleId']),
+      itemId: serializer.fromJson<String>(json['itemId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'homeId': serializer.toJson<String>(homeId),
+      'articleId': serializer.toJson<String>(articleId),
+      'itemId': serializer.toJson<String>(itemId),
+    };
+  }
+
+  ArticleItemRow copyWith({
+    String? id,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? homeId,
+    String? articleId,
+    String? itemId,
+  }) => ArticleItemRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    homeId: homeId ?? this.homeId,
+    articleId: articleId ?? this.articleId,
+    itemId: itemId ?? this.itemId,
+  );
+  ArticleItemRow copyWithCompanion(ArticleItemsCompanion data) {
+    return ArticleItemRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      articleId: data.articleId.present ? data.articleId.value : this.articleId,
+      itemId: data.itemId.present ? data.itemId.value : this.itemId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArticleItemRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('articleId: $articleId, ')
+          ..write('itemId: $itemId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    articleId,
+    itemId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ArticleItemRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.homeId == this.homeId &&
+          other.articleId == this.articleId &&
+          other.itemId == this.itemId);
+}
+
+class ArticleItemsCompanion extends UpdateCompanion<ArticleItemRow> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> homeId;
+  final Value<String> articleId;
+  final Value<String> itemId;
+  final Value<int> rowid;
+  const ArticleItemsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.articleId = const Value.absent(),
+    this.itemId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ArticleItemsCompanion.insert({
+    required String id,
+    required int createdAt,
+    required int updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String homeId,
+    required String articleId,
+    required String itemId,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       homeId = Value(homeId),
+       articleId = Value(articleId),
+       itemId = Value(itemId);
+  static Insertable<ArticleItemRow> custom({
+    Expression<Uint8List>? id,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<Uint8List>? homeId,
+    Expression<Uint8List>? articleId,
+    Expression<Uint8List>? itemId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (homeId != null) 'home_id': homeId,
+      if (articleId != null) 'article_id': articleId,
+      if (itemId != null) 'item_id': itemId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ArticleItemsCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? homeId,
+    Value<String>? articleId,
+    Value<String>? itemId,
+    Value<int>? rowid,
+  }) {
+    return ArticleItemsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      homeId: homeId ?? this.homeId,
+      articleId: articleId ?? this.articleId,
+      itemId: itemId ?? this.itemId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<Uint8List>(
+        $ArticleItemsTable.$converterid.toSql(id.value),
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $ArticleItemsTable.$converterhomeId.toSql(homeId.value),
+      );
+    }
+    if (articleId.present) {
+      map['article_id'] = Variable<Uint8List>(
+        $ArticleItemsTable.$converterarticleId.toSql(articleId.value),
+      );
+    }
+    if (itemId.present) {
+      map['item_id'] = Variable<Uint8List>(
+        $ArticleItemsTable.$converteritemId.toSql(itemId.value),
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArticleItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('articleId: $articleId, ')
+          ..write('itemId: $itemId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SuppliersTable extends Suppliers
+    with TableInfo<$SuppliersTable, SupplierRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SuppliersTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> id =
+      GeneratedColumn<Uint8List>(
+        'id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($SuppliersTable.$converterid);
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($SuppliersTable.$converterhomeId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> articleId =
+      GeneratedColumn<Uint8List>(
+        'article_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($SuppliersTable.$converterarticleId);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _referenceMeta = const VerificationMeta(
+    'reference',
+  );
+  @override
+  late final GeneratedColumn<String> reference = GeneratedColumn<String>(
+    'reference',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _urlMeta = const VerificationMeta('url');
+  @override
+  late final GeneratedColumn<String> url = GeneratedColumn<String>(
+    'url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _lastPriceMeta = const VerificationMeta(
+    'lastPrice',
+  );
+  @override
+  late final GeneratedColumn<String> lastPrice = GeneratedColumn<String>(
+    'last_price',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    articleId,
+    name,
+    reference,
+    url,
+    lastPrice,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'suppliers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SupplierRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('reference')) {
+      context.handle(
+        _referenceMeta,
+        reference.isAcceptableOrUnknown(data['reference']!, _referenceMeta),
+      );
+    }
+    if (data.containsKey('url')) {
+      context.handle(
+        _urlMeta,
+        url.isAcceptableOrUnknown(data['url']!, _urlMeta),
+      );
+    }
+    if (data.containsKey('last_price')) {
+      context.handle(
+        _lastPriceMeta,
+        lastPrice.isAcceptableOrUnknown(data['last_price']!, _lastPriceMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SupplierRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SupplierRow(
+      id: $SuppliersTable.$converterid.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}id'],
+        )!,
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      homeId: $SuppliersTable.$converterhomeId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        )!,
+      ),
+      articleId: $SuppliersTable.$converterarticleId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}article_id'],
+        )!,
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      reference: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reference'],
+      )!,
+      url: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}url'],
+      )!,
+      lastPrice: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_price'],
+      ),
+    );
+  }
+
+  @override
+  $SuppliersTable createAlias(String alias) {
+    return $SuppliersTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterid = const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterarticleId =
+      const UuidConverter();
+}
+
+class SupplierRow extends DataClass implements Insertable<SupplierRow> {
+  final String id;
+  final int createdAt;
+  final int updatedAt;
+  final int? deletedAt;
+  final String homeId;
+  final String articleId;
+  final String name;
+  final String reference;
+  final String url;
+  final String? lastPrice;
+  const SupplierRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.homeId,
+    required this.articleId,
+    required this.name,
+    required this.reference,
+    required this.url,
+    this.lastPrice,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['id'] = Variable<Uint8List>($SuppliersTable.$converterid.toSql(id));
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    {
+      map['home_id'] = Variable<Uint8List>(
+        $SuppliersTable.$converterhomeId.toSql(homeId),
+      );
+    }
+    {
+      map['article_id'] = Variable<Uint8List>(
+        $SuppliersTable.$converterarticleId.toSql(articleId),
+      );
+    }
+    map['name'] = Variable<String>(name);
+    map['reference'] = Variable<String>(reference);
+    map['url'] = Variable<String>(url);
+    if (!nullToAbsent || lastPrice != null) {
+      map['last_price'] = Variable<String>(lastPrice);
+    }
+    return map;
+  }
+
+  SuppliersCompanion toCompanion(bool nullToAbsent) {
+    return SuppliersCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      homeId: Value(homeId),
+      articleId: Value(articleId),
+      name: Value(name),
+      reference: Value(reference),
+      url: Value(url),
+      lastPrice: lastPrice == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastPrice),
+    );
+  }
+
+  factory SupplierRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SupplierRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      homeId: serializer.fromJson<String>(json['homeId']),
+      articleId: serializer.fromJson<String>(json['articleId']),
+      name: serializer.fromJson<String>(json['name']),
+      reference: serializer.fromJson<String>(json['reference']),
+      url: serializer.fromJson<String>(json['url']),
+      lastPrice: serializer.fromJson<String?>(json['lastPrice']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'homeId': serializer.toJson<String>(homeId),
+      'articleId': serializer.toJson<String>(articleId),
+      'name': serializer.toJson<String>(name),
+      'reference': serializer.toJson<String>(reference),
+      'url': serializer.toJson<String>(url),
+      'lastPrice': serializer.toJson<String?>(lastPrice),
+    };
+  }
+
+  SupplierRow copyWith({
+    String? id,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? homeId,
+    String? articleId,
+    String? name,
+    String? reference,
+    String? url,
+    Value<String?> lastPrice = const Value.absent(),
+  }) => SupplierRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    homeId: homeId ?? this.homeId,
+    articleId: articleId ?? this.articleId,
+    name: name ?? this.name,
+    reference: reference ?? this.reference,
+    url: url ?? this.url,
+    lastPrice: lastPrice.present ? lastPrice.value : this.lastPrice,
+  );
+  SupplierRow copyWithCompanion(SuppliersCompanion data) {
+    return SupplierRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      articleId: data.articleId.present ? data.articleId.value : this.articleId,
+      name: data.name.present ? data.name.value : this.name,
+      reference: data.reference.present ? data.reference.value : this.reference,
+      url: data.url.present ? data.url.value : this.url,
+      lastPrice: data.lastPrice.present ? data.lastPrice.value : this.lastPrice,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SupplierRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('articleId: $articleId, ')
+          ..write('name: $name, ')
+          ..write('reference: $reference, ')
+          ..write('url: $url, ')
+          ..write('lastPrice: $lastPrice')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    articleId,
+    name,
+    reference,
+    url,
+    lastPrice,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SupplierRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.homeId == this.homeId &&
+          other.articleId == this.articleId &&
+          other.name == this.name &&
+          other.reference == this.reference &&
+          other.url == this.url &&
+          other.lastPrice == this.lastPrice);
+}
+
+class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> homeId;
+  final Value<String> articleId;
+  final Value<String> name;
+  final Value<String> reference;
+  final Value<String> url;
+  final Value<String?> lastPrice;
+  final Value<int> rowid;
+  const SuppliersCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.articleId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.reference = const Value.absent(),
+    this.url = const Value.absent(),
+    this.lastPrice = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SuppliersCompanion.insert({
+    required String id,
+    required int createdAt,
+    required int updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String homeId,
+    required String articleId,
+    required String name,
+    this.reference = const Value.absent(),
+    this.url = const Value.absent(),
+    this.lastPrice = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       homeId = Value(homeId),
+       articleId = Value(articleId),
+       name = Value(name);
+  static Insertable<SupplierRow> custom({
+    Expression<Uint8List>? id,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<Uint8List>? homeId,
+    Expression<Uint8List>? articleId,
+    Expression<String>? name,
+    Expression<String>? reference,
+    Expression<String>? url,
+    Expression<String>? lastPrice,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (homeId != null) 'home_id': homeId,
+      if (articleId != null) 'article_id': articleId,
+      if (name != null) 'name': name,
+      if (reference != null) 'reference': reference,
+      if (url != null) 'url': url,
+      if (lastPrice != null) 'last_price': lastPrice,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SuppliersCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? homeId,
+    Value<String>? articleId,
+    Value<String>? name,
+    Value<String>? reference,
+    Value<String>? url,
+    Value<String?>? lastPrice,
+    Value<int>? rowid,
+  }) {
+    return SuppliersCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      homeId: homeId ?? this.homeId,
+      articleId: articleId ?? this.articleId,
+      name: name ?? this.name,
+      reference: reference ?? this.reference,
+      url: url ?? this.url,
+      lastPrice: lastPrice ?? this.lastPrice,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<Uint8List>(
+        $SuppliersTable.$converterid.toSql(id.value),
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $SuppliersTable.$converterhomeId.toSql(homeId.value),
+      );
+    }
+    if (articleId.present) {
+      map['article_id'] = Variable<Uint8List>(
+        $SuppliersTable.$converterarticleId.toSql(articleId.value),
+      );
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (reference.present) {
+      map['reference'] = Variable<String>(reference.value);
+    }
+    if (url.present) {
+      map['url'] = Variable<String>(url.value);
+    }
+    if (lastPrice.present) {
+      map['last_price'] = Variable<String>(lastPrice.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SuppliersCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('articleId: $articleId, ')
+          ..write('name: $name, ')
+          ..write('reference: $reference, ')
+          ..write('url: $url, ')
+          ..write('lastPrice: $lastPrice, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MovementsTable extends Movements
+    with TableInfo<$MovementsTable, MovementRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MovementsTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> id =
+      GeneratedColumn<Uint8List>(
+        'id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($MovementsTable.$converterid);
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($MovementsTable.$converterhomeId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> articleId =
+      GeneratedColumn<Uint8List>(
+        'article_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($MovementsTable.$converterarticleId);
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<String> quantity = GeneratedColumn<String>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _occurredOnMeta = const VerificationMeta(
+    'occurredOn',
+  );
+  @override
+  late final GeneratedColumn<String> occurredOn = GeneratedColumn<String>(
+    'occurred_on',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String?, Uint8List> occurrenceId =
+      GeneratedColumn<Uint8List>(
+        'occurrence_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: false,
+      ).withConverter<String?>($MovementsTable.$converteroccurrenceIdn);
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    articleId,
+    kind,
+    quantity,
+    occurredOn,
+    note,
+    occurrenceId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'movements';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MovementRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_quantityMeta);
+    }
+    if (data.containsKey('occurred_on')) {
+      context.handle(
+        _occurredOnMeta,
+        occurredOn.isAcceptableOrUnknown(data['occurred_on']!, _occurredOnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_occurredOnMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MovementRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MovementRow(
+      id: $MovementsTable.$converterid.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}id'],
+        )!,
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      homeId: $MovementsTable.$converterhomeId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        )!,
+      ),
+      articleId: $MovementsTable.$converterarticleId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}article_id'],
+        )!,
+      ),
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quantity'],
+      )!,
+      occurredOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}occurred_on'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      )!,
+      occurrenceId: $MovementsTable.$converteroccurrenceIdn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}occurrence_id'],
+        ),
+      ),
+    );
+  }
+
+  @override
+  $MovementsTable createAlias(String alias) {
+    return $MovementsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterid = const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterarticleId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converteroccurrenceId =
+      const UuidConverter();
+  static TypeConverter<String?, Uint8List?> $converteroccurrenceIdn =
+      NullAwareTypeConverter.wrap($converteroccurrenceId);
+}
+
+class MovementRow extends DataClass implements Insertable<MovementRow> {
+  final String id;
+  final int createdAt;
+  final int updatedAt;
+  final int? deletedAt;
+  final String homeId;
+  final String articleId;
+  final String kind;
+  final String quantity;
+  final String occurredOn;
+  final String note;
+
+  /// The occurrence whose closing, or its undoing, wrote this line.
+  final String? occurrenceId;
+  const MovementRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.homeId,
+    required this.articleId,
+    required this.kind,
+    required this.quantity,
+    required this.occurredOn,
+    required this.note,
+    this.occurrenceId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['id'] = Variable<Uint8List>($MovementsTable.$converterid.toSql(id));
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    {
+      map['home_id'] = Variable<Uint8List>(
+        $MovementsTable.$converterhomeId.toSql(homeId),
+      );
+    }
+    {
+      map['article_id'] = Variable<Uint8List>(
+        $MovementsTable.$converterarticleId.toSql(articleId),
+      );
+    }
+    map['kind'] = Variable<String>(kind);
+    map['quantity'] = Variable<String>(quantity);
+    map['occurred_on'] = Variable<String>(occurredOn);
+    map['note'] = Variable<String>(note);
+    if (!nullToAbsent || occurrenceId != null) {
+      map['occurrence_id'] = Variable<Uint8List>(
+        $MovementsTable.$converteroccurrenceIdn.toSql(occurrenceId),
+      );
+    }
+    return map;
+  }
+
+  MovementsCompanion toCompanion(bool nullToAbsent) {
+    return MovementsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      homeId: Value(homeId),
+      articleId: Value(articleId),
+      kind: Value(kind),
+      quantity: Value(quantity),
+      occurredOn: Value(occurredOn),
+      note: Value(note),
+      occurrenceId: occurrenceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(occurrenceId),
+    );
+  }
+
+  factory MovementRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MovementRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      homeId: serializer.fromJson<String>(json['homeId']),
+      articleId: serializer.fromJson<String>(json['articleId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      quantity: serializer.fromJson<String>(json['quantity']),
+      occurredOn: serializer.fromJson<String>(json['occurredOn']),
+      note: serializer.fromJson<String>(json['note']),
+      occurrenceId: serializer.fromJson<String?>(json['occurrenceId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'homeId': serializer.toJson<String>(homeId),
+      'articleId': serializer.toJson<String>(articleId),
+      'kind': serializer.toJson<String>(kind),
+      'quantity': serializer.toJson<String>(quantity),
+      'occurredOn': serializer.toJson<String>(occurredOn),
+      'note': serializer.toJson<String>(note),
+      'occurrenceId': serializer.toJson<String?>(occurrenceId),
+    };
+  }
+
+  MovementRow copyWith({
+    String? id,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? homeId,
+    String? articleId,
+    String? kind,
+    String? quantity,
+    String? occurredOn,
+    String? note,
+    Value<String?> occurrenceId = const Value.absent(),
+  }) => MovementRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    homeId: homeId ?? this.homeId,
+    articleId: articleId ?? this.articleId,
+    kind: kind ?? this.kind,
+    quantity: quantity ?? this.quantity,
+    occurredOn: occurredOn ?? this.occurredOn,
+    note: note ?? this.note,
+    occurrenceId: occurrenceId.present ? occurrenceId.value : this.occurrenceId,
+  );
+  MovementRow copyWithCompanion(MovementsCompanion data) {
+    return MovementRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      articleId: data.articleId.present ? data.articleId.value : this.articleId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      occurredOn: data.occurredOn.present
+          ? data.occurredOn.value
+          : this.occurredOn,
+      note: data.note.present ? data.note.value : this.note,
+      occurrenceId: data.occurrenceId.present
+          ? data.occurrenceId.value
+          : this.occurrenceId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MovementRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('articleId: $articleId, ')
+          ..write('kind: $kind, ')
+          ..write('quantity: $quantity, ')
+          ..write('occurredOn: $occurredOn, ')
+          ..write('note: $note, ')
+          ..write('occurrenceId: $occurrenceId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    articleId,
+    kind,
+    quantity,
+    occurredOn,
+    note,
+    occurrenceId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MovementRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.homeId == this.homeId &&
+          other.articleId == this.articleId &&
+          other.kind == this.kind &&
+          other.quantity == this.quantity &&
+          other.occurredOn == this.occurredOn &&
+          other.note == this.note &&
+          other.occurrenceId == this.occurrenceId);
+}
+
+class MovementsCompanion extends UpdateCompanion<MovementRow> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> homeId;
+  final Value<String> articleId;
+  final Value<String> kind;
+  final Value<String> quantity;
+  final Value<String> occurredOn;
+  final Value<String> note;
+  final Value<String?> occurrenceId;
+  final Value<int> rowid;
+  const MovementsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.articleId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.occurredOn = const Value.absent(),
+    this.note = const Value.absent(),
+    this.occurrenceId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MovementsCompanion.insert({
+    required String id,
+    required int createdAt,
+    required int updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String homeId,
+    required String articleId,
+    required String kind,
+    required String quantity,
+    required String occurredOn,
+    this.note = const Value.absent(),
+    this.occurrenceId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       homeId = Value(homeId),
+       articleId = Value(articleId),
+       kind = Value(kind),
+       quantity = Value(quantity),
+       occurredOn = Value(occurredOn);
+  static Insertable<MovementRow> custom({
+    Expression<Uint8List>? id,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<Uint8List>? homeId,
+    Expression<Uint8List>? articleId,
+    Expression<String>? kind,
+    Expression<String>? quantity,
+    Expression<String>? occurredOn,
+    Expression<String>? note,
+    Expression<Uint8List>? occurrenceId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (homeId != null) 'home_id': homeId,
+      if (articleId != null) 'article_id': articleId,
+      if (kind != null) 'kind': kind,
+      if (quantity != null) 'quantity': quantity,
+      if (occurredOn != null) 'occurred_on': occurredOn,
+      if (note != null) 'note': note,
+      if (occurrenceId != null) 'occurrence_id': occurrenceId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MovementsCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? homeId,
+    Value<String>? articleId,
+    Value<String>? kind,
+    Value<String>? quantity,
+    Value<String>? occurredOn,
+    Value<String>? note,
+    Value<String?>? occurrenceId,
+    Value<int>? rowid,
+  }) {
+    return MovementsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      homeId: homeId ?? this.homeId,
+      articleId: articleId ?? this.articleId,
+      kind: kind ?? this.kind,
+      quantity: quantity ?? this.quantity,
+      occurredOn: occurredOn ?? this.occurredOn,
+      note: note ?? this.note,
+      occurrenceId: occurrenceId ?? this.occurrenceId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<Uint8List>(
+        $MovementsTable.$converterid.toSql(id.value),
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $MovementsTable.$converterhomeId.toSql(homeId.value),
+      );
+    }
+    if (articleId.present) {
+      map['article_id'] = Variable<Uint8List>(
+        $MovementsTable.$converterarticleId.toSql(articleId.value),
+      );
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<String>(quantity.value);
+    }
+    if (occurredOn.present) {
+      map['occurred_on'] = Variable<String>(occurredOn.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (occurrenceId.present) {
+      map['occurrence_id'] = Variable<Uint8List>(
+        $MovementsTable.$converteroccurrenceIdn.toSql(occurrenceId.value),
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MovementsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('articleId: $articleId, ')
+          ..write('kind: $kind, ')
+          ..write('quantity: $quantity, ')
+          ..write('occurredOn: $occurredOn, ')
+          ..write('note: $note, ')
+          ..write('occurrenceId: $occurrenceId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $TaskMaterialsTable extends TaskMaterials
+    with TableInfo<$TaskMaterialsTable, TaskMaterialRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TaskMaterialsTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> id =
+      GeneratedColumn<Uint8List>(
+        'id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($TaskMaterialsTable.$converterid);
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($TaskMaterialsTable.$converterhomeId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> taskId =
+      GeneratedColumn<Uint8List>(
+        'task_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($TaskMaterialsTable.$convertertaskId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> articleId =
+      GeneratedColumn<Uint8List>(
+        'article_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($TaskMaterialsTable.$converterarticleId);
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<String> quantity = GeneratedColumn<String>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    taskId,
+    articleId,
+    quantity,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'task_materials';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TaskMaterialRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_quantityMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TaskMaterialRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TaskMaterialRow(
+      id: $TaskMaterialsTable.$converterid.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}id'],
+        )!,
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      homeId: $TaskMaterialsTable.$converterhomeId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        )!,
+      ),
+      taskId: $TaskMaterialsTable.$convertertaskId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}task_id'],
+        )!,
+      ),
+      articleId: $TaskMaterialsTable.$converterarticleId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}article_id'],
+        )!,
+      ),
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quantity'],
+      )!,
+    );
+  }
+
+  @override
+  $TaskMaterialsTable createAlias(String alias) {
+    return $TaskMaterialsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterid = const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $convertertaskId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterarticleId =
+      const UuidConverter();
+}
+
+class TaskMaterialRow extends DataClass implements Insertable<TaskMaterialRow> {
+  final String id;
+  final int createdAt;
+  final int updatedAt;
+  final int? deletedAt;
+  final String homeId;
+  final String taskId;
+  final String articleId;
+  final String quantity;
+  const TaskMaterialRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.homeId,
+    required this.taskId,
+    required this.articleId,
+    required this.quantity,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['id'] = Variable<Uint8List>(
+        $TaskMaterialsTable.$converterid.toSql(id),
+      );
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    {
+      map['home_id'] = Variable<Uint8List>(
+        $TaskMaterialsTable.$converterhomeId.toSql(homeId),
+      );
+    }
+    {
+      map['task_id'] = Variable<Uint8List>(
+        $TaskMaterialsTable.$convertertaskId.toSql(taskId),
+      );
+    }
+    {
+      map['article_id'] = Variable<Uint8List>(
+        $TaskMaterialsTable.$converterarticleId.toSql(articleId),
+      );
+    }
+    map['quantity'] = Variable<String>(quantity);
+    return map;
+  }
+
+  TaskMaterialsCompanion toCompanion(bool nullToAbsent) {
+    return TaskMaterialsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      homeId: Value(homeId),
+      taskId: Value(taskId),
+      articleId: Value(articleId),
+      quantity: Value(quantity),
+    );
+  }
+
+  factory TaskMaterialRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TaskMaterialRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      homeId: serializer.fromJson<String>(json['homeId']),
+      taskId: serializer.fromJson<String>(json['taskId']),
+      articleId: serializer.fromJson<String>(json['articleId']),
+      quantity: serializer.fromJson<String>(json['quantity']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'homeId': serializer.toJson<String>(homeId),
+      'taskId': serializer.toJson<String>(taskId),
+      'articleId': serializer.toJson<String>(articleId),
+      'quantity': serializer.toJson<String>(quantity),
+    };
+  }
+
+  TaskMaterialRow copyWith({
+    String? id,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? homeId,
+    String? taskId,
+    String? articleId,
+    String? quantity,
+  }) => TaskMaterialRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    homeId: homeId ?? this.homeId,
+    taskId: taskId ?? this.taskId,
+    articleId: articleId ?? this.articleId,
+    quantity: quantity ?? this.quantity,
+  );
+  TaskMaterialRow copyWithCompanion(TaskMaterialsCompanion data) {
+    return TaskMaterialRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      taskId: data.taskId.present ? data.taskId.value : this.taskId,
+      articleId: data.articleId.present ? data.articleId.value : this.articleId,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TaskMaterialRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('taskId: $taskId, ')
+          ..write('articleId: $articleId, ')
+          ..write('quantity: $quantity')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    taskId,
+    articleId,
+    quantity,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TaskMaterialRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.homeId == this.homeId &&
+          other.taskId == this.taskId &&
+          other.articleId == this.articleId &&
+          other.quantity == this.quantity);
+}
+
+class TaskMaterialsCompanion extends UpdateCompanion<TaskMaterialRow> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> homeId;
+  final Value<String> taskId;
+  final Value<String> articleId;
+  final Value<String> quantity;
+  final Value<int> rowid;
+  const TaskMaterialsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.taskId = const Value.absent(),
+    this.articleId = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TaskMaterialsCompanion.insert({
+    required String id,
+    required int createdAt,
+    required int updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String homeId,
+    required String taskId,
+    required String articleId,
+    required String quantity,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       homeId = Value(homeId),
+       taskId = Value(taskId),
+       articleId = Value(articleId),
+       quantity = Value(quantity);
+  static Insertable<TaskMaterialRow> custom({
+    Expression<Uint8List>? id,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<Uint8List>? homeId,
+    Expression<Uint8List>? taskId,
+    Expression<Uint8List>? articleId,
+    Expression<String>? quantity,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (homeId != null) 'home_id': homeId,
+      if (taskId != null) 'task_id': taskId,
+      if (articleId != null) 'article_id': articleId,
+      if (quantity != null) 'quantity': quantity,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TaskMaterialsCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? homeId,
+    Value<String>? taskId,
+    Value<String>? articleId,
+    Value<String>? quantity,
+    Value<int>? rowid,
+  }) {
+    return TaskMaterialsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      homeId: homeId ?? this.homeId,
+      taskId: taskId ?? this.taskId,
+      articleId: articleId ?? this.articleId,
+      quantity: quantity ?? this.quantity,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<Uint8List>(
+        $TaskMaterialsTable.$converterid.toSql(id.value),
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $TaskMaterialsTable.$converterhomeId.toSql(homeId.value),
+      );
+    }
+    if (taskId.present) {
+      map['task_id'] = Variable<Uint8List>(
+        $TaskMaterialsTable.$convertertaskId.toSql(taskId.value),
+      );
+    }
+    if (articleId.present) {
+      map['article_id'] = Variable<Uint8List>(
+        $TaskMaterialsTable.$converterarticleId.toSql(articleId.value),
+      );
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<String>(quantity.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TaskMaterialsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('taskId: $taskId, ')
+          ..write('articleId: $articleId, ')
+          ..write('quantity: $quantity, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MaterialDrawsTable extends MaterialDraws
+    with TableInfo<$MaterialDrawsTable, MaterialDrawRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MaterialDrawsTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> id =
+      GeneratedColumn<Uint8List>(
+        'id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($MaterialDrawsTable.$converterid);
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($MaterialDrawsTable.$converterhomeId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> occurrenceId =
+      GeneratedColumn<Uint8List>(
+        'occurrence_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($MaterialDrawsTable.$converteroccurrenceId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> articleId =
+      GeneratedColumn<Uint8List>(
+        'article_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($MaterialDrawsTable.$converterarticleId);
+  static const VerificationMeta _wantedMeta = const VerificationMeta('wanted');
+  @override
+  late final GeneratedColumn<String> wanted = GeneratedColumn<String>(
+    'wanted',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _drawnMeta = const VerificationMeta('drawn');
+  @override
+  late final GeneratedColumn<String> drawn = GeneratedColumn<String>(
+    'drawn',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    occurrenceId,
+    articleId,
+    wanted,
+    drawn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'material_draws';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MaterialDrawRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('wanted')) {
+      context.handle(
+        _wantedMeta,
+        wanted.isAcceptableOrUnknown(data['wanted']!, _wantedMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_wantedMeta);
+    }
+    if (data.containsKey('drawn')) {
+      context.handle(
+        _drawnMeta,
+        drawn.isAcceptableOrUnknown(data['drawn']!, _drawnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_drawnMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MaterialDrawRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MaterialDrawRow(
+      id: $MaterialDrawsTable.$converterid.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}id'],
+        )!,
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      homeId: $MaterialDrawsTable.$converterhomeId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        )!,
+      ),
+      occurrenceId: $MaterialDrawsTable.$converteroccurrenceId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}occurrence_id'],
+        )!,
+      ),
+      articleId: $MaterialDrawsTable.$converterarticleId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}article_id'],
+        )!,
+      ),
+      wanted: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}wanted'],
+      )!,
+      drawn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}drawn'],
+      )!,
+    );
+  }
+
+  @override
+  $MaterialDrawsTable createAlias(String alias) {
+    return $MaterialDrawsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterid = const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converteroccurrenceId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterarticleId =
+      const UuidConverter();
+}
+
+class MaterialDrawRow extends DataClass implements Insertable<MaterialDrawRow> {
+  final String id;
+  final int createdAt;
+  final int updatedAt;
+  final int? deletedAt;
+  final String homeId;
+  final String occurrenceId;
+  final String articleId;
+  final String wanted;
+  final String drawn;
+  const MaterialDrawRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.homeId,
+    required this.occurrenceId,
+    required this.articleId,
+    required this.wanted,
+    required this.drawn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['id'] = Variable<Uint8List>(
+        $MaterialDrawsTable.$converterid.toSql(id),
+      );
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    {
+      map['home_id'] = Variable<Uint8List>(
+        $MaterialDrawsTable.$converterhomeId.toSql(homeId),
+      );
+    }
+    {
+      map['occurrence_id'] = Variable<Uint8List>(
+        $MaterialDrawsTable.$converteroccurrenceId.toSql(occurrenceId),
+      );
+    }
+    {
+      map['article_id'] = Variable<Uint8List>(
+        $MaterialDrawsTable.$converterarticleId.toSql(articleId),
+      );
+    }
+    map['wanted'] = Variable<String>(wanted);
+    map['drawn'] = Variable<String>(drawn);
+    return map;
+  }
+
+  MaterialDrawsCompanion toCompanion(bool nullToAbsent) {
+    return MaterialDrawsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      homeId: Value(homeId),
+      occurrenceId: Value(occurrenceId),
+      articleId: Value(articleId),
+      wanted: Value(wanted),
+      drawn: Value(drawn),
+    );
+  }
+
+  factory MaterialDrawRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MaterialDrawRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      homeId: serializer.fromJson<String>(json['homeId']),
+      occurrenceId: serializer.fromJson<String>(json['occurrenceId']),
+      articleId: serializer.fromJson<String>(json['articleId']),
+      wanted: serializer.fromJson<String>(json['wanted']),
+      drawn: serializer.fromJson<String>(json['drawn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'homeId': serializer.toJson<String>(homeId),
+      'occurrenceId': serializer.toJson<String>(occurrenceId),
+      'articleId': serializer.toJson<String>(articleId),
+      'wanted': serializer.toJson<String>(wanted),
+      'drawn': serializer.toJson<String>(drawn),
+    };
+  }
+
+  MaterialDrawRow copyWith({
+    String? id,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? homeId,
+    String? occurrenceId,
+    String? articleId,
+    String? wanted,
+    String? drawn,
+  }) => MaterialDrawRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    homeId: homeId ?? this.homeId,
+    occurrenceId: occurrenceId ?? this.occurrenceId,
+    articleId: articleId ?? this.articleId,
+    wanted: wanted ?? this.wanted,
+    drawn: drawn ?? this.drawn,
+  );
+  MaterialDrawRow copyWithCompanion(MaterialDrawsCompanion data) {
+    return MaterialDrawRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      occurrenceId: data.occurrenceId.present
+          ? data.occurrenceId.value
+          : this.occurrenceId,
+      articleId: data.articleId.present ? data.articleId.value : this.articleId,
+      wanted: data.wanted.present ? data.wanted.value : this.wanted,
+      drawn: data.drawn.present ? data.drawn.value : this.drawn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MaterialDrawRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('occurrenceId: $occurrenceId, ')
+          ..write('articleId: $articleId, ')
+          ..write('wanted: $wanted, ')
+          ..write('drawn: $drawn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    occurrenceId,
+    articleId,
+    wanted,
+    drawn,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MaterialDrawRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.homeId == this.homeId &&
+          other.occurrenceId == this.occurrenceId &&
+          other.articleId == this.articleId &&
+          other.wanted == this.wanted &&
+          other.drawn == this.drawn);
+}
+
+class MaterialDrawsCompanion extends UpdateCompanion<MaterialDrawRow> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> homeId;
+  final Value<String> occurrenceId;
+  final Value<String> articleId;
+  final Value<String> wanted;
+  final Value<String> drawn;
+  final Value<int> rowid;
+  const MaterialDrawsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.occurrenceId = const Value.absent(),
+    this.articleId = const Value.absent(),
+    this.wanted = const Value.absent(),
+    this.drawn = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MaterialDrawsCompanion.insert({
+    required String id,
+    required int createdAt,
+    required int updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String homeId,
+    required String occurrenceId,
+    required String articleId,
+    required String wanted,
+    required String drawn,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       homeId = Value(homeId),
+       occurrenceId = Value(occurrenceId),
+       articleId = Value(articleId),
+       wanted = Value(wanted),
+       drawn = Value(drawn);
+  static Insertable<MaterialDrawRow> custom({
+    Expression<Uint8List>? id,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<Uint8List>? homeId,
+    Expression<Uint8List>? occurrenceId,
+    Expression<Uint8List>? articleId,
+    Expression<String>? wanted,
+    Expression<String>? drawn,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (homeId != null) 'home_id': homeId,
+      if (occurrenceId != null) 'occurrence_id': occurrenceId,
+      if (articleId != null) 'article_id': articleId,
+      if (wanted != null) 'wanted': wanted,
+      if (drawn != null) 'drawn': drawn,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MaterialDrawsCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? homeId,
+    Value<String>? occurrenceId,
+    Value<String>? articleId,
+    Value<String>? wanted,
+    Value<String>? drawn,
+    Value<int>? rowid,
+  }) {
+    return MaterialDrawsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      homeId: homeId ?? this.homeId,
+      occurrenceId: occurrenceId ?? this.occurrenceId,
+      articleId: articleId ?? this.articleId,
+      wanted: wanted ?? this.wanted,
+      drawn: drawn ?? this.drawn,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<Uint8List>(
+        $MaterialDrawsTable.$converterid.toSql(id.value),
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $MaterialDrawsTable.$converterhomeId.toSql(homeId.value),
+      );
+    }
+    if (occurrenceId.present) {
+      map['occurrence_id'] = Variable<Uint8List>(
+        $MaterialDrawsTable.$converteroccurrenceId.toSql(occurrenceId.value),
+      );
+    }
+    if (articleId.present) {
+      map['article_id'] = Variable<Uint8List>(
+        $MaterialDrawsTable.$converterarticleId.toSql(articleId.value),
+      );
+    }
+    if (wanted.present) {
+      map['wanted'] = Variable<String>(wanted.value);
+    }
+    if (drawn.present) {
+      map['drawn'] = Variable<String>(drawn.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MaterialDrawsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('occurrenceId: $occurrenceId, ')
+          ..write('articleId: $articleId, ')
+          ..write('wanted: $wanted, ')
+          ..write('drawn: $drawn, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $FieldClockTable extends FieldClock
     with TableInfo<$FieldClockTable, FieldClockRow> {
   @override
@@ -6299,6 +10442,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ContractorsTable contractors = $ContractorsTable(this);
   late final $TasksTable tasks = $TasksTable(this);
   late final $OccurrencesTable occurrences = $OccurrencesTable(this);
+  late final $ArticlesTable articles = $ArticlesTable(this);
+  late final $ArticleRoomsTable articleRooms = $ArticleRoomsTable(this);
+  late final $ArticleItemsTable articleItems = $ArticleItemsTable(this);
+  late final $SuppliersTable suppliers = $SuppliersTable(this);
+  late final $MovementsTable movements = $MovementsTable(this);
+  late final $TaskMaterialsTable taskMaterials = $TaskMaterialsTable(this);
+  late final $MaterialDrawsTable materialDraws = $MaterialDrawsTable(this);
   late final $FieldClockTable fieldClock = $FieldClockTable(this);
   late final $LocalSettingsTable localSettings = $LocalSettingsTable(this);
   late final Index roomHomePosition = Index(
@@ -6317,6 +10467,22 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'occ_task_status',
     'CREATE INDEX occ_task_status ON occurrences (task_id, status)',
   );
+  late final Index articleHomeName = Index(
+    'article_home_name',
+    'CREATE INDEX article_home_name ON articles (home_id, name)',
+  );
+  late final Index movementArticle = Index(
+    'movement_article',
+    'CREATE INDEX movement_article ON movements (article_id)',
+  );
+  late final Index materialTask = Index(
+    'material_task',
+    'CREATE INDEX material_task ON task_materials (task_id)',
+  );
+  late final Index drawOccurrence = Index(
+    'draw_occurrence',
+    'CREATE INDEX draw_occurrence ON material_draws (occurrence_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6329,12 +10495,23 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     contractors,
     tasks,
     occurrences,
+    articles,
+    articleRooms,
+    articleItems,
+    suppliers,
+    movements,
+    taskMaterials,
+    materialDraws,
     fieldClock,
     localSettings,
     roomHomePosition,
     taskHomeCreated,
     occHomeStatusDue,
     occTaskStatus,
+    articleHomeName,
+    movementArticle,
+    materialTask,
+    drawOccurrence,
   ];
 }
 
@@ -9057,6 +13234,2107 @@ typedef $$OccurrencesTableProcessedTableManager =
       OccurrenceRow,
       PrefetchHooks Function()
     >;
+typedef $$ArticlesTableCreateCompanionBuilder = ArticlesCompanion Function({
+  required String id,
+  required int createdAt,
+  required int updatedAt,
+  Value<int?> deletedAt,
+  required String homeId,
+  required String name,
+  Value<String> manufacturerReference,
+  Value<String> dimensions,
+  Value<String> storageLocation,
+  Value<String> unit,
+  Value<String> unitOther,
+  Value<String?> threshold,
+  Value<String?> unitPrice,
+  Value<String> notes,
+  Value<String?> label,
+  Value<int> rowid,
+});
+typedef $$ArticlesTableUpdateCompanionBuilder = ArticlesCompanion Function({
+  Value<String> id,
+  Value<int> createdAt,
+  Value<int> updatedAt,
+  Value<int?> deletedAt,
+  Value<String> homeId,
+  Value<String> name,
+  Value<String> manufacturerReference,
+  Value<String> dimensions,
+  Value<String> storageLocation,
+  Value<String> unit,
+  Value<String> unitOther,
+  Value<String?> threshold,
+  Value<String?> unitPrice,
+  Value<String> notes,
+  Value<String?> label,
+  Value<int> rowid,
+});
+
+class $$ArticlesTableFilterComposer
+    extends Composer<_$AppDatabase, $ArticlesTable> {
+  $$ArticlesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get id =>
+      $composableBuilder(
+        column: $table.id,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get manufacturerReference => $composableBuilder(
+    column: $table.manufacturerReference,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dimensions => $composableBuilder(
+    column: $table.dimensions,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get storageLocation => $composableBuilder(
+    column: $table.storageLocation,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unitOther => $composableBuilder(
+    column: $table.unitOther,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get threshold => $composableBuilder(
+    column: $table.threshold,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unitPrice => $composableBuilder(
+    column: $table.unitPrice,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ArticlesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ArticlesTable> {
+  $$ArticlesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<Uint8List> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get manufacturerReference => $composableBuilder(
+    column: $table.manufacturerReference,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dimensions => $composableBuilder(
+    column: $table.dimensions,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get storageLocation => $composableBuilder(
+    column: $table.storageLocation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unitOther => $composableBuilder(
+    column: $table.unitOther,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get threshold => $composableBuilder(
+    column: $table.threshold,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unitPrice => $composableBuilder(
+    column: $table.unitPrice,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ArticlesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ArticlesTable> {
+  $$ArticlesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<String, Uint8List> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get manufacturerReference => $composableBuilder(
+    column: $table.manufacturerReference,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get dimensions => $composableBuilder(
+    column: $table.dimensions,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get storageLocation => $composableBuilder(
+    column: $table.storageLocation,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<String> get unitOther =>
+      $composableBuilder(column: $table.unitOther, builder: (column) => column);
+
+  GeneratedColumn<String> get threshold =>
+      $composableBuilder(column: $table.threshold, builder: (column) => column);
+
+  GeneratedColumn<String> get unitPrice =>
+      $composableBuilder(column: $table.unitPrice, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+}
+
+class $$ArticlesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ArticlesTable,
+          ArticleRow,
+          $$ArticlesTableFilterComposer,
+          $$ArticlesTableOrderingComposer,
+          $$ArticlesTableAnnotationComposer,
+          $$ArticlesTableCreateCompanionBuilder,
+          $$ArticlesTableUpdateCompanionBuilder,
+          (
+            ArticleRow,
+            BaseReferences<_$AppDatabase, $ArticlesTable, ArticleRow>,
+          ),
+          ArticleRow,
+          PrefetchHooks Function()
+        > {
+  $$ArticlesTableTableManager(_$AppDatabase db, $ArticlesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ArticlesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ArticlesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ArticlesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> homeId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> manufacturerReference = const Value.absent(),
+                Value<String> dimensions = const Value.absent(),
+                Value<String> storageLocation = const Value.absent(),
+                Value<String> unit = const Value.absent(),
+                Value<String> unitOther = const Value.absent(),
+                Value<String?> threshold = const Value.absent(),
+                Value<String?> unitPrice = const Value.absent(),
+                Value<String> notes = const Value.absent(),
+                Value<String?> label = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ArticlesCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                name: name,
+                manufacturerReference: manufacturerReference,
+                dimensions: dimensions,
+                storageLocation: storageLocation,
+                unit: unit,
+                unitOther: unitOther,
+                threshold: threshold,
+                unitPrice: unitPrice,
+                notes: notes,
+                label: label,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String homeId,
+                required String name,
+                Value<String> manufacturerReference = const Value.absent(),
+                Value<String> dimensions = const Value.absent(),
+                Value<String> storageLocation = const Value.absent(),
+                Value<String> unit = const Value.absent(),
+                Value<String> unitOther = const Value.absent(),
+                Value<String?> threshold = const Value.absent(),
+                Value<String?> unitPrice = const Value.absent(),
+                Value<String> notes = const Value.absent(),
+                Value<String?> label = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ArticlesCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                name: name,
+                manufacturerReference: manufacturerReference,
+                dimensions: dimensions,
+                storageLocation: storageLocation,
+                unit: unit,
+                unitOther: unitOther,
+                threshold: threshold,
+                unitPrice: unitPrice,
+                notes: notes,
+                label: label,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ArticlesTable, ArticleRow>(table),
+                  BaseReferences<_$AppDatabase, $ArticlesTable, ArticleRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ArticlesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ArticlesTable,
+      ArticleRow,
+      $$ArticlesTableFilterComposer,
+      $$ArticlesTableOrderingComposer,
+      $$ArticlesTableAnnotationComposer,
+      $$ArticlesTableCreateCompanionBuilder,
+      $$ArticlesTableUpdateCompanionBuilder,
+      (ArticleRow, BaseReferences<_$AppDatabase, $ArticlesTable, ArticleRow>),
+      ArticleRow,
+      PrefetchHooks Function()
+    >;
+typedef $$ArticleRoomsTableCreateCompanionBuilder =
+    ArticleRoomsCompanion Function({
+      required String id,
+      required int createdAt,
+      required int updatedAt,
+      Value<int?> deletedAt,
+      required String homeId,
+      required String articleId,
+      required String roomId,
+      Value<int> rowid,
+    });
+typedef $$ArticleRoomsTableUpdateCompanionBuilder =
+    ArticleRoomsCompanion Function({
+      Value<String> id,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int?> deletedAt,
+      Value<String> homeId,
+      Value<String> articleId,
+      Value<String> roomId,
+      Value<int> rowid,
+    });
+
+class $$ArticleRoomsTableFilterComposer
+    extends Composer<_$AppDatabase, $ArticleRoomsTable> {
+  $$ArticleRoomsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get id =>
+      $composableBuilder(
+        column: $table.id,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get articleId =>
+      $composableBuilder(
+        column: $table.articleId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get roomId =>
+      $composableBuilder(
+        column: $table.roomId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+}
+
+class $$ArticleRoomsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ArticleRoomsTable> {
+  $$ArticleRoomsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<Uint8List> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get articleId => $composableBuilder(
+    column: $table.articleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get roomId => $composableBuilder(
+    column: $table.roomId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ArticleRoomsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ArticleRoomsTable> {
+  $$ArticleRoomsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<String, Uint8List> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get articleId =>
+      $composableBuilder(column: $table.articleId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get roomId =>
+      $composableBuilder(column: $table.roomId, builder: (column) => column);
+}
+
+class $$ArticleRoomsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ArticleRoomsTable,
+          ArticleRoomRow,
+          $$ArticleRoomsTableFilterComposer,
+          $$ArticleRoomsTableOrderingComposer,
+          $$ArticleRoomsTableAnnotationComposer,
+          $$ArticleRoomsTableCreateCompanionBuilder,
+          $$ArticleRoomsTableUpdateCompanionBuilder,
+          (
+            ArticleRoomRow,
+            BaseReferences<_$AppDatabase, $ArticleRoomsTable, ArticleRoomRow>,
+          ),
+          ArticleRoomRow,
+          PrefetchHooks Function()
+        > {
+  $$ArticleRoomsTableTableManager(_$AppDatabase db, $ArticleRoomsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ArticleRoomsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ArticleRoomsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ArticleRoomsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> homeId = const Value.absent(),
+                Value<String> articleId = const Value.absent(),
+                Value<String> roomId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ArticleRoomsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                articleId: articleId,
+                roomId: roomId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String homeId,
+                required String articleId,
+                required String roomId,
+                Value<int> rowid = const Value.absent(),
+              }) => ArticleRoomsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                articleId: articleId,
+                roomId: roomId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ArticleRoomsTable, ArticleRoomRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ArticleRoomsTable,
+                    ArticleRoomRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ArticleRoomsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ArticleRoomsTable,
+      ArticleRoomRow,
+      $$ArticleRoomsTableFilterComposer,
+      $$ArticleRoomsTableOrderingComposer,
+      $$ArticleRoomsTableAnnotationComposer,
+      $$ArticleRoomsTableCreateCompanionBuilder,
+      $$ArticleRoomsTableUpdateCompanionBuilder,
+      (
+        ArticleRoomRow,
+        BaseReferences<_$AppDatabase, $ArticleRoomsTable, ArticleRoomRow>,
+      ),
+      ArticleRoomRow,
+      PrefetchHooks Function()
+    >;
+typedef $$ArticleItemsTableCreateCompanionBuilder =
+    ArticleItemsCompanion Function({
+      required String id,
+      required int createdAt,
+      required int updatedAt,
+      Value<int?> deletedAt,
+      required String homeId,
+      required String articleId,
+      required String itemId,
+      Value<int> rowid,
+    });
+typedef $$ArticleItemsTableUpdateCompanionBuilder =
+    ArticleItemsCompanion Function({
+      Value<String> id,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int?> deletedAt,
+      Value<String> homeId,
+      Value<String> articleId,
+      Value<String> itemId,
+      Value<int> rowid,
+    });
+
+class $$ArticleItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $ArticleItemsTable> {
+  $$ArticleItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get id =>
+      $composableBuilder(
+        column: $table.id,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get articleId =>
+      $composableBuilder(
+        column: $table.articleId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get itemId =>
+      $composableBuilder(
+        column: $table.itemId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+}
+
+class $$ArticleItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ArticleItemsTable> {
+  $$ArticleItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<Uint8List> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get articleId => $composableBuilder(
+    column: $table.articleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get itemId => $composableBuilder(
+    column: $table.itemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ArticleItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ArticleItemsTable> {
+  $$ArticleItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<String, Uint8List> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get articleId =>
+      $composableBuilder(column: $table.articleId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get itemId =>
+      $composableBuilder(column: $table.itemId, builder: (column) => column);
+}
+
+class $$ArticleItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ArticleItemsTable,
+          ArticleItemRow,
+          $$ArticleItemsTableFilterComposer,
+          $$ArticleItemsTableOrderingComposer,
+          $$ArticleItemsTableAnnotationComposer,
+          $$ArticleItemsTableCreateCompanionBuilder,
+          $$ArticleItemsTableUpdateCompanionBuilder,
+          (
+            ArticleItemRow,
+            BaseReferences<_$AppDatabase, $ArticleItemsTable, ArticleItemRow>,
+          ),
+          ArticleItemRow,
+          PrefetchHooks Function()
+        > {
+  $$ArticleItemsTableTableManager(_$AppDatabase db, $ArticleItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ArticleItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ArticleItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ArticleItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> homeId = const Value.absent(),
+                Value<String> articleId = const Value.absent(),
+                Value<String> itemId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ArticleItemsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                articleId: articleId,
+                itemId: itemId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String homeId,
+                required String articleId,
+                required String itemId,
+                Value<int> rowid = const Value.absent(),
+              }) => ArticleItemsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                articleId: articleId,
+                itemId: itemId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ArticleItemsTable, ArticleItemRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ArticleItemsTable,
+                    ArticleItemRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ArticleItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ArticleItemsTable,
+      ArticleItemRow,
+      $$ArticleItemsTableFilterComposer,
+      $$ArticleItemsTableOrderingComposer,
+      $$ArticleItemsTableAnnotationComposer,
+      $$ArticleItemsTableCreateCompanionBuilder,
+      $$ArticleItemsTableUpdateCompanionBuilder,
+      (
+        ArticleItemRow,
+        BaseReferences<_$AppDatabase, $ArticleItemsTable, ArticleItemRow>,
+      ),
+      ArticleItemRow,
+      PrefetchHooks Function()
+    >;
+typedef $$SuppliersTableCreateCompanionBuilder = SuppliersCompanion Function({
+  required String id,
+  required int createdAt,
+  required int updatedAt,
+  Value<int?> deletedAt,
+  required String homeId,
+  required String articleId,
+  required String name,
+  Value<String> reference,
+  Value<String> url,
+  Value<String?> lastPrice,
+  Value<int> rowid,
+});
+typedef $$SuppliersTableUpdateCompanionBuilder = SuppliersCompanion Function({
+  Value<String> id,
+  Value<int> createdAt,
+  Value<int> updatedAt,
+  Value<int?> deletedAt,
+  Value<String> homeId,
+  Value<String> articleId,
+  Value<String> name,
+  Value<String> reference,
+  Value<String> url,
+  Value<String?> lastPrice,
+  Value<int> rowid,
+});
+
+class $$SuppliersTableFilterComposer
+    extends Composer<_$AppDatabase, $SuppliersTable> {
+  $$SuppliersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get id =>
+      $composableBuilder(
+        column: $table.id,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get articleId =>
+      $composableBuilder(
+        column: $table.articleId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastPrice => $composableBuilder(
+    column: $table.lastPrice,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SuppliersTableOrderingComposer
+    extends Composer<_$AppDatabase, $SuppliersTable> {
+  $$SuppliersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<Uint8List> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get articleId => $composableBuilder(
+    column: $table.articleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastPrice => $composableBuilder(
+    column: $table.lastPrice,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SuppliersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SuppliersTable> {
+  $$SuppliersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<String, Uint8List> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get articleId =>
+      $composableBuilder(column: $table.articleId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get reference =>
+      $composableBuilder(column: $table.reference, builder: (column) => column);
+
+  GeneratedColumn<String> get url =>
+      $composableBuilder(column: $table.url, builder: (column) => column);
+
+  GeneratedColumn<String> get lastPrice =>
+      $composableBuilder(column: $table.lastPrice, builder: (column) => column);
+}
+
+class $$SuppliersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SuppliersTable,
+          SupplierRow,
+          $$SuppliersTableFilterComposer,
+          $$SuppliersTableOrderingComposer,
+          $$SuppliersTableAnnotationComposer,
+          $$SuppliersTableCreateCompanionBuilder,
+          $$SuppliersTableUpdateCompanionBuilder,
+          (
+            SupplierRow,
+            BaseReferences<_$AppDatabase, $SuppliersTable, SupplierRow>,
+          ),
+          SupplierRow,
+          PrefetchHooks Function()
+        > {
+  $$SuppliersTableTableManager(_$AppDatabase db, $SuppliersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SuppliersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SuppliersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SuppliersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> homeId = const Value.absent(),
+                Value<String> articleId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> reference = const Value.absent(),
+                Value<String> url = const Value.absent(),
+                Value<String?> lastPrice = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SuppliersCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                articleId: articleId,
+                name: name,
+                reference: reference,
+                url: url,
+                lastPrice: lastPrice,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String homeId,
+                required String articleId,
+                required String name,
+                Value<String> reference = const Value.absent(),
+                Value<String> url = const Value.absent(),
+                Value<String?> lastPrice = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SuppliersCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                articleId: articleId,
+                name: name,
+                reference: reference,
+                url: url,
+                lastPrice: lastPrice,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SuppliersTable, SupplierRow>(table),
+                  BaseReferences<_$AppDatabase, $SuppliersTable, SupplierRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SuppliersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SuppliersTable,
+      SupplierRow,
+      $$SuppliersTableFilterComposer,
+      $$SuppliersTableOrderingComposer,
+      $$SuppliersTableAnnotationComposer,
+      $$SuppliersTableCreateCompanionBuilder,
+      $$SuppliersTableUpdateCompanionBuilder,
+      (
+        SupplierRow,
+        BaseReferences<_$AppDatabase, $SuppliersTable, SupplierRow>,
+      ),
+      SupplierRow,
+      PrefetchHooks Function()
+    >;
+typedef $$MovementsTableCreateCompanionBuilder = MovementsCompanion Function({
+  required String id,
+  required int createdAt,
+  required int updatedAt,
+  Value<int?> deletedAt,
+  required String homeId,
+  required String articleId,
+  required String kind,
+  required String quantity,
+  required String occurredOn,
+  Value<String> note,
+  Value<String?> occurrenceId,
+  Value<int> rowid,
+});
+typedef $$MovementsTableUpdateCompanionBuilder = MovementsCompanion Function({
+  Value<String> id,
+  Value<int> createdAt,
+  Value<int> updatedAt,
+  Value<int?> deletedAt,
+  Value<String> homeId,
+  Value<String> articleId,
+  Value<String> kind,
+  Value<String> quantity,
+  Value<String> occurredOn,
+  Value<String> note,
+  Value<String?> occurrenceId,
+  Value<int> rowid,
+});
+
+class $$MovementsTableFilterComposer
+    extends Composer<_$AppDatabase, $MovementsTable> {
+  $$MovementsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get id =>
+      $composableBuilder(
+        column: $table.id,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get articleId =>
+      $composableBuilder(
+        column: $table.articleId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get occurredOn => $composableBuilder(
+    column: $table.occurredOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String?, String, Uint8List> get occurrenceId =>
+      $composableBuilder(
+        column: $table.occurrenceId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+}
+
+class $$MovementsTableOrderingComposer
+    extends Composer<_$AppDatabase, $MovementsTable> {
+  $$MovementsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<Uint8List> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get articleId => $composableBuilder(
+    column: $table.articleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get occurredOn => $composableBuilder(
+    column: $table.occurredOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get occurrenceId => $composableBuilder(
+    column: $table.occurrenceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MovementsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MovementsTable> {
+  $$MovementsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<String, Uint8List> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get articleId =>
+      $composableBuilder(column: $table.articleId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<String> get occurredOn => $composableBuilder(
+    column: $table.occurredOn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String?, Uint8List> get occurrenceId =>
+      $composableBuilder(
+        column: $table.occurrenceId,
+        builder: (column) => column,
+      );
+}
+
+class $$MovementsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MovementsTable,
+          MovementRow,
+          $$MovementsTableFilterComposer,
+          $$MovementsTableOrderingComposer,
+          $$MovementsTableAnnotationComposer,
+          $$MovementsTableCreateCompanionBuilder,
+          $$MovementsTableUpdateCompanionBuilder,
+          (
+            MovementRow,
+            BaseReferences<_$AppDatabase, $MovementsTable, MovementRow>,
+          ),
+          MovementRow,
+          PrefetchHooks Function()
+        > {
+  $$MovementsTableTableManager(_$AppDatabase db, $MovementsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MovementsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MovementsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MovementsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> homeId = const Value.absent(),
+                Value<String> articleId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> quantity = const Value.absent(),
+                Value<String> occurredOn = const Value.absent(),
+                Value<String> note = const Value.absent(),
+                Value<String?> occurrenceId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MovementsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                articleId: articleId,
+                kind: kind,
+                quantity: quantity,
+                occurredOn: occurredOn,
+                note: note,
+                occurrenceId: occurrenceId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String homeId,
+                required String articleId,
+                required String kind,
+                required String quantity,
+                required String occurredOn,
+                Value<String> note = const Value.absent(),
+                Value<String?> occurrenceId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MovementsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                articleId: articleId,
+                kind: kind,
+                quantity: quantity,
+                occurredOn: occurredOn,
+                note: note,
+                occurrenceId: occurrenceId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MovementsTable, MovementRow>(table),
+                  BaseReferences<_$AppDatabase, $MovementsTable, MovementRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MovementsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MovementsTable,
+      MovementRow,
+      $$MovementsTableFilterComposer,
+      $$MovementsTableOrderingComposer,
+      $$MovementsTableAnnotationComposer,
+      $$MovementsTableCreateCompanionBuilder,
+      $$MovementsTableUpdateCompanionBuilder,
+      (
+        MovementRow,
+        BaseReferences<_$AppDatabase, $MovementsTable, MovementRow>,
+      ),
+      MovementRow,
+      PrefetchHooks Function()
+    >;
+typedef $$TaskMaterialsTableCreateCompanionBuilder =
+    TaskMaterialsCompanion Function({
+      required String id,
+      required int createdAt,
+      required int updatedAt,
+      Value<int?> deletedAt,
+      required String homeId,
+      required String taskId,
+      required String articleId,
+      required String quantity,
+      Value<int> rowid,
+    });
+typedef $$TaskMaterialsTableUpdateCompanionBuilder =
+    TaskMaterialsCompanion Function({
+      Value<String> id,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int?> deletedAt,
+      Value<String> homeId,
+      Value<String> taskId,
+      Value<String> articleId,
+      Value<String> quantity,
+      Value<int> rowid,
+    });
+
+class $$TaskMaterialsTableFilterComposer
+    extends Composer<_$AppDatabase, $TaskMaterialsTable> {
+  $$TaskMaterialsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get id =>
+      $composableBuilder(
+        column: $table.id,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get taskId =>
+      $composableBuilder(
+        column: $table.taskId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get articleId =>
+      $composableBuilder(
+        column: $table.articleId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TaskMaterialsTableOrderingComposer
+    extends Composer<_$AppDatabase, $TaskMaterialsTable> {
+  $$TaskMaterialsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<Uint8List> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get taskId => $composableBuilder(
+    column: $table.taskId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get articleId => $composableBuilder(
+    column: $table.articleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TaskMaterialsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TaskMaterialsTable> {
+  $$TaskMaterialsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<String, Uint8List> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get taskId =>
+      $composableBuilder(column: $table.taskId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get articleId =>
+      $composableBuilder(column: $table.articleId, builder: (column) => column);
+
+  GeneratedColumn<String> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+}
+
+class $$TaskMaterialsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TaskMaterialsTable,
+          TaskMaterialRow,
+          $$TaskMaterialsTableFilterComposer,
+          $$TaskMaterialsTableOrderingComposer,
+          $$TaskMaterialsTableAnnotationComposer,
+          $$TaskMaterialsTableCreateCompanionBuilder,
+          $$TaskMaterialsTableUpdateCompanionBuilder,
+          (
+            TaskMaterialRow,
+            BaseReferences<_$AppDatabase, $TaskMaterialsTable, TaskMaterialRow>,
+          ),
+          TaskMaterialRow,
+          PrefetchHooks Function()
+        > {
+  $$TaskMaterialsTableTableManager(_$AppDatabase db, $TaskMaterialsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TaskMaterialsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TaskMaterialsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TaskMaterialsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> homeId = const Value.absent(),
+                Value<String> taskId = const Value.absent(),
+                Value<String> articleId = const Value.absent(),
+                Value<String> quantity = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TaskMaterialsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                taskId: taskId,
+                articleId: articleId,
+                quantity: quantity,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String homeId,
+                required String taskId,
+                required String articleId,
+                required String quantity,
+                Value<int> rowid = const Value.absent(),
+              }) => TaskMaterialsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                taskId: taskId,
+                articleId: articleId,
+                quantity: quantity,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$TaskMaterialsTable, TaskMaterialRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $TaskMaterialsTable,
+                    TaskMaterialRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TaskMaterialsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TaskMaterialsTable,
+      TaskMaterialRow,
+      $$TaskMaterialsTableFilterComposer,
+      $$TaskMaterialsTableOrderingComposer,
+      $$TaskMaterialsTableAnnotationComposer,
+      $$TaskMaterialsTableCreateCompanionBuilder,
+      $$TaskMaterialsTableUpdateCompanionBuilder,
+      (
+        TaskMaterialRow,
+        BaseReferences<_$AppDatabase, $TaskMaterialsTable, TaskMaterialRow>,
+      ),
+      TaskMaterialRow,
+      PrefetchHooks Function()
+    >;
+typedef $$MaterialDrawsTableCreateCompanionBuilder =
+    MaterialDrawsCompanion Function({
+      required String id,
+      required int createdAt,
+      required int updatedAt,
+      Value<int?> deletedAt,
+      required String homeId,
+      required String occurrenceId,
+      required String articleId,
+      required String wanted,
+      required String drawn,
+      Value<int> rowid,
+    });
+typedef $$MaterialDrawsTableUpdateCompanionBuilder =
+    MaterialDrawsCompanion Function({
+      Value<String> id,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int?> deletedAt,
+      Value<String> homeId,
+      Value<String> occurrenceId,
+      Value<String> articleId,
+      Value<String> wanted,
+      Value<String> drawn,
+      Value<int> rowid,
+    });
+
+class $$MaterialDrawsTableFilterComposer
+    extends Composer<_$AppDatabase, $MaterialDrawsTable> {
+  $$MaterialDrawsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get id =>
+      $composableBuilder(
+        column: $table.id,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get occurrenceId =>
+      $composableBuilder(
+        column: $table.occurrenceId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get articleId =>
+      $composableBuilder(
+        column: $table.articleId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get wanted => $composableBuilder(
+    column: $table.wanted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get drawn => $composableBuilder(
+    column: $table.drawn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MaterialDrawsTableOrderingComposer
+    extends Composer<_$AppDatabase, $MaterialDrawsTable> {
+  $$MaterialDrawsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<Uint8List> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get occurrenceId => $composableBuilder(
+    column: $table.occurrenceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get articleId => $composableBuilder(
+    column: $table.articleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get wanted => $composableBuilder(
+    column: $table.wanted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get drawn => $composableBuilder(
+    column: $table.drawn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MaterialDrawsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MaterialDrawsTable> {
+  $$MaterialDrawsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<String, Uint8List> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get occurrenceId =>
+      $composableBuilder(
+        column: $table.occurrenceId,
+        builder: (column) => column,
+      );
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get articleId =>
+      $composableBuilder(column: $table.articleId, builder: (column) => column);
+
+  GeneratedColumn<String> get wanted =>
+      $composableBuilder(column: $table.wanted, builder: (column) => column);
+
+  GeneratedColumn<String> get drawn =>
+      $composableBuilder(column: $table.drawn, builder: (column) => column);
+}
+
+class $$MaterialDrawsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MaterialDrawsTable,
+          MaterialDrawRow,
+          $$MaterialDrawsTableFilterComposer,
+          $$MaterialDrawsTableOrderingComposer,
+          $$MaterialDrawsTableAnnotationComposer,
+          $$MaterialDrawsTableCreateCompanionBuilder,
+          $$MaterialDrawsTableUpdateCompanionBuilder,
+          (
+            MaterialDrawRow,
+            BaseReferences<_$AppDatabase, $MaterialDrawsTable, MaterialDrawRow>,
+          ),
+          MaterialDrawRow,
+          PrefetchHooks Function()
+        > {
+  $$MaterialDrawsTableTableManager(_$AppDatabase db, $MaterialDrawsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MaterialDrawsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MaterialDrawsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MaterialDrawsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> homeId = const Value.absent(),
+                Value<String> occurrenceId = const Value.absent(),
+                Value<String> articleId = const Value.absent(),
+                Value<String> wanted = const Value.absent(),
+                Value<String> drawn = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MaterialDrawsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                occurrenceId: occurrenceId,
+                articleId: articleId,
+                wanted: wanted,
+                drawn: drawn,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String homeId,
+                required String occurrenceId,
+                required String articleId,
+                required String wanted,
+                required String drawn,
+                Value<int> rowid = const Value.absent(),
+              }) => MaterialDrawsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                occurrenceId: occurrenceId,
+                articleId: articleId,
+                wanted: wanted,
+                drawn: drawn,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MaterialDrawsTable, MaterialDrawRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MaterialDrawsTable,
+                    MaterialDrawRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MaterialDrawsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MaterialDrawsTable,
+      MaterialDrawRow,
+      $$MaterialDrawsTableFilterComposer,
+      $$MaterialDrawsTableOrderingComposer,
+      $$MaterialDrawsTableAnnotationComposer,
+      $$MaterialDrawsTableCreateCompanionBuilder,
+      $$MaterialDrawsTableUpdateCompanionBuilder,
+      (
+        MaterialDrawRow,
+        BaseReferences<_$AppDatabase, $MaterialDrawsTable, MaterialDrawRow>,
+      ),
+      MaterialDrawRow,
+      PrefetchHooks Function()
+    >;
 typedef $$FieldClockTableCreateCompanionBuilder = FieldClockCompanion Function({
   required String entity,
   required String rowId,
@@ -9430,6 +15708,20 @@ class $AppDatabaseManager {
       $$TasksTableTableManager(_db, _db.tasks);
   $$OccurrencesTableTableManager get occurrences =>
       $$OccurrencesTableTableManager(_db, _db.occurrences);
+  $$ArticlesTableTableManager get articles =>
+      $$ArticlesTableTableManager(_db, _db.articles);
+  $$ArticleRoomsTableTableManager get articleRooms =>
+      $$ArticleRoomsTableTableManager(_db, _db.articleRooms);
+  $$ArticleItemsTableTableManager get articleItems =>
+      $$ArticleItemsTableTableManager(_db, _db.articleItems);
+  $$SuppliersTableTableManager get suppliers =>
+      $$SuppliersTableTableManager(_db, _db.suppliers);
+  $$MovementsTableTableManager get movements =>
+      $$MovementsTableTableManager(_db, _db.movements);
+  $$TaskMaterialsTableTableManager get taskMaterials =>
+      $$TaskMaterialsTableTableManager(_db, _db.taskMaterials);
+  $$MaterialDrawsTableTableManager get materialDraws =>
+      $$MaterialDrawsTableTableManager(_db, _db.materialDraws);
   $$FieldClockTableTableManager get fieldClock =>
       $$FieldClockTableTableManager(_db, _db.fieldClock);
   $$LocalSettingsTableTableManager get localSettings =>
