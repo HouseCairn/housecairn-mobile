@@ -265,6 +265,15 @@ sections 1 and 2.2 holds; the differences are these.
 - **An erased home** answers 410 `home_gone` on every route of that home: the phone erases it as
   a purge (section 2.2) and drops every operation of it.
 
+**The operation on the wire** (lot 4b, `ServerTransport.wire`). The phone keeps `deleted_at` as
+a field of its `put`s; the server takes a deletion only as `k: delete` or `k: restore`, so the
+transport sends a `put` that sets `deleted_at` as a `delete` with the same clock (and the other
+fields as a `put`), one that clears it alone as a `restore`, and drops `deleted_at: null` next
+to other fields. The columns the server keeps for itself, `updated_at` and `created_at` (but on
+`stock.article`, `stock.supplier`, `stock.movement` and `reports.report`, whose `created_at` it
+takes), are not sent: one of them makes the whole operation `rejected` with `forbidden`. The
+device of the operations is the push's `device`, and their `sv` the push's.
+
 **Starting again after 410.** The phone keeps, per row and outside the row's fields (in its sync
 tables, never synced), a mark **seen by the server**. It sets the mark when the row arrives in
 the feed or in a snapshot, and when the result of a push for an operation of that row is

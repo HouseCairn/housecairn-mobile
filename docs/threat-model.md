@@ -108,11 +108,36 @@ archive a home. Only an admin can remove phones and delete a home, a purge that 
 applies only if the log says its signer is admin; a non-admin cannot. A read-only member is not
 in v1 (maintainer's decision).
 
+### A Housecairn server (the third way)
+
+In the third way ([ADR 0010](adr/0010-three-ways-to-use-the-app.md)) the phone's homes are on
+a Housecairn server **in clear**: whoever runs the server or its host, every account that is a
+member of these homes on it, the integrations that hold a token of them, and anyone who gets a
+backup of the server can read and change everything in them. The app says so on its confirmation
+screen, before anything is sent or received. What the app still holds to:
+
+- it talks only to the address typed: every request goes to that origin, no redirect is
+  followed, no proxy of the environment is used, and an endpoint that `info` gives on another
+  host is refused (`lib/sync/server_address.dart`, `server_http_io.dart`);
+- HTTPS with the system's certificate checks, which cannot be skipped; `http://` only to an IP
+  literal that is not public (protocol section 2.10), never a name, `.local` included, and after
+  a warning that anyone on that network can read what the phone sends;
+- the sign-in is OAuth 2 with PKCE `S256` in the system browser, `state` checked; no token is
+  typed or pasted. The access and refresh tokens are in the Keychain or the Android Keystore
+  (`Store`), never in the database, an export or a log;
+- the server cannot make the phone write outside the homes the access covers, and a home it
+  stops listing is removed from the phone as a purge;
+- disconnecting deletes the credential at once, and the access can be revoked on the server,
+  per phone; a revoked access stops the phone at its next call, and the phone says so.
+
+A server can still feed the phone false data in its homes, as any member could; it cannot
+reach the relay, the other ways, or another server.
+
 ## What the project commits to
 
 - No telemetry, no analytics, no crash reporting, no remote configuration.
-- The app talks to the chosen relay, the store, and the push service of the platform; nothing
-  else. No link preview, no remote image.
+- The app talks to the chosen relay or Housecairn server, the store, and the push service of
+  the platform; nothing else. No link preview, no remote image.
 - Cryptography only through libsodium constructions; no home-made primitive.
 - The protocol is public; a self-hosted relay gives the same guarantees.
 - A security review of the crypto and sync code by someone outside the project before the
