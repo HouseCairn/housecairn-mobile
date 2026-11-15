@@ -3,6 +3,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../data/repository.dart';
+import '../design/adaptive.dart';
 import '../domain/day.dart';
 import '../l10n/app_localizations.dart';
 import 'messages.dart';
@@ -100,11 +101,11 @@ Future<void> postponeOccurrence(
   final state = AppScope.of(context);
   final repository = state.repository;
   final today = repository.today();
-  final picked = await showDatePicker(
-    context: context,
-    initialDate: asDateTime(today.addDays(1)),
-    firstDate: asDateTime(today),
-    lastDate: asDateTime(today.addYears(dateSpanYears)),
+  final picked = await hcPickDate(
+    context,
+    initial: asDateTime(today.addDays(1)),
+    first: asDateTime(today),
+    last: asDateTime(today.addYears(dateSpanYears)),
   );
   if (picked == null || !context.mounted) return;
   await _run(

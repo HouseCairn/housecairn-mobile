@@ -518,6 +518,12 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancel;
 
+  /// Button of the date or list picker of iOS that keeps the choice (design lot D5). The word iOS shows in that place: OK in French.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get pickerDone;
+
   /// Heading of the archived homes on the Homes screen.
   ///
   /// In en, this message translates to:

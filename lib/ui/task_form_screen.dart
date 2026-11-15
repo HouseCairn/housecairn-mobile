@@ -4,7 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
-import '../design/theme.dart';
+import '../design/adaptive.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/budget.dart' as budget;
@@ -331,19 +331,6 @@ class _TaskFormScreenState extends State<TaskFormScreen>
     }
   }
 
-  Future<void> _chooseDate() async {
-    final today = AppScope.of(context).repository.today();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: asDateTime(_due ?? today),
-      firstDate: asDateTime(today.addYears(-dateSpanYears)),
-      lastDate: asDateTime(today.addYears(dateSpanYears)),
-    );
-    if (picked == null) return;
-    setState(() => _due = Day.of(picked));
-    sheetChanged(now: true);
-  }
-
   List<Day> _preview(String hemisphere) {
     final due = _due;
     final interval = int.tryParse(_interval.text.trim());
@@ -454,31 +441,15 @@ class _TaskFormScreenState extends State<TaskFormScreen>
               validator: (v) => _nameRequired(v, l10n),
             ),
           ],
-          Text(l10n.taskDueDate, style: HcText.fieldLabel),
-          const SizedBox(height: HcSpace.s1),
-          Wrap(
-            spacing: HcSpace.s2,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                _due == null
-                    ? l10n.todayNoDate
-                    : l10n.dueOn(formatDay(context, _due!)),
-                style: HcText.body,
-              ),
-              TextButton(
-                onPressed: _chooseDate,
-                child: Text(l10n.taskChooseDate),
-              ),
-              if (_due != null)
-                TextButton(
-                  onPressed: () {
-                    setState(() => _due = null);
-                    sheetChanged(now: true);
-                  },
-                  child: Text(l10n.taskClearDate),
-                ),
-            ],
+          HcDateField(
+            key: const Key('task-due'),
+            label: l10n.taskDueDate,
+            value: _due,
+            noDate: l10n.todayNoDate,
+            onChanged: (day) {
+              setState(() => _due = day);
+              sheetChanged(now: true);
+            },
           ),
         ],
       ),
@@ -496,28 +467,16 @@ class _TaskFormScreenState extends State<TaskFormScreen>
             _season.isNotEmpty ||
             _hide.text.trim() != '0',
         children: [
-          HcField(
-            label: l10n.repeat,
-            child: DropdownButtonFormField<String>(
-              key: const Key('task-repeat'),
-              initialValue: _mode,
-              isExpanded: true,
-              items: [
-                DropdownMenuItem(
-                  value: recurrence.once,
-                  child: Text(l10n.repeatOnce),
-                ),
-                DropdownMenuItem(
-                  value: recurrence.fixed,
-                  child: Text(l10n.repeatFixed),
-                ),
-                DropdownMenuItem(
-                  value: recurrence.afterLast,
-                  child: Text(l10n.repeatAfterLast),
-                ),
-              ],
-              onChanged: (value) => setState(() => _mode = value!),
-            ),
+          hcChoice<String>(
+            l10n.repeat,
+            _mode,
+            [
+              (recurrence.once, l10n.repeatOnce),
+              (recurrence.fixed, l10n.repeatFixed),
+              (recurrence.afterLast, l10n.repeatAfterLast),
+            ],
+            (value) => setState(() => _mode = value),
+            key: const Key('task-repeat'),
           ),
           if (_mode != recurrence.once)
             HcField(
@@ -547,19 +506,15 @@ class _TaskFormScreenState extends State<TaskFormScreen>
                   const SizedBox(width: HcSpace.s2, height: HcSpace.s2),
                   _pairPart(
                     wide,
-                    DropdownButtonFormField<String>(
-                      initialValue: _unit,
-                      isExpanded: true,
-                      items: [
-                        for (final (unit, label) in [
-                          (recurrence.dayUnit, l10n.unitDays),
-                          (recurrence.weekUnit, l10n.unitWeeks),
-                          (recurrence.monthUnit, l10n.unitMonths),
-                          (recurrence.yearUnit, l10n.unitYears),
-                        ])
-                          DropdownMenuItem(value: unit, child: Text(label)),
+                    HcSelect<String>(
+                      value: _unit,
+                      choices: [
+                        (recurrence.dayUnit, l10n.unitDays),
+                        (recurrence.weekUnit, l10n.unitWeeks),
+                        (recurrence.monthUnit, l10n.unitMonths),
+                        (recurrence.yearUnit, l10n.unitYears),
                       ],
-                      onChanged: (value) => setState(() => _unit = value!),
+                      onChanged: (value) => setState(() => _unit = value),
                     ),
                   ),
                 ],
@@ -567,22 +522,18 @@ class _TaskFormScreenState extends State<TaskFormScreen>
             ),
           HcField(
             label: l10n.season,
-            child: DropdownButtonFormField<String>(
-              initialValue: _season,
-              isExpanded: true,
-              items: [
-                for (final (season, label) in [
-                  ('', l10n.seasonWholeYear),
-                  (recurrence.spring, l10n.seasonSpring),
-                  (recurrence.summer, l10n.seasonSummer),
-                  (recurrence.autumn, l10n.seasonAutumn),
-                  (recurrence.winter, l10n.seasonWinter),
-                  if (_season == recurrence.custom)
-                    (recurrence.custom, l10n.seasonCustom),
-                ])
-                  DropdownMenuItem(value: season, child: Text(label)),
+            child: HcSelect<String>(
+              value: _season,
+              choices: [
+                ('', l10n.seasonWholeYear),
+                (recurrence.spring, l10n.seasonSpring),
+                (recurrence.summer, l10n.seasonSummer),
+                (recurrence.autumn, l10n.seasonAutumn),
+                (recurrence.winter, l10n.seasonWinter),
+                if (_season == recurrence.custom)
+                  (recurrence.custom, l10n.seasonCustom),
               ],
-              onChanged: (value) => setState(() => _season = value!),
+              onChanged: (value) => setState(() => _season = value),
             ),
           ),
           hcText(
@@ -707,22 +658,18 @@ class _TaskFormScreenState extends State<TaskFormScreen>
               wide,
               Semantics(
                 label: l10n.taskDurationUnit,
-                child: DropdownButtonFormField<String>(
+                child: HcSelect<String>(
                   key: const Key('task-duration-unit'),
-                  initialValue: _durationUnit,
-                  isExpanded: true,
-                  items: [
-                    for (final (unit, label) in [
-                      (durations.minute, l10n.unitMinutes),
-                      (durations.hour, l10n.unitHours),
-                      (durations.day, l10n.unitDays),
-                      (durations.week, l10n.unitWeeks),
-                      (durations.month, l10n.unitMonths),
-                      (durations.year, l10n.unitYears),
-                    ])
-                      DropdownMenuItem(value: unit, child: Text(label)),
+                  value: _durationUnit,
+                  choices: [
+                    (durations.minute, l10n.unitMinutes),
+                    (durations.hour, l10n.unitHours),
+                    (durations.day, l10n.unitDays),
+                    (durations.week, l10n.unitWeeks),
+                    (durations.month, l10n.unitMonths),
+                    (durations.year, l10n.unitYears),
                   ],
-                  onChanged: (value) => setState(() => _durationUnit = value!),
+                  onChanged: (value) => setState(() => _durationUnit = value),
                 ),
               ),
             ),

@@ -147,6 +147,28 @@ and that document disagree on a screen, that document is right. `design/glossary
 of the web's glossary, and `test/glossary_test.dart` checks that the ARB keys that show a term say
 it in English and French, with the keys known to differ listed with their lot.
 
+**The controls of iOS on an iPhone** (design lot D5, rows 1 to 4 of the adaptations of
+`design/patterns.md`). The screens call one API, `lib/design/adaptive.dart`, which draws the
+control of the platform of the theme (the phone's, or `debugDefaultTargetPlatformOverride` in
+tests); on Android every control is the one of Material it was before. The colours, Manrope and
+the sizes stay those of the tokens on both: `housecairnCupertinoTheme` gives the widgets of iOS
+the primary colour and the font, and every text of those controls is drawn in an `HcText` style.
+
+| Control | iPhone | Android | Component |
+| --- | --- | --- | --- |
+| Choice in a list | a field with a chevron, which opens the wheel of iOS in a sheet, Cancel at the left of its bar and Done (French: OK) at the right | the menu of Material | `HcSelect`, `hcChoice` |
+| Date | the field below, which opens the date wheel of iOS in the same sheet | the calendar of Material | `HcDateField`, `hcPickDate`, `pickDay` |
+| Confirmation, alert, short form | the alert of iOS: Cancel in bold, the destroying action in the danger colour, a message centred | the dialog of Material, the danger button for what destroys | `HcDialog`, `showHcDialog` |
+| A choice among actions (attach a task) | the action sheet of iOS, Cancel apart | a simple dialog | `showHcChoices` |
+| Switch | the switch of iOS, the primary colour when on | the switch of Material | `HcSwitch` |
+
+A date is a field on both platforms (T8 of the design audit): the date in the phone's language,
+or "No date" muted, a calendar icon at its end, a button that removes the date when it may be
+removed, and the picker of the platform on a tap; it was a text and two text buttons. The menus
+of a row (`…`), the photo sheet and the other rows of the adaptations are later lots.
+`test/adaptive_test.dart` runs each control on both platforms and keeps golden files of iOS in
+English and French (`test/goldens/ios_*`).
+
 ## Consequences
 
 - The app looks like the web application on a phone; the components of lot 2b exist before its
