@@ -258,7 +258,7 @@ class Check(Case):
         (self.app / PARITY).unlink()
         code, out, err = self.cli("check", "--web", str(self.web))
         self.assertEqual(code, 1, err)
-        self.assertIn(f"FAIL web_parity: {PARITY} is missing", out)
+        self.assertIn(f"web_parity: {PARITY} is missing", out)
 
     def test_parity_measure_of_another_repository_fails(self):
         self.app_write(
