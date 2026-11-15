@@ -11,6 +11,13 @@ android {
     compileSdk = maxOf(flutter.compileSdkVersion, 37)
     ndkVersion = flutter.ndkVersion
 
+    // The lint of the release build crashes while analysing image_picker_android
+    // (a NoSuchMethodError on `List.removeLast()`, a Java 21 method): a crash of
+    // the tool, not a finding. Lint is not one of the checks of this repository.
+    lint {
+        checkReleaseBuilds = false
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
