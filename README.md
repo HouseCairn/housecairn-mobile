@@ -31,6 +31,25 @@ For example, on the phone:
 - book the yearly boiler service;
 - one app for several homes: a main home, a second home, a rented flat.
 
+### One example: descaling the espresso machine
+
+<img src="test/goldens/task_materials_en_x2.png" width="200" align="right"
+     alt="The materials of a task in the app, rendered by its screenshot test with test data: a main filter, one piece needed and two in stock, with a field to add another stock item.">
+
+The example the [web application](https://github.com/HouseCairn/housecairn) follows in its
+documentation, as it runs on the phone today:
+
+1. A task, *Descaling*, every three months after the last time.
+2. It belongs to the *Espresso machine* of the kitchen.
+3. It uses one water filter, taken from the stock each time you tap **Done**.
+4. The stock goes down, and the filter is marked low before you run out.
+5. Its cost a year (7.90 a filter, 31.60 a year) is to come: the budget is not in the app
+   yet.
+
+<sub>The image is rendered by the app's screenshot test (`test/goldens/`), with test data.</sub>
+
+<br clear="right">
+
 ## What it is
 
 - **Standalone.** The data lives on the phone, in SQLite. The app works fully with no
@@ -57,8 +76,9 @@ version is released; the first builds will be alpha. Merged so far, from the
 app shell, English and French, the continuous integration with an Android APK and an
 unsigned iOS build on every pull request), the data, the recurrence and several homes with
 the Today, Task and Homes screens (lot 2a), the look of the web application (lot 2d), and
-the rooms, items, contractors, task templates, photos and local reminders (lot 2b).
-Budget, stock, projects and family sync are still to come. How to build and
+the rooms, items, contractors, task templates, photos and local reminders (lot 2b),
+and the stock with the materials of the tasks (lot 3a). Budget, projects and family sync are
+still to come. How to build and
 test: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 | Document | What it settles |
