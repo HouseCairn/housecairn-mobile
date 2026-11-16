@@ -19,7 +19,27 @@ abstract final class HelpPages {
   static const projects = 'screens/projects/';
   static const budget = 'screens/budget/';
   static const more = 'screens/more/';
+  static const tasks = 'screens/tasks/';
+  static const task = 'screens/task/';
+  static const templates = 'screens/task-templates/';
+  static const room = 'screens/room/';
+  static const item = 'screens/item/';
+  static const stockItem = 'screens/stock-item/';
+  static const project = 'screens/project/';
+  static const contractors = 'screens/contractors/';
+  static const contractor = 'screens/contractor/';
+  static const reports = 'screens/reports/';
+  static const report = 'screens/report/';
+  static const homes = 'screens/homes/';
+  static const notifications = 'screens/notifications/';
+  static const about = 'screens/about/';
 }
+
+/// The actions of a bar: [actions], or the help button of [page] when a
+/// page has no action of its own (the web shows the "?" on every page,
+/// design/patterns.md, "Header").
+List<Widget> actionsOrHelp(List<Widget> actions, String page) =>
+    actions.isEmpty ? [HelpButton(page: page)] : actions;
 
 /// The address of [page] in the language of the app: the site publishes
 /// English at its root and French under `fr/` (`DOCS_LANGUAGES`).

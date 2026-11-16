@@ -9,6 +9,7 @@ import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
+import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'budget_parts.dart';
 import 'messages.dart';
@@ -395,6 +396,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     final writable = _home != null && _home!.archivedAt == null;
     return HcScaffold(
       title: l10n.tasksTitle,
+      actions: const [HelpButton(page: HelpPages.tasks)],
       body: (list == null && past == null)
           ? const SizedBox.shrink()
           : HcScreenList(

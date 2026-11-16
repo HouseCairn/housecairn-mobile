@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../design/tokens.dart';
 import '../design/widgets.dart';
+import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import '../version.dart';
 
@@ -30,6 +31,7 @@ class _AboutScreenState extends State<AboutScreen> {
     final text = Theme.of(context).textTheme;
     return HcScaffold(
       title: l10n.about,
+      actions: const [HelpButton(page: HelpPages.about)],
       body: ListView(
         padding: const EdgeInsets.all(HcSpace.s6),
         children: [

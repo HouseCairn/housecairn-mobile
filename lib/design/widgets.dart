@@ -470,6 +470,7 @@ class HcScreenList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = HcPageTitle.of(context);
+    final below = HcPageTitle.belowOf(context);
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         HcSpace.s4,
@@ -477,9 +478,71 @@ class HcScreenList extends StatelessWidget {
         HcSpace.s4,
         HcSpace.s12 + HcSpace.s12,
       ),
-      children: [if (title != null) HcLargeTitle(title), ...children],
+      children: [
+        if (title != null) HcLargeTitle(title),
+        // The selector of the home, a compact line under the `h1` of a
+        // section root.
+        ?below,
+        ...children,
+      ],
     );
   }
+}
+
+/// A banner of the page (`.undo-banner`, `tasks.css`): sage-soft on a
+/// border, the text at the left and its action at the right on the same
+/// line, 12 px (`space-3`) under it. The text takes the room the action does
+/// not (the action at most three fifths of the line); from a text size of
+/// 1.3 the action goes under the text.
+class HcBanner extends StatelessWidget {
+  const HcBanner({super.key, required this.child, required this.action});
+
+  final Widget child;
+  final Widget action;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: HcSpace.s3),
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        color: HcColors.sageSoft,
+        border: Border.all(color: HcColors.border),
+        borderRadius: BorderRadius.circular(HcRadius.md),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: HcSpace.s4,
+          vertical: HcSpace.s2,
+        ),
+        // Side by side up to a text size of 1.3, as the field pairs (ADR
+        // 0011); beyond, the action under the text, which would break its
+        // words in the share it has left.
+        child: MediaQuery.textScalerOf(context).scale(1) > 1.3
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  child,
+                  const SizedBox(height: HcSpace.s2),
+                  action,
+                ],
+              )
+            : LayoutBuilder(
+                builder: (context, constraints) => Row(
+                  children: [
+                    Expanded(child: child),
+                    const SizedBox(width: HcSpace.s3),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: constraints.maxWidth * 3 / 5,
+                      ),
+                      child: action,
+                    ),
+                  ],
+                ),
+              ),
+      ),
+    ),
+  );
 }
 
 /// The tabs of a section (`components/tabs.html`, `.tabs-fit`): sister

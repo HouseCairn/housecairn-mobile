@@ -42,7 +42,7 @@ class EmptySection extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return HcScaffold(
       title: title(l10n),
-      actions: const [HomeSelector()],
+      belowTitle: const HomeSelector(),
       body: HcScreenList(
         children: [
           const SizedBox(height: HcSpace.s4),

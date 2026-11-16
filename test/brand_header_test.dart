@@ -103,7 +103,8 @@ void main() {
     await tester.tap(find.byKey(const Key('more-about')));
     await tester.pumpAndSettle();
     expect(find.byType(HcBrand), findsNothing);
-    expect(find.byKey(const Key('help-button')), findsNothing);
+    // It has no action of its own: the help button of its page (lot D8b).
+    expect(find.byKey(const Key('help-button')), findsOneWidget);
   });
 
   testWidgets('on an iPhone the brand stays in the bar when the page scrolls', (
@@ -130,35 +131,40 @@ void main() {
     ('fr', 320.0, 2.0),
     ('en', 360.0, 1.5),
   ]) {
-    testWidgets('with two homes the bar fits ${width.round()} px, text x$scale '
-        '($locale)', (tester) async {
-      await onPhone(tester, width: width, textScale: scale);
-      await pumpApp(
-        tester,
-        locale: locale,
-        seed: (repository) async => TwoHomes.create(repository),
-      );
-      expect(find.byKey(const Key('home-selector')), findsOneWidget);
-      // No overflow was reported, and every part of the bar is on screen.
-      expect(tester.takeException(), isNull);
-      for (final key in ['brand-icon', 'home-selector', 'help-button']) {
-        final box = tester.getRect(find.byKey(Key(key)));
-        expect(box.left, greaterThanOrEqualTo(0), reason: key);
-        expect(box.right, lessThanOrEqualTo(width), reason: key);
-      }
-      // The name goes before it is cut: whole or not shown, the cairn stays.
-      final name = find.byKey(const Key('brand-name'));
-      if (name.evaluate().isNotEmpty) {
-        expect(
-          tester.renderObject<RenderParagraph>(name).didExceedMaxLines,
-          isFalse,
+    testWidgets(
+      'with two homes the page fits ${width.round()} px, text x$scale '
+      '($locale)',
+      (tester) async {
+        await onPhone(tester, width: width, textScale: scale);
+        await pumpApp(
+          tester,
+          locale: locale,
+          seed: (repository) async => TwoHomes.create(repository),
         );
-      }
-      final brand = tester.getRect(find.byType(HcBrand));
-      final selector = tester.getRect(find.byKey(const Key('home-selector')));
-      final help = tester.getRect(find.byKey(const Key('help-button')));
-      expect(brand.right, lessThanOrEqualTo(selector.left));
-      expect(selector.right, lessThanOrEqualTo(help.left));
-    });
+        expect(find.byKey(const Key('home-selector')), findsOneWidget);
+        // No overflow was reported, and every part of the bar is on screen.
+        expect(tester.takeException(), isNull);
+        for (final key in ['brand-icon', 'help-button']) {
+          final box = tester.getRect(find.byKey(Key(key)));
+          expect(box.left, greaterThanOrEqualTo(0), reason: key);
+          expect(box.right, lessThanOrEqualTo(width), reason: key);
+        }
+        // The selector is under the title, not in the bar (lot D8b), and fits
+        // the width of the page.
+        final selector = tester.getRect(find.byKey(const Key('home-selector')));
+        expect(selector.right, lessThanOrEqualTo(width));
+        // The name goes before it is cut: whole or not shown, the cairn stays.
+        final name = find.byKey(const Key('brand-name'));
+        if (name.evaluate().isNotEmpty) {
+          expect(
+            tester.renderObject<RenderParagraph>(name).didExceedMaxLines,
+            isFalse,
+          );
+        }
+        final brand = tester.getRect(find.byType(HcBrand));
+        final help = tester.getRect(find.byKey(const Key('help-button')));
+        expect(brand.right, lessThanOrEqualTo(help.left));
+      },
+    );
   }
 }

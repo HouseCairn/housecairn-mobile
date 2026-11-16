@@ -93,10 +93,8 @@ class _TodayScreenState extends State<TodayScreen> {
     return HcScaffold(
       title: l10n.navToday,
       brand: true,
-      actions: const [
-        HomeSelector(withAllHomes: true),
-        HelpButton(page: HelpPages.today),
-      ],
+      belowTitle: const HomeSelector(withAllHomes: true),
+      actions: const [HelpButton(page: HelpPages.today)],
       body: entries == null
           ? const SizedBox.shrink()
           : HcScreenList(

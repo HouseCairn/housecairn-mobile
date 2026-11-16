@@ -168,6 +168,10 @@ void main() {
         ),
         matching: find.widgetWithText(FilledButton, t('Done', 'Fait')),
       );
+      // Under the title and the selector of the home, the row may be below
+      // the first screen.
+      await tester.ensureVisible(done);
+      await tester.pumpAndSettle();
       await tester.tap(done);
       await tester.pumpAndSettle();
       expect(await repo.stockLevel(data.filter), Decimal.zero);

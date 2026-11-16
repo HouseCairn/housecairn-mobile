@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../design/icons.dart';
+import '../design/page.dart';
 import '../design/tokens.dart';
 import '../l10n/app_localizations.dart';
 import 'sections.dart';
@@ -62,6 +63,7 @@ class _ShellState extends State<Shell> {
             for (final section in Section.values)
               Navigator(
                 key: _navigators[section],
+                observers: [HcBackTitles()],
                 onGenerateRoute: (settings) => MaterialPageRoute<void>(
                   settings: settings,
                   builder: (context) => sectionRoot(section),

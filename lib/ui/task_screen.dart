@@ -14,6 +14,7 @@ import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
 import '../domain/durations.dart' as durations;
 import '../domain/recurrence.dart' as recurrence;
+import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'budget_parts.dart';
 import 'contractor_screens.dart';
@@ -579,6 +580,7 @@ class _TaskPageState extends State<TaskPage> {
     return HcScaffold(
       title: task?.title,
       drawsTitle: false,
+      actions: const [HelpButton(page: HelpPages.task)],
       body: task == null
           ? const SizedBox.shrink()
           : HcScreenList(

@@ -10,6 +10,7 @@ import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/day.dart';
 import '../domain/photos.dart';
+import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'parts.dart';
 import 'messages.dart';
@@ -53,35 +54,31 @@ class TodayReports extends StatelessWidget {
         if (count > 0)
           Semantics(
             liveRegion: true,
-            child: HcCard(
-              child: Wrap(
-                spacing: HcSpace.s3,
-                runSpacing: HcSpace.s2,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(
-                    l10n.problemsReported(count),
-                    key: const Key('today-reports-count'),
-                    style: HcText.body,
-                  ),
-                  OutlinedButton(
-                    key: const Key('today-reports-see'),
-                    onPressed: () => open(ReportsScreen(homeId: homeId)),
-                    child: Text(l10n.seeReports),
-                  ),
-                ],
+            // The web's `.undo-banner` of the open reports line: the count
+            // at the left and the button at the right on the same line
+            // (`reports/_today.html`).
+            child: HcBanner(
+              key: const Key('today-reports'),
+              action: OutlinedButton(
+                key: const Key('today-reports-see'),
+                onPressed: () => open(ReportsScreen(homeId: homeId)),
+                child: Text(l10n.seeReports),
+              ),
+              child: Text(
+                l10n.problemsReported(count),
+                key: const Key('today-reports-count'),
+                style: HcText.body,
               ),
             ),
           ),
-        Padding(
-          padding: const EdgeInsets.only(top: HcSpace.s2),
-          child: Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: OutlinedButton(
-              key: const Key('today-report-add'),
-              onPressed: () => open(ReportFormScreen(homeId: homeId)),
-              child: Text(l10n.reportProblem),
-            ),
+        // The banner has its own space under it (`HcBanner`).
+        if (count == 0) const SizedBox(height: HcSpace.s2),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: OutlinedButton(
+            key: const Key('today-report-add'),
+            onPressed: () => open(ReportFormScreen(homeId: homeId)),
+            child: Text(l10n.reportProblem),
           ),
         ),
       ],
@@ -108,6 +105,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     const keys = [reportOpen, 'closed', ''];
     return HcScaffold(
       title: l10n.reports,
+      actions: const [HelpButton(page: HelpPages.reports)],
       body: DataView<List<ReportEntry>>(
         key: ValueKey('${widget.homeId}|$_filter'),
         load: (r) => r.reportsOf(widget.homeId, status: keys[_filter]),
@@ -187,6 +185,7 @@ class ReportScreen extends StatelessWidget {
         final photo = repository.reportPhoto(report);
         return HcScaffold(
           title: report.title,
+          actions: const [HelpButton(page: HelpPages.report)],
           body: HcScreenList(
             children: [
               const SizedBox(height: HcSpace.s2),
