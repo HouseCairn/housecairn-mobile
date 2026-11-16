@@ -386,14 +386,10 @@ class _ContractorFormScreenState extends State<ContractorFormScreen> {
               ),
             ),
             if (widget.contractorId != null) ...[
-              const SizedBox(height: HcSpace.s4),
-              OutlinedButton(
+              HcDeleteButton(
                 key: const Key('contractor-delete'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: HcColors.danger,
-                ),
+                label: l10n.deleteContractor,
                 onPressed: _delete,
-                child: Text(l10n.deleteContractor),
               ),
             ],
           ],

@@ -85,6 +85,22 @@ Future<void> openMore(WidgetTester tester, String label, String entry) async {
   await tester.pumpAndSettle();
 }
 
+/// Scrolls the vertical list of the screen until [finder] shows: the page of a
+/// home is longer than the screen, and its list builds what is near.
+Future<void> scrollToSee(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    200,
+    scrollable: find
+        .byWidgetPredicate(
+          (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+        )
+        .hitTestable()
+        .last,
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
   const labels = {
     'en': (today: 'Today', more: 'More', homes: 'My homes'),
@@ -202,7 +218,13 @@ void main() {
         await openMore(tester, l.more, l.homes);
         await tester.tap(find.text('Second home'));
         await tester.pumpAndSettle();
-        await tester.tap(find.text(t('Archive', 'Archiver')));
+        await scrollToSee(
+          tester,
+          find.text(t('Archive this home', 'Archiver ce logement')),
+        );
+        await tester.tap(
+          find.text(t('Archive this home', 'Archiver ce logement')),
+        );
         await tester.pumpAndSettle();
         expect(state.activeHomes, hasLength(1));
         expect(heading(t('Archived', 'Archivés')), findsOneWidget);
@@ -215,13 +237,29 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text('Second home'));
         await tester.pumpAndSettle();
-        await tester.tap(find.text(t('Unarchive', 'Désarchiver')));
+        await scrollToSee(
+          tester,
+          find.text(
+            t('Bring this home back', 'Remettre ce logement en service'),
+          ),
+        );
+        await tester.tap(
+          find.text(
+            t('Bring this home back', 'Remettre ce logement en service'),
+          ),
+        );
         await tester.pumpAndSettle();
         expect(state.activeHomes, hasLength(2));
 
         await tester.tap(find.text('Second home'));
         await tester.pumpAndSettle();
-        await tester.tap(find.text(t('Delete', 'Supprimer')));
+        await scrollToSee(
+          tester,
+          find.text(t('Delete this home', 'Supprimer ce logement')),
+        );
+        await tester.tap(
+          find.text(t('Delete this home', 'Supprimer ce logement')),
+        );
         await tester.pumpAndSettle();
         final confirm = find.widgetWithText(
           FilledButton,
@@ -369,9 +407,18 @@ void main() {
           ScaffoldMessenger.of(tester.element(find.byType(Scaffold).first))
               .removeCurrentSnackBar();
           await tester.pumpAndSettle();
-          await tester.ensureVisible(find.text(t('Delete', 'Supprimer')));
+          await scrollToSee(
+            tester,
+            find.text(t('Delete this home', 'Supprimer ce logement')),
+          );
           await tester.pumpAndSettle();
-          await tester.tap(find.text(t('Delete', 'Supprimer')));
+          await scrollToSee(
+            tester,
+            find.text(t('Delete this home', 'Supprimer ce logement')),
+          );
+          await tester.tap(
+            find.text(t('Delete this home', 'Supprimer ce logement')),
+          );
           await tester.pumpAndSettle();
           expect(find.byType(AlertDialog), findsOneWidget);
           check('Delete a home');

@@ -869,14 +869,10 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
               ),
             ),
             if (widget.articleId != null) ...[
-              const SizedBox(height: HcSpace.s4),
-              OutlinedButton(
+              HcDeleteButton(
                 key: const Key('article-delete'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: HcColors.danger,
-                ),
+                label: l10n.deleteArticle,
                 onPressed: _delete,
-                child: Text(l10n.deleteArticle),
               ),
             ],
           ],
@@ -1038,14 +1034,10 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
               ),
             ),
             if (widget.supplierId != null) ...[
-              const SizedBox(height: HcSpace.s4),
-              OutlinedButton(
+              HcDeleteButton(
                 key: const Key('supplier-delete'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: HcColors.danger,
-                ),
+                label: l10n.deleteSupplier,
                 onPressed: _delete,
-                child: Text(l10n.deleteSupplier),
               ),
             ],
           ],

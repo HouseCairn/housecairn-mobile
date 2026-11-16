@@ -9,6 +9,7 @@ import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/recurrence.dart' as recurrence;
+import 'budget_parts.dart';
 import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'messages.dart';
@@ -164,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final archived = home?.archivedAt != null;
     final editable = !archived;
     return HcScaffold(
-      title: home?.name ?? l10n.newHome,
+      title: home == null ? l10n.newHome : l10n.editHome,
       actions: [if (editable) HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
         key: _form,
@@ -205,6 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           : l10n.errCurrencyInvalid,
                     ),
                   ),
+                  fieldHelp(l10n.homeCurrencyHelp),
                   HcField(
                     label: l10n.homeHemisphere,
                     child: HcSelect<String>(
@@ -217,33 +219,30 @@ class _HomeScreenState extends State<HomeScreen> {
                       onChanged: (value) => setState(() => _hemisphere = value),
                     ),
                   ),
+                  fieldHelp(l10n.homeHemisphereHelp),
                 ],
               ),
             ),
             if (home != null) ...[
               const SizedBox(height: HcSpace.s4),
-              Wrap(
-                spacing: HcSpace.s2,
-                runSpacing: HcSpace.s2,
-                children: [
-                  if (archived)
-                    OutlinedButton(
-                      onPressed: () => _act((r) => r.unarchiveHome(home.id)),
-                      child: Text(l10n.homeUnarchive),
-                    )
-                  else
-                    OutlinedButton(
-                      onPressed: () => _act((r) => r.archiveHome(home.id)),
-                      child: Text(l10n.homeArchive),
-                    ),
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: HcColors.danger,
-                    ),
-                    onPressed: () => _delete(home),
-                    child: Text(l10n.homeDelete),
-                  ),
-                ],
+              // As the web's page of a home: Archive (secondary) above Delete
+              // (danger), each the width of the column.
+              if (archived)
+                OutlinedButton(
+                  key: const Key('home-unarchive'),
+                  onPressed: () => _act((r) => r.unarchiveHome(home.id)),
+                  child: Text(l10n.homeUnarchive),
+                )
+              else
+                OutlinedButton(
+                  key: const Key('home-archive'),
+                  onPressed: () => _act((r) => r.archiveHome(home.id)),
+                  child: Text(l10n.homeArchive),
+                ),
+              HcDeleteButton(
+                key: const Key('home-delete'),
+                label: l10n.homeDelete,
+                onPressed: () => _delete(home),
               ),
             ],
           ],

@@ -599,14 +599,7 @@ class _ItemFormScreenState extends State<ItemFormScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  hcText(
-                    l10n.fieldName,
-                    _name,
-                    key: const Key('item-name'),
-                    validator: (v) =>
-                        (v ?? '').trim().isEmpty ? l10n.errTitleRequired : null,
-                  ),
-                  if (widget.chooseRoom && widget.itemId == null)
+                  if (widget.chooseRoom && widget.itemId == null) ...[
                     hcChoice<String?>(
                       l10n.room,
                       _room,
@@ -614,6 +607,15 @@ class _ItemFormScreenState extends State<ItemFormScreen>
                       (v) => setState(() => _room = v),
                       key: const Key('item-room'),
                     ),
+                    fieldHelp(l10n.itemRoomHelp),
+                  ],
+                  hcText(
+                    l10n.fieldName,
+                    _name,
+                    key: const Key('item-name'),
+                    validator: (v) =>
+                        (v ?? '').trim().isEmpty ? l10n.errTitleRequired : null,
+                  ),
                   hcChoice<String>(
                     l10n.fieldType,
                     _kind,
@@ -728,14 +730,10 @@ class _ItemFormScreenState extends State<ItemFormScreen>
               ),
             ),
             if (widget.itemId != null) ...[
-              const SizedBox(height: HcSpace.s4),
-              OutlinedButton(
+              HcDeleteButton(
                 key: const Key('item-delete'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: HcColors.danger,
-                ),
+                label: l10n.deleteItem,
                 onPressed: _delete,
-                child: Text(l10n.deleteItem),
               ),
             ],
           ],

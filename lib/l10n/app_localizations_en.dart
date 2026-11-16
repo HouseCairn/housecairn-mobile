@@ -93,10 +93,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreNotificationsText => 'When the phone reminds you of a task';
 
   @override
-  String get reportPhotoHelp =>
-      'A photo is optional. Its location and other metadata are removed.';
-
-  @override
   String get homes => 'My homes';
 
   @override
@@ -281,16 +277,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hemisphereSouth => 'Southern';
 
   @override
-  String get homeArchive => 'Archive';
+  String get homeArchive => 'Archive this home';
 
   @override
-  String get homeUnarchive => 'Unarchive';
+  String get homeUnarchive => 'Bring this home back';
 
   @override
   String get homeArchivedNotice => 'This home is archived: it is read only.';
 
   @override
-  String get homeDelete => 'Delete';
+  String get homeDelete => 'Delete this home';
 
   @override
   String homeDeleteTitle(String home) {
@@ -2761,4 +2757,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncNoticesRead => 'Mark as read';
+
+  @override
+  String get roomKindHelp =>
+      'Sets the icon and the filters of the room and, later, the task templates offered for it. Choose Other if none fits.';
+
+  @override
+  String get roomNameHelp =>
+      'Fills in by itself from the type; change it to name the room.';
+
+  @override
+  String get itemRoomHelp =>
+      'Where the item is. Choose another room to move it.';
+
+  @override
+  String get homeCurrencyHelp =>
+      'ISO 4217 code of the currency used for this home\'s budget.';
+
+  @override
+  String get homeHemisphereHelp =>
+      'Where the home is, for the seasons: spring in the north starts in March, in the south in September.';
+
+  @override
+  String get editHome => 'Edit the home';
+
+  @override
+  String get projectSectionRooms => 'Rooms, duration and season';
+
+  @override
+  String get projectSeason => 'Preferred season';
+
+  @override
+  String get projectSeasonAnyTime => 'Any time';
+
+  @override
+  String get projectSeasonStart => 'Custom season starts in';
+
+  @override
+  String get projectSeasonEnd => 'Custom season ends in';
+
+  @override
+  String get projectSeasonEndHelp => 'Only used with the season Custom months.';
+
+  @override
+  String projectSeasonHemisphereHelp(String hemisphere) {
+    return 'The season follows the hemisphere of the home ($hemisphere): change it in the settings of the home.';
+  }
+
+  @override
+  String get errProjectSeasonMonths => 'Give the first and the last month.';
+
+  @override
+  String get materialsFormHelp =>
+      'Stock items the task needs, with the quantity. Marking the task done takes these quantities from the stock.';
+
+  @override
+  String get addMaterialLine => 'Add a line';
+
+  @override
+  String get removeMaterialLine => 'Remove this line';
+
+  @override
+  String materialsLimit(int max) {
+    return 'A task lists at most $max stock items.';
+  }
+
+  @override
+  String reportPhotoHelpSize(String max) {
+    return 'A photo is optional: a JPEG, PNG or WebP image, $max at most. Its location and other metadata are removed.';
+  }
+
+  @override
+  String sizeMegabytes(int count) {
+    return '$count MB';
+  }
 }

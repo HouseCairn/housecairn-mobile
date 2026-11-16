@@ -254,12 +254,6 @@ abstract class AppLocalizations {
   /// **'When the phone reminds you of a task'**
   String get moreNotificationsText;
 
-  /// Help under the photo of the report form (web: reports/report_form.html, without the size, which the phone does not limit).
-  ///
-  /// In en, this message translates to:
-  /// **'A photo is optional. Its location and other metadata are removed.'**
-  String get reportPhotoHelp;
-
   /// Entry of More and title of the Homes screen. Web catalogue: Mes logements.
   ///
   /// In en, this message translates to:
@@ -611,13 +605,13 @@ abstract class AppLocalizations {
   /// Button that archives a home: hidden from Today and the selector, read only.
   ///
   /// In en, this message translates to:
-  /// **'Archive'**
+  /// **'Archive this home'**
   String get homeArchive;
 
   /// Button that brings an archived home back.
   ///
   /// In en, this message translates to:
-  /// **'Unarchive'**
+  /// **'Bring this home back'**
   String get homeUnarchive;
 
   /// Shown on the settings of an archived home.
@@ -629,7 +623,7 @@ abstract class AppLocalizations {
   /// Button that deletes a home, after its name is typed. Web catalogue: Supprimer.
   ///
   /// In en, this message translates to:
-  /// **'Delete'**
+  /// **'Delete this home'**
   String get homeDelete;
 
   /// Title of the dialog that deletes a home.
@@ -4519,6 +4513,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark as read'**
   String get syncNoticesRead;
+
+  /// Help under the Type of the room form. Web catalogue (rooms): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'Sets the icon and the filters of the room and, later, the task templates offered for it. Choose Other if none fits.'**
+  String get roomKindHelp;
+
+  /// Help under the Name of the room form. Web catalogue (rooms): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'Fills in by itself from the type; change it to name the room.'**
+  String get roomNameHelp;
+
+  /// Help under the Room of the item form. Web catalogue (rooms): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the item is. Choose another room to move it.'**
+  String get itemRoomHelp;
+
+  /// Help under the currency of the home form. Web catalogue (homes): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'ISO 4217 code of the currency used for this home\'s budget.'**
+  String get homeCurrencyHelp;
+
+  /// Help under the hemisphere of the home form. Web catalogue (homes): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the home is, for the seasons: spring in the north starts in March, in the south in September.'**
+  String get homeHemisphereHelp;
+
+  /// Title of the form of an existing home. Web catalogue (homes): Modifier le logement.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the home'**
+  String get editHome;
+
+  /// Folded section of the project form. Web catalogue (projects): Pièces, durée et saison.
+  ///
+  /// In en, this message translates to:
+  /// **'Rooms, duration and season'**
+  String get projectSectionRooms;
+
+  /// Season of the project form. Web catalogue (projects): Saison souhaitée.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred season'**
+  String get projectSeason;
+
+  /// No season for a project. Web catalogue (projects): Toute l'année.
+  ///
+  /// In en, this message translates to:
+  /// **'Any time'**
+  String get projectSeasonAnyTime;
+
+  /// First month of a custom season of a project. Web catalogue (projects): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom season starts in'**
+  String get projectSeasonStart;
+
+  /// Last month of a custom season of a project. Web catalogue (projects): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom season ends in'**
+  String get projectSeasonEnd;
+
+  /// Help under the last month of a custom season. Web catalogue (projects): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'Only used with the season Custom months.'**
+  String get projectSeasonEndHelp;
+
+  /// Help under the season of the project form. Web catalogue (projects): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'The season follows the hemisphere of the home ({hemisphere}): change it in the settings of the home.'**
+  String projectSeasonHemisphereHelp(String hemisphere);
+
+  /// Error of a custom season with a month missing. Web catalogue (projects): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the first and the last month.'**
+  String get errProjectSeasonMonths;
+
+  /// Help of the Materials section of the task form. Web catalogue (tasks): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock items the task needs, with the quantity. Marking the task done takes these quantities from the stock.'**
+  String get materialsFormHelp;
+
+  /// Button of the Materials section of the task form that adds a line. Web catalogue (tasks): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a line'**
+  String get addMaterialLine;
+
+  /// Label of the button that removes a line of the Materials section of the task form. Web catalogue (tasks): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this line'**
+  String get removeMaterialLine;
+
+  /// Notice of the Materials section when the limit is reached. Web catalogue (tasks): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'A task lists at most {max} stock items.'**
+  String materialsLimit(int max);
+
+  /// Help under the Photo of the report form. Web catalogue (reports): same text; the app names its own limit.
+  ///
+  /// In en, this message translates to:
+  /// **'A photo is optional: a JPEG, PNG or WebP image, {max} at most. Its location and other metadata are removed.'**
+  String reportPhotoHelpSize(String max);
+
+  /// A file size in megabytes, as the web writes it (filesizeformat).
+  ///
+  /// In en, this message translates to:
+  /// **'{count} MB'**
+  String sizeMegabytes(int count);
 }
 
 class _AppLocalizationsDelegate
