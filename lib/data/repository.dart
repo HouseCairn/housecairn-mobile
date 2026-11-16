@@ -18,6 +18,7 @@ import '../domain/day.dart';
 import '../domain/photos.dart';
 import '../domain/recurrence.dart' as recurrence;
 import '../domain/reminders.dart';
+import '../domain/search.dart';
 import '../domain/stock.dart' as stock;
 import '../domain/warranty.dart' as warranty;
 import '../sync/mode.dart';
