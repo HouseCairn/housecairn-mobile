@@ -190,7 +190,11 @@ Homes and Settings shows the current home.
    added with the task; Save and Cancel end it, deletion is under them. The files attached to a
    task (web: Photos and files) are not in the app yet.
 3. **Add from a template**: the bundled library, filtered by the equipment ticked.
-4. **Rooms**: list in the household's order; a room shows its memory, items, photos, tasks.
+4. **Rooms**: list in the household's order; a room shows its type, then **Report a problem**
+   (Where starts with the room), its memory (the short values as lines of label and value, with
+   **Edit the memory**, its own form as on the web), its photos, its items and its tasks, in the
+   order of the web (`rooms/room_detail.html`). **Edit** in the bar opens the name, type and
+   notes.
    Its tab **Equipment** lists every item of the home, by room then name, with its next task
    and its warranty, filtered by a room and by words of the name, brand, model or serial number
    (`rooms/services.py` `item_rows`, `rooms/item_list.html`). An **Add an item** button follows
@@ -201,7 +205,7 @@ Homes and Settings shows the current home.
    returns to that page).
 5. **Item**: details, the manufacturer's warranty (a duration in months or years, who gives it,
    its start, else the purchase date, and its end worked out; web ADR 0080), its state,
-   contract, links, photos, tasks.
+   contract, **Report a problem** (Where starts with the item), links, photos, tasks.
 
 The sheets of an existing item, room, task and stock article save themselves as they are
 changed (web ADR 0082): a choice, a date or a tick at once, a text 800 ms after the typing
@@ -209,13 +213,21 @@ stops, one write of the fields that changed, a discreet "Saved" said by the scre
 creation and a deletion keep their button, as does a task that adds a room, an item or a
 contractor with it.
 6. **Stock**: articles with low-stock flag (`stock/models.py:90-96`), an article with its
-   movements and suppliers, add an entry, an exit or an inventory.
-7. **Projects**: list by status (`projects/models.py:61-67`); a project with its budget lines,
-   quotes, tasks, links and photos.
+   movements and suppliers, add an entry, an exit or an inventory. **Edit the stock item** and
+   **Report a problem** (Where starts with the article) are the action row of its page. Saved,
+   a new article opens, and Back from it returns to the list (web design guide, After a form).
+7. **Projects**: list by status (`projects/models.py:61-67`); a project with its pills (state,
+   priority, what is left of the budget), its goal, its rooms as links, then its tasks, its
+   budget lines (Planned, Committed, Paid, Gap; a line opens its form), quotes, links and
+   photos, in the order of the web (`projects/project_detail.html`). Saved, a new project
+   opens, and Back from it returns to the list.
 8. **Budget**: the year of the current home against its envelope, by room, by project, upkeep
    (read only). Each home has its own currency and envelopes (`homes/models.py:33-39`,
    `projects/models.py:355-377`), so homes are never added together.
-9. **Report a problem**: title, place, photo; the list, make a task from a report, close it.
+9. **Report a problem**: title, place (a room, an item or a stock item), photo; the list, make a
+   task from a report, close it. A report page is a record page: its state pill, its title, then
+   Where (a link to the place), Reported on, Closed on and Task as lines of label and value, and
+   the action row.
 10. **Contractors**: list and card, call and e-mail from the card.
 11. **Homes**: the list of homes, active then archived; create, rename, change currency or
     hemisphere, archive, unarchive, delete ([Homes](#homes)).

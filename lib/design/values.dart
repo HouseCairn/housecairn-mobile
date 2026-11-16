@@ -425,3 +425,39 @@ class _RenderValueLine extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
       defaultHitTestChildren(result, position: position);
 }
+
+/// A value of a line of label and value that opens a page (the rooms of a
+/// project, the place of a report), as the web's link in a `.facts dd`: the
+/// value's style, underlined, on a target of 48 at least.
+class HcValueLink extends StatelessWidget {
+  const HcValueLink(this.text, {super.key, required this.onTap});
+
+  final String text;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    link: true,
+    child: InkWell(
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: HcLayout.touchTargetLg,
+          minWidth: HcLayout.touchTargetLg,
+        ),
+        child: Align(
+          widthFactor: 1,
+          heightFactor: 1,
+          alignment: AlignmentDirectional.centerEnd,
+          child: Text(
+            text,
+            textAlign: TextAlign.end,
+            style: HcValueText.value.copyWith(
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}

@@ -9,7 +9,6 @@ import '../l10n/app_localizations.dart';
 import 'about.dart';
 import 'budget_screens.dart';
 import 'contractor_screens.dart';
-import 'home_selector.dart';
 import 'homes_screen.dart';
 import 'project_screens.dart';
 import 'report_screens.dart';
@@ -29,29 +28,6 @@ Widget sectionRoot(Section section) => switch (section) {
   Section.budget => const BudgetScreen(),
   Section.more => const MoreScreen(),
 };
-
-/// A section with no content yet: its title, the home selector, and one line
-/// that says so. The screens of lot 2b and later replace these.
-class EmptySection extends StatelessWidget {
-  const EmptySection({super.key, required this.title});
-
-  final String Function(AppLocalizations l10n) title;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return HcScaffold(
-      title: title(l10n),
-      belowTitle: const HomeSelector(),
-      body: HcScreenList(
-        children: [
-          const SizedBox(height: HcSpace.s4),
-          HcEmpty(l10n.emptySection),
-        ],
-      ),
-    );
-  }
-}
 
 /// More, in the groups of the web and in their order (design/patterns.md of
 /// the web, More): Home, Me, Help, then the group of the app, last. An entry

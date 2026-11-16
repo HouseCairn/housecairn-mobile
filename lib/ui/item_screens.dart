@@ -21,11 +21,13 @@ import 'contractor_screens.dart';
 import 'messages.dart';
 import 'parts.dart';
 import 'photos.dart';
+import 'report_screens.dart';
 import 'rooms.dart';
 import 'state.dart';
 
-/// An item (docs/spec.md, "Screens of v1", 5): what it is, its warranty, its
-/// maintenance contract, its links, its photos and its tasks.
+/// An item (docs/spec.md, "Screens of v1", 5; `rooms/item_detail.html`):
+/// what it is, its warranty, its maintenance contract and Report a problem,
+/// then its links, its photos and its tasks.
 class ItemScreen extends StatelessWidget {
   const ItemScreen({super.key, required this.homeId, required this.itemId});
 
@@ -159,6 +161,21 @@ class ItemScreen extends StatelessWidget {
                       ),
                     if (item.notes.isNotEmpty)
                       HcFact(l10n.fieldNotes, factText(item.notes)),
+                    // The action row (`labels/_tools.html`): Edit is the
+                    // action of the bar.
+                    RecordActions(
+                      children: [
+                        OutlinedButton(
+                          key: const Key('item-report'),
+                          onPressed: () => Navigator.of(context).push(
+                            hcRoute(
+                              ReportFormScreen(homeId: homeId, itemId: itemId),
+                            ),
+                          ),
+                          child: Text(l10n.reportProblem),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),

@@ -22,6 +22,7 @@ import 'rooms.dart';
 import 'state.dart';
 import 'budget_parts.dart';
 import 'stock_format.dart';
+import 'report_screens.dart';
 import 'task_screen.dart';
 
 /// The language tag the amounts are written in.
@@ -140,13 +141,25 @@ class _StockListState extends State<StockList> {
                 label: l10n.addArticle,
                 primary: false,
                 gap: entries.isEmpty ? HcSpace.s2 : HcSpace.s3,
-                onPressed: () =>
-                    Navigator.of(context)
-                        .push(hcRoute(ArticleFormScreen(homeId: home.id))),
+                onPressed: () => _add(context),
               ),
           ],
         );
       },
+    );
+  }
+
+  /// Created from the list of its own section, the new stock item opens (web
+  /// design guide, After a form); Back from it returns to this list, still
+  /// filtered.
+  Future<void> _add(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    final id = await navigator.push(
+      hcRouteOf<String?>(ArticleFormScreen(homeId: widget.home.id)),
+    );
+    if (id == null || !mounted) return;
+    await navigator.push(
+      hcRoute(ArticleScreen(homeId: widget.home.id, articleId: id)),
     );
   }
 }
@@ -275,17 +288,30 @@ class ArticleScreen extends StatelessWidget {
                     ),
                     if (a.notes.isNotEmpty)
                       HcFact(l10n.fieldNotes, factText(a.notes)),
-                    if (writable)
-                      Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: OutlinedButton(
-                          key: const Key('article-edit'),
-                          onPressed: () => open(
-                            ArticleFormScreen(homeId: homeId, articleId: a.id),
+                    // The action row (`stock/article_detail.html`): Edit,
+                    // then Report a problem (`labels/_tools.html`).
+                    RecordActions(
+                      children: [
+                        if (writable)
+                          OutlinedButton(
+                            key: const Key('article-edit'),
+                            onPressed: () => open(
+                              ArticleFormScreen(
+                                homeId: homeId,
+                                articleId: a.id,
+                              ),
+                            ),
+                            child: Text(l10n.editArticle),
                           ),
-                          child: Text(l10n.editArticle),
+                        OutlinedButton(
+                          key: const Key('article-report'),
+                          onPressed: () => open(
+                            ReportFormScreen(homeId: homeId, articleId: a.id),
+                          ),
+                          child: Text(l10n.reportProblem),
                         ),
-                      ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -697,13 +723,17 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
     cancelAutosave();
     if (!_form.currentState!.validate()) return;
     final navigator = Navigator.of(context);
-    final saved = await runChange(
-      context,
-      (r) => widget.articleId == null
-          ? r.addArticle(widget.homeId, _input())
-          : r.updateArticle(widget.articleId!, _input()),
-    );
-    if (saved) navigator.pop();
+    String? added;
+    final saved = await runChange(context, (r) async {
+      if (widget.articleId == null) {
+        added = await r.addArticle(widget.homeId, _input());
+      } else {
+        await r.updateArticle(widget.articleId!, _input());
+      }
+    });
+    // A new stock item is given back, for the list that opened the form to
+    // open it.
+    if (saved) navigator.pop(added);
   }
 
   Future<void> _delete() async {

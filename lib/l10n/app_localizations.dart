@@ -134,12 +134,6 @@ abstract class AppLocalizations {
   /// **'More'**
   String get navMore;
 
-  /// Shown in a section that has no content in this early version.
-  ///
-  /// In en, this message translates to:
-  /// **'Nothing here yet.'**
-  String get emptySection;
-
   /// Heading of the group Help of the More screen. Web catalogue: Aide.
   ///
   /// In en, this message translates to:
@@ -1027,6 +1021,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nothing noted yet: paint, floor and wall coverings, and what runs behind the walls.'**
   String get roomMemoryEmpty;
+
+  /// Button of the memory of a room: opens its form. Web catalogue: Modifier la mémoire.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the memory'**
+  String get editMemory;
 
   /// Field of the room memory. Web catalogue: Couleur de la peinture.
   ///
@@ -2390,6 +2390,12 @@ abstract class AppLocalizations {
   /// **'Paid'**
   String get amountPaid;
 
+  /// Amount of a budget line of a project: the planned amount less the more of committed and paid. Web catalogue: Écart.
+  ///
+  /// In en, this message translates to:
+  /// **'Gap'**
+  String get amountGap;
+
   /// Web catalogue (projects, budget or reports): Consommé.
   ///
   /// In en, this message translates to:
@@ -3181,6 +3187,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Where?'**
   String get reportWhere;
+
+  /// Label of the place on the page of a report (reports/report_detail.html). Web catalogue: Où.
+  ///
+  /// In en, this message translates to:
+  /// **'Where'**
+  String get reportWhereFact;
 
   /// Web catalogue (projects, budget or reports): Signalé le.
   ///
