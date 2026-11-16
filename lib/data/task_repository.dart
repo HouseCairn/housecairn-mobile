@@ -58,14 +58,18 @@ class HistoryFilter {
   final Day? after;
   final Day? before;
 
-  bool get active =>
-      roomId != null ||
-      itemId != null ||
-      contractorId != null ||
-      query.trim().isNotEmpty ||
-      status.isNotEmpty ||
-      after != null ||
-      before != null;
+  bool get active => criteria > 0 || query.trim().isNotEmpty;
+
+  /// How many criteria of the sheet Filters apply (the search field is not
+  /// one of them), the count of "Filters (2)".
+  int get criteria => [
+    roomId,
+    itemId,
+    contractorId,
+    status.isEmpty ? null : status,
+    after,
+    before,
+  ].nonNulls.length;
 }
 
 /// A closed occurrence of the history, with where it happened and who was
@@ -149,6 +153,7 @@ extension TaskListsRepository on Repository {
     String? roomId,
     bool showHidden = false,
     int page = 1,
+    String query = '',
   }) async {
     final home = await this.home(homeId);
     if (home == null) throw const Refused(Refusal.notFound);
@@ -187,39 +192,70 @@ extension TaskListsRepository on Repository {
       return row.read(total)!;
     }
 
-    final total = await count(filter(db));
+    final needle = foldForSearch(query.trim());
     var hidden = 0;
     if (!showHidden) {
       hidden = await count(open(db)) - await count(open(db) & shown(db));
     }
+    final rooms = await _roomNames([homeId]);
+    final items = await _itemNames([homeId]);
+    final order = [
+      OrderingTerm(expression: db.occurrences.dueOn, nulls: NullsOrder.last),
+      OrderingTerm.asc(db.occurrences.createdAt),
+      OrderingTerm.asc(db.occurrences.id),
+    ];
+    TodayEntry entry(TypedResult row) => TodayEntry(
+      occurrence: row.readTable(db.occurrences),
+      task: row.readTable(db.tasks),
+      home: home,
+      roomName: rooms[row.readTable(db.tasks).roomId],
+      itemName: items[row.readTable(db.tasks).itemId],
+    );
+
+    if (needle.isNotEmpty) {
+      // A search compares the folded title, room and item: the rows are read
+      // once, ordered, and kept in memory for the page.
+      final all =
+          await (select()
+                ..where(filter(db))
+                ..orderBy(order))
+              .get();
+      final found = <TypedResult>[
+        for (final row in all)
+          if (matchesSearch(needle, [
+            foldForSearch(row.readTable(db.tasks).title),
+            foldForSearch(rooms[row.readTable(db.tasks).roomId] ?? ''),
+            foldForSearch(items[row.readTable(db.tasks).itemId] ?? ''),
+          ]))
+            row,
+      ];
+      final pages = found.isEmpty
+          ? 1
+          : (found.length + taskPageSize - 1) ~/ taskPageSize;
+      final shownPage = page.clamp(1, pages);
+      return TaskListPage(
+        rows: [
+          for (final row
+              in found.skip((shownPage - 1) * taskPageSize).take(taskPageSize))
+            entry(row),
+        ],
+        total: found.length,
+        hidden: hidden,
+        page: shownPage,
+      );
+    }
+
+    final total = await count(filter(db));
     final pages = total == 0 ? 1 : (total + taskPageSize - 1) ~/ taskPageSize;
     final shownPage = page.clamp(1, pages);
     final rows =
         await (select()
               ..where(filter(db))
-              ..orderBy([
-                OrderingTerm(
-                  expression: db.occurrences.dueOn,
-                  nulls: NullsOrder.last,
-                ),
-                OrderingTerm.asc(db.occurrences.createdAt),
-                OrderingTerm.asc(db.occurrences.id),
-              ])
+              ..orderBy(order)
               ..limit(taskPageSize, offset: (shownPage - 1) * taskPageSize))
             .get();
-    final rooms = await _roomNames([homeId]);
-    final items = await _itemNames([homeId]);
     return TaskListPage(
-      rows: [
-        for (final row in rows)
-          TodayEntry(
-            occurrence: row.readTable(db.occurrences),
-            task: row.readTable(db.tasks),
-            home: home,
-            roomName: rooms[row.readTable(db.tasks).roomId],
-            itemName: items[row.readTable(db.tasks).itemId],
-          ),
-      ],
+      rows: [for (final row in rows) entry(row)],
       total: total,
       hidden: hidden,
       page: shownPage,
@@ -304,7 +340,7 @@ extension TaskListsRepository on Repository {
     final rooms = await _roomNames([homeId]);
     final items = await _itemNames([homeId]);
     final names = {for (final c in await contractors(homeId)) c.id: c.name};
-    final query = selection.query.trim().toLowerCase();
+    final query = foldForSearch(selection.query.trim());
     final entries = <HistoryEntry>[];
     for (final row in rows) {
       final occurrence = row.readTable(db.occurrences);
@@ -319,9 +355,12 @@ extension TaskListsRepository on Repository {
           task.contractorId != selection.contractorId) {
         continue;
       }
-      if (query.isNotEmpty &&
-          !task.title.toLowerCase().contains(query) &&
-          !occurrence.completionNote.toLowerCase().contains(query)) {
+      if (!matchesSearch(query, [
+        foldForSearch(task.title),
+        foldForSearch(occurrence.completionNote),
+        foldForSearch(rooms[task.roomId] ?? ''),
+        foldForSearch(items[task.itemId] ?? ''),
+      ])) {
         continue;
       }
       final closedOn = occurrence.completedOn != null

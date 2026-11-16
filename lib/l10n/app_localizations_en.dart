@@ -916,10 +916,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stockSearch => 'Search by name, reference or supplier';
 
   @override
-  String get stockLowOnly => 'Low stock only';
-
-  @override
-  String get stockLow => 'Low';
+  String get stockTabAll => 'All';
 
   @override
   String get stockEmpty => 'No stock item yet.';
@@ -1932,9 +1929,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tasksTitle => 'Tasks';
 
   @override
-  String get tasksFilterShow => 'Show';
-
-  @override
   String get tasksToDo => 'To do';
 
   @override
@@ -1970,6 +1964,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String pageOf(int number, int total) {
     return 'Page $number of $total';
   }
+
+  @override
+  String filtersCount(int count) {
+    return 'Filters ($count)';
+  }
+
+  @override
+  String get filtersClearAll => 'Clear filters';
+
+  @override
+  String get searchClear => 'Clear the search';
+
+  @override
+  String get tasksSearchLabel => 'Search by task, room or item';
 
   @override
   String get historyFilters => 'Filters';

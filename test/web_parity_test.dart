@@ -502,11 +502,14 @@ Measures measure(
   if (field) {
     final decorator = find.byType(InputDecorator).first;
     m['field_height'] = rectOf(tester, decorator).height;
-    final label = find.descendant(
-      of: find.byType(HcField).first,
-      matching: find.byType(Text),
-    );
-    m['label_font'] = drawnSize(tester, label.first);
+    // A search field has no label above it (a screen reader reads it).
+    if (find.byType(HcField).evaluate().isNotEmpty) {
+      final label = find.descendant(
+        of: find.byType(HcField).first,
+        matching: find.byType(Text),
+      );
+      m['label_font'] = drawnSize(tester, label.first);
+    }
   }
   return m;
 }
@@ -607,9 +610,12 @@ final screens = <Screen>[
     name: 'history',
     open: (tester, demo) async {
       await openScreen(tester, TaskListScreen(homeId: demo.home));
-      await tester.tap(find.byKey(const Key('tasks-status')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Faites').last);
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const Key('tasks-status')),
+          matching: find.text('Faites'),
+        ),
+      );
       await tester.pumpAndSettle();
     },
     measure: (t) => measure(t, field: true),
@@ -776,7 +782,9 @@ const adaptations = <String, ({double app, String why})>{
 const absences = <String, String>{
   'rooms.label_font':
       'the web has a search field above the rooms; the app has no search yet',
-  'stock.label_font': 'the label of the search field: this test reads labels on forms only; the app draws it with HcField, as every label',
+  'stock.label_font': 'the search field of the web has a label only for screen readers, and the app\'s has none above it: this test reads the labels drawn above fields',
+  'tasks.label_font': 'the web reference was recorded with a select above the list; the search field has no label drawn above it, on either side now',
+  'history.label_font': 'the web reference was recorded with a select above the list; the search field has no label drawn above it, on either side now',
   'room_form.h2_font':
       'the memory of the room is in this form, a screen of its own on the web',
   'room_form.h2_weight':

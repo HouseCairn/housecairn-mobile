@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
+import '../design/filters.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
@@ -38,14 +39,18 @@ class _TaskListScreenState extends State<TaskListScreen> {
   bool _showHidden = false;
   int _page = 1;
 
-  // The filters of the history.
+  // The search, shared by both tabs: what the field holds, and what the list
+  // was last asked (the field's text follows the typing after a pause).
   final _query = TextEditingController();
+  String _search = '';
+
+  // The other criteria of the history, in the sheet Filters.
   String? _itemId;
   String? _contractorId;
   String _outcome = '';
   Day? _after;
   Day? _before;
-  bool _filtersOpen = false;
+  int _loads = 0;
 
   TaskListPage? _list;
   HistoryPage? _past;
@@ -75,13 +80,22 @@ class _TaskListScreenState extends State<TaskListScreen> {
     roomId: _roomId,
     itemId: _itemId,
     contractorId: _contractorId,
-    query: _query.text,
+    query: _search,
     status: _outcome,
     after: _after,
     before: _before,
   );
 
+  /// How many criteria of the sheet apply: the room on the tasks to do, those
+  /// of the history under Done.
+  int get _criteria => _history
+      ? _filter.criteria
+      : (_rooms.any((r) => r.id == _roomId) ? 1 : 0);
+
+  bool get _searching => _search.trim().isNotEmpty || _criteria > 0;
+
   Future<void> _load() async {
+    final turn = ++_loads;
     final repository = AppScope.of(context).repository;
     final rooms = await repository.rooms(widget.homeId);
     final items = await repository.itemsOfHome(widget.homeId);
@@ -94,11 +108,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
             roomId: _roomId,
             showHidden: _showHidden,
             page: _page,
+            query: _search,
           );
     final past = _history
         ? await repository.history(widget.homeId, _filter, page: _page)
         : null;
-    if (!mounted) return;
+    // A later change of filter asked again while this one was reading.
+    if (!mounted || turn != _loads) return;
     setState(() {
       _rooms = rooms;
       _items = items;
@@ -152,28 +168,47 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
-  Widget _statusAndRoom(AppLocalizations l10n) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      hcChoice<bool>(
-        l10n.tasksFilterShow,
-        _history,
-        [(false, l10n.tasksToDo), (true, l10n.tasksDoneFilter)],
-        (value) => _change(() => _history = value),
-        key: const Key('tasks-status'),
-      ),
-      if (!_history)
-        hcChoice<String?>(
-          l10n.room,
-          _rooms.any((r) => r.id == _roomId) ? _roomId : null,
-          [
-            (null, l10n.tasksAllRooms),
-            for (final room in _rooms) (room.id, room.name),
-          ],
-          (value) => _change(() => _roomId = value),
-          key: const Key('tasks-room'),
-        ),
-    ],
+  void _setSearch(String text) {
+    if (text == _search) return;
+    _change(() => _search = text);
+  }
+
+  /// Everything shown again: the search and every criterion removed.
+  void _clearAll() => _change(() {
+    _query.clear();
+    _search = '';
+    _roomId = null;
+    _itemId = null;
+    _contractorId = null;
+    _outcome = '';
+    _after = null;
+    _before = null;
+  });
+
+  Widget _bar(AppLocalizations l10n) => HcFilterBar(
+    tabsKey: const Key('tasks-status'),
+    tabLabels: [l10n.tasksToDo, l10n.tasksDoneFilter],
+    currentTab: _history ? 1 : 0,
+    onTab: (index) => _change(() => _history = index == 1),
+    searchController: _query,
+    searchKey: const Key('tasks-search'),
+    searchLabel: l10n.tasksSearchLabel,
+    onSearch: _setSearch,
+    filterCount: _criteria,
+    filtersKey: const Key('filters-toggle'),
+    onFilters: () => showHcFilterSheet(
+      context,
+      count: () => _criteria,
+      onClear: () => _change(() {
+        _roomId = null;
+        _itemId = null;
+        _contractorId = null;
+        _outcome = '';
+        _after = null;
+        _before = null;
+      }),
+      builder: (context, refresh) => _sheet(l10n, refresh),
+    ),
   );
 
   Widget _openList(AppLocalizations l10n, TaskListPage list) {
@@ -181,7 +216,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (list.rows.isEmpty)
+        if (list.rows.isEmpty && _searching)
+          HcNoMatch(text: l10n.historyNothingMatches, onClear: _clearAll)
+        else if (list.rows.isEmpty)
           HcEmpty(l10n.tasksNone)
         else
           HcCardList(
@@ -212,110 +249,72 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
-  Widget _dayField(String label, Day? value, ValueChanged<Day?> onChanged) =>
-      HcDateField(
-        label: label,
-        value: value,
-        noDate: '—',
-        onChanged: (day) => _change(() => onChanged(day)),
-      );
+  /// The criteria of the sheet Filters: the room under To do; under Done the
+  /// room, the item, who was paid, the outcome and the dates.
+  Widget _sheet(AppLocalizations l10n, VoidCallback refresh) {
+    void pick(VoidCallback change) {
+      _change(change);
+      refresh();
+    }
 
-  Widget _filters(AppLocalizations l10n) {
-    final clear = _filter.active;
+    final room = hcChoice<String?>(
+      l10n.room,
+      _rooms.any((r) => r.id == _roomId) ? _roomId : null,
+      [
+        (null, l10n.tasksAllRooms),
+        for (final room in _rooms) (room.id, room.name),
+      ],
+      (value) => pick(() => _roomId = value),
+      key: Key(_history ? 'history-room' : 'tasks-room'),
+    );
+    if (!_history) return room;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        HcCardList(
-          children: [
-            HcRow(
-              key: const Key('filters-toggle'),
-              title: l10n.historyFilters,
-              onTap: () => setState(() => _filtersOpen = !_filtersOpen),
-            ),
+        room,
+        hcChoice<String?>(
+          l10n.item,
+          _items.any((i) => i.id == _itemId) ? _itemId : null,
+          [
+            (null, l10n.historyAllItems),
+            for (final item in _items) (item.id, item.name),
           ],
+          (value) => pick(() => _itemId = value),
+          key: const Key('history-item'),
         ),
-        if (_filtersOpen || clear) ...[
-          const SizedBox(height: HcSpace.s3),
-          HcField(
-            label: l10n.historySearch,
-            child: TextField(
-              key: const Key('history-query'),
-              controller: _query,
-              textInputAction: TextInputAction.search,
-              onSubmitted: (_) => _change(() {}),
-            ),
-          ),
-          hcChoice<String?>(
-            l10n.room,
-            _rooms.any((r) => r.id == _roomId) ? _roomId : null,
-            [
-              (null, l10n.tasksAllRooms),
-              for (final room in _rooms) (room.id, room.name),
-            ],
-            (value) => _change(() => _roomId = value),
-            key: const Key('history-room'),
-          ),
-          hcChoice<String?>(
-            l10n.item,
-            _items.any((i) => i.id == _itemId) ? _itemId : null,
-            [
-              (null, l10n.historyAllItems),
-              for (final item in _items) (item.id, item.name),
-            ],
-            (value) => _change(() => _itemId = value),
-            key: const Key('history-item'),
-          ),
-          hcChoice<String?>(
-            l10n.contractor,
-            _contractors.any((c) => c.id == _contractorId)
-                ? _contractorId
-                : null,
-            [
-              (null, l10n.historyEveryone),
-              for (final c in _contractors) (c.id, c.name),
-            ],
-            (value) => _change(() => _contractorId = value),
-            key: const Key('history-contractor'),
-          ),
-          hcChoice<String>(
-            l10n.historyOutcome,
-            _outcome,
-            [
-              ('', l10n.historyDoneOrSkipped),
-              ('done', l10n.historyOutcomeDone),
-              ('skipped', l10n.historyOutcomeSkipped),
-            ],
-            (value) => _change(() => _outcome = value),
-            key: const Key('history-outcome'),
-          ),
-          _dayField(l10n.historyFrom, _after, (day) => _after = day),
-          _dayField(l10n.historyTo, _before, (day) => _before = day),
-          Row(
-            children: [
-              FilledButton(
-                key: const Key('history-apply'),
-                onPressed: () => _change(() {}),
-                child: Text(l10n.tasksFilterShow),
-              ),
-              const SizedBox(width: HcSpace.s2),
-              if (clear)
-                OutlinedButton(
-                  key: const Key('history-clear'),
-                  onPressed: () => _change(() {
-                    _query.clear();
-                    _roomId = null;
-                    _itemId = null;
-                    _contractorId = null;
-                    _outcome = '';
-                    _after = null;
-                    _before = null;
-                  }),
-                  child: Text(l10n.historyClear),
-                ),
-            ],
-          ),
-          const SizedBox(height: HcSpace.s3),
-        ],
+        hcChoice<String?>(
+          l10n.contractor,
+          _contractors.any((c) => c.id == _contractorId) ? _contractorId : null,
+          [
+            (null, l10n.historyEveryone),
+            for (final c in _contractors) (c.id, c.name),
+          ],
+          (value) => pick(() => _contractorId = value),
+          key: const Key('history-contractor'),
+        ),
+        hcChoice<String>(
+          l10n.historyOutcome,
+          _outcome,
+          [
+            ('', l10n.historyDoneOrSkipped),
+            ('done', l10n.historyOutcomeDone),
+            ('skipped', l10n.historyOutcomeSkipped),
+          ],
+          (value) => pick(() => _outcome = value),
+          key: const Key('history-outcome'),
+        ),
+        HcDateField(
+          label: l10n.historyFrom,
+          value: _after,
+          noDate: '—',
+          onChanged: (day) => pick(() => _after = day),
+        ),
+        HcDateField(
+          label: l10n.historyTo,
+          value: _before,
+          noDate: '—',
+          onChanged: (day) => pick(() => _before = day),
+        ),
       ],
     );
   }
@@ -326,7 +325,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _filters(l10n),
         // The count and the real cost of the whole selection, as the web's
         // `history-total` (a status for assistive technology).
         Semantics(
@@ -345,12 +343,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
           ),
         ),
         const SizedBox(height: HcSpace.s3),
-        if (past.rows.isEmpty)
-          HcEmpty(
-            _filter.active
-                ? l10n.historyNothingMatches
-                : l10n.historyNothingDone,
-          )
+        if (past.rows.isEmpty && _filter.active)
+          HcNoMatch(text: l10n.historyNothingMatches, onClear: _clearAll)
+        else if (past.rows.isEmpty)
+          HcEmpty(l10n.historyNothingDone)
         else
           HcCardList(
             children: [
@@ -408,7 +404,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   current: 1,
                   onSelect: (_) => Navigator.of(context).pop(),
                 ),
-                _statusAndRoom(l10n),
+                _bar(l10n),
                 if (list != null) _openList(l10n, list),
                 if (past != null) _historyList(l10n, past),
                 if (writable && !_history) ...[
