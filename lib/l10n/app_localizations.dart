@@ -182,6 +182,36 @@ abstract class AppLocalizations {
   /// **'Open source licences'**
   String get aboutLicences;
 
+  /// Row of the About screen that gives the address of the public iPhone beta, to invite someone.
+  ///
+  /// In en, this message translates to:
+  /// **'iPhone beta (TestFlight)'**
+  String get aboutBeta;
+
+  /// Action of the iPhone beta row: opens its address in the browser of the phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the link'**
+  String get aboutBetaOpen;
+
+  /// Action of the iPhone beta row: copies its address, to send it to someone.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the link'**
+  String get aboutBetaCopy;
+
+  /// Message shown once the address of the iPhone beta is copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get aboutBetaCopied;
+
+  /// Message when the phone has no app to open the address of the iPhone beta.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on this phone can open this link.'**
+  String get aboutBetaCannotOpen;
+
   /// Heading of the group Home of More (web: core/more.py, msgctxt "group of More").
   ///
   /// In en, this message translates to:
