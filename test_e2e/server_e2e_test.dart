@@ -111,6 +111,23 @@ void main() {
     expect(names, ['E2E house']);
   }, skip: skip);
 
+  test('an access the server refuses (401) is renewed by the refresh token, '
+      'without a CSRF cookie, and the call goes through', () async {
+    final before = (await ServerCredential.read(store))!;
+    await ServerCredential(
+      access: 'hca_not-an-access-of-this-server',
+      refresh: before.refresh,
+      token: before.token,
+      revoke: before.revoke,
+    ).write(store);
+    final homes = await transport.homes();
+    expect(homes.map((h) => h.id), [home]);
+    final after = (await ServerCredential.read(store))!;
+    expect(after.access, startsWith('hca_'));
+    expect(after.access, isNot('hca_not-an-access-of-this-server'));
+    expect(after.refresh, isNot(before.refresh), reason: 'rotated');
+  }, skip: skip);
+
   test('a change made on the phone is read through the web API', () async {
     phone.clock.set(DateTime.now().toUtc());
     final room = await phone.repo.createRoom(home, name: 'Kitchen');
@@ -208,26 +225,18 @@ void main() {
     );
   }, skip: skip);
 
-  test(
-    'v0.4.0: /o/token/ and /o/revoke_token/ take a request without a CSRF '
-    'cookie, as a phone sends it',
-    () async {
-      for (final route in ['/o/token/', '/o/revoke_token/']) {
-        final reply = await web.raw(
-          'POST',
-          address.resolve(route),
-          headers: {'content-type': 'application/x-www-form-urlencoded'},
-          body: 'client_id=$oauthClientId',
-        );
-        expect(reply.$1, isNot(403), reason: route);
-      }
-    },
-    skip:
-        skip ??
-        'Web v0.4.0 answers 403 (CSRF) on both: TokenView and RevokeTokenView '
-            'override dispatch without csrf_exempt. A phone can then neither '
-            'refresh its access nor revoke it on disconnect.',
-  );
+  test('/o/token/ and /o/revoke_token/ take a request without a CSRF cookie, '
+      'as a phone sends it (web v0.4.1)', () async {
+    for (final route in ['/o/token/', '/o/revoke_token/']) {
+      final reply = await web.raw(
+        'POST',
+        address.resolve(route),
+        headers: {'content-type': 'application/x-www-form-urlencoded'},
+        body: 'client_id=$oauthClientId',
+      );
+      expect(reply.$1, isNot(403), reason: route);
+    }
+  }, skip: skip);
 }
 
 class _MemoryStore implements Store {
@@ -252,10 +261,8 @@ class _Web {
   final String apiToken;
   final _client = HttpClient();
 
-  /// The CSRF cookie the consent page set. v0.4.0 answers 403 to a request
-  /// of `/o/token/` without it (its `TokenView.dispatch` override drops the
-  /// `csrf_exempt` of django-oauth-toolkit), which no phone can send; the
-  /// test sends it, and [csrfDefect] names the gap.
+  /// The CSRF cookie the consent page set, for the pages of the browser
+  /// only: the token requests go without it, as a phone sends them.
   String? csrf;
 
   void close() => _client.close(force: true);
@@ -329,10 +336,6 @@ class _Web {
       headers: {
         'accept': 'application/json',
         'content-type': 'application/x-www-form-urlencoded',
-        if (csrf != null) ...{
-          'cookie': 'csrftoken=$csrf',
-          'x-csrftoken': csrf!,
-        },
       },
       body: Uri(queryParameters: fields).query,
     );

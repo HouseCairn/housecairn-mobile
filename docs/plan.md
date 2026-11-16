@@ -423,6 +423,41 @@ mobile lots, as a card of its own in the web repository. A change in the Home As
 the way works against the add-on, and is made in the add-on's repository. Not on lots 5 to 7:
 no crypto, no relay, no subscription. **Lot 8 waits for this lot.**
 
+**Decisions of the maintainer (2026-11-16)**, after the web release v0.4.0 (then v0.4.1) brought
+the sync API without the right to create homes and without the files:
+
+1. "**M5c and M6 leave lot 4b** for a new **lot 4c**, which waits for a web version that has
+   `POST /api/v1/sync/homes/` (M5c) and the files (M6). Lot 4c carries: 'keep this phone's
+   homes' when moving to the server, and the photos and attachments in server mode."
+2. "**Reminders**: the web adds the current member of the signed-in account to the
+   sync API. Reminders in server mode wait for that version." The criterion "Reminders on the
+   phone cover the tasks of the signed-in account and the tasks with no assignee" waits for
+   it, and is done in the first lot after that web version.
+3. "**In-app purchase**: out of lot 4b, in a dedicated lot later." The criterion "The way
+   stays locked until the purchase is made" moves with it.
+4. "**Settings** (server address, the sentence of ADR 0010, Disconnect): not in this card. A
+   dedicated card will do it after the merge of D5 (#26)."
+
+So lot 4b, as merged, covers with web v0.4.1: `ServerTransport`, the address rule, the sign-in
+and confirmation screens, the mark **seen by the server** and the reconciliation after 410, the
+cases of ADR 0003 against the web, the move server → alone, the move alone → server when the
+phone has no home (with homes on the phone, the app says that keeping them on a server comes
+with lot 4c, and changes nothing), archiving by owners, the members read only. The e2e job runs
+against the image v0.4.1, pinned by digest.
+
+## Lot 4c. Homes of the phone and files on a server
+
+**Scope**: what lot 4b left for a later web version (decision 1 above): **keep this phone's
+homes** when moving alone → server (the phone creates empty homes on the server under its
+access's right, `POST /api/v1/sync/homes/`, then sends every row with its own ids), and, with
+data on both sides, the choice between keeping the phone's homes and keeping the server's,
+after an export is offered; the files of photos and attachments in server mode (web M6).
+
+**Acceptance**: the criteria of lot 4b that name these (send with two homes, the take after an
+export and a typed confirmation, the files), against the web release that brings M5c and M6.
+
+**Depends on**: lot 4b, and that web release.
+
 ## Lot 5. Encryption and family
 
 **Scope**: device keys in secure storage; epochs; batch, snapshot and blob formats of
