@@ -431,8 +431,10 @@ class ServerTransport implements SyncTransport {
   }
 
   /// The homes of the access, and those erased while bound to it; kept in
-  /// the state for [homesGone] and the members of each home.
-  Future<List<ServerHome>> homes() async {
+  /// the state for [homesGone] and the members of each home. With [keep]
+  /// `false` they are only read (a new sign-in not confirmed yet), and the
+  /// state is left as it was.
+  Future<List<ServerHome>> homes({bool keep = true}) async {
     final reply = await _call('GET', '/api/v1/sync/homes/');
     if (reply.status != 200) _unexpected(reply);
     final json = _json(reply);
@@ -440,6 +442,7 @@ class ServerTransport implements SyncTransport {
       for (final h in (json['homes'] as List? ?? const []))
         ServerHome.fromJson((h as Map).cast<String, Object?>()),
     ];
+    if (!keep) return listed;
     final s = await _state();
     final before = {for (final h in s.homes) h.id};
     final now = {for (final h in listed) h.id};
@@ -956,8 +959,10 @@ class ServerTransport implements SyncTransport {
   Future<void> deleteFile(String id) async {}
 
   /// Disconnect: the access is revoked on the server when it answers, and
-  /// the credential is deleted from [store] whatever happens.
-  Future<void> disconnect() async {
+  /// the credential is deleted from [store] whatever happens. With
+  /// [keepState] the cursor and the homes of the transport stay: a new
+  /// sign-in to the same server, cancelled, leaves the phone where it was.
+  Future<void> disconnect({bool keepState = false}) async {
     final credential = await ServerCredential.read(store);
     try {
       if (credential != null && address.owns(credential.revoke)) {
@@ -980,8 +985,10 @@ class ServerTransport implements SyncTransport {
       // Offline: the access can still be revoked on the server's page.
     } finally {
       await ServerCredential.forget(store);
-      await state.writeServerState(null);
-      _cached = null;
+      if (!keepState) {
+        await state.writeServerState(null);
+        _cached = null;
+      }
     }
   }
 }

@@ -4256,6 +4256,42 @@ abstract class AppLocalizations {
   /// **'Other changes: {count}'**
   String wayLeaveServerOther(int count);
 
+  /// Title of the read-only row of More that shows the address of the server in use (third way, ADR 0010).
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to'**
+  String get settingsServerAddress;
+
+  /// Row and button: revoke the access of this phone, delete it from the phone and go back to using the app alone, keeping the homes.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get settingsServerDisconnect;
+
+  /// Line under Disconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke the access of this phone. Your homes stay on it.'**
+  String get settingsServerDisconnectText;
+
+  /// Title of the confirmation of Disconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect from this server?'**
+  String get settingsServerDisconnectTitle;
+
+  /// Row shown when the server revoked or expired the access: signs in again to the same server, in the browser.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get settingsServerSignInAgain;
+
+  /// On the confirmation after signing in again: the homes of the phone that the new access does not cover.
+  ///
+  /// In en, this message translates to:
+  /// **'These homes are not in the access you chose and will leave this phone at the next sync: {names}'**
+  String settingsServerReconnectDropped(String names);
+
   /// Title of the screen and row of More that show the sync with the server (lot 4b).
   ///
   /// In en, this message translates to:

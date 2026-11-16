@@ -272,3 +272,41 @@ class ServerCredential {
   @override
   String toString() => 'ServerCredential(…)';
 }
+
+/// A [Store] that keeps the credential in memory and passes every other key
+/// to [store]: a new sign-in to the server in use lives here until the
+/// person confirms it, so that the secure store keeps the access it had,
+/// byte for byte, when they go back or the next step fails.
+class HeldCredentialStore implements Store {
+  HeldCredentialStore(this.store);
+
+  final Store store;
+  Uint8List? _credential;
+
+  /// The credential held, `null` before the sign-in or once forgotten.
+  ServerCredential? get credential => ServerCredential.decode(_credential);
+
+  @override
+  Future<Uint8List?> read(String key) async {
+    if (key == ServerCredential.storeKey) return _credential;
+    return store.read(key);
+  }
+
+  @override
+  Future<void> write(String key, Uint8List value) async {
+    if (key == ServerCredential.storeKey) {
+      _credential = value;
+    } else {
+      await store.write(key, value);
+    }
+  }
+
+  @override
+  Future<void> delete(String key) async {
+    if (key == ServerCredential.storeKey) {
+      _credential = null;
+    } else {
+      await store.delete(key);
+    }
+  }
+}
