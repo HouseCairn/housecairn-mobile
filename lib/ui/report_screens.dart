@@ -7,6 +7,7 @@ import '../data/database.dart';
 import '../data/repository.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
+import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/day.dart';
 import '../domain/photos.dart';
@@ -15,6 +16,9 @@ import '../l10n/app_localizations.dart';
 import 'parts.dart';
 import 'messages.dart';
 import 'state.dart';
+import 'item_screens.dart';
+import 'rooms.dart';
+import 'stock_screens.dart';
 import 'task_screen.dart';
 
 String reportStatusLabel(AppLocalizations l10n, String status) =>
@@ -157,129 +161,178 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 }
 
-/// A report (`reports/report_detail.html`): what, where, when, its photo,
-/// and the actions: make it a task, close it, reopen it.
+/// What the page of a report shows: the report, its task, its home, and the
+/// room, item or stock item it is about, when it still exists.
+class _ReportData {
+  _ReportData(this.report, this.task, this.home, this.where);
+
+  final ReportRow report;
+  final TaskRow? task;
+  final HomeRow home;
+
+  /// The page of the place, to open from Where.
+  final Widget? where;
+}
+
+/// A report (`reports/report_detail.html`), on the pattern of a record page:
+/// its state pill, its title, Where, Reported on, Closed on and Task as lines
+/// of label and value, its photo, then the action row: make it a task, close
+/// it, or reopen it.
 class ReportScreen extends StatelessWidget {
   const ReportScreen({super.key, required this.homeId, required this.reportId});
 
   final String homeId;
   final String reportId;
 
+  Future<_ReportData?> _load(Repository r) async {
+    final report = await r.report(reportId);
+    final home = await r.home(homeId);
+    if (report == null || home == null) return null;
+    final task = report.taskId == null ? null : await r.task(report.taskId!);
+    Widget? where;
+    if (report.roomId != null && await r.room(report.roomId!) != null) {
+      where = RoomScreen(homeId: homeId, roomId: report.roomId!);
+    } else if (report.itemId != null && await r.item(report.itemId!) != null) {
+      where = ItemScreen(homeId: homeId, itemId: report.itemId!);
+    } else if (report.articleId != null &&
+        await r.article(report.articleId!) != null) {
+      where = ArticleScreen(homeId: homeId, articleId: report.articleId!);
+    }
+    return _ReportData(report, task, home, where);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return DataView<(ReportRow?, TaskRow?, HomeRow?)>(
-      load: (r) async {
-        final report = await r.report(reportId);
-        final task = report?.taskId == null
-            ? null
-            : await r.task(report!.taskId!);
-        return (report, task, await r.home(homeId));
-      },
+    return DataView<_ReportData?>(
+      load: _load,
       builder: (context, data) {
-        final (report, task, home) = data;
-        if (report == null || home == null) return HcScaffold();
+        if (data == null) return HcScaffold();
+        final report = data.report;
+        final task = data.task;
+        final where = data.where;
         final repository = AppScope.of(context).repository;
-        final writable = home.archivedAt == null;
+        final writable = data.home.archivedAt == null;
         final closed = reportClosedStatuses.contains(report.status);
         final photo = repository.reportPhoto(report);
+        void open(Widget screen) => Navigator.of(context).push(hcRoute(screen));
+        Future<void> change(Future<void> Function(Repository) action) async {
+          await runChange(context, action);
+        }
+
         return HcScaffold(
           title: report.title,
+          // The title is drawn under the pill, as on the web.
+          drawsTitle: false,
           actions: const [HelpButton(page: HelpPages.report)],
           body: HcScreenList(
             children: [
-              const SizedBox(height: HcSpace.s2),
               HcCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: HcSpace.s3),
-                      child: Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: HcPill(
-                          reportStatusLabel(l10n, report.status),
-                          tone: reportStatusTone(report.status),
-                        ),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: HcPill(
+                        reportStatusLabel(l10n, report.status),
+                        key: const Key('report-status'),
+                        tone: reportStatusTone(report.status),
                       ),
                     ),
-                    if (report.place.isNotEmpty)
-                      HcFact(l10n.reportWhere, factText(report.place)),
-                    HcFact(
-                      l10n.reportedOn,
-                      factText(formatDay(context, _dayOf(report.createdAt))),
+                    const SizedBox(height: HcSpace.s2),
+                    Semantics(
+                      header: true,
+                      child: Text(report.title, style: HcText.pageTitle),
                     ),
-                    if (report.closedAt != null)
-                      HcFact(
-                        l10n.closedOn,
-                        factText(formatDay(context, _dayOf(report.closedAt!))),
-                      ),
-                    if (task != null)
-                      HcFact(
-                        l10n.reportTask,
-                        InkWell(
-                          onTap: () => Navigator.of(context).push(
-                            hcRoute(
-                              TaskScreen(homeId: homeId, taskId: task.id),
-                            ),
+                    const SizedBox(height: HcSpace.s3),
+                    HcValueList(
+                      key: const Key('report-facts'),
+                      children: [
+                        if (report.place.isNotEmpty)
+                          HcValueRow(
+                            l10n.reportWhereFact,
+                            report.place,
+                            child: where == null
+                                ? null
+                                : HcValueLink(
+                                    report.place,
+                                    key: const Key('report-where'),
+                                    onTap: () => open(where),
+                                  ),
                           ),
-                          child: Text(
+                        HcValueRow(
+                          l10n.reportedOn,
+                          formatDay(context, _dayOf(report.createdAt)),
+                        ),
+                        if (report.closedAt != null)
+                          HcValueRow(
+                            l10n.closedOn,
+                            formatDay(context, _dayOf(report.closedAt!)),
+                          ),
+                        if (task != null)
+                          HcValueRow(
+                            l10n.reportTask,
                             task.title,
-                            style: HcText.body.copyWith(
-                              color: HcColors.primary,
-                              decoration: TextDecoration.underline,
+                            child: HcValueLink(
+                              task.title,
+                              key: const Key('report-task'),
+                              onTap: () => open(
+                                TaskScreen(homeId: homeId, taskId: task.id),
+                              ),
                             ),
                           ),
+                      ],
+                    ),
+                    if (report.photo != null && photo.existsSync()) ...[
+                      const SizedBox(height: HcSpace.s3),
+                      Semantics(
+                        image: true,
+                        label: l10n.reportPhoto,
+                        child: Image.file(
+                          photo,
+                          key: const Key('report-photo'),
                         ),
+                      ),
+                    ],
+                    // The action row: one primary action at most, the others
+                    // secondary, as wide as their label, on lines that wrap.
+                    if (writable)
+                      RecordActions(
+                        children: [
+                          if (report.status == reportOpen)
+                            FilledButton(
+                              key: const Key('report-make-task'),
+                              onPressed: () =>
+                                  change((r) => r.makeTask(reportId)),
+                              child: Text(l10n.makeItATask),
+                            ),
+                          if (!closed) ...[
+                            OutlinedButton(
+                              key: const Key('report-resolve'),
+                              onPressed: () => change(
+                                (r) => r.closeReport(reportId, reportResolved),
+                              ),
+                              child: Text(l10n.markResolved),
+                            ),
+                            OutlinedButton(
+                              key: const Key('report-no-action'),
+                              onPressed: () => change(
+                                (r) => r.closeReport(reportId, reportNoAction),
+                              ),
+                              child: Text(l10n.closeWithoutAction),
+                            ),
+                          ] else
+                            OutlinedButton(
+                              key: const Key('report-reopen'),
+                              onPressed: () =>
+                                  change((r) => r.reopenReport(reportId)),
+                              child: Text(l10n.reopen),
+                            ),
+                        ],
                       ),
                   ],
                 ),
               ),
-              if (report.photo != null && photo.existsSync()) ...[
-                const SizedBox(height: HcSpace.s3),
-                Semantics(
-                  image: true,
-                  label: l10n.reportPhoto,
-                  child: Image.file(photo, key: const Key('report-photo')),
-                ),
-              ],
-              if (writable) ...[
-                const SizedBox(height: HcSpace.s4),
-                if (report.status == reportOpen)
-                  FilledButton(
-                    key: const Key('report-make-task'),
-                    onPressed: () async {
-                      await runChange(context, (r) => r.makeTask(reportId));
-                    },
-                    child: Text(l10n.makeItATask),
-                  ),
-                if (!closed) ...[
-                  const SizedBox(height: HcSpace.s2),
-                  OutlinedButton(
-                    key: const Key('report-resolve'),
-                    onPressed: () => runChange(
-                      context,
-                      (r) => r.closeReport(reportId, reportResolved),
-                    ),
-                    child: Text(l10n.markResolved),
-                  ),
-                  const SizedBox(height: HcSpace.s2),
-                  OutlinedButton(
-                    key: const Key('report-no-action'),
-                    onPressed: () => runChange(
-                      context,
-                      (r) => r.closeReport(reportId, reportNoAction),
-                    ),
-                    child: Text(l10n.closeWithoutAction),
-                  ),
-                ] else
-                  OutlinedButton(
-                    key: const Key('report-reopen'),
-                    onPressed: () =>
-                        runChange(context, (r) => r.reopenReport(reportId)),
-                    child: Text(l10n.reopen),
-                  ),
-              ],
             ],
           ),
         );
@@ -289,14 +342,28 @@ class ReportScreen extends StatelessWidget {
 }
 
 /// Report a problem (`reports/report_form.html`): what is wrong, where (a
-/// room, optional) and a photo (optional), re-encoded without metadata.
+/// room, an item or a stock item, optional) and a photo (optional),
+/// re-encoded without metadata. Opened from the page of a room, an item or a
+/// stock item, Where starts with it, as the web's `?room=`, `?item=` and
+/// `?article=`.
 class ReportFormScreen extends StatefulWidget implements HcFormScreen {
   @override
   bool get opensAsSheet => true;
 
-  const ReportFormScreen({super.key, required this.homeId});
+  const ReportFormScreen({
+    super.key,
+    required this.homeId,
+    this.roomId,
+    this.itemId,
+    this.articleId,
+  });
 
   final String homeId;
+
+  /// The place Where starts with: one at most.
+  final String? roomId;
+  final String? itemId;
+  final String? articleId;
 
   @override
   State<ReportFormScreen> createState() => _ReportFormScreenState();
@@ -305,18 +372,50 @@ class ReportFormScreen extends StatefulWidget implements HcFormScreen {
 class _ReportFormScreenState extends State<ReportFormScreen> {
   final _form = GlobalKey<FormState>();
   final _title = TextEditingController();
-  String? _room;
-  List<RoomRow> _rooms = const [];
+
+  /// The place chosen, `room:<id>`, `item:<id>` or `article:<id>`, as the
+  /// web's field `place`; null for none.
+  String? _place;
+
+  /// The places of the home, in the order of the web's list: the rooms, the
+  /// items ("Room · Item"), then the stock items.
+  List<(String, String)> _places = const [];
   ProcessedPhoto? _photo;
   bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _place = widget.roomId != null
+        ? 'room:${widget.roomId}'
+        : widget.itemId != null
+        ? 'item:${widget.itemId}'
+        : widget.articleId != null
+        ? 'article:${widget.articleId}'
+        : null;
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_loaded) return;
     _loaded = true;
-    AppScope.of(context).repository.rooms(widget.homeId).then((rooms) {
-      if (mounted) setState(() => _rooms = rooms);
+    _loadPlaces(AppScope.of(context).repository);
+  }
+
+  Future<void> _loadPlaces(Repository r) async {
+    final rooms = await r.rooms(widget.homeId);
+    final names = {for (final room in rooms) room.id: room.name};
+    final items = await r.itemsOfHome(widget.homeId);
+    final articles = await r.articles(widget.homeId);
+    if (!mounted) return;
+    setState(() {
+      _places = [
+        for (final room in rooms) ('room:${room.id}', room.name),
+        for (final item in items)
+          ('item:${item.id}', [?names[item.roomId], item.name].join(' · ')),
+        for (final a in articles) ('article:${a.article.id}', a.article.name),
+      ];
     });
   }
 
@@ -347,16 +446,18 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   Future<void> _save() async {
     if (!_form.currentState!.validate()) return;
     final navigator = Navigator.of(context);
-    final place = _room == null
-        ? ''
-        : _rooms.firstWhere((r) => r.id == _room).name;
+    final chosen = _places.where((p) => p.$1 == _place).firstOrNull;
+    final parts = chosen?.$1.split(':') ?? const ['', ''];
+    final kind = parts.first, id = parts.last;
     final saved = await runChange(
       context,
       (r) => r.createReport(
         widget.homeId,
         title: _title.text,
-        roomId: _room,
-        place: place,
+        roomId: kind == 'room' ? id : null,
+        itemId: kind == 'item' ? id : null,
+        articleId: kind == 'article' ? id : null,
+        place: chosen?.$2 ?? '',
         photo: _photo,
       ),
     );
@@ -388,9 +489,9 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                   ),
                   hcChoice<String?>(
                     l10n.reportWhere,
-                    _room,
-                    [(null, '—'), for (final r in _rooms) (r.id, r.name)],
-                    (v) => setState(() => _room = v),
+                    _places.any((p) => p.$1 == _place) ? _place : null,
+                    [(null, '—'), ..._places],
+                    (v) => setState(() => _place = v),
                     key: const Key('report-room'),
                   ),
                   if (AppScope.of(context).photoSource != null) ...[

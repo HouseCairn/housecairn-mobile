@@ -28,9 +28,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navMore => 'More';
 
   @override
-  String get emptySection => 'Nothing here yet.';
-
-  @override
   String get moreHelpGroup => 'Help';
 
   @override
@@ -524,6 +521,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get roomMemoryEmpty =>
       'Nothing noted yet: paint, floor and wall coverings, and what runs behind the walls.';
+
+  @override
+  String get editMemory => 'Edit the memory';
 
   @override
   String get paintColour => 'Paint colour';
@@ -1377,6 +1377,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get amountPaid => 'Paid';
 
   @override
+  String get amountGap => 'Gap';
+
+  @override
   String get amountUsed => 'Used';
 
   @override
@@ -1869,6 +1872,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportWhere => 'Where?';
+
+  @override
+  String get reportWhereFact => 'Where';
 
   @override
   String get reportedOn => 'Reported on';

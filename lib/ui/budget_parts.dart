@@ -3,6 +3,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../design/icons.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/values.dart';
@@ -102,7 +103,13 @@ List<Widget> gapPills(budget.Amounts amounts, String currency) => [
 /// The amounts of a row of a budget table (`budget/_row_amounts.html`), as
 /// the stacked table of the web reads on a phone: one fact per column.
 class AmountFacts extends StatelessWidget {
-  const AmountFacts(this.amounts, this.currency, {super.key, this.toPay});
+  const AmountFacts(
+    this.amounts,
+    this.currency, {
+    super.key,
+    this.toPay,
+    this.lines = false,
+  });
 
   final budget.Amounts amounts;
   final String currency;
@@ -110,11 +117,33 @@ class AmountFacts extends StatelessWidget {
   /// Shows Still to pay too (the table of the projects).
   final bool? toPay;
 
+  /// The columns of the budget lines of a project
+  /// (`projects/project_detail.html`): Planned, Committed, Paid and Gap,
+  /// the gap being its pill.
+  final bool lines;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     String m(Decimal v) => moneyIn(context, currency, v);
     final a = amounts;
+    if (lines) {
+      return HcValueList(
+        dense: true,
+        children: [
+          HcValueRow(l10n.amountPlanned, m(a.planned), dense: true),
+          HcValueRow(l10n.amountCommitted, m(a.committed), dense: true),
+          HcValueRow(l10n.amountPaid, m(a.paid), dense: true),
+          if (gapPills(a, currency).isNotEmpty)
+            HcValueRow(
+              l10n.amountGap,
+              '',
+              dense: true,
+              child: GapPill(a, currency),
+            ),
+        ],
+      );
+    }
     final used = budget.usedPercent(a);
     return HcValueList(
       dense: true,
@@ -153,6 +182,8 @@ class AmountCard extends StatelessWidget {
     required this.currency,
     this.subtitle,
     this.toPay = false,
+    this.lines = false,
+    this.chevron = false,
     this.onTap,
   });
 
@@ -161,6 +192,15 @@ class AmountCard extends StatelessWidget {
   final budget.Amounts amounts;
   final String currency;
   final bool toPay;
+
+  /// The amounts of a budget line of a project ([AmountFacts.lines]).
+  final bool lines;
+
+  /// Draws the chevron of a row after the title: the card opens something
+  /// (the form of a budget line of a project, as the web's `.row-link`).
+  final bool chevron;
+
+  /// Opens what the card is about; the whole card is the target.
   final VoidCallback? onTap;
 
   @override
@@ -170,14 +210,26 @@ class AmountCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(title, style: HcText.cardTitle),
+          if (!chevron || onTap == null)
+            Text(title, style: HcText.cardTitle)
+          else
+            Row(
+              children: [
+                Expanded(child: Text(title, style: HcText.cardTitle)),
+                const HcIcon(
+                  HcIcons.chevron,
+                  size: HcComponent.chevronSize,
+                  color: HcColors.textMuted,
+                ),
+              ],
+            ),
           if (subtitle != null)
             Padding(
               padding: const EdgeInsets.only(top: HcSpace.s1),
               child: Text(subtitle!, style: HcText.bodySmall),
             ),
           const SizedBox(height: HcSpace.s2),
-          AmountFacts(amounts, currency, toPay: toPay),
+          AmountFacts(amounts, currency, toPay: toPay, lines: lines),
         ],
       ),
     );

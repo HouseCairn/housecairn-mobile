@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Loads every font the app bundles (FontManifest.json: Manrope, and the
 /// Material icons), so that golden files show the real text and icons
@@ -52,4 +53,16 @@ class TolerantComparator extends LocalFileComparator {
 void useTolerantGoldens() {
   final local = goldenFileComparator as LocalFileComparator;
   goldenFileComparator = TolerantComparator(local.basedir.resolve('test.dart'));
+}
+
+/// Decodes the images of the screen (the cairn of the header) before a
+/// capture: the first test of a file would take it before its image is
+/// ready, as `goldens_settings_test.dart` found.
+Future<void> precacheImages(WidgetTester tester) async {
+  await tester.runAsync(() async {
+    for (final element in find.byType(Image).evaluate()) {
+      await precacheImage((element.widget as Image).image, element);
+    }
+  });
+  await tester.pumpAndSettle();
 }
