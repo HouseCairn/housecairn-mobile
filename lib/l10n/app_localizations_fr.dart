@@ -2609,6 +2609,27 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get settingsServerAddress => 'Connecté à';
+
+  @override
+  String get settingsServerDisconnect => 'Déconnecter';
+
+  @override
+  String get settingsServerDisconnectText =>
+      'Révoque l\'accès de ce téléphone. Vos logements y restent.';
+
+  @override
+  String get settingsServerDisconnectTitle => 'Se déconnecter de ce serveur ?';
+
+  @override
+  String get settingsServerSignInAgain => 'Se reconnecter';
+
+  @override
+  String settingsServerReconnectDropped(String names) {
+    return 'Ces logements ne font pas partie de l\'accès choisi et quitteront ce téléphone à la prochaine synchronisation : $names';
+  }
+
+  @override
   String get syncTitle => 'Synchronisation avec le serveur';
 
   @override

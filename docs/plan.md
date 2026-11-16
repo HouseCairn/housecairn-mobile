@@ -468,6 +468,21 @@ against the image v0.4.1, pinned by digest.
   téléphone." Written in protocol section 2.10, "A push refused": the server's snapshot of the
   home is read again, since the sync API has no route that reads one row.
 
+**Settings in the third way** (decision 4 above, after D5): in More, the group "How you use
+Housecairn" is the Settings of the ways (lot 2c). On a server it shows first the address of the
+server, read only, with the sentence of the confirmation of
+[ADR 0010](adr/0010-three-ways-to-use-the-app.md#what-the-screen-says) word for word, then
+**Disconnect**: a confirmation in the dialog of the platform (`HcDialog`, ADR 0011), then the
+move server → alone of the same ADR (unsent changes sent first, or named and kept after a second
+confirmation; the access revoked at `/o/revoke_token/`, or left to the server's page when it
+cannot be reached; the secure store emptied whatever happens; the homes kept). When the server
+revoked or expired the access, **Sign in again** signs in to the same address in the browser,
+reads the homes of the new access without recording them, and shows the confirmation, which
+names the homes of the phone the new access no longer covers (they leave the phone at the next
+sync, as any home gone); Connect resumes the sync where it was, Cancel revokes the new access and
+leaves the phone as it was. Alone, the row "My Housecairn server" of the same group is the entry
+to the address screen (with homes on the phone, the message of lot 4c).
+
 ## Lot 4c. Homes of the phone and files on a server
 
 **Scope**: what lot 4b left for a later web version (decision 1 above): **keep this phone's

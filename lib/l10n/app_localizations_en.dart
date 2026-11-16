@@ -2591,6 +2591,27 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get settingsServerAddress => 'Connected to';
+
+  @override
+  String get settingsServerDisconnect => 'Disconnect';
+
+  @override
+  String get settingsServerDisconnectText =>
+      'Revoke the access of this phone. Your homes stay on it.';
+
+  @override
+  String get settingsServerDisconnectTitle => 'Disconnect from this server?';
+
+  @override
+  String get settingsServerSignInAgain => 'Sign in again';
+
+  @override
+  String settingsServerReconnectDropped(String names) {
+    return 'These homes are not in the access you chose and will leave this phone at the next sync: $names';
+  }
+
+  @override
   String get syncTitle => 'Sync with the server';
 
   @override

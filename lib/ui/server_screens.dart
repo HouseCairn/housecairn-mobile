@@ -172,16 +172,21 @@ class _ServerAddressScreenState extends State<ServerAddressScreen> {
 
 /// The confirmation before anything of the homes is sent or received: it
 /// names the server and says what it gets (docs/adr/0010, "What the screen
-/// says"), with the homes the access covers.
+/// says"), with the homes the access covers. With [reconnect], after a new
+/// sign-in to the server in use: it also names the homes of the phone the
+/// new access no longer covers, Connect resumes the sync where it was, and
+/// Cancel forgets the new access only.
 class ServerConfirmScreen extends StatefulWidget {
   const ServerConfirmScreen({
     super.key,
     required this.address,
     required this.homes,
+    this.reconnect = false,
   });
 
   final ServerAddress address;
   final List<ServerHome> homes;
+  final bool reconnect;
 
   @override
   State<ServerConfirmScreen> createState() => _ServerConfirmScreenState();
@@ -200,7 +205,11 @@ class _ServerConfirmScreenState extends State<ServerConfirmScreen> {
       _error = null;
     });
     try {
-      await state.startServer(widget.address);
+      if (widget.reconnect) {
+        await state.reconnectServer();
+      } else {
+        await state.startServer(widget.address);
+      }
       navigator.popUntil((route) => route.isFirst);
     } on Object catch (e) {
       if (mounted) setState(() => _error = serverProblem(l10n, e));
@@ -212,13 +221,20 @@ class _ServerConfirmScreenState extends State<ServerConfirmScreen> {
   Future<void> _cancel() async {
     final state = AppScope.of(context);
     final navigator = Navigator.of(context);
-    await state.forgetServer(widget.address);
+    await state.forgetServer(widget.address, keepState: widget.reconnect);
     navigator.pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final offered = {for (final h in widget.homes) h.id};
+    final leaving = widget.reconnect
+        ? [
+            for (final h in AppScope.of(context).homes)
+              if (!offered.contains(h.id)) h.name,
+          ]
+        : const <String>[];
     return Scaffold(
       appBar: AppBar(title: Text(l10n.serverConfirmTitle)),
       body: SafeArea(
@@ -262,6 +278,14 @@ class _ServerConfirmScreenState extends State<ServerConfirmScreen> {
                           ),
                       ],
                     ),
+                  if (leaving.isNotEmpty) ...[
+                    const SizedBox(height: HcSpace.s3),
+                    Text(
+                      l10n.settingsServerReconnectDropped(leaving.join(', ')),
+                      key: const Key('server-reconnect-dropped'),
+                      style: HcText.body.copyWith(color: HcColors.warning),
+                    ),
+                  ],
                   if (_error != null) ...[
                     const SizedBox(height: HcSpace.s3),
                     Text(

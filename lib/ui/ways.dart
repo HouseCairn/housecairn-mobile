@@ -9,6 +9,7 @@ import '../design/widgets.dart';
 import '../l10n/app_localizations.dart';
 import '../sync/mode.dart';
 import '../sync/operation.dart';
+import '../sync/server_transport.dart';
 import '../sync/transport.dart';
 import 'server_screens.dart';
 import 'server_sync.dart';
@@ -248,7 +249,7 @@ class WaysRows extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final state = AppScope.of(context);
     final inUse = state.syncMode;
-    return HcCardList(
+    final rows = HcCardList(
       children: [
         // The state of the sync, "Sync now" and the changes refused, in
         // the third way (lot 4b).
@@ -288,6 +289,15 @@ class WaysRows extends StatelessWidget {
           ),
       ],
     );
+    if (inUse != SyncMode.server) return rows;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const ServerSettingsRows(),
+        const SizedBox(height: HcSpace.s3),
+        rows,
+      ],
+    );
   }
 
   static Future<void> _move(
@@ -307,7 +317,13 @@ class WaysRows extends StatelessWidget {
       return;
     }
     if (state.syncMode == SyncMode.server && to == SyncMode.alone) {
-      await _leaveServer(context, state);
+      final l10n = AppLocalizations.of(context);
+      await leaveServer(
+        context,
+        state,
+        title: l10n.wayLeaveServerTitle,
+        action: l10n.wayLeaveServerConfirm,
+      );
     }
   }
 
@@ -375,21 +391,29 @@ class WaysRows extends StatelessWidget {
     return ok ?? false;
   }
 
-  /// Server → alone: a confirmation that counts the changes not sent; if
-  /// the server cannot be reached, a second one that names them.
-  static Future<void> _leaveServer(BuildContext context, AppState state) async {
+  /// Server → alone, from the row of the first way or from Disconnect in
+  /// Settings: a confirmation titled [title] that counts the changes not
+  /// sent, with the button [action]; if the server cannot be reached, a
+  /// second one that names them. The access is revoked and deleted, the
+  /// homes stay, and the phone is back to the choice of the ways, alone.
+  static Future<void> leaveServer(
+    BuildContext context,
+    AppState state, {
+    required String title,
+    required String action,
+  }) async {
     final l10n = AppLocalizations.of(context);
     final unsent = await state.unsentChanges();
     if (!context.mounted) return;
     final go = await _confirm(
       context,
       key: const Key('way-leave-server'),
-      title: l10n.wayLeaveServerTitle,
+      title: title,
       lines: [
         l10n.wayLeaveServerText,
         if (unsent.isNotEmpty) l10n.wayLeaveServerUnsent(unsent.length),
       ],
-      action: l10n.wayLeaveServerConfirm,
+      action: action,
     );
     if (!go) return;
     final left = await state.leaveServer();
@@ -398,7 +422,7 @@ class WaysRows extends StatelessWidget {
     final drop = await _confirm(
       context,
       key: const Key('way-leave-server-unsent'),
-      title: l10n.wayLeaveServerTitle,
+      title: title,
       lines: [
         l10n.wayLeaveServerUnreachable,
         for (final name in names.named) '• $name',
@@ -407,6 +431,103 @@ class WaysRows extends StatelessWidget {
       action: l10n.wayLeaveServerDrop,
     );
     if (drop) await state.leaveServer(keepUnsent: true);
+  }
+}
+
+/// Settings in the third way (docs/adr/0010, "What the screen says"): the
+/// address of the server in use, read only, with the sentence of the
+/// confirmation next to it for as long as the phone is connected; "Sign in
+/// again" when the server revoked or expired the access; and Disconnect,
+/// which revokes the access, deletes it from the phone and goes back to the
+/// first way with the homes kept (the move server → alone).
+class ServerSettingsRows extends StatefulWidget {
+  const ServerSettingsRows({super.key});
+
+  @override
+  State<ServerSettingsRows> createState() => _ServerSettingsRowsState();
+}
+
+class _ServerSettingsRowsState extends State<ServerSettingsRows> {
+  /// Set while a sign-in or a disconnection runs: a second tap does nothing.
+  bool _busy = false;
+
+  Future<void> _run(Future<void> Function() action) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await action();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _disconnect(AppState state) {
+    final l10n = AppLocalizations.of(context);
+    return WaysRows.leaveServer(
+      context,
+      state,
+      title: l10n.settingsServerDisconnectTitle,
+      action: l10n.settingsServerDisconnect,
+    );
+  }
+
+  /// A new sign-in to the same server in the browser, then the
+  /// confirmation, which names the homes that would leave the phone.
+  Future<void> _signInAgain(AppState state) async {
+    final l10n = AppLocalizations.of(context);
+    final navigator = Navigator.of(context);
+    final address = await state.serverAddress();
+    if (address == null) return;
+    try {
+      await state.signInToServer(address);
+      final homes = await state.serverHomesOffered(address, keep: false);
+      if (!mounted) return;
+      await navigator.push(
+        MaterialPageRoute<void>(
+          builder: (_) => ServerConfirmScreen(
+            address: address,
+            homes: homes,
+            reconnect: true,
+          ),
+        ),
+      );
+    } on Object catch (e) {
+      if (!mounted) return;
+      await WaysRows._tell(
+        context,
+        l10n.settingsServerSignInAgain,
+        serverProblem(l10n, e),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final state = AppScope.of(context);
+    return HcCardList(
+      children: [
+        HcRow(
+          key: const Key('settings-server-address'),
+          title: l10n.settingsServerAddress,
+          text: state.serverAddressShown ?? '',
+          moreText: l10n.serverSeesEverything,
+        ),
+        if (state.serverSync.stopped == ServerStop.disconnected)
+          HcRow(
+            key: const Key('settings-server-sign-in-again'),
+            title: l10n.settingsServerSignInAgain,
+            text: l10n.serverDisconnected,
+            onTap: _busy ? null : () => _run(() => _signInAgain(state)),
+          ),
+        HcRow(
+          key: const Key('settings-server-disconnect'),
+          title: l10n.settingsServerDisconnect,
+          text: l10n.settingsServerDisconnectText,
+          onTap: _busy ? null : () => _run(() => _disconnect(state)),
+        ),
+      ],
+    );
   }
 }
 

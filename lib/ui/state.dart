@@ -144,6 +144,9 @@ class AppState extends ChangeNotifier {
       await repository.createHome(name: firstHomeName);
     }
     syncMode = stored ?? SyncMode.alone;
+    serverAddressShown = syncMode == SyncMode.server
+        ? (await serverAddress())?.display
+        : null;
     loaded = true;
     homes = await repository.homes();
     current = await repository.currentHome();
@@ -189,16 +192,23 @@ class AppState extends ChangeNotifier {
   ).signIn(address);
 
   /// The homes the access chosen in the browser covers, and their members.
-  Future<List<ServerHome>> serverHomesOffered(ServerAddress address) async {
+  /// With [keep] `false` (a new sign-in to the server in use, not confirmed
+  /// yet) the homes are only read: the phone's record of them is unchanged.
+  Future<List<ServerHome>> serverHomesOffered(
+    ServerAddress address, {
+    bool keep = true,
+  }) async {
     final transport = _transport(address);
     await transport.capabilities();
-    return transport.homes();
+    return transport.homes(keep: keep);
   }
 
   /// Forgets an access signed in but not confirmed: revoked on the server
-  /// when it answers, deleted from [store] whatever happens.
-  Future<void> forgetServer(ServerAddress address) =>
-      _transport(address).disconnect();
+  /// when it answers, deleted from [store] whatever happens. With
+  /// [keepState] (a new sign-in to the server in use, cancelled) the
+  /// phone's cursor and homes of the server stay.
+  Future<void> forgetServer(ServerAddress address, {bool keepState = false}) =>
+      _transport(address).disconnect(keepState: keepState);
 
   /// The confirmation of the third way at the first start: the phone has no
   /// home, so it keeps the server's (docs/adr/0010, "Moving from one way to
@@ -213,6 +223,19 @@ class AppState extends ChangeNotifier {
   /// The address of the server in use, in the third way.
   Future<ServerAddress?> serverAddress() async =>
       ServerAddress.stored(await repository.serverAddress());
+
+  /// The address of the server in use as Settings shows it; `null` outside
+  /// the third way.
+  String? serverAddressShown;
+
+  /// After a new sign-in to the server in use (the access was revoked or
+  /// expired, [ServerStop.disconnected]), confirmed: the phone stops being
+  /// held and syncs at once, from where it was. The homes the new access
+  /// no longer covers leave the phone at that sync, as any home gone.
+  Future<void> reconnectServer() async {
+    serverSync.stopped = null;
+    await syncWithServer(throwing: true);
+  }
 
   /// What the screens show of the sync with the server (lot 4b).
   final serverSync = ServerSyncStatus();
