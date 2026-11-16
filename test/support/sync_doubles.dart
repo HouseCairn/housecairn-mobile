@@ -91,13 +91,19 @@ class RelayTransport implements SyncTransport {
   }
 
   @override
-  Future<void> putFile(String id, Uint8List bytes) async {}
+  Future<void> putFile(
+    String home,
+    String id,
+    Uint8List bytes, {
+    required String sha256,
+    required String type,
+  }) async {}
 
   @override
-  Future<Uint8List> getFile(String id) async => Uint8List(0);
+  Future<Uint8List> getFile(String home, String id) async => Uint8List(0);
 
   @override
-  Future<void> deleteFile(String id) async {}
+  Future<void> deleteFile(String home, String id) async {}
 
   @override
   Future<List<String>> homesGone() async => [...relay.purged];
@@ -232,13 +238,19 @@ class ServerTransport implements SyncTransport {
   }
 
   @override
-  Future<void> putFile(String id, Uint8List bytes) async {}
+  Future<void> putFile(
+    String home,
+    String id,
+    Uint8List bytes, {
+    required String sha256,
+    required String type,
+  }) async {}
 
   @override
-  Future<Uint8List> getFile(String id) async => Uint8List(0);
+  Future<Uint8List> getFile(String home, String id) async => Uint8List(0);
 
   @override
-  Future<void> deleteFile(String id) async {}
+  Future<void> deleteFile(String home, String id) async {}
 
   @override
   Future<List<String>> homesGone() async => [...server.gone];

@@ -516,3 +516,35 @@ class OtherVersions extends Table {
   @override
   Set<Column<Object>> get primaryKey => {entity, rowId, field, hlc, device};
 }
+
+/// The files of photos and of project files, as this phone sends and fetches
+/// them with a Housecairn server (docs/adr/0012-files-with-a-server.md): one
+/// row per file reference, named by `file` of the reference. Never synced,
+/// never in an export; emptied when the phone leaves the server.
+///
+/// [direction] is `up` for a file this phone made and has to send, `down`
+/// for one it has to fetch. [state] is `waiting` (to try, not before
+/// [nextAt]), `done` (on both sides) or `failed` (the server refused it for
+/// good: only the person's "Try again" tries it again). [code] is the code of
+/// the last refusal (`malformed`, `too_large`, `quota_exceeded`, ...).
+/// [nextAt] is in UTC milliseconds.
+@DataClassName('FileSyncRow')
+class FileSync extends Table {
+  TextColumn get fileId => text()();
+  BlobColumn get homeId => blob().map(const UuidConverter())();
+
+  /// The table of the row that holds the file: `photos` or `project_files`.
+  TextColumn get holder => text()();
+  BlobColumn get rowId => blob().map(const UuidConverter())();
+  TextColumn get direction => text()();
+  TextColumn get state => text()();
+  IntColumn get attempts => integer().withDefault(const Constant(0))();
+  IntColumn get nextAt => integer().withDefault(const Constant(0))();
+  TextColumn get code => text().nullable()();
+
+  @override
+  String get tableName => 'file_sync';
+
+  @override
+  Set<Column<Object>> get primaryKey => {fileId};
+}

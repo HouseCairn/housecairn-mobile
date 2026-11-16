@@ -300,6 +300,8 @@ class ServerTransport implements SyncTransport {
     Uint8List? body,
     bool auth = true,
     String? contentType,
+    String accept = 'application/json',
+    Map<String, String> extra = const {},
     bool retried = false,
   }) async {
     final credential = auth ? await ServerCredential.read(store) : null;
@@ -310,8 +312,9 @@ class ServerTransport implements SyncTransport {
       method,
       url,
       headers: {
-        'accept': 'application/json',
+        'accept': accept,
         'content-type': ?contentType,
+        ...extra,
         if (credential != null) 'authorization': 'Bearer ${credential.access}',
       },
       body: body,
@@ -324,6 +327,8 @@ class ServerTransport implements SyncTransport {
         body: body,
         auth: auth,
         contentType: contentType,
+        accept: accept,
+        extra: extra,
         retried: true,
       );
     }
@@ -657,8 +662,43 @@ class ServerTransport implements SyncTransport {
   /// phone does not send it. The server writes its own.
   static bool _serverOwned(String? type, String field) =>
       field == 'updated_at' ||
+      // What the server reads in the file reference instead (web
+      // `projects/syncing.py`, `skip`): sent, the operation is `forbidden`.
+      (type == 'projects.projectfile' &&
+          (field == 'content_type' || field == 'size_bytes')) ||
       (field == 'created_at' && !_createdAtSent.contains(type)) ||
       (field == 'visible_from' && type == 'tasks.occurrence');
+
+  /// The field that holds the file reference of a row, by entity type (web
+  /// `sync/files.py`, `HOLDERS`): the phone keeps it as JSON text in its
+  /// column, the server reads and writes it as an object.
+  static const fileFields = {
+    'rooms.photo': 'image',
+    'projects.projectfile': 'file',
+    'tasks.attachment': 'file',
+  };
+
+  static Object? _fileOnWire(String? type, String field, Object? value) {
+    if (fileFields[type] != field || value is! String) return value;
+    try {
+      final json = jsonDecode(value);
+      return json is Map ? json : value;
+    } on FormatException {
+      return value;
+    }
+  }
+
+  /// The operation of the feed or of a snapshot as the phone keeps it: the
+  /// file reference, an object on the wire, as JSON text.
+  static Map<String, Object?> _fileFromWire(Map<String, Object?> op) {
+    final field = fileFields[op[Op.type]];
+    final fields = op[Op.fields];
+    if (field == null || fields is! Map || fields[field] is! Map) return op;
+    return {
+      ...op,
+      Op.fields: {...fields, field: jsonEncode(fields[field])},
+    };
+  }
 
   /// The operation as the server reads it: the keys of section 2.2 only
   /// (the device is the push's, and `sv` the body's), and `deleted_at`,
@@ -675,7 +715,8 @@ class ServerTransport implements SyncTransport {
       for (final MapEntry(:key, :value)
           in ((op[Op.fields] as Map?)?.cast<String, Object?>() ?? const {})
               .entries)
-        if (!_serverOwned(op[Op.type] as String?, key)) key: value,
+        if (!_serverOwned(op[Op.type] as String?, key))
+          key: _fileOnWire(op[Op.type] as String?, key, value),
     };
     if (op[Op.kind] == Op.put && fields.isEmpty) return const [];
     if (op[Op.kind] != Op.put || !fields.containsKey('deleted_at')) {
@@ -844,7 +885,7 @@ class ServerTransport implements SyncTransport {
         for (final change in (json['changes'] as List? ?? const [])) {
           final c = (change as Map).cast<String, Object?>();
           final op = (c['op']! as Map).cast<String, Object?>();
-          operations.add({...op, Op.device: c['device']});
+          operations.add(_fileFromWire({...op, Op.device: c['device']}));
           marked.add((op[Op.type]! as String, home, op[Op.id]! as String));
           s.staged[home] = c['pos']! as int;
         }
@@ -915,7 +956,7 @@ class ServerTransport implements SyncTransport {
     // is set.
     return [
       for (final write in writes)
-        {
+        _fileFromWire({
           Op.type: row['t'],
           Op.home: row['h'],
           Op.id: row['id'],
@@ -923,7 +964,7 @@ class ServerTransport implements SyncTransport {
           Op.clock: write.$1,
           Op.device: write.$2,
           Op.fields: byWrite[write],
-        },
+        }),
     ];
   }
 
@@ -946,17 +987,57 @@ class ServerTransport implements SyncTransport {
   }
 
   @override
-  Future<void> putFile(String id, Uint8List bytes) => throw UnsupportedError(
-    'Files need a server with the file routes of web ADR 0077.',
-  );
+  Future<void> putFile(
+    String home,
+    String id,
+    Uint8List bytes, {
+    required String sha256,
+    required String type,
+  }) async {
+    // The server decides the type of a file by its content, never by what
+    // the phone says (web ADR 0077): the body is octet-stream, and `type`
+    // is only the phone's own record of it.
+    final reply = await _send(
+      'PUT',
+      address.resolve('/api/v1/sync/homes/$home/files/$id'),
+      body: bytes,
+      contentType: 'application/octet-stream',
+      extra: {'hc-sha256': sha256},
+    );
+    switch (reply.status) {
+      case 200 || 201:
+        return;
+      case 404 || 410:
+        throw const FileNotFound();
+      case 408 || 429 || >= 500:
+        throw ServerBusy(reply.status);
+    }
+    if (reply.status >= 400 && reply.status < 500) {
+      throw FileRefused(_code(reply) ?? '${reply.status}');
+    }
+    _unexpected(reply);
+  }
 
   @override
-  Future<Uint8List> getFile(String id) => throw UnsupportedError(
-    'Files need a server with the file routes of web ADR 0077.',
-  );
+  Future<Uint8List> getFile(String home, String id) async {
+    final reply = await _send(
+      'GET',
+      address.resolve('/api/v1/sync/homes/$home/files/$id'),
+      accept: '*/*',
+    );
+    switch (reply.status) {
+      case 200:
+        return reply.body;
+      case 404 || 410:
+        throw const FileNotFound();
+    }
+    _unexpected(reply);
+  }
 
+  /// A server has no route to delete a file: it removes the files no row
+  /// refers to by itself, the night after 7 days (web ADR 0077, need 10).
   @override
-  Future<void> deleteFile(String id) async {}
+  Future<void> deleteFile(String home, String id) async {}
 
   /// Disconnect: the access is revoked on the server when it answers, and
   /// the credential is deleted from [store] whatever happens. With

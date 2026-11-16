@@ -258,6 +258,15 @@ sections 1 and 2.2 holds; the differences are these.
   lower-case hexadecimal names the bytes so that an upload sent twice is recognised. The file
   is uploaded before the push that references it, as with the relay. A phone keeps the form of
   the way it is in.
+  **The upload** (lot 4c, [ADR 0012](adr/0012-files-with-a-server.md)): `PUT` of
+  `/api/v1/sync/homes/{h}/files/{file}` with the bytes as the body (`application/octet-stream`)
+  and the digest in the header `HC-Sha256`; `201` or `200` when taken, `400` `malformed` (digest
+  missing or not the body's), `403` `forbidden`, `409` `file_conflict`, `413` `too_large` or
+  `quota_exceeded`, `415` `unsupported_type`. `GET` of the same route gives the file the server
+  keeps (its own re-encoded copy), `404` when it has none. There is no route to delete a file.
+  A refusal is final for the file; `408`, `429` and `5xx` are tried again after a wait that
+  doubles, six hours at most. The reference is an object on the wire and JSON text in the
+  phone's column.
 - **`archived_at`**: owners only (section 2.2).
 - **Tombstones are kept 400 days**, not forever as on the relay ([ADR 0003](adr/0003-sync-protocol.md)),
   and the changes of the feed as long. A cursor older than that gets 410 `cursor_expired`,

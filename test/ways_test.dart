@@ -558,9 +558,15 @@ void main() {
         expect(all.position, 2);
         expect((await transport.pull(after: all.position)).operations, isEmpty);
         expect((await transport.pull(after: 1)).operations.single['id'], 'b');
-        await transport.putFile('f', Uint8List.fromList([1, 2]));
-        expect(await transport.getFile('f'), [1, 2]);
-        await transport.deleteFile('f');
+        await transport.putFile(
+          'h1',
+          'f',
+          Uint8List.fromList([1, 2]),
+          sha256: 'x',
+          type: 'image/jpeg',
+        );
+        expect(await transport.getFile('h1', 'f'), [1, 2]);
+        await transport.deleteFile('h1', 'f');
         expect(transport.files, isEmpty);
         expect(await transport.homesGone(), ['h1']);
       },

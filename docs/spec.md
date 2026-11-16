@@ -305,6 +305,18 @@ all homes together, counting photos, files and the sync data.
   show "photo on another phone"; Settings shows the space used and what takes it, by home.
 - **Deleted**: a deleted photo can be restored for 30 days, then its blob is deleted from the
   relay; deleting a home deletes its photos from the relay at once.
+- **With a Housecairn server** (the third way, [ADR 0012](adr/0012-files-with-a-server.md)):
+  the file is sent to the server with the id of the phone and its SHA-256 before the row that
+  shows it, and never holds the rows back. A photo or a file another phone or the site added is
+  fetched after the pull, newest first, with a plain tile until it comes; a file the server does
+  not have yet is asked for again later, without an error. A file that cannot go waits longer at
+  each try (30 seconds, doubled, six hours at most) and survives closing the app; one the server
+  refuses for good (too large, no room left, a kind it does not take, a digest that does not
+  match) stays on the phone, is not sent again by itself, and Settings says why in plain words.
+  Settings shows how many files wait and "Send now". A deleted photo's file leaves the phone 30
+  days after the deletion; the server removes the files no row refers to by itself. Nothing is
+  sent when the phone is alone. The label photo of a stock article and the photo of a report are
+  not synced as files yet, nor are the files of a task, which the app does not show.
 
 ## Export and import
 

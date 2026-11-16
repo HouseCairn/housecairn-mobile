@@ -227,7 +227,7 @@ extension SyncRepository on Repository {
     final rows = await db
         .customSelect('SELECT seq, body FROM op_log ORDER BY seq')
         .get();
-    return [
+    final out = [
       for (final row in rows)
         OutgoingOperation(
           row.data['seq'] as int,
@@ -235,6 +235,8 @@ extension SyncRepository on Repository {
               .cast<String, Object?>(),
         ),
     ];
+    await completeFileReferences(out);
+    return out;
   }
 
   /// The other side took every operation up to [seq].
@@ -784,6 +786,7 @@ extension SyncRepository on Repository {
         'op_log',
         'other_versions',
         'server_seen',
+        'file_sync',
       ]) {
         await db.customStatement('DELETE FROM $table WHERE home_id = ?', [key]);
       }

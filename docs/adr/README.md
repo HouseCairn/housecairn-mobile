@@ -18,3 +18,4 @@ repository (`docs/adr/` there).
 | [0009](0009-early-testflight-builds.md) | TestFlight builds from `main`, from lot 1b on | proposed |
 | [0010](0010-three-ways-to-use-the-app.md) | Three ways to use the app: alone, family sync through the relay, a Housecairn server | accepted |
 | [0011](0011-design-from-the-web-app.md) | The look of the web application, adapted to the phone | proposed |
+| [0012](0012-files-with-a-server.md) | Photos and files with a Housecairn server | proposed, amends 0010 |

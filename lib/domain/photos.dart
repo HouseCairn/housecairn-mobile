@@ -5,6 +5,8 @@ import 'dart:typed_data';
 
 import 'package:image/image.dart' as img;
 
+import 'file_reference.dart';
+
 /// Photos, re-encoded on the phone before anything is stored, as the web
 /// re-encodes them on upload (`rooms/images.py:75-101`, docs/spec.md, "Photos
 /// and files"): turned upright, every metadata removed but the colour profile
@@ -67,9 +69,19 @@ class ProcessedPhoto {
   final int width;
   final int height;
 
-  /// The file reference of docs/protocol.md section 2.9, as the JSON of the
-  /// column `photos.image`. `blob` and `key` are made when the file is
-  /// uploaded (lot 5): until then the photo is only on this phone.
+  /// The file reference of a new photo in the form of a Housecairn server
+  /// (web ADR 0077, need 10): an id made now, the SHA-256 of [image], its
+  /// size, type and dimensions. It is the JSON of the column `photos.image`.
+  FileReference fileReference() => FileReference.fresh(
+    image,
+    type: 'image/jpeg',
+    width: width,
+    height: height,
+  );
+
+  /// The reference of docs/protocol.md section 2.9 without a file id nor a
+  /// digest, as the column of a stock article's label and of a report's
+  /// photo hold it until a lot of their own.
   String get reference => jsonEncode({
     'size': image.length,
     'type': 'image/jpeg',
@@ -99,6 +111,16 @@ ProcessedPhoto processPhoto(Uint8List bytes) {
     width: stored.width,
     height: stored.height,
   );
+}
+
+/// The thumbnail of a photo another phone made (what a server gives back),
+/// as [processPhoto] makes one; `null` when [bytes] are not an image.
+Uint8List? makeThumbnail(Uint8List bytes) {
+  final decoded = img.decodeImage(bytes);
+  if (decoded == null || decoded.width * decoded.height > maxPixels) {
+    return null;
+  }
+  return _encode(_fit(img.bakeOrientation(decoded), thumbnailSide));
 }
 
 /// [source] reduced so that its longest side is at most [side]; never

@@ -2767,6 +2767,56 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncNoticesRead => 'Mark as read';
 
   @override
+  String get settingsFilesTitle => 'Photos and files to send';
+
+  @override
+  String settingsFilesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos or files are waiting to be sent.',
+      one: '1 photo or file is waiting to be sent.',
+      zero: 'Nothing is waiting to be sent.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsFilesSendNow => 'Send now';
+
+  @override
+  String get filesRefusedTooLarge =>
+      'A file is larger than the server takes. It stays on this phone.';
+
+  @override
+  String get filesRefusedQuota =>
+      'The server has no room left for more files. Free some space on it, then send again.';
+
+  @override
+  String get filesRefusedType =>
+      'The server does not take this kind of file. It stays on this phone.';
+
+  @override
+  String get filesRefusedMalformed =>
+      'A file did not match what this phone sent, so the server did not keep it. It stays on this phone.';
+
+  @override
+  String get filesRefusedForbidden =>
+      'Your role in this home on the server does not allow sending files.';
+
+  @override
+  String get filesRefusedConflict =>
+      'The server already holds another file under the same name.';
+
+  @override
+  String get filesRefusedSeveral => 'The server did not take some files.';
+
+  @override
+  String filesRefusedOther(String code) {
+    return 'The server did not take a file (code $code).';
+  }
+
+  @override
   String get roomKindHelp =>
       'Sets the icon and the filters of the room and, later, the task templates offered for it. Choose Other if none fits.';
 

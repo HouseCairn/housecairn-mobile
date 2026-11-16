@@ -429,6 +429,8 @@ the sync API without the right to create homes and without the files:
 1. "**M5c and M6 leave lot 4b** for a new **lot 4c**, which waits for a web version that has
    `POST /api/v1/sync/homes/` (M5c) and the files (M6). Lot 4c carries: 'keep this phone's
    homes' when moving to the server, and the photos and attachments in server mode."
+   *The photos and files in server mode are built in lot 4c, part one: web ADR 0077 (M6), with
+   [ADR 0012](adr/0012-files-with-a-server.md).*
 2. "**Reminders**: the web adds the current member of the signed-in account to the
    sync API. Reminders in server mode wait for that version." The criterion "Reminders on the
    phone cover the tasks of the signed-in account and the tasks with no assignee" waits for
