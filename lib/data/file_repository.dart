@@ -232,7 +232,7 @@ extension FileSyncRepository on Repository {
   Future<bool> _isMadeHere(File file, FileReference ref) async {
     final digest = ref.sha256;
     if (digest == null || file.lengthSync() != ref.size) return false;
-    return await sha256HexOffMain(await file.readAsBytes()) == digest;
+    return await sha256HexOffMain(file.readAsBytesSync()) == digest;
   }
 
   Future<void> _insertFileEntry(

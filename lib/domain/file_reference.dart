@@ -124,7 +124,13 @@ class FileReference {
 /// The SHA-256 of [bytes], in lower-case hexadecimal.
 String sha256Hex(List<int> bytes) => sha256.convert(bytes).toString();
 
-/// The SHA-256 of [bytes], computed in an isolate so that a large photo does
+/// Below this size the digest is computed where the call is: starting an
+/// isolate would cost more than the hash.
+const _inlineDigestBytes = 128 * 1024;
+
+/// The SHA-256 of [bytes]; a photo is hashed in an isolate so that it does
 /// not hold the interface (the bytes are copied once to it).
-Future<String> sha256HexOffMain(Uint8List bytes) =>
-    Isolate.run(() => sha256Hex(bytes));
+Future<String> sha256HexOffMain(Uint8List bytes) async =>
+    bytes.length < _inlineDigestBytes
+    ? sha256Hex(bytes)
+    : await Isolate.run(() => sha256Hex(bytes));

@@ -634,6 +634,15 @@ void main() {
     });
   });
 
+  test(
+    'the digest of a large file is the same, computed in an isolate',
+    () async {
+      final big = Uint8List.fromList(List.generate(300 * 1024, (i) => i % 251));
+      expect(await sha256HexOffMain(big), sha256Hex(big));
+      expect(await sha256HexOffMain(Uint8List(3)), sha256Hex(Uint8List(3)));
+    },
+  );
+
   group('the file reference', () {
     test('is read from a server, a first build or nothing', () {
       expect(FileReference.parse(null, rowId: uuid), isNull);
