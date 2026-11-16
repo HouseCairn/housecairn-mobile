@@ -161,8 +161,8 @@ abstract class AppLocalizations {
   /// Version of the app on the About screen. Web catalogue: version %(version)s.
   ///
   /// In en, this message translates to:
-  /// **'version {version}'**
-  String aboutVersion(String version);
+  /// **'Version {version} ({build})'**
+  String aboutVersion(String version, String build);
 
   /// Licence of the app. Web catalogue: Logiciel libre sous licence AGPL-3.0.
   ///

@@ -1,14 +1,27 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/design/icons.dart';
 import 'package:housecairn_mobile/design/widgets.dart';
 import 'package:housecairn_mobile/version.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'support/app.dart';
 
 void main() {
+  // The platform answers with these; the app never holds a version of its own.
+  setUp(() {
+    PackageInfo.setMockInitialValues(
+      appName: 'Housecairn',
+      packageName: 'app.example',
+      version: '9.8.7',
+      buildNumber: '42',
+      buildSignature: '',
+    );
+  });
+
   const sections = {
     'en': ['Today', 'Rooms', 'Projects', 'Budget', 'More'],
     'fr': ["Aujourd'hui", 'Pièces', 'Projets', 'Budget', 'Plus'],
@@ -65,7 +78,7 @@ void main() {
       await tester.tap(find.text('About'));
       await tester.pumpAndSettle();
       expect(find.text('Housecairn, by Robvred'), findsOneWidget);
-      expect(find.text('version $appVersion'), findsOneWidget);
+      expect(find.text('Version 9.8.7 (42)'), findsOneWidget);
       expect(
         find.text('Free software under the AGPL-3.0 licence.'),
         findsOneWidget,
@@ -100,4 +113,28 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.widgetWithText(HcLargeTitle, 'More'), findsOneWidget);
   });
+
+  for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+    for (final (locale, shown) in [
+      ('en', 'Version 9.8.7 (42)'),
+      ('fr', 'Version 9.8.7 (42)'),
+    ]) {
+      testWidgets('About shows the version and build read from the platform, '
+          'selectable ($platform, $locale)', (tester) async {
+        debugDefaultTargetPlatformOverride = platform;
+        addTearDown(() => debugDefaultTargetPlatformOverride = null);
+        await onPhone(tester);
+        await pumpApp(tester, locale: locale);
+        await tester.tap(destination(locale == 'en' ? 'More' : 'Plus'));
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(hcIcon(HcIcons.info), 100);
+        await tester.tap(hcIcon(HcIcons.info));
+        await tester.pumpAndSettle();
+        final version = find.byKey(const Key('about-version'));
+        expect(version, findsOneWidget);
+        expect(find.text(shown), findsOneWidget);
+        expect(tester.widget(version), isA<SelectableText>());
+      });
+    }
+  }
 }
