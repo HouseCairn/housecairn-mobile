@@ -127,7 +127,12 @@ void main() {
         query: 'dehumidifier',
       )).single;
       expect(added.room.name, 'Main cellar');
-      // Back on the list, which is still filtered on the cellar.
+      // The new item opens; Back returns to the list, still filtered on the
+      // cellar.
+      expect(find.byType(ItemScreen), findsOneWidget);
+      expect(find.byKey(const Key('equipment-add')), findsNothing);
+      await back(tester);
+      expect(find.byType(ItemScreen), findsNothing);
       expect(find.byKey(const Key('equipment-add')), findsOneWidget);
       expect(find.text('Dehumidifier'), findsOneWidget);
       expect(find.text('Main boiler'), findsOneWidget);
@@ -222,6 +227,59 @@ void main() {
         }
       });
     }
+
+    for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+      testWidgets('Equipment: saving a new item opens its page, Back returns '
+          'to the filtered list, on ${platform.name}, $locale', (tester) async {
+        debugDefaultTargetPlatformOverride = platform;
+        try {
+          final (state, data) = await start(tester);
+          await openEquipment(tester);
+          // Filtered by words (the room choice is a wheel on iOS).
+          await type(tester, 'equipment-search', 'pump');
+          await tester.pumpAndSettle();
+          await tapKey(tester, 'equipment-add');
+          await type(tester, 'item-name', 'Sump pump');
+          await tester.tap(find.text(t('Save', 'Enregistrer')));
+          await tester.pumpAndSettle();
+          final added = (await state.repository.itemList(
+            data.homes.main,
+            query: 'sump pump',
+          )).single;
+          final page = tester.widget<ItemScreen>(find.byType(ItemScreen));
+          expect(page.itemId, added.item.id);
+          await back(tester);
+          expect(find.byKey(const Key('equipment-add')), findsOneWidget);
+          expect(find.text('Sump pump'), findsOneWidget);
+          expect(find.text('Main boiler'), findsNothing);
+          expect(find.text('Coffee machine'), findsNothing);
+        } finally {
+          debugDefaultTargetPlatformOverride = null;
+        }
+      });
+    }
+
+    testWidgets('an item added from the page of a room stays on that page, '
+        '$locale', (tester) async {
+      final (state, data) = await start(tester);
+      await openRooms(tester, t('Rooms', 'Pièces'));
+      await tester.tap(find.text('Main cellar').last);
+      await tester.pumpAndSettle();
+      await reveal(tester, find.byKey(const Key('item-add')));
+      await tapKey(tester, 'item-add');
+      await type(tester, 'item-name', 'Water softener');
+      await tester.tap(find.text(t('Save', 'Enregistrer')));
+      await tester.pumpAndSettle();
+      expect(
+        (await state.repository.itemList(
+          data.homes.main,
+          query: 'water softener',
+        )).single.room.name,
+        'Main cellar',
+      );
+      expect(find.byType(ItemScreen), findsNothing);
+      expect(find.text('Water softener'), findsOneWidget);
+    });
 
     testWidgets('the search of Equipment keeps its focus while the words '
         'go on, and the list follows, $locale', (tester) async {

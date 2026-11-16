@@ -448,13 +448,16 @@ class _ItemFormScreenState extends State<ItemFormScreen>
     cancelAutosave();
     if (!_form.currentState!.validate()) return;
     final navigator = Navigator.of(context);
-    final saved = await runChange(
-      context,
-      (r) => widget.itemId == null
-          ? r.addItem(_room ?? widget.roomId!, _input())
-          : r.updateItem(widget.itemId!, _input()),
-    );
-    if (saved) navigator.pop();
+    String? added;
+    final saved = await runChange(context, (r) async {
+      if (widget.itemId == null) {
+        added = await r.addItem(_room ?? widget.roomId!, _input());
+      } else {
+        await r.updateItem(widget.itemId!, _input());
+      }
+    });
+    // A new item is given back, for the list that opened the form to open it.
+    if (saved) navigator.pop(added);
   }
 
   Future<void> _delete() async {
