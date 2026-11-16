@@ -18,6 +18,7 @@ import 'package:housecairn_mobile/ui/report_screens.dart';
 import 'package:housecairn_mobile/ui/rooms.dart';
 import 'package:housecairn_mobile/ui/state.dart';
 import 'package:housecairn_mobile/ui/stock_screens.dart';
+import 'package:housecairn_mobile/ui/task_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -249,6 +250,50 @@ void main() {
       // Where opens the room.
       await tapKey(tester, 'report-where');
       expect(find.byType(RoomScreen), findsOneWidget);
+    });
+
+    testWidgets('a report made a task shows its task as a link; a closed one '
+        'shows when it was closed and only Reopen, $locale', (tester) async {
+      final (state, data) = await start(tester);
+      final repository = state.repository;
+      // Made a task: Task is a line of label and value, a link to the task,
+      // and the report can still be closed.
+      final taskId = await repository.makeTask(data.report);
+      await openScreen(
+        tester,
+        ReportScreen(homeId: data.main, reportId: data.report),
+      );
+      final task = (await repository.task(taskId))!;
+      expect(
+        find.ancestor(
+          of: find.text(t('Task', 'Tâche')),
+          matching: find.byType(HcValueRow),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('report-make-task')), findsNothing);
+      expect(find.byKey(const Key('report-resolve')), findsOneWidget);
+      await tapKey(tester, 'report-task');
+      expect(
+        tester.widget<TaskScreen>(find.byType(TaskScreen)).taskId,
+        task.id,
+      );
+      await back(tester);
+      // Closed: Closed on is a line, Reopen is the only action.
+      await tapKey(tester, 'report-resolve');
+      expect(
+        find.ancestor(
+          of: find.text(t('Closed on', 'Classé le')),
+          matching: find.byType(HcValueRow),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('report-resolve')), findsNothing);
+      expect(find.byKey(const Key('report-no-action')), findsNothing);
+      expect(find.byKey(const Key('report-reopen')), findsOneWidget);
+      await tapKey(tester, 'report-reopen');
+      expect(find.byKey(const Key('report-reopen')), findsNothing);
+      expect(find.byKey(const Key('report-resolve')), findsOneWidget);
     });
 
     testWidgets('a project: pills with what is left, title, goal as a '
