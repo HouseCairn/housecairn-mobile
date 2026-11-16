@@ -2820,23 +2820,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get projectSeasonAnyTime => 'Toute l\'année';
 
   @override
-  String get projectSeasonStart => 'La saison personnalisée commence en';
-
-  @override
-  String get projectSeasonEnd => 'La saison personnalisée finit en';
-
-  @override
-  String get projectSeasonEndHelp =>
-      'Utilisé seulement avec la saison « Mois personnalisés ».';
-
-  @override
   String projectSeasonHemisphereHelp(String hemisphere) {
     return 'La saison suit l\'hémisphère du logement ($hemisphere) : modifiez-le dans les réglages du logement.';
   }
-
-  @override
-  String get errProjectSeasonMonths =>
-      'Indiquez le premier et le dernier mois.';
 
   @override
   String get materialsFormHelp =>

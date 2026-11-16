@@ -4580,35 +4580,11 @@ abstract class AppLocalizations {
   /// **'Any time'**
   String get projectSeasonAnyTime;
 
-  /// First month of a custom season of a project. Web catalogue (projects): same text.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom season starts in'**
-  String get projectSeasonStart;
-
-  /// Last month of a custom season of a project. Web catalogue (projects): same text.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom season ends in'**
-  String get projectSeasonEnd;
-
-  /// Help under the last month of a custom season. Web catalogue (projects): same text.
-  ///
-  /// In en, this message translates to:
-  /// **'Only used with the season Custom months.'**
-  String get projectSeasonEndHelp;
-
   /// Help under the season of the project form. Web catalogue (projects): same text.
   ///
   /// In en, this message translates to:
   /// **'The season follows the hemisphere of the home ({hemisphere}): change it in the settings of the home.'**
   String projectSeasonHemisphereHelp(String hemisphere);
-
-  /// Error of a custom season with a month missing. Web catalogue (projects): same text.
-  ///
-  /// In en, this message translates to:
-  /// **'Give the first and the last month.'**
-  String get errProjectSeasonMonths;
 
   /// Help of the Materials section of the task form. Web catalogue (tasks): same text.
   ///

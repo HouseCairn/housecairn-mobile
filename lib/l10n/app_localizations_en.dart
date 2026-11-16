@@ -2799,21 +2799,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectSeasonAnyTime => 'Any time';
 
   @override
-  String get projectSeasonStart => 'Custom season starts in';
-
-  @override
-  String get projectSeasonEnd => 'Custom season ends in';
-
-  @override
-  String get projectSeasonEndHelp => 'Only used with the season Custom months.';
-
-  @override
   String projectSeasonHemisphereHelp(String hemisphere) {
     return 'The season follows the hemisphere of the home ($hemisphere): change it in the settings of the home.';
   }
-
-  @override
-  String get errProjectSeasonMonths => 'Give the first and the last month.';
 
   @override
   String get materialsFormHelp =>
