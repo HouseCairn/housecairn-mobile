@@ -260,8 +260,78 @@ void main() {
     });
   });
 
+  group('after the phone left the server and came back', () {
+    setUp(startPhone);
+
+    test('a photo made elsewhere, held as the server copy, is not an error '
+        'nor to send', () async {
+      final photo = await photoMade();
+      await sync();
+      // What the phone holds of a photo another phone made: the server's
+      // re-encoded copy, whose bytes are not the ones the reference names.
+      repo.photoFile(photo).writeAsBytesSync(jpeg(80));
+      await repo.forgetFileSync();
+
+      await sync();
+
+      final queue = await repo.fileQueue();
+      expect([queue.waiting, queue.failed, queue.toSend], [0, 0, 0]);
+      expect(queue.codes, isEmpty);
+      expect(puts(), hasLength(1), reason: 'only the first send');
+    });
+
+    test('a photo made here and not yet sent is sent after the entries '
+        'were forgotten', () async {
+      server.cutUploads = true;
+      final photo = await photoMade();
+      await sync();
+      expect((await repo.fileQueue()).waiting, 1);
+      await repo.forgetFileSync();
+      server.cutUploads = false;
+
+      await sync();
+
+      expect(server.files.containsKey(referenceOf(photo).file), isTrue);
+      expect((await repo.fileQueue()).toSend, 0);
+    });
+  });
+
   group('a photo deleted', () {
     setUp(startPhone);
+
+    test('before it was sent: it is not counted, and not sent', () async {
+      server.cutUploads = true;
+      final photo = await photoMade();
+      expect((await repo.fileQueue()).toSend, 1);
+      await repo.deletePhoto(photo.id);
+
+      await sync();
+
+      expect((await repo.fileQueue()).toSend, 0);
+      server.cutUploads = false;
+      clock.advance(const Duration(minutes: 5));
+      await sync();
+      expect(puts(), isEmpty);
+    });
+
+    test(
+      'in a home that is not of the server: its file is not swept',
+      () async {
+        final other = await repo.createHome(name: 'Cabin');
+        final id = await repo.addPhoto(
+          other,
+          processPhoto(jpegWithGps(orientation: 1)),
+          roomId: await repo.createRoom(other, name: 'Hall'),
+        );
+        final photo = (await repo.photo(id))!;
+        await repo.deletePhoto(id);
+        clock.advance(const Duration(days: 31));
+
+        expect(await repo.sweepFiles(), 0);
+
+        expect(repo.photoFile(photo).existsSync(), isTrue);
+      },
+    );
 
     test(
       'on the phone: the server hears it, the file goes after 30 days',
@@ -337,6 +407,9 @@ void main() {
 
     test('a file that is not the one its row names is not sent', () async {
       final photo = await photoMade();
+      // The phone has seen the photo (so it knows it made it) when the file
+      // changes under it.
+      await repo.fileQueue();
       repo.photoFile(photo).writeAsBytesSync([1, 2, 3, 4]);
       await sync();
       expect(puts(), isEmpty);
@@ -500,7 +573,7 @@ void main() {
         transport.putFile(uuid, uuid, bytes, sha256: 'x', type: 't'),
         throwsA(isA<FileNotFound>()),
       );
-      for (final status in [429, 500, 503]) {
+      for (final status in [408, 429, 500, 503]) {
         http.status = status;
         await expectLater(
           transport.putFile(uuid, uuid, bytes, sha256: 'x', type: 't'),

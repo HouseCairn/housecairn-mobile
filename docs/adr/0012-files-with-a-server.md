@@ -43,12 +43,17 @@ web ADR 0077 asks; if it fails, the row goes all the same (the server applies it
 server: the id, the home, the row, the way (`up`: this phone made it; `down`: another did), a
 state (`waiting`, `done`, `failed`), the number of tries, the earliest next try and the code of
 the last refusal. Never synced, never exported, emptied when the phone leaves the server and
-when a row or a home is purged. The list is made from the rows (a scan before each step): a file
-the phone holds under a reference with a digest is to send; a reference with no file on the
-phone is to fetch; a reference with no digest and a file is a server's, already done. It lives
+when a row or a home is purged. The list is made from the rows (a scan before each step): a reference with no file on the
+phone is to fetch; a reference with no digest and a file is a server's, already done; a file
+the phone holds under a reference with a digest is to send only when it is the very file the
+reference names (same size, same digest, the digest computed in an isolate), because a photo
+another phone made is held as the server's re-encoded copy and must not be sent nor refused
+when the list was forgotten (the phone left the server and came back); that copy is marked
+done. A deleted row has no entry: it is not counted and not sent, and a restore makes the
+entry again. It lives
 in a table and not in `local_settings` because it has one entry per photo, read by state.
 
-**Tries.** A file that could not go (the server busy, out of reach, `404`) waits 30 seconds, then
+**Tries.** A file that could not go (the server busy, out of reach, `404`, `408`, `429`) waits 30 seconds, then
 twice as long at each failure, six hours at most; the next round does not try it before. "Send
 now" in Settings clears every wait and every refusal and syncs. A refusal for good, `400`
 (a digest that is not the one of the bytes), `403`, `409`, `413` (`too_large`, `quota_exceeded`)
@@ -73,7 +78,8 @@ fetched is never sent back.
 deleted within the retention, is removed after 7 days), so `deleteFile` of the server transport
 does nothing. On the phone the file stays 30 days after the deletion, so that it can be restored
 ([spec](../spec.md#photos-and-files)), then the sweep of a round removes it, its thumbnail and
-its entry, whichever phone deleted the row.
+its entry, whichever phone deleted the row, in the homes of the server only: the files of a
+home that is not of the server are left as they are.
 
 **Not in this lot.** The label photo of a stock article and the photo of a report, whose
 reference the server keeps in `extra` until a lot of its own; the files attached to a task, which

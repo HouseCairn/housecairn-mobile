@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import 'dart:convert';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
@@ -122,3 +123,8 @@ class FileReference {
 
 /// The SHA-256 of [bytes], in lower-case hexadecimal.
 String sha256Hex(List<int> bytes) => sha256.convert(bytes).toString();
+
+/// The SHA-256 of [bytes], computed in an isolate so that a large photo does
+/// not hold the interface (the bytes are copied once to it).
+Future<String> sha256HexOffMain(Uint8List bytes) =>
+    Isolate.run(() => sha256Hex(bytes));

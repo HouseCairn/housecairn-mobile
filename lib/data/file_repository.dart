@@ -168,9 +168,11 @@ extension FileSyncRepository on Repository {
         final text = row.data['ref'] as String;
         var ref = FileReference.parse(text, rowId: rowId);
         if (ref == null) continue;
+        // A deleted row has nothing to send nor to fetch: it is not counted
+        // (its entry is dropped below), and a restore makes the entry again.
+        if (row.data['deleted_at'] != null) continue;
         final file = fileOfRow(holder, homeId, rowId);
         final exists = file.existsSync();
-        final deleted = row.data['deleted_at'] != null;
         if (FileReference.isLegacy(text) &&
             exists &&
             !entries.containsKey(ref.file)) {
@@ -183,12 +185,25 @@ extension FileSyncRepository on Repository {
         seen.add(ref.file);
         final entry = entries[ref.file];
         if (entry == null) {
-          if (deleted) continue;
-          // A reference with no digest is a server's (a photo made on the
-          // web, or one fetched before the phone left the server): the file
-          // is there, nothing to send.
-          final way = exists && ref.sha256 != null ? 'up' : 'down';
-          final state = exists && ref.sha256 == null ? 'done' : 'waiting';
+          // No entry: never seen, or forgotten when the phone left the
+          // server. A file the phone holds is to send only when it is the
+          // very file the reference names (same size, same digest): a
+          // reference with no digest is a server's (a photo made on the
+          // web), and a photo another phone made is held as the server's
+          // re-encoded copy, whose bytes are not the ones its digest names
+          // (ADR 0012). Both are there already: nothing to send.
+          final String way;
+          final String state;
+          if (!exists) {
+            way = 'down';
+            state = 'waiting';
+          } else if (await _isMadeHere(file, ref)) {
+            way = 'up';
+            state = 'waiting';
+          } else {
+            way = 'down';
+            state = 'done';
+          }
           await _insertFileEntry(ref.file, homeId, holder, rowId, way, state);
         } else if (entry['direction'] == 'down' &&
             exists &&
@@ -210,6 +225,14 @@ extension FileSyncRepository on Repository {
     for (final id in entries.keys.where((id) => !seen.contains(id))) {
       await db.customStatement('DELETE FROM file_sync WHERE file_id = ?', [id]);
     }
+  }
+
+  /// Whether [file] holds the bytes [ref] names: the proof that this phone
+  /// made it. The size is read first, the digest only when it agrees.
+  Future<bool> _isMadeHere(File file, FileReference ref) async {
+    final digest = ref.sha256;
+    if (digest == null || file.lengthSync() != ref.size) return false;
+    return await sha256HexOffMain(await file.readAsBytes()) == digest;
   }
 
   Future<void> _insertFileEntry(
@@ -399,7 +422,8 @@ extension FileSyncRepository on Repository {
 
   /// Removes from the phone the files of what was deleted more than
   /// [fileKeepDays] days ago (a deleted photo can be restored until then),
-  /// and the entries of those files.
+  /// and the entries of those files, in the homes of the server only: the
+  /// phone keeps the files of the other homes as they are.
   Future<int> sweepFiles() async {
     final before =
         clock.now().millisecondsSinceEpoch -
@@ -416,6 +440,7 @@ extension FileSyncRepository on Repository {
       for (final row in rows) {
         final rowId = Uuid.unparse(row.data['id'] as Uint8List);
         final home = Uuid.unparse(row.data['home_id'] as Uint8List);
+        if (await serverRole(home) == null) continue;
         for (final file in [
           fileOfRow(holder, home, rowId),
           thumbnailOfRow(home, rowId),

@@ -66,7 +66,7 @@ class FileSyncer {
       if (!job.file.existsSync()) continue;
       final Uint8List bytes;
       try {
-        bytes = job.file.readAsBytesSync();
+        bytes = await job.file.readAsBytes();
       } on Object {
         await repository.fileLater(job, code: 'unreadable');
         continue;
@@ -76,7 +76,7 @@ class FileSyncer {
         await repository.fileFailed(job.fileId, 'too_large');
         continue;
       }
-      final digest = sha256Hex(bytes);
+      final digest = await sha256HexOffMain(bytes);
       if (job.reference.sha256 != null && digest != job.reference.sha256) {
         // The file is not the one the row names: the server would refuse
         // the row too (`malformed`), and sending these bytes would make
@@ -101,7 +101,7 @@ class FileSyncer {
       } on ServerStopped {
         rethrow;
       } on Object {
-        // Out of reach or too busy: this one waits, and so do the others
+        // Out of reach or too busy (408 and 429 included): this one waits, and so do the others
         // until the next round.
         await repository.fileLater(job);
         break;

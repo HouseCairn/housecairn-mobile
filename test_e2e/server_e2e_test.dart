@@ -15,6 +15,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/core/hlc.dart';
 import 'package:housecairn_mobile/core/store.dart';
 import 'package:housecairn_mobile/data/repository.dart';
+import 'package:housecairn_mobile/domain/file_reference.dart';
+import 'package:housecairn_mobile/domain/photos.dart';
 import 'package:housecairn_mobile/domain/recurrence.dart' as recurrence;
 import 'package:housecairn_mobile/domain/stock.dart' as stock;
 import 'package:housecairn_mobile/sync/operation.dart';
@@ -25,6 +27,7 @@ import 'package:housecairn_mobile/sync/server_transport.dart';
 import 'package:housecairn_mobile/sync/transport.dart';
 import 'package:uuid/uuid.dart';
 
+import '../test/support/fakes.dart' show jpegWithGps;
 import '../test/support/sync_fixture.dart';
 
 final _env = Platform.environment;
@@ -552,6 +555,41 @@ void main() {
       (bad, 'malformed'),
     ]);
     expect(await webRoomStatus(good), 200);
+  }, skip: skip);
+
+  test('a photo goes to the server and comes back (file routes of web 0.5.0): '
+      'sent before its row, kept by the server, fetched again as the '
+      'server\'s copy without any error', () async {
+    phone.clock.set(DateTime.now().toUtc());
+    final room = await phone.repo.createRoom(home, name: 'Hall');
+    final id = await phone.repo.addPhoto(
+      home,
+      processPhoto(jpegWithGps(width: 320, orientation: 1)),
+      roomId: room,
+    );
+    final photo = (await phone.repo.photo(id))!;
+    final reference = FileReference.parse(photo.image, rowId: id)!;
+
+    final sent = await phone.sync();
+
+    expect(sent.filesSent, 1);
+    expect([
+      for (final r in transport.rejections) '${r.code} ${r.operation}',
+    ], isEmpty);
+    final kept = await transport.getFile(home, reference.file);
+    expect(kept.take(2), [0xFF, 0xD8], reason: 'the server\'s own JPEG');
+    expect((await phone.repo.fileQueue()).toSend, 0);
+
+    // The phone loses the file and its list: the server's copy comes back,
+    // whose bytes are not the ones the digest names, and is no error.
+    phone.repo.photoFile(photo).deleteSync();
+    await phone.repo.forgetFileSync();
+    final back = await phone.sync();
+    expect(back.filesFetched, 1);
+    expect(phone.repo.photoFile(photo).existsSync(), isTrue);
+    await phone.sync();
+    final queue = await phone.repo.fileQueue();
+    expect([queue.waiting, queue.failed, queue.fetching], [0, 0, 0]);
   }, skip: skip);
 
   test('revoking the access on the server stops the phone at its next call, '

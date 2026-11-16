@@ -1009,7 +1009,7 @@ class ServerTransport implements SyncTransport {
         return;
       case 404 || 410:
         throw const FileNotFound();
-      case 429 || >= 500:
+      case 408 || 429 || >= 500:
         throw ServerBusy(reply.status);
     }
     if (reply.status >= 400 && reply.status < 500) {
