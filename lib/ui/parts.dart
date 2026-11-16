@@ -16,9 +16,18 @@ import 'state.dart';
 /// the data of the app changes ([AppState.revision]): a screen shows what is
 /// stored now, whoever changed it.
 class DataView<T> extends StatefulWidget {
-  const DataView({super.key, required this.load, required this.builder});
+  const DataView({
+    super.key,
+    required this.load,
+    required this.builder,
+    this.reloadKey,
+  });
 
   final Future<T> Function(Repository repository) load;
+
+  /// When it changes the data is read again, the previous data staying on
+  /// screen until the new arrives (a list that follows a search).
+  final Object? reloadKey;
   final Widget Function(BuildContext context, T data) builder;
 
   @override
@@ -28,6 +37,7 @@ class DataView<T> extends StatefulWidget {
 class _DataViewState<T> extends State<DataView<T>> {
   T? _data;
   int _revision = -1;
+  int _reads = 0;
 
   @override
   void didChangeDependencies() {
@@ -39,9 +49,19 @@ class _DataViewState<T> extends State<DataView<T>> {
     }
   }
 
+  @override
+  void didUpdateWidget(DataView<T> old) {
+    super.didUpdateWidget(old);
+    if (widget.reloadKey != old.reloadKey) {
+      _load(AppScope.of(context).repository);
+    }
+  }
+
   Future<void> _load(Repository repository) async {
+    final read = ++_reads;
     final data = await widget.load(repository);
-    if (mounted) setState(() => _data = data);
+    // A later read was asked for while this one ran: its answer wins.
+    if (mounted && read == _reads) setState(() => _data = data);
   }
 
   @override

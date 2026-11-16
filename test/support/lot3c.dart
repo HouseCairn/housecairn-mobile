@@ -131,10 +131,7 @@ final screens3c =
         'history',
         (tester, data, l) async {
           await openTaskList(tester, data);
-          await tester.tap(find.byKey(const Key('tasks-status')));
-          await tester.pumpAndSettle();
-          await tester.tap(find.text(l.doneFilter).last);
-          await tester.pumpAndSettle();
+          await openDoneTab(tester, l.doneFilter);
         },
       ),
       (
@@ -173,3 +170,14 @@ final screens3c =
         (tester, data, l) => openScreen(tester, TaskScreen(homeId: data.main)),
       ),
     ];
+
+/// The tab Done of All (the history), as a person taps it.
+Future<void> openDoneTab(WidgetTester tester, String label) async {
+  await tester.tap(
+    find.descendant(
+      of: find.byKey(const Key('tasks-status')),
+      matching: find.text(label),
+    ),
+  );
+  await tester.pumpAndSettle();
+}

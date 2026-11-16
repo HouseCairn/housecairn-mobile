@@ -2,6 +2,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/data/repository.dart';
+import 'package:housecairn_mobile/design/filters.dart';
 import 'package:housecairn_mobile/ui/task_list_screen.dart';
 import 'package:housecairn_mobile/ui/task_screen.dart';
 import 'package:material_ui/material_ui.dart';
@@ -95,9 +96,14 @@ void main() {
 
       await tester.drag(_vertical(), const Offset(0, 2000));
       await tester.pumpAndSettle();
+      // The room is a criterion of the sheet Filters.
+      await tester.tap(find.byKey(const Key('filters-toggle')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('tasks-room')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Main kitchen').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('filters-sheet-done')));
       await tester.pumpAndSettle();
       expect(find.text('Main smoke alarm'), findsOneWidget);
       expect(find.text('Main boiler service'), findsNothing);
@@ -126,10 +132,7 @@ void main() {
         '$locale', (tester) async {
       final data = await start(tester);
       await openTaskList(tester, data);
-      await tester.tap(find.byKey(const Key('tasks-status')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(l.doneFilter).last);
-      await tester.pumpAndSettle();
+      await openDoneTab(tester, l.doneFilter);
       expect(find.text('Change the smoke alarm battery'), findsOneWidget);
       expect(find.text('Check the extinguishers'), findsOneWidget);
       expect(find.text('Second oil check'), findsNothing, reason: 'other home');
@@ -152,29 +155,28 @@ void main() {
       await _see(tester, find.byKey(const Key('filters-toggle')));
       await tester.tap(find.byKey(const Key('filters-toggle')));
       await tester.pumpAndSettle();
-      await _see(tester, find.byKey(const Key('history-outcome')));
       await tester.tap(find.byKey(const Key('history-outcome')));
       await tester.pumpAndSettle();
       await tester.tap(find.text(t('Skipped', 'Ignorée')).last);
       await tester.pumpAndSettle();
-      expect(find.text('Change the smoke alarm battery'), findsNothing);
-      expect(find.text('Check the extinguishers'), findsOneWidget);
-      await _see(tester, find.byKey(const Key('history-clear')));
-      await tester.tap(find.byKey(const Key('history-clear')));
+      expect(find.byKey(const Key('filters-sheet-title')), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('filters-sheet-title'))).data,
+        t('Filters (1)', 'Filtres (1)'),
+      );
+      await tester.tap(find.byKey(const Key('filters-sheet-clear')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('filters-sheet-done')));
       await tester.pumpAndSettle();
       expect(find.text('Change the smoke alarm battery'), findsOneWidget);
 
-      await _see(tester, find.byKey(const Key('history-query')));
-      await tester.enterText(find.byKey(const Key('history-query')), 'battery');
-      await _see(tester, find.byKey(const Key('history-apply')));
-      await tester.tap(find.byKey(const Key('history-apply')));
+      await tester.enterText(find.byKey(const Key('tasks-search')), 'battery');
+      await tester.pump(hcSearchDelay);
       await tester.pumpAndSettle();
       expect(find.text('Check the extinguishers'), findsNothing);
       expect(find.text('Change the smoke alarm battery'), findsOneWidget);
-      await _see(tester, find.byKey(const Key('history-query')));
-      await tester.enterText(find.byKey(const Key('history-query')), 'zzz');
-      await _see(tester, find.byKey(const Key('history-apply')));
-      await tester.tap(find.byKey(const Key('history-apply')));
+      await tester.enterText(find.byKey(const Key('tasks-search')), 'zzz');
+      await tester.pump(hcSearchDelay);
       await tester.pumpAndSettle();
       expect(
         find.text(t('Nothing matches.', 'Rien ne correspond.')),
