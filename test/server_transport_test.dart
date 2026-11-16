@@ -285,6 +285,81 @@ void main() {
         isEmpty,
       );
     });
+
+    test('the derived visible_from of an occurrence is not sent (web '
+        'SYNC_DERIVED; found by the e2e against v0.4.1)', () {
+      final occurrence = ServerTransport.wire(
+        put('tasks.occurrence', {
+          'due_on': '2026-11-16',
+          'visible_from': '2026-11-09',
+        }),
+      );
+      expect(occurrence.single[Op.fields], {'due_on': '2026-11-16'});
+    });
+  });
+
+  group('the mark seen by the server', () {
+    test('rows of the feed, of a snapshot, and of a push applied are marked; '
+        'a rejected one is not', () async {
+      final marked = _Seen();
+      transport = ServerTransport(
+        address: address,
+        http: server,
+        store: store,
+        state: state,
+        device: device,
+        schemaVersion: 6,
+        seenStore: marked,
+      );
+      server.snapshot = [
+        {
+          't': 'rooms.room',
+          'h': home,
+          'id': '33333333-3333-4333-8333-333333333333',
+          'f': {
+            'name': ['Attic', '0193a1b2c3d40001', serverDevice],
+          },
+        },
+        {'covers': 3},
+      ];
+      final first = await transport.pull();
+      expect(first.complete[home], {
+        ('rooms.room', '33333333-3333-4333-8333-333333333333'),
+      });
+      server.changes = [
+        {
+          'pos': 4,
+          'device': serverDevice,
+          'op': op('44444444-4444-4444-8444-444444444444', {'name': 'Hall'}),
+        },
+      ];
+      await transport.pull(after: first.position);
+      server.pushResults = [
+        {'i': 0, 'status': 'applied'},
+        {'i': 1, 'status': 'rejected', 'code': 'forbidden'},
+      ];
+      await transport.push([
+        op('55555555-5555-4555-8555-555555555555', {'name': 'Den'}),
+        op('66666666-6666-4666-8666-666666666666', {'name': 'Bad'}),
+      ]);
+      expect(marked.rows, {
+        ('rooms.room', home, '33333333-3333-4333-8333-333333333333'),
+        ('rooms.room', home, '44444444-4444-4444-8444-444444444444'),
+        ('rooms.room', home, '55555555-5555-4555-8555-555555555555'),
+      });
+    });
+
+    test('a push towards a cursor the server no longer keeps sends nothing '
+        'and waits for the rule after 410', () async {
+      final first = await transport.pull();
+      await transport.pull(after: first.position);
+      server.expired = true;
+      final result = await transport.push([
+        op('77777777-7777-4777-8777-777777777777', {'name': 'Loft'}),
+      ]);
+      expect(result.held, isTrue);
+      expect(server.pushes, isEmpty);
+    });
   });
 
   group('pull', () {
@@ -762,4 +837,12 @@ class _MemoryState implements ServerStateStore {
 
   @override
   Future<void> writeServerState(String? state) async => value = state;
+}
+
+class _Seen implements ServerSeenStore {
+  final rows = <(String, String, String)>{};
+
+  @override
+  Future<void> markSeen(Iterable<(String, String, String)> marked) async =>
+      rows.addAll(marked);
 }

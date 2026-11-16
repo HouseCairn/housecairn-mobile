@@ -7,6 +7,8 @@ import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../l10n/app_localizations.dart';
 import '../sync/mode.dart';
+import '../sync/operation.dart';
+import '../sync/transport.dart';
 import 'server_screens.dart';
 import 'state.dart';
 
@@ -232,33 +234,166 @@ class _Indicator extends StatelessWidget {
   );
 }
 
-/// The rows of More that show the way in use, and the two others disabled
-/// with "Coming later" (docs/plan.md, lot 2c).
+/// The rows of More that show the way in use, the way that is coming later
+/// disabled with "Coming later" (docs/plan.md, lot 2c), and the moves of
+/// lot 4b: server → alone, and alone → server for a phone with no home
+/// (with homes, a message that lot 4c brings it, and nothing changes).
 class WaysRows extends StatelessWidget {
   const WaysRows({super.key});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final inUse = AppScope.of(context).syncMode;
+    final state = AppScope.of(context);
+    final inUse = state.syncMode;
     return HcCardList(
       children: [
         for (final way in SyncMode.values)
           Semantics(
             key: Key('way-row-${way.name}'),
-            enabled: way == inUse,
+            enabled: way == inUse || wayAvailable(way),
             child: HcRow(
               title: wayWords(l10n, way).title,
               text: wayWords(l10n, way).text,
               pills: [
                 if (way == inUse)
                   HcPill(l10n.wayInUse, tone: HcPillTone.success)
-                else
+                else if (!wayAvailable(way))
                   HcPill(l10n.wayComingLater, tone: HcPillTone.ghost),
               ],
+              onTap: way != inUse && wayAvailable(way)
+                  ? () => _move(context, state, way)
+                  : null,
             ),
           ),
       ],
     );
   }
+
+  static Future<void> _move(
+    BuildContext context,
+    AppState state,
+    SyncMode to,
+  ) async {
+    if (to == SyncMode.server) {
+      if (!state.canMoveToServer) {
+        await _tell(context, AppLocalizations.of(context).wayMoveToServerLater);
+        return;
+      }
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const ServerAddressScreen()),
+      );
+      return;
+    }
+    if (state.syncMode == SyncMode.server && to == SyncMode.alone) {
+      await _leaveServer(context, state);
+    }
+  }
+
+  static Future<void> _tell(BuildContext context, String text) =>
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          key: const Key('way-message'),
+          content: Text(text),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(MaterialLocalizations.of(context).okButtonLabel),
+            ),
+          ],
+        ),
+      );
+
+  static Future<bool> _confirm(
+    BuildContext context, {
+    required Key key,
+    String? title,
+    required List<String> lines,
+    required String action,
+  }) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        key: key,
+        scrollable: true,
+        title: title == null ? null : Text(title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final line in lines)
+              Padding(
+                padding: const EdgeInsets.only(bottom: HcSpace.s2),
+                child: Text(line),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            key: const Key('way-confirm'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(action),
+          ),
+        ],
+      ),
+    );
+    return ok ?? false;
+  }
+
+  /// Server → alone: a confirmation that counts the changes not sent; if
+  /// the server cannot be reached, a second one that names them.
+  static Future<void> _leaveServer(BuildContext context, AppState state) async {
+    final l10n = AppLocalizations.of(context);
+    final unsent = await state.unsentChanges();
+    if (!context.mounted) return;
+    final go = await _confirm(
+      context,
+      key: const Key('way-leave-server'),
+      title: l10n.wayLeaveServerTitle,
+      lines: [
+        l10n.wayLeaveServerText,
+        if (unsent.isNotEmpty) l10n.wayLeaveServerUnsent(unsent.length),
+      ],
+      action: l10n.wayLeaveServerConfirm,
+    );
+    if (!go) return;
+    final left = await state.leaveServer();
+    if (left.isEmpty || !context.mounted) return;
+    final names = unsentNames(left);
+    final drop = await _confirm(
+      context,
+      key: const Key('way-leave-server-unsent'),
+      lines: [
+        l10n.wayLeaveServerUnreachable,
+        for (final name in names.named) '• $name',
+        if (names.others > 0) l10n.wayLeaveServerOther(names.others),
+      ],
+      action: l10n.wayLeaveServerDrop,
+    );
+    if (drop) await state.leaveServer(keepUnsent: true);
+  }
+}
+
+/// The names of the rows that [operations] change (their `name` or `title`
+/// as the phone sends it), each once, and how many change a row without a
+/// name in them.
+({List<String> named, int others}) unsentNames(List<SyncOperation> operations) {
+  final named = <String>{};
+  final others = <String>{};
+  for (final op in operations) {
+    final fields = (op[Op.fields] as Map?) ?? const {};
+    final name = fields['name'] ?? fields['title'];
+    if (name is String && name.isNotEmpty) {
+      named.add(name);
+    } else {
+      others.add('${op[Op.type]}:${op[Op.id]}');
+    }
+  }
+  return (named: named.toList(), others: others.length);
 }

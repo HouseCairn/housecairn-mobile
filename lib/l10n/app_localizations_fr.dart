@@ -2553,4 +2553,49 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get serverDeviceName => 'Application mobile Housecairn';
+
+  @override
+  String get errReadOnlyHome =>
+      'Vous êtes membre en lecture seule de ce logement sur votre serveur : rien ne peut y être modifié depuis ce téléphone.';
+
+  @override
+  String get errOwnersOnly =>
+      'Seul un propriétaire de ce logement sur votre serveur peut l\'archiver ou le rétablir.';
+
+  @override
+  String get errDeleteOnServer =>
+      'Un logement de votre serveur se supprime sur la page web du serveur, par un propriétaire. Il disparaît alors aussi de ce téléphone.';
+
+  @override
+  String get wayMoveToServerLater =>
+      'Garder les logements de ce téléphone sur un serveur Housecairn viendra avec une prochaine version de l\'application. Rien n\'a changé sur ce téléphone.';
+
+  @override
+  String get wayLeaveServerTitle =>
+      'Arrêter la synchronisation avec le serveur ?';
+
+  @override
+  String get wayLeaveServerText =>
+      'Ce téléphone garde une copie de ses logements tels qu\'ils étaient à la dernière synchronisation. Ils ne se synchroniseront plus, et l\'accès de ce téléphone est révoqué sur le serveur.';
+
+  @override
+  String wayLeaveServerUnsent(int count) {
+    return 'Modifications pas encore envoyées : $count. Elles sont envoyées d\'abord.';
+  }
+
+  @override
+  String get wayLeaveServerConfirm => 'Arrêter la synchronisation';
+
+  @override
+  String get wayLeaveServerUnreachable =>
+      'Le serveur est injoignable, ces modifications ne peuvent pas être envoyées. Si vous arrêtez maintenant, elles restent sur ce téléphone seulement :';
+
+  @override
+  String get wayLeaveServerDrop =>
+      'Arrêter et les garder sur ce téléphone seulement';
+
+  @override
+  String wayLeaveServerOther(int count) {
+    return 'Autres modifications : $count';
+  }
 }

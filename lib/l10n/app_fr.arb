@@ -832,5 +832,16 @@
   "serverCertificate": "Le certificat de ce serveur n'est pas valide. L'application ne s'y connecte pas.",
   "serverOtherHost": "Le serveur a renvoyé l'application vers une autre adresse. L'application ne parle qu'à l'adresse que vous avez saisie.",
   "serverUnreachable": "Le serveur est injoignable. Vérifiez l'adresse et le réseau.",
-  "serverDeviceName": "Application mobile Housecairn"
+  "serverDeviceName": "Application mobile Housecairn",
+  "errReadOnlyHome": "Vous êtes membre en lecture seule de ce logement sur votre serveur : rien ne peut y être modifié depuis ce téléphone.",
+  "errOwnersOnly": "Seul un propriétaire de ce logement sur votre serveur peut l'archiver ou le rétablir.",
+  "errDeleteOnServer": "Un logement de votre serveur se supprime sur la page web du serveur, par un propriétaire. Il disparaît alors aussi de ce téléphone.",
+  "wayMoveToServerLater": "Garder les logements de ce téléphone sur un serveur Housecairn viendra avec une prochaine version de l'application. Rien n'a changé sur ce téléphone.",
+  "wayLeaveServerTitle": "Arrêter la synchronisation avec le serveur ?",
+  "wayLeaveServerText": "Ce téléphone garde une copie de ses logements tels qu'ils étaient à la dernière synchronisation. Ils ne se synchroniseront plus, et l'accès de ce téléphone est révoqué sur le serveur.",
+  "wayLeaveServerUnsent": "Modifications pas encore envoyées : {count}. Elles sont envoyées d'abord.",
+  "wayLeaveServerConfirm": "Arrêter la synchronisation",
+  "wayLeaveServerUnreachable": "Le serveur est injoignable, ces modifications ne peuvent pas être envoyées. Si vous arrêtez maintenant, elles restent sur ce téléphone seulement :",
+  "wayLeaveServerDrop": "Arrêter et les garder sur ce téléphone seulement",
+  "wayLeaveServerOther": "Autres modifications : {count}"
 }

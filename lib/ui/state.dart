@@ -24,6 +24,7 @@ import '../sync/server_connection.dart';
 import '../sync/server_http.dart';
 import '../sync/server_http_io.dart';
 import '../sync/server_transport.dart';
+import '../sync/transport.dart';
 
 /// Re-encodes a photo off the main isolate (a photo of 12 megapixels takes a
 /// second or two); tests give [processPhoto] itself.
@@ -221,6 +222,44 @@ class AppState extends ChangeNotifier {
     } finally {
       await refresh();
     }
+  }
+
+  /// The move alone → server is open only to a phone with no home
+  /// (docs/plan.md, lot 4b): keeping this phone's homes on a server is lot
+  /// 4c, and the phone never merges nor drops them on its own.
+  bool get canMoveToServer => homes.isEmpty;
+
+  /// The changes of this phone not yet sent to the server, oldest first.
+  Future<List<SyncOperation>> unsentChanges() async => [
+    for (final o in await repository.outgoing()) o.operation,
+  ];
+
+  /// The move server → alone (docs/adr/0010, "Moving from one way to
+  /// another"): the changes not sent are sent first; when the server cannot
+  /// be reached, nothing changes and they are given back, unless
+  /// [keepUnsent] says the person confirmed leaving with them on this phone
+  /// only. Then the access is revoked and deleted from [store], the marks
+  /// and the transport's state go, and the homes stay as they were at the
+  /// last sync, no longer synced.
+  Future<List<SyncOperation>> leaveServer({bool keepUnsent = false}) async {
+    final address = await serverAddress();
+    if (address != null && (await unsentChanges()).isNotEmpty) {
+      try {
+        await SyncEngine(repository, _transport(address)).sync();
+      } on ServerHttpException {
+        if (!keepUnsent) return unsentChanges();
+      } on ServerStopped {
+        if (!keepUnsent) return unsentChanges();
+      }
+    }
+    if (address != null) await _transport(address).disconnect();
+    final left = await repository.outgoing();
+    if (left.isNotEmpty) await repository.acknowledge(left.last.seq);
+    await repository.forgetServerSeen();
+    await repository.setServerAddress(null);
+    await repository.setSyncMode(SyncMode.alone);
+    await refresh();
+    return const [];
   }
 
   Future<void> choose(String homeId) async {

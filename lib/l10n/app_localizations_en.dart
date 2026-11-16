@@ -2537,4 +2537,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get serverDeviceName => 'Housecairn mobile app';
+
+  @override
+  String get errReadOnlyHome =>
+      'You are a read-only member of this home on your server: nothing can be changed in it from this phone.';
+
+  @override
+  String get errOwnersOnly =>
+      'Only an owner of this home on your server can archive it or bring it back.';
+
+  @override
+  String get errDeleteOnServer =>
+      'A home of your server is deleted on the server\'s web page, by an owner. It then goes from this phone too.';
+
+  @override
+  String get wayMoveToServerLater =>
+      'Keeping this phone\'s homes on a Housecairn server comes with a later version of the app. Nothing on this phone has changed.';
+
+  @override
+  String get wayLeaveServerTitle => 'Stop syncing with the server?';
+
+  @override
+  String get wayLeaveServerText =>
+      'This phone keeps a copy of its homes as they were at the last sync. They will no longer sync, and the access of this phone is revoked on the server.';
+
+  @override
+  String wayLeaveServerUnsent(int count) {
+    return 'Changes not yet sent: $count. They are sent first.';
+  }
+
+  @override
+  String get wayLeaveServerConfirm => 'Stop syncing';
+
+  @override
+  String get wayLeaveServerUnreachable =>
+      'The server cannot be reached, so these changes cannot be sent. If you stop now, they stay on this phone only:';
+
+  @override
+  String get wayLeaveServerDrop => 'Stop and keep them on this phone only';
+
+  @override
+  String wayLeaveServerOther(int count) {
+    return 'Other changes: $count';
+  }
 }

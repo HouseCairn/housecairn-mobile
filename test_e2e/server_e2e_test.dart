@@ -13,6 +13,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/core/store.dart';
 import 'package:housecairn_mobile/data/repository.dart';
+import 'package:housecairn_mobile/domain/recurrence.dart' as recurrence;
 import 'package:housecairn_mobile/sync/server_address.dart';
 import 'package:housecairn_mobile/sync/server_http_io.dart';
 import 'package:housecairn_mobile/sync/server_sign_in.dart';
@@ -183,6 +184,187 @@ void main() {
     expect(after.where((r) => r['id'] == room), hasLength(1));
     expect(after.length, before.length + 1);
   }, skip: skip);
+
+  // The cases of docs/adr/0003-sync-protocol.md with the phone offline on one
+  // side and the web on the other (docs/plan.md, lot 4b): after the sync,
+  // the phone and the server are equal, field by field.
+
+  /// A task that repeats every three months after the last time, due today,
+  /// sent to the server; its open occurrence.
+  Future<(String, String)> repeatingTask(String title) async {
+    phone.clock.set(DateTime.now().toUtc());
+    final task = await phone.repo.createTask(
+      home,
+      TaskInput(
+        title: title,
+        dueOn: phone.repo.today(),
+        repeatMode: recurrence.afterLast,
+        repeatUnit: recurrence.monthUnit,
+        repeatInterval: 3,
+      ),
+    );
+    await phone.sync();
+    expect([
+      for (final r in transport.rejections) '${r.code} ${r.operation}',
+    ], isEmpty);
+    return (task, (await phone.repo.openOccurrencesOf(task)).single.id);
+  }
+
+  Future<List<Map<String, Object?>>> webOccurrences(String task) async {
+    final (status, text, _) = await web.raw(
+      'GET',
+      address.resolve('/api/v1/homes/$home/occurrences/', {'task': task}),
+      headers: {
+        'accept': 'application/json',
+        'authorization': 'Bearer ${web.apiToken}',
+      },
+    );
+    expect(status, 200, reason: text);
+    return [
+      for (final r in (jsonDecode(text) as Map)['results']! as List)
+        (r as Map).cast<String, Object?>(),
+    ];
+  }
+
+  /// Every occurrence of [task] on the phone and on the web, with the fields
+  /// both have: the same list on both sides.
+  Future<void> expectOccurrencesEqual(String task) async {
+    String text(Object? v) => v == null ? '' : '$v';
+    final onWeb = {
+      for (final o in await webOccurrences(task))
+        o['id']! as String: [
+          text(o['status']),
+          text(o['due_on']),
+          text(o['completed_on']),
+          text(o['postponed_from']),
+        ],
+    };
+    final onPhone = {
+      for (final o in await phone.repo.occurrencesOf(task))
+        o.id: [
+          o.status,
+          '${o.dueOn}',
+          text(o.completedOn),
+          text(o.postponedFrom),
+        ],
+    };
+    expect(onPhone, onWeb);
+  }
+
+  Future<void> syncTwice() async {
+    phone.clock.set(DateTime.now().toUtc());
+    await phone.sync();
+    await phone.sync();
+  }
+
+  test('ADR 0003, two closings of one occurrence: done on the phone offline '
+      'and on the web give one next occurrence, the same on both', () async {
+    final (task, occurrence) = await repeatingTask('Filter of the hood');
+    await phone.repo.complete(occurrence);
+    await web.send(
+      'POST',
+      '/api/v1/homes/$home/occurrences/$occurrence/complete/',
+      body: {'note': ''},
+    );
+    await syncTwice();
+    expect(await phone.repo.openOccurrencesOf(task), hasLength(1));
+    await expectOccurrencesEqual(task);
+  }, skip: skip);
+
+  test('ADR 0003, postpone against done: postponed on the phone offline, '
+      'done on the web; one open occurrence, the same on both', () async {
+    final (task, occurrence) = await repeatingTask('Gutters');
+    await phone.repo.postpone(occurrence, phone.repo.today().addDays(3));
+    await web.send(
+      'POST',
+      '/api/v1/homes/$home/occurrences/$occurrence/complete/',
+      body: {'note': ''},
+    );
+    await syncTwice();
+    expect(await phone.repo.openOccurrencesOf(task), hasLength(1));
+    await expectOccurrencesEqual(task);
+  }, skip: skip);
+
+  test('ADR 0003, undo against an edit of the successor: the edit on the web '
+      'wins, the undo of the phone is taken back', () async {
+    final (task, occurrence) = await repeatingTask('Smoke alarm battery');
+    final closing = await phone.repo.complete(occurrence);
+    await phone.sync();
+    await phone.repo.undo(occurrence);
+    // An edit of the successor on the web: it is moved to another day.
+    await web.send(
+      'POST',
+      '/api/v1/homes/$home/occurrences/${closing.nextId}/postpone/',
+      body: {'due_on': '${phone.repo.today().addDays(120)}'},
+    );
+    final report = await phone.sync();
+    await syncTwice();
+    expect(
+      report.notices.map((n) => n.kind),
+      contains(SyncNoticeKind.undoReverted),
+    );
+    expect((await phone.repo.occurrence(occurrence))!.status, 'done');
+    expect(await phone.repo.occurrence(closing.nextId!), isNotNull);
+    await expectOccurrencesEqual(task);
+  }, skip: skip);
+
+  test('ADR 0003, deletion against edit: deleted on the phone offline, renamed '
+      'on the web; the row stays deleted on both', () async {
+    final room = await phone.repo.createRoom(home, name: 'Laundry');
+    await phone.sync();
+    await phone.repo.deleteRoom(room);
+    await web.json(
+      'PATCH',
+      '/api/v1/homes/$home/rooms/$room/',
+      body: {'name': 'Utility room'},
+    );
+    await syncTwice();
+    expect(await phone.repo.room(room), isNull);
+    final (status, _, _) = await web.raw(
+      'GET',
+      address.resolve('/api/v1/homes/$home/rooms/$room/'),
+      headers: {'authorization': 'Bearer ${web.apiToken}'},
+    );
+    expect(status, 404);
+  }, skip: skip);
+
+  test('ADR 0003, two fields of one row: each side keeps its change', () async {
+    final room = await phone.repo.createRoom(home, name: 'Study');
+    await phone.sync();
+    await phone.repo.updateRoom(room, const RoomInput(name: 'Office'));
+    await web.json(
+      'PATCH',
+      '/api/v1/homes/$home/rooms/$room/',
+      body: {'notes': 'North light'},
+    );
+    await syncTwice();
+    final onPhone = (await phone.repo.room(room))!;
+    final onWeb = await web.json('GET', '/api/v1/homes/$home/rooms/$room/');
+    expect(onPhone.name, 'Office');
+    expect(onPhone.notes, 'North light');
+    expect([onWeb['name'], onWeb['notes']], [onPhone.name, onPhone.notes]);
+  }, skip: skip);
+
+  test(
+    'ADR 0003, one field on both sides: the later write wins on both',
+    () async {
+      final room = await phone.repo.createRoom(home, name: 'Porch');
+      await phone.sync();
+      await phone.repo.updateRoom(room, const RoomInput(name: 'Veranda'));
+      // The web writes after the phone, by the clocks of both.
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await web.json(
+        'PATCH',
+        '/api/v1/homes/$home/rooms/$room/',
+        body: {'name': 'Sunroom'},
+      );
+      await syncTwice();
+      final onWeb = await web.json('GET', '/api/v1/homes/$home/rooms/$room/');
+      expect((await phone.repo.room(room))!.name, 'Sunroom');
+      expect(onWeb['name'], 'Sunroom');
+    },
+    skip: skip,
+  );
 
   test('revoking the access on the server stops the phone at its next call, '
       'and the phone says so', () async {

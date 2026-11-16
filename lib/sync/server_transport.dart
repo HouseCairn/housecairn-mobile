@@ -508,12 +508,14 @@ class ServerTransport implements SyncTransport {
   };
 
   /// A column the server keeps for itself (web `sync.pushing`, `server_owned`:
-  /// `created_at` and `updated_at` but where it takes `created_at`): an
+  /// `created_at` and `updated_at` but where it takes `created_at`, and the
+  /// derived fields, `SYNC_DERIVED`: `visible_from` of an occurrence): an
   /// operation that sets one is rejected `forbidden` as a whole, so the
   /// phone does not send it. The server writes its own.
   static bool _serverOwned(String? type, String field) =>
       field == 'updated_at' ||
-      (field == 'created_at' && !_createdAtSent.contains(type));
+      (field == 'created_at' && !_createdAtSent.contains(type)) ||
+      (field == 'visible_from' && type == 'tasks.occurrence');
 
   /// The operation as the server reads it: the keys of section 2.2 only
   /// (the device is the push's, and `sv` the body's), and `deleted_at`,

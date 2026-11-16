@@ -174,6 +174,18 @@ enum Refusal {
 
   /// Only a closed report can be reopened (`reopen_report`).
   reportNotClosed,
+
+  /// A home of a server where the signed-in account is a read-only member
+  /// (lot 4b): the phone writes nothing in it.
+  readOnlyHome,
+
+  /// Only an owner archives a home of a server, or brings it back (web ADR
+  /// 0077, need 9).
+  ownersOnly,
+
+  /// A home of a server is deleted on the server's web page, not on the
+  /// phone (web ADR 0077: the push never erases a home).
+  deleteOnServer,
 }
 
 class Refused implements Exception {
@@ -521,6 +533,14 @@ class Repository {
   late Hlc _hlc;
   late Uint8List _device;
 
+  /// The role of the signed-in account in each home of a server, read from
+  /// the transport's state; `null` until read, empty outside the third way.
+  Map<String, String>? _serverRoles;
+
+  /// Whether operations of the other side are being applied: their repairs
+  /// write in any home, as the server's own repairs do.
+  bool _applyingSync = false;
+
   /// Opens the database and reads the id of this phone (16 random bytes,
   /// made at the first start) and the last clock it gave.
   Future<void> open() async {
@@ -590,6 +610,10 @@ class Repository {
     String? homeId,
     bool create = false,
   }) async {
+    if (!_applyingSync) {
+      final home = table == 'homes' ? id : homeId ?? await _homeOf(table, id);
+      if (home != null) await _checkServerRole(home, table, fields);
+    }
     final now = _now();
     final clock = _hlc.next();
     final hlc = Hlc.format(clock);
@@ -823,6 +847,11 @@ class Repository {
   Future<void> deleteHome(String id, {required String typedName}) async {
     final found = await home(id);
     if (found == null) throw const Refused(Refusal.notFound);
+    // A home of a server is erased there, on the web, by an owner; the phone
+    // then erases it as a purge (docs/protocol.md section 2.10).
+    if (await serverRole(id) != null) {
+      throw const Refused(Refusal.deleteOnServer);
+    }
     if (typedName != found.name) throw const Refused(Refusal.nameMismatch);
     final active = await activeHomes();
     if (found.archivedAt == null && active.length <= 1) {

@@ -22,6 +22,7 @@ import 'support/app.dart';
 import 'support/arb.dart';
 import 'support/fake_transport.dart';
 import 'support/fixture.dart';
+import 'support/sync_fixture.dart';
 
 const _words = {
   'en': (
@@ -262,7 +263,7 @@ void main() {
             expect(pill('relay', w.inUse), findsNothing);
             expect(pill('server', w.inUse), findsNothing);
             expect(pill('relay', w.later), findsOneWidget);
-            expect(pill('server', w.later), findsOneWidget);
+            expect(pill('server', w.later), findsNothing);
           },
         );
       }
@@ -297,11 +298,11 @@ void main() {
         expect(await state.repository.storedSyncMode(), SyncMode.alone);
       });
 
-      testWidgets('More shows the way in use and the two others disabled', (
-        tester,
-      ) async {
+      testWidgets('More shows the way in use, family sync coming later, and '
+          'a phone with homes is told that moving them to a server comes '
+          'with lot 4c, nothing changed', (tester) async {
         await onPhone(tester);
-        await pumpApp(tester, locale: locale);
+        final state = await pumpApp(tester, locale: locale);
         await openMore(tester, w.more);
         await tester.scrollUntilVisible(
           find.byKey(const Key('way-row-server')),
@@ -313,14 +314,26 @@ void main() {
         );
         expect(pill('alone', w.inUse), findsOneWidget);
         expect(pill('relay', w.later), findsOneWidget);
-        expect(pill('server', w.later), findsOneWidget);
-        // Nothing opens: no row of the group is tappable.
+        expect(pill('server', w.later), findsNothing);
+        final before = await dumpOf(state.repository);
+        // Family sync opens nothing.
+        await tester.ensureVisible(find.byKey(const Key('way-row-relay')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('way-row-relay')));
+        await tester.pumpAndSettle();
+        expect(find.byType(Dialog), findsNothing);
+        // The server, with homes on the phone: a message, nothing else.
         await tester.ensureVisible(find.byKey(const Key('way-row-server')));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('way-row-server')));
         await tester.pumpAndSettle();
+        expect(find.byKey(const Key('way-message')), findsOneWidget);
+        await tester.tap(find.text('OK'));
+        await tester.pumpAndSettle();
         expect(find.byType(Dialog), findsNothing);
-        expect(find.text(w.server), findsOneWidget);
+        expect(state.syncMode, SyncMode.alone);
+        expect(await state.repository.storedSyncMode(), SyncMode.alone);
+        expect(await dumpOf(state.repository), before);
       });
 
       for (final scale in [1.0, 2.0]) {

@@ -251,12 +251,17 @@ extension SyncRepository on Repository {
     bool repair = true,
   }) async {
     final notices = <SyncNotice>[];
-    await db.transaction(() async {
-      for (final op in operations) {
-        await _applyOne(op, notices);
-      }
-      if (repair) notices.addAll(await repairMerged());
-    });
+    _applyingSync = true;
+    try {
+      await db.transaction(() async {
+        for (final op in operations) {
+          await _applyOne(op, notices);
+        }
+        if (repair) notices.addAll(await repairMerged());
+      });
+    } finally {
+      _applyingSync = false;
+    }
     return notices;
   }
 
@@ -705,6 +710,21 @@ extension SyncRepository on Repository {
       final id = record.key.substring('undo:'.length);
       final closed = await occurrence(id);
       if (closed == null || !openStatuses.contains(closed.status)) {
+        // Closed again by the other side's write (a server that refused the
+        // undo gives the values that won, lot 4b): the undo was taken back
+        // there, and the person is told so here.
+        final by = closed == null
+            ? null
+            : (await _clocksOf('tasks.occurrence', id))['status'];
+        if (by != null && b64(by.device) != b64(_device)) {
+          notices.add(
+            SyncNotice(
+              SyncNoticeKind.undoReverted,
+              entity: 'tasks.occurrence',
+              rowId: id,
+            ),
+          );
+        }
         await _setSetting(record.key, null);
         continue;
       }

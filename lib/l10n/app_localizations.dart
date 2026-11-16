@@ -4165,6 +4165,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Housecairn mobile app'**
   String get serverDeviceName;
+
+  /// Error: the signed-in account is a read-only member of this home of the server (lot 4b).
+  ///
+  /// In en, this message translates to:
+  /// **'You are a read-only member of this home on your server: nothing can be changed in it from this phone.'**
+  String get errReadOnlyHome;
+
+  /// Error: archiving a home of a server is for its owners (web ADR 0077).
+  ///
+  /// In en, this message translates to:
+  /// **'Only an owner of this home on your server can archive it or bring it back.'**
+  String get errOwnersOnly;
+
+  /// Error: a home of a server cannot be deleted from the phone.
+  ///
+  /// In en, this message translates to:
+  /// **'A home of your server is deleted on the server\'s web page, by an owner. It then goes from this phone too.'**
+  String get errDeleteOnServer;
+
+  /// Shown when the person picks My Housecairn server while the phone has homes of its own (docs/plan.md, lot 4c).
+  ///
+  /// In en, this message translates to:
+  /// **'Keeping this phone\'s homes on a Housecairn server comes with a later version of the app. Nothing on this phone has changed.'**
+  String get wayMoveToServerLater;
+
+  /// Title of the confirmation before the phone leaves the third way for Alone on this phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop syncing with the server?'**
+  String get wayLeaveServerTitle;
+
+  /// Body of the confirmation before leaving the server (docs/adr/0010, My server to alone).
+  ///
+  /// In en, this message translates to:
+  /// **'This phone keeps a copy of its homes as they were at the last sync. They will no longer sync, and the access of this phone is revoked on the server.'**
+  String get wayLeaveServerText;
+
+  /// Line of the confirmation before leaving the server: how many changes wait to be sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes not yet sent: {count}. They are sent first.'**
+  String wayLeaveServerUnsent(int count);
+
+  /// Button: leave the server, keep the homes on this phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop syncing'**
+  String get wayLeaveServerConfirm;
+
+  /// Second confirmation when the server does not answer: the unsent changes are named after it.
+  ///
+  /// In en, this message translates to:
+  /// **'The server cannot be reached, so these changes cannot be sent. If you stop now, they stay on this phone only:'**
+  String get wayLeaveServerUnreachable;
+
+  /// Button: leave the server without sending the changes listed.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop and keep them on this phone only'**
+  String get wayLeaveServerDrop;
+
+  /// Line after the names of the unsent changes, for those without a name.
+  ///
+  /// In en, this message translates to:
+  /// **'Other changes: {count}'**
+  String wayLeaveServerOther(int count);
 }
 
 class _AppLocalizationsDelegate

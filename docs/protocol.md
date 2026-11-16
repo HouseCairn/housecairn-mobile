@@ -271,7 +271,9 @@ transport sends a `put` that sets `deleted_at` as a `delete` with the same clock
 fields as a `put`), one that clears it alone as a `restore`, and drops `deleted_at: null` next
 to other fields. The columns the server keeps for itself, `updated_at` and `created_at` (but on
 `stock.article`, `stock.supplier`, `stock.movement` and `reports.report`, whose `created_at` it
-takes), are not sent: one of them makes the whole operation `rejected` with `forbidden`. The
+takes), are not sent, nor the derived `visible_from` of `tasks.occurrence` (web
+`SYNC_DERIVED`, recomputed on each side, ADR 0003 "Derived"): one of them makes the whole
+operation `rejected` with `forbidden`. The
 device of the operations is the push's `device`, and their `sv` the push's.
 
 **Starting again after 410.** The phone keeps, per row and outside the row's fields (in its sync

@@ -22,6 +22,34 @@ extension ServerSettings on Repository {
   /// The [ServerSeenStore] of the transport, on `server_seen`.
   ServerSeenStore get serverSeen => _RepositoryServerSeen(this);
 
+  /// The role of the signed-in account in [homeId] on the server, `null`
+  /// when it is not a home of a server.
+  Future<String?> serverRole(String homeId) async {
+    final roles = _serverRoles ??= {
+      for (final h in ServerSyncState.decode(
+        await _setting('server_sync'),
+      ).homes)
+        h.id: h.role,
+    };
+    return roles[homeId];
+  }
+
+  /// A read-only member writes nothing; only an owner archives (lot 4b).
+  Future<void> _checkServerRole(
+    String homeId,
+    String table,
+    Map<String, Object?> fields,
+  ) async {
+    final role = await serverRole(homeId);
+    if (role == null) return;
+    if (role == 'read_only') throw const Refused(Refusal.readOnlyHome);
+    if (table == 'homes' &&
+        fields.containsKey('archived_at') &&
+        role != 'owner') {
+      throw const Refused(Refusal.ownersOnly);
+    }
+  }
+
   // ---------- the mark "seen by the server" (protocol section 2.10) ----------
 
   /// Marks [rows] (`(t, h, id)`) as seen by the server.
@@ -204,8 +232,10 @@ class _RepositoryServerState implements ServerStateStore {
   Future<String?> readServerState() => repository._setting('server_sync');
 
   @override
-  Future<void> writeServerState(String? state) =>
-      repository._setSetting('server_sync', state);
+  Future<void> writeServerState(String? state) async {
+    await repository._setSetting('server_sync', state);
+    repository._serverRoles = null;
+  }
 }
 
 class _RepositoryServerSeen implements ServerSeenStore {
