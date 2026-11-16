@@ -3902,6 +3902,12 @@ abstract class AppLocalizations {
   /// **'No item yet. Add one from the page of a room.'**
   String get itemsAllEmpty;
 
+  /// Empty list of every item while the Add an item button is under it. Web catalogue: Aucun élément pour l'instant.
+  ///
+  /// In en, this message translates to:
+  /// **'No item yet.'**
+  String get itemsEmptyShort;
+
   /// The filters of the list of every item leave nothing. Web catalogue: Aucun élément ne correspond.
   ///
   /// In en, this message translates to:

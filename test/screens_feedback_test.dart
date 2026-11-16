@@ -6,10 +6,14 @@
 // sheets of existing rows saved as they are changed, with a "Saved" said by
 // the screen reader.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:housecairn_mobile/data/database.dart' show HomeRow;
 import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/domain/day.dart';
+import 'package:housecairn_mobile/design/widgets.dart';
 import 'package:housecairn_mobile/ui/autosave.dart';
+import 'package:housecairn_mobile/ui/equipment_screen.dart';
 import 'package:housecairn_mobile/ui/item_screens.dart';
 import 'package:housecairn_mobile/ui/state.dart';
 import 'package:housecairn_mobile/ui/stock_format.dart';
@@ -102,6 +106,122 @@ void main() {
       expect(find.text('Coffee machine'), findsNothing);
       expect(data.kitchen, isNotEmpty);
     });
+
+    testWidgets('Equipment adds an item: the button is there, the room being '
+        'filtered is chosen, the list gets it back, $locale', (tester) async {
+      final (state, data) = await start(tester);
+      await openEquipment(tester);
+      expect(find.byKey(const Key('equipment-add')), findsOneWidget);
+      expect(find.text(t('Add an item', 'Ajouter un élément')), findsOneWidget);
+      // Filtered on the cellar: the form starts with that room.
+      await tapKey(tester, 'equipment-room');
+      await tester.tap(find.text('Main cellar').last);
+      await tester.pumpAndSettle();
+      await tapKey(tester, 'equipment-add');
+      expect(find.byKey(const Key('item-room')), findsOneWidget);
+      await type(tester, 'item-name', 'Dehumidifier');
+      await tester.tap(find.text(t('Save', 'Enregistrer')));
+      await tester.pumpAndSettle();
+      final added = (await state.repository.itemList(
+        data.homes.main,
+        query: 'dehumidifier',
+      )).single;
+      expect(added.room.name, 'Main cellar');
+      // Back on the list, which is still filtered on the cellar.
+      expect(find.byKey(const Key('equipment-add')), findsOneWidget);
+      expect(find.text('Dehumidifier'), findsOneWidget);
+      expect(find.text('Main boiler'), findsOneWidget);
+    });
+
+    testWidgets('Equipment: with no room filter the form asks for the room, '
+        'and an archived home has no button, $locale', (tester) async {
+      final (state, data) = await start(tester);
+      await openEquipment(tester);
+      await tapKey(tester, 'equipment-add');
+      await tapKey(tester, 'item-room');
+      await tester.tap(find.text('Main cellar').last);
+      await tester.pumpAndSettle();
+      await type(tester, 'item-name', 'Shelf');
+      await tester.tap(find.text(t('Save', 'Enregistrer')));
+      await tester.pumpAndSettle();
+      expect(
+        (await state.repository.itemList(
+          data.homes.main,
+          query: 'shelf',
+        )).single.room.name,
+        'Main cellar',
+      );
+      await state.repository.archiveHome(data.homes.main);
+      final archived = (await state.repository.homes()).firstWhere(
+        (h) => h.id == data.homes.main,
+      );
+      expect(archived.archivedAt, isNotNull);
+      await openScreen(
+        tester,
+        HcScaffold(
+          title: 'Equipment',
+          body: EquipmentList(home: archived, tabs: const SizedBox.shrink()),
+        ),
+      );
+      expect(find.text('Coffee machine'), findsOneWidget);
+      expect(find.byKey(const Key('equipment-add')), findsNothing);
+    });
+
+    testWidgets('Equipment empty: with rooms the short text sits above the '
+        'button, with no room the long text and no button, $locale', (
+      tester,
+    ) async {
+      final (state, _) = await start(tester);
+      final id = await state.repository.createHome(name: 'Bare home');
+      Future<HomeRow> reread() async =>
+          (await state.repository.homes()).firstWhere((h) => h.id == id);
+      final short = t('No item yet.', 'Aucun élément pour l\'instant.');
+      final long = t(
+        'No item yet. Add one from the page of a room.',
+        'Aucun élément pour l\'instant. Ajoutez-en un depuis la page d\'une '
+            'pièce.',
+      );
+      // No room yet: the long text points to the page of a room.
+      await openScreen(
+        tester,
+        HcScaffold(
+          title: 'Equipment',
+          body: EquipmentList(home: await reread(), tabs: const SizedBox()),
+        ),
+      );
+      expect(find.text(long), findsOneWidget);
+      expect(find.byKey(const Key('equipment-add')), findsNothing);
+      // A room and no item: the short text, and the button under it.
+      await state.repository.createRoom(id, name: 'Bare room');
+      await openScreen(
+        tester,
+        HcScaffold(
+          title: 'Equipment',
+          body: EquipmentList(home: await reread(), tabs: const SizedBox()),
+        ),
+      );
+      expect(find.text(short), findsOneWidget);
+      expect(find.text(long), findsNothing);
+      expect(find.byKey(const Key('equipment-add')), findsOneWidget);
+    });
+
+    for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+      testWidgets('Equipment: Add an item opens the form and the room list '
+          'on ${platform.name}, $locale', (tester) async {
+        debugDefaultTargetPlatformOverride = platform;
+        try {
+          await start(tester);
+          await openEquipment(tester);
+          await tapKey(tester, 'equipment-add');
+          expect(find.byKey(const Key('item-name')), findsOneWidget);
+          expect(find.byKey(const Key('item-room')), findsOneWidget);
+          await tapKey(tester, 'item-room');
+          expect(find.text('Main cellar'), findsWidgets);
+        } finally {
+          debugDefaultTargetPlatformOverride = null;
+        }
+      });
+    }
 
     testWidgets('the search of Equipment keeps its focus while the words '
         'go on, and the list follows, $locale', (tester) async {

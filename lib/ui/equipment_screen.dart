@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
+import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/day.dart';
 import '../l10n/app_localizations.dart';
@@ -39,6 +40,7 @@ class _EquipmentListState extends State<EquipmentList> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final home = widget.home;
+    final writable = home.archivedAt == null;
     // The search field and the room choice live in the outer view, keyed by
     // the home only, so that typing never rebuilds the field (it would lose
     // its focus and close the keyboard); only the list below is read again
@@ -74,13 +76,47 @@ class _EquipmentListState extends State<EquipmentList> {
             load: (r) => r.itemList(home.id, roomId: _room, query: _query.text),
             builder: (context, entries) {
               final everything = _query.text.trim().isEmpty && _room == null;
-              return entries.isEmpty
-                  ? HcEmpty(everything ? l10n.itemsAllEmpty : l10n.itemsNoMatch)
-                  : HcCardList(
+              // After the list, as on the other lists; an item needs a room,
+              // so the button waits for the first one. The room being
+              // filtered is the one the form starts with. With the button
+              // under it, the empty state does not send the reader to the
+              // page of a room.
+              final canAdd = writable && rooms.isNotEmpty;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (entries.isEmpty)
+                    HcEmpty(
+                      !everything
+                          ? l10n.itemsNoMatch
+                          : canAdd
+                          ? l10n.itemsEmptyShort
+                          : l10n.itemsAllEmpty,
+                    )
+                  else
+                    HcCardList(
                       children: [
                         for (final entry in entries) _row(context, l10n, entry),
                       ],
-                    );
+                    ),
+                  if (canAdd)
+                    HcAddButton(
+                      key: const Key('equipment-add'),
+                      label: l10n.addItem,
+                      primary: false,
+                      gap: entries.isEmpty ? HcSpace.s2 : HcSpace.s3,
+                      onPressed: () => Navigator.of(context).push(
+                        hcRoute(
+                          ItemFormScreen(
+                            homeId: home.id,
+                            roomId: _room,
+                            chooseRoom: true,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
             },
           ),
         ],
