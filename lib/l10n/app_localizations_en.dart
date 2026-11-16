@@ -236,6 +236,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
+  String get pickerDone => 'Done';
+
+  @override
   String get homesArchived => 'Archived';
 
   @override

@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
+import '../design/adaptive.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/values.dart';
@@ -537,19 +538,10 @@ class ProjectScreen extends StatelessWidget {
     List<TaskRow> tasks,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final chosen = await showDialog<String>(
-      context: context,
-      builder: (context) => SimpleDialog(
-        title: Text(l10n.attachTask),
-        children: [
-          for (final t in tasks)
-            SimpleDialogOption(
-              key: Key('attach-${t.id}'),
-              onPressed: () => Navigator.of(context).pop(t.id),
-              child: Text(t.title, style: HcText.body),
-            ),
-        ],
-      ),
+    final chosen = await showHcChoices<String>(
+      context,
+      title: l10n.attachTask,
+      choices: [for (final t in tasks) (Key('attach-${t.id}'), t.id, t.title)],
     );
     if (chosen == null || !context.mounted) return;
     await runChange(context, (r) => r.attachTask(id, chosen));
@@ -559,10 +551,10 @@ class ProjectScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final url = TextEditingController();
     final title = TextEditingController();
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.addLink),
+    final ok = await showHcDialog<bool>(
+      context,
+      (context) => HcDialog(
+        title: l10n.addLink,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -577,14 +569,15 @@ class ProjectScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          TextButton(
+          HcDialogAction(
+            label: l10n.cancel,
+            kind: HcDialogKind.cancel,
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.cancel),
           ),
-          TextButton(
+          HcDialogAction(
             key: const Key('link-save'),
+            label: l10n.addLinkButton,
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.addLinkButton),
           ),
         ],
       ),
@@ -604,20 +597,21 @@ class ProjectScreen extends StatelessWidget {
 Future<String?> _ask(BuildContext context, String title, String label) async {
   final l10n = AppLocalizations.of(context);
   final controller = TextEditingController();
-  final text = await showDialog<String>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(title),
+  final text = await showHcDialog<String>(
+    context,
+    (context) => HcDialog(
+      title: title,
       content: hcText(label, controller, key: const Key('ask-text')),
       actions: [
-        TextButton(
+        HcDialogAction(
+          label: l10n.cancel,
+          kind: HcDialogKind.cancel,
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel),
         ),
-        TextButton(
+        HcDialogAction(
           key: const Key('ask-save'),
+          label: l10n.save,
           onPressed: () => Navigator.of(context).pop(controller.text),
-          child: Text(l10n.save),
         ),
       ],
     ),
@@ -1137,17 +1131,12 @@ class _QuoteFormScreenState extends State<QuoteFormScreen> {
                   if (_status == budget.accepted) ...[
                     HcField(
                       label: l10n.committedOnLabel,
-                      child: DropdownButtonFormField<String?>(
+                      child: HcSelect<String?>(
                         key: const Key('quote-line'),
-                        initialValue: _line,
-                        isExpanded: true,
-                        items: [
-                          const DropdownMenuItem(value: null, child: Text('—')),
-                          for (final l in _lines)
-                            DropdownMenuItem(
-                              value: l.line.id,
-                              child: Text(l.line.label),
-                            ),
+                        value: _line,
+                        choices: [
+                          (null, '—'),
+                          for (final l in _lines) (l.line.id, l.line.label),
                         ],
                         validator: (v) =>
                             v == null ? l10n.errQuoteNeedsLine : null,

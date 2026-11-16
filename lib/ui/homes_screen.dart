@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
+import '../design/adaptive.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
@@ -143,9 +144,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _delete(HomeRow home) async {
-    final confirmed = await showDialog<String>(
-      context: context,
-      builder: (_) => _DeleteDialog(home: home),
+    final confirmed = await showHcDialog<String>(
+      context,
+      (_) => _DeleteDialog(home: home),
     );
     if (confirmed == null) return;
     await _act(
@@ -204,22 +205,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   HcField(
                     label: l10n.homeHemisphere,
-                    child: DropdownButtonFormField<String>(
-                      initialValue: _hemisphere,
-                      isExpanded: true,
-                      items: [
-                        DropdownMenuItem(
-                          value: recurrence.north,
-                          child: Text(l10n.hemisphereNorth),
-                        ),
-                        DropdownMenuItem(
-                          value: recurrence.south,
-                          child: Text(l10n.hemisphereSouth),
-                        ),
+                    child: HcSelect<String>(
+                      value: _hemisphere,
+                      choices: [
+                        (recurrence.north, l10n.hemisphereNorth),
+                        (recurrence.south, l10n.hemisphereSouth),
                       ],
-                      onChanged: editable
-                          ? (value) => setState(() => _hemisphere = value!)
-                          : null,
+                      enabled: editable,
+                      onChanged: (value) => setState(() => _hemisphere = value),
                     ),
                   ),
                 ],
@@ -282,10 +275,10 @@ class _DeleteDialogState extends State<_DeleteDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final matches = _typed.text == widget.home.name;
-    return AlertDialog(
+    return HcDialog(
       // Scrolls at large text scales, name field and buttons stay reachable.
       scrollable: true,
-      title: Text(l10n.homeDeleteTitle(widget.home.name)),
+      title: l10n.homeDeleteTitle(widget.home.name),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,18 +296,19 @@ class _DeleteDialogState extends State<_DeleteDialog> {
         ],
       ),
       actions: [
-        TextButton(
+        HcDialogAction(
+          label: l10n.cancel,
+          kind: HcDialogKind.cancel,
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel),
         ),
         // The danger button, kept for the action that destroys
         // (`.button-danger`, design guide of the web).
-        FilledButton(
-          style: hcDangerStyle(),
+        HcDialogAction(
+          label: l10n.homeDeleteConfirm,
+          kind: HcDialogKind.danger,
           onPressed: matches
               ? () => Navigator.of(context).pop(_typed.text)
               : null,
-          child: Text(l10n.homeDeleteConfirm),
         ),
       ],
     );

@@ -17,6 +17,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   material_ui: ^1.1.0
+  # The controls of iOS on an iPhone (design lot D5, lib/design/adaptive.dart).
+  cupertino_ui: ^1.1.6
   drift: ^2.35.4
   drift_flutter: ^0.3.1
   sqlite3: ^3.9.1

@@ -44,7 +44,14 @@ enum HcIcons {
   reports([_P('M12 4L21 20H3Z'), _P('M12 10v4'), _C(12, 17, 0.6)]),
 
   /// Not in the web set, which writes "+" in text: the same stroke.
-  add([_P('M12 5v14'), _P('M5 12h14')]);
+  add([_P('M12 5v14'), _P('M5 12h14')]),
+
+  /// Not in the web set, whose date and list fields are drawn by the browser:
+  /// the field of a date, the field of a list and the button that removes a
+  /// date (design lot D5), in the same stroke.
+  calendar([_R(4, 5, 16, 15, 2), _P('M4 10h16'), _P('M8 3v4'), _P('M16 3v4')]),
+  chevronDown([_P('M6 9l6 6 6-6')]),
+  clear([_P('M7 7l10 10'), _P('M17 7L7 17')]);
 
   const HcIcons(this.shapes);
 
