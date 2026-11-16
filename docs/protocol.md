@@ -276,6 +276,33 @@ takes), are not sent, nor the derived `visible_from` of `tasks.occurrence` (web
 operation `rejected` with `forbidden`. The
 device of the operations is the push's `device`, and their `sv` the push's.
 
+**A push refused** (lot 4b, `ServerTransport.push`). A push holds at most 200 operations of the
+phone, 500 on the wire and 1 MiB of body (the server's `ops_per_push` and `push_bytes`); one
+operation larger than that alone is kept aside as `too_large` without being sent. A push whose
+answer never came, or that got `429` or a `5xx`, is sent again with the same number and the
+same bytes, and nothing else. Any other refusal is final, and the server wrote nothing: `400`
+(`malformed`, `too_large`; `sync_version` stops the phone instead), `409` (`push_conflict`,
+`wrong_device`), `403` `sso_required`. The rule is the maintainer's (decision A, 2026-11-16):
+"Envoi refusé définitivement par le serveur : découper l'envoi pour isoler la ou les opérations
+fautives, envoyer le reste, mettre les fautives de côté avec un message ; rien n'est perdu en
+silence." So the phone forgets the push it would have sent again, then:
+
+- with `malformed` and the `index` of an operation, that operation is kept aside and the others
+  are pushed again (another one may be at fault);
+- otherwise the push is cut in two halves, each pushed under its own number, and so on until
+  each refused push holds one operation, which is kept aside with the code;
+- `push_conflict` is first sent once more under the next number, since it is about the number
+  and not the operations; `wrong_device` and `sso_required` are about the push's device or the
+  home's sign-in, so every half would be refused the same: all its operations are kept aside at
+  once, the result the halving would reach.
+
+An operation `rejected` in a push the server took is kept aside the same way, with its code.
+What is kept aside leaves `op_log` for a list of this phone only (`local_settings`, never
+synced): the app shows each change on its line, with the name of its row and the reason in
+words, to be sent again (back to `op_log`, as it was made) or no longer sent (the row keeps on
+the phone the value the change gave it, until a change from the server writes that field). The
+list goes when the phone leaves the server.
+
 **Starting again after 410.** The phone keeps, per row and outside the row's fields (in its sync
 tables, never synced), a mark **seen by the server**. It sets the mark when the row arrives in
 the feed or in a snapshot, and when the result of a push for an operation of that row is
@@ -285,9 +312,14 @@ sets it then). After 410 the phone reads the snapshot, then for every row of the
 
 1. a row in the snapshot is merged field by field, as any incoming change, and gets the mark;
 2. a row absent from the snapshot that has the mark was deleted, then purged, on the server: the
-   phone deletes it, its children and its local files, and drops the operations of it still
-   waiting to be sent, a `restore` included; a long text so dropped goes to the "other version"
-   list, and the app lists what it dropped;
+   phone deletes it and its local files, and drops the operations of it still waiting to be
+   sent, a `restore` included; a long text so dropped goes to the "other version" list, and the
+   app lists what it dropped. Its children are not deleted with it: each follows its own rule.
+   A child the server had seen is gone from the snapshot too, and goes by this rule; a child
+   made on the phone and never sent goes by rule 3, and the server refuses it
+   (`invalid_reference`, its parent being gone), so the phone keeps it aside with that reason,
+   as any change the server refuses (below). Nothing the server never had is deleted in
+   silence;
 3. a row absent from the snapshot without the mark was made on the phone and never reached the
    server: the phone keeps it and sends it again as a `put` of every field with its clock;
 4. operations still waiting for the rows of rules 1 and 3 are pushed as usual, and the server

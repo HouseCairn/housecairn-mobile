@@ -190,6 +190,17 @@ class ServerStopped implements Exception {
   String toString() => 'ServerStopped(${reason.name})';
 }
 
+/// The server is there but cannot take the request now (`429`, or `5xx`):
+/// the phone tries again later, a push with its number and its bytes.
+class ServerBusy implements Exception {
+  const ServerBusy(this.status);
+
+  final int status;
+
+  @override
+  String toString() => 'ServerBusy($status)';
+}
+
 /// One operation the server refused (`rejected`), shown on its row.
 class ServerRejection {
   const ServerRejection(this.operation, this.code);
@@ -242,6 +253,12 @@ class ServerTransport implements SyncTransport {
   /// Operations of the phone per push: each may become two on the wire
   /// ([wire]), and the server takes 500 (`ops_per_push`).
   static const pushSize = 200;
+
+  /// Operations on the wire per push (`ops_per_push` of the server).
+  static const wirePerPush = 500;
+
+  /// Bytes of a push body (`push_bytes` of the server: 1 MiB).
+  static const pushBytes = 1024 * 1024;
 
   ServerSyncState? _cached;
 
@@ -368,6 +385,9 @@ class ServerTransport implements SyncTransport {
   }
 
   Never _unexpected(ServerReply reply) {
+    if (reply.status == 429 || reply.status >= 500) {
+      throw ServerBusy(reply.status);
+    }
     Object? detail;
     try {
       final json = _json(reply);
@@ -443,9 +463,12 @@ class ServerTransport implements SyncTransport {
   Future<PushResult> push(List<SyncOperation> operations) async {
     final s = await _state();
     final lost = <SyncOperation>[];
+    final refused = <RefusedOperation>[];
     rejections.clear();
     if (s.unanswered case final u?) {
-      await _sendPush(s, u.home, u.number, u.body, const [], lost);
+      // A refusal of it for good only clears it: its operations are still
+      // waiting in op_log, so they are among [operations] and go below.
+      await _sendPush(s, u.home, u.number, u.body, const [], lost, refused);
     }
     final byHome = <String, List<SyncOperation>>{};
     for (final op in operations) {
@@ -470,32 +493,138 @@ class ServerTransport implements SyncTransport {
       }
     }
     for (final MapEntry(key: home, value: ops) in byHome.entries) {
-      for (var start = 0; start < ops.length; start += pushSize) {
-        final chunk = ops.sublist(
-          start,
-          start + pushSize > ops.length ? ops.length : start + pushSize,
-        );
-        final number = s.nextPush++;
-        final wired = <Map<String, Object?>>[];
-        final sources = <SyncOperation>[];
-        for (final op in chunk) {
-          for (final w in wire(op)) {
-            wired.add(w);
-            sources.add(op);
-          }
-        }
-        final body = jsonEncode({
-          'push': number,
-          'sv': schemaVersion,
-          'device': device,
-          'ops': wired,
-        });
-        s.unanswered = (home: home, number: number, body: body);
-        await _save(s);
-        await _sendPush(s, home, number, body, sources, lost);
+      for (final batch in batches(ops)) {
+        await _pushBatch(s, home, batch, lost, refused);
       }
     }
-    return PushResult(lost: lost);
+    return PushResult(lost: lost, refused: refused);
+  }
+
+  /// [ops] cut into pushes the server takes: at most [pushSize] operations
+  /// of the phone, [wirePerPush] on the wire and [pushBytes] of body each,
+  /// in their order. One operation larger than [pushBytes] is a batch alone.
+  List<List<SyncOperation>> batches(List<SyncOperation> ops) {
+    final out = <List<SyncOperation>>[];
+    final header = _bodySize(const []);
+    var current = <SyncOperation>[];
+    var bytes = header;
+    var wired = 0;
+    for (final op in ops) {
+      final w = wire(op);
+      final size = _wireSize(w);
+      if (current.isNotEmpty &&
+          (current.length >= pushSize ||
+              wired + w.length > wirePerPush ||
+              bytes + size > pushBytes)) {
+        out.add(current);
+        current = [];
+        bytes = header;
+        wired = 0;
+      }
+      current.add(op);
+      bytes += size;
+      wired += w.length;
+    }
+    if (current.isNotEmpty) out.add(current);
+    return out;
+  }
+
+  /// The bytes of the wire operations [w] in a body, a comma each.
+  static int _wireSize(List<Map<String, Object?>> w) =>
+      w.fold(0, (n, x) => n + utf8.encode(jsonEncode(x)).length + 1);
+
+  /// The bytes of a body of [wired] operations, with the largest number a
+  /// push may have.
+  int _bodySize(List<Map<String, Object?>> wired) =>
+      utf8.encode(_body(9007199254740991, wired)).length;
+
+  String _body(int number, List<Map<String, Object?>> wired) => jsonEncode({
+    'push': number,
+    'sv': schemaVersion,
+    'device': device,
+    'ops': wired,
+  });
+
+  /// Sends [ops] as one push. When the server refuses it for good, the rule
+  /// of the maintainer (docs/protocol.md section 2.10, "A push refused"):
+  /// the push is cut to find the operations at fault, the others are sent,
+  /// and those are kept aside in [refused] with the reason.
+  Future<void> _pushBatch(
+    ServerSyncState s,
+    String home,
+    List<SyncOperation> ops,
+    List<SyncOperation> lost,
+    List<RefusedOperation> refused, {
+    bool renumbered = false,
+  }) async {
+    if (ops.isEmpty || s.gone.contains(home)) return;
+    final wired = <Map<String, Object?>>[];
+    final sources = <SyncOperation>[];
+    for (final op in ops) {
+      for (final w in wire(op)) {
+        wired.add(w);
+        sources.add(op);
+      }
+    }
+    // Only fields the server keeps for itself: nothing to send.
+    if (wired.isEmpty) return;
+    if (ops.length == 1 && _bodySize(wired) > pushBytes) {
+      refused.add(RefusedOperation(ops.single, 'too_large'));
+      return;
+    }
+    final number = s.nextPush++;
+    final body = _body(number, wired);
+    s.unanswered = (home: home, number: number, body: body);
+    await _save(s);
+    final refusal = await _sendPush(
+      s,
+      home,
+      number,
+      body,
+      sources,
+      lost,
+      refused,
+    );
+    if (refusal == null) return;
+    final (:code, :detail, :index) = refusal;
+    // The number was used before with other bytes: the same operations
+    // under the next number, once.
+    if (code == 'push_conflict' && !renumbered) {
+      return _pushBatch(s, home, ops, lost, refused, renumbered: true);
+    }
+    if (ops.length == 1) {
+      refused.add(RefusedOperation(ops.single, code, detail: detail));
+      return;
+    }
+    switch (code) {
+      // What the server refuses is the push's device, or the sign-in the
+      // home asks for, not an operation: every half would be refused the
+      // same, so the operations are all kept aside at once.
+      case 'wrong_device' || 'sso_required':
+        refused.addAll([
+          for (final op in ops) RefusedOperation(op, code, detail: detail),
+        ]);
+        return;
+    }
+    // The server named the operation at fault: it is kept aside, the others
+    // go again (another may be at fault too).
+    if (code == 'malformed' && index != null && index < sources.length) {
+      final faulty = sources[index];
+      refused.add(RefusedOperation(faulty, code, detail: detail));
+      return _pushBatch(
+        s,
+        home,
+        [
+          for (final op in ops)
+            if (!identical(op, faulty)) op,
+        ],
+        lost,
+        refused,
+      );
+    }
+    final half = ops.length ~/ 2;
+    await _pushBatch(s, home, ops.sublist(0, half), lost, refused);
+    await _pushBatch(s, home, ops.sublist(half), lost, refused);
   }
 
   /// The types whose `created_at` the server takes from the phone (web
@@ -550,13 +679,19 @@ class ServerTransport implements SyncTransport {
     ];
   }
 
-  Future<void> _sendPush(
+  /// Sends one push and reads its answer. `null` when it is settled (taken,
+  /// or of a home gone); the refusal when the server refused it for good
+  /// and wrote nothing (a `4xx` other than `sync_version`). No answer, or
+  /// `429` and `5xx`, keep [ServerSyncState.unanswered], to send again
+  /// with the same number and bytes.
+  Future<({String code, String? detail, int? index})?> _sendPush(
     ServerSyncState s,
     String home,
     int number,
     String body,
     List<SyncOperation> chunk,
     List<SyncOperation> lost,
+    List<RefusedOperation> refused,
   ) async {
     final reply = await _send(
       'POST',
@@ -565,7 +700,10 @@ class ServerTransport implements SyncTransport {
       contentType: 'application/json',
     );
     final code = _code(reply);
-    if (reply.status == 410 && code == 'home_gone') {
+    ({String code, String? detail, int? index})? refusal;
+    if (reply.status == 429 || reply.status >= 500) {
+      throw ServerBusy(reply.status);
+    } else if (reply.status == 410 && code == 'home_gone') {
       s.gone.add(home);
     } else if (reply.status == 400 && code == 'sync_version') {
       s.unanswered = null;
@@ -574,7 +712,19 @@ class ServerTransport implements SyncTransport {
     } else if (reply.status == 404) {
       // Not a home of this access (any more): it goes with the next list.
     } else if (reply.status != 200) {
-      _unexpected(reply);
+      Map<String, Object?> json;
+      try {
+        json = _json(reply);
+      } on FormatException {
+        json = const {};
+      }
+      final detail = json['detail'];
+      final index = json['index'];
+      refusal = (
+        code: code ?? '${reply.status}',
+        detail: detail is String ? detail : null,
+        index: index is int ? index : null,
+      );
     } else {
       final sent = chunk.isNotEmpty
           ? chunk
@@ -591,7 +741,11 @@ class ServerTransport implements SyncTransport {
         seen[key] = status != 'rejected';
         if (status != 'rejected') marked.add((key.$1, home, key.$2));
         if (status == 'rejected') {
-          rejections.add(ServerRejection(op, r['code'] as String? ?? ''));
+          final reason = r['code'] as String? ?? '';
+          rejections.add(ServerRejection(op, reason));
+          // A push sent again carries operations still waiting in op_log,
+          // which go again in this round: only theirs are kept aside.
+          if (chunk.isNotEmpty) refused.add(RefusedOperation(op, reason));
         }
         final fields = (r['lost'] as Map?)?.cast<String, Object?>();
         if (fields != null) lost.addAll(_lostOperations(op, fields));
@@ -600,6 +754,7 @@ class ServerTransport implements SyncTransport {
     }
     s.unanswered = null;
     await _save(s);
+    return refusal;
   }
 
   /// One operation per write that won on the server against [op].

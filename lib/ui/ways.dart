@@ -2,6 +2,7 @@
 
 import 'package:material_ui/material_ui.dart';
 
+import '../design/adaptive.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
@@ -10,6 +11,7 @@ import '../sync/mode.dart';
 import '../sync/operation.dart';
 import '../sync/transport.dart';
 import 'server_screens.dart';
+import 'server_sync.dart';
 import 'state.dart';
 
 /// The words of one way to use the app (docs/adr/0010), from the ARB files.
@@ -248,6 +250,24 @@ class WaysRows extends StatelessWidget {
     final inUse = state.syncMode;
     return HcCardList(
       children: [
+        // The state of the sync, "Sync now" and the changes refused, in
+        // the third way (lot 4b).
+        if (inUse == SyncMode.server)
+          HcRow(
+            key: const Key('way-row-sync'),
+            title: l10n.syncTitle,
+            text: syncProblem(l10n, state.serverSync),
+            pills: [
+              if (state.serverSync.refused.isNotEmpty)
+                HcPill(
+                  l10n.syncRefusedCount(state.serverSync.refused.length),
+                  tone: HcPillTone.warning,
+                ),
+            ],
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const ServerSyncScreen()),
+            ),
+          ),
         for (final way in SyncMode.values)
           Semantics(
             key: Key('way-row-${way.name}'),
@@ -277,7 +297,8 @@ class WaysRows extends StatelessWidget {
   ) async {
     if (to == SyncMode.server) {
       if (!state.canMoveToServer) {
-        await _tell(context, AppLocalizations.of(context).wayMoveToServerLater);
+        final l10n = AppLocalizations.of(context);
+        await _tell(context, l10n.wayServerTitle, l10n.wayMoveToServerLater);
         return;
       }
       await Navigator.of(context).push(
@@ -290,35 +311,41 @@ class WaysRows extends StatelessWidget {
     }
   }
 
-  static Future<void> _tell(BuildContext context, String text) =>
-      showDialog<void>(
-        context: context,
-        builder: (context) => AlertDialog(
+  /// A message with OK: the alert of iOS on an iPhone, the dialog of
+  /// Material on Android (ADR 0011).
+  static Future<void> _tell(BuildContext context, String title, String text) =>
+      showHcDialog<void>(
+        context,
+        (context) => HcDialog(
           key: const Key('way-message'),
+          title: title,
           content: Text(text),
           actions: [
-            TextButton(
+            HcDialogAction(
+              key: const Key('way-message-ok'),
+              label: MaterialLocalizations.of(context).okButtonLabel,
+              kind: HcDialogKind.cancel,
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(MaterialLocalizations.of(context).okButtonLabel),
             ),
           ],
         ),
       );
 
+  /// A confirmation of [lines] with Cancel and [action] (ADR 0011).
   static Future<bool> _confirm(
     BuildContext context, {
     required Key key,
-    String? title,
+    required String title,
     required List<String> lines,
     required String action,
   }) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
+    final ok = await showHcDialog<bool>(
+      context,
+      (context) => HcDialog(
         key: key,
         scrollable: true,
-        title: title == null ? null : Text(title),
+        title: title,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,14 +358,16 @@ class WaysRows extends StatelessWidget {
           ],
         ),
         actions: [
-          TextButton(
+          HcDialogAction(
+            key: const Key('way-cancel'),
+            label: l10n.cancel,
+            kind: HcDialogKind.cancel,
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.cancel),
           ),
-          FilledButton(
+          HcDialogAction(
             key: const Key('way-confirm'),
+            label: action,
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(action),
           ),
         ],
       ),
@@ -369,6 +398,7 @@ class WaysRows extends StatelessWidget {
     final drop = await _confirm(
       context,
       key: const Key('way-leave-server-unsent'),
+      title: l10n.wayLeaveServerTitle,
       lines: [
         l10n.wayLeaveServerUnreachable,
         for (final name in names.named) '• $name',

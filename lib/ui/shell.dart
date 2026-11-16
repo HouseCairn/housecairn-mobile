@@ -7,6 +7,7 @@ import '../design/icons.dart';
 import '../design/tokens.dart';
 import '../l10n/app_localizations.dart';
 import 'sections.dart';
+import 'server_sync.dart';
 
 /// The five sections of the design guide of Housecairn, in this order, in a
 /// bar at the bottom: Today, Rooms, Projects, Budget, More
@@ -77,21 +78,30 @@ class _ShellState extends State<Shell> {
           // The labels of the bar keep their size whatever the text size of
           // the phone, as the tab bar of iOS does: five labels must stay side
           // by side on 360 px (docs/adr/0011).
-          child: MediaQuery.withNoTextScaling(
-            child: NavigationBar(
-              selectedIndex: _current.index,
-              onDestinationSelected: _select,
-              destinations: [
-                for (final (icon, label) in [
-                  (HcIcons.today, l10n.navToday),
-                  (HcIcons.rooms, l10n.navRooms),
-                  (HcIcons.projects, l10n.navProjects),
-                  (HcIcons.budget, l10n.navBudget),
-                  (HcIcons.more, l10n.navMore),
-                ])
-                  NavigationDestination(icon: HcIcon(icon), label: label),
-              ],
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // In the third way, what the sync needs from the person
+              // (lot 4b); nothing otherwise.
+              const ServerSyncBanner(),
+              MediaQuery.withNoTextScaling(
+                child: NavigationBar(
+                  selectedIndex: _current.index,
+                  onDestinationSelected: _select,
+                  destinations: [
+                    for (final (icon, label) in [
+                      (HcIcons.today, l10n.navToday),
+                      (HcIcons.rooms, l10n.navRooms),
+                      (HcIcons.projects, l10n.navProjects),
+                      (HcIcons.budget, l10n.navBudget),
+                      (HcIcons.more, l10n.navMore),
+                    ])
+                      NavigationDestination(icon: HcIcon(icon), label: label),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

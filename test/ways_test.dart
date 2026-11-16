@@ -5,8 +5,9 @@
 // `local_settings`, Settings, the texts, and the interface of the transport.
 
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoAlertDialog;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/app.dart';
 import 'package:housecairn_mobile/data/repository.dart';
@@ -369,6 +370,39 @@ void main() {
       });
     });
   }
+
+  group('the message of lot 4c follows the platform (ADR 0011)', () {
+    for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+      testWidgets('the dialog of ${platform.name}', (tester) async {
+        debugDefaultTargetPlatformOverride = platform;
+        try {
+          await onPhone(tester);
+          final state = await pumpApp(tester);
+          await openMore(tester, _words['en']!.more);
+          await tester.scrollUntilVisible(
+            find.byKey(const Key('way-row-server')),
+            100,
+          );
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('way-row-server')));
+          await tester.pumpAndSettle();
+          final ios = platform == TargetPlatform.iOS;
+          expect(find.byKey(const Key('way-message')), findsOneWidget);
+          expect(
+            find.byType(CupertinoAlertDialog),
+            ios ? findsOneWidget : findsNothing,
+          );
+          expect(find.byType(AlertDialog), ios ? findsNothing : findsOneWidget);
+          await tester.tap(find.byKey(const Key('way-message-ok')));
+          await tester.pumpAndSettle();
+          expect(find.byKey(const Key('way-message')), findsNothing);
+          expect(state.syncMode, SyncMode.alone);
+        } finally {
+          debugDefaultTargetPlatformOverride = null;
+        }
+      });
+    }
+  });
 
   group('sync_mode in local_settings', () {
     test(

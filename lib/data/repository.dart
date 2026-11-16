@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -537,9 +538,20 @@ class Repository {
   /// the transport's state; `null` until read, empty outside the third way.
   Map<String, String>? _serverRoles;
 
-  /// Whether operations of the other side are being applied: their repairs
-  /// write in any home, as the server's own repairs do.
-  bool _applyingSync = false;
+  /// Set in the zone of [SyncRepository.applyOperations] only: the repairs
+  /// of operations from the other side write in any home, as the server's
+  /// own repairs do. A zone value and not a field of the repository, so
+  /// that a write of the screens made while a sync applies is still
+  /// checked (lot 4b review).
+  static final _syncApply = Object();
+
+  bool get _inSyncApply => Zone.current[_syncApply] == true;
+
+  final _localWrites = StreamController<void>.broadcast();
+
+  /// An event after each change made on this phone (not those a sync
+  /// applies): the app syncs with a server a moment after (lot 4b).
+  Stream<void> get localWrites => _localWrites.stream;
 
   /// Opens the database and reads the id of this phone (16 random bytes,
   /// made at the first start) and the last clock it gave.
@@ -610,9 +622,10 @@ class Repository {
     String? homeId,
     bool create = false,
   }) async {
-    if (!_applyingSync) {
+    if (!_inSyncApply) {
       final home = table == 'homes' ? id : homeId ?? await _homeOf(table, id);
       if (home != null) await _checkServerRole(home, table, fields);
+      _localWrites.add(null);
     }
     final now = _now();
     final clock = _hlc.next();

@@ -2583,4 +2583,116 @@ class AppLocalizationsEn extends AppLocalizations {
   String wayLeaveServerOther(int count) {
     return 'Other changes: $count';
   }
+
+  @override
+  String get syncTitle => 'Sync with the server';
+
+  @override
+  String get syncText =>
+      'The changes of this phone go to the server a moment after you make them; the server\'s come when the app opens or comes back.';
+
+  @override
+  String get syncNow => 'Sync now';
+
+  @override
+  String get syncRunning => 'Syncing…';
+
+  @override
+  String syncLast(String time) {
+    return 'Last sync: $time';
+  }
+
+  @override
+  String get syncNever => 'Not synced yet.';
+
+  @override
+  String get syncUnreachable =>
+      'The server cannot be reached for now. Your changes stay on this phone and go with the next sync.';
+
+  @override
+  String get syncFailed =>
+      'The last sync did not finish. It is tried again by itself.';
+
+  @override
+  String get syncRefusedTitle => 'Changes the server refused';
+
+  @override
+  String syncRefusedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes refused by the server',
+      one: '1 change refused by the server',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncRefusedHelp =>
+      'The server did not take these changes; they are still on this phone. Send one again once its cause is fixed, or stop sending it: it then stays on this phone only.';
+
+  @override
+  String get syncSendAgain => 'Send again';
+
+  @override
+  String get syncStopSending => 'Stop sending';
+
+  @override
+  String get syncRefusedUnnamed => 'A change without a name';
+
+  @override
+  String get syncRefusedForbidden =>
+      'Your role in this home on the server does not allow this change.';
+
+  @override
+  String get syncRefusedReference =>
+      'It names something that is not in this home on the server.';
+
+  @override
+  String get syncRefusedClock =>
+      'The date of this phone is ahead: check it in the phone\'s settings, then send again.';
+
+  @override
+  String get syncRefusedIdTaken =>
+      'The server already has another row with the same id.';
+
+  @override
+  String get syncRefusedMalformed => 'The server could not read this change.';
+
+  @override
+  String get syncRefusedTooLarge => 'This change is too large for the server.';
+
+  @override
+  String get syncRefusedDevice =>
+      'The server knows this phone under another id. Sign in again on this phone.';
+
+  @override
+  String syncRefusedOther(String code) {
+    return 'The server refused this change (code $code).';
+  }
+
+  @override
+  String get syncNoticesTitle => 'Since the last syncs';
+
+  @override
+  String syncNoticesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count things to read about the sync',
+      one: '1 thing to read about the sync',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncNoticeUndoReverted =>
+      'An undo was taken back: the next time of this task was changed on another device meanwhile.';
+
+  @override
+  String get syncNoticeDropped =>
+      'Something deleted on the server was removed from this phone.';
+
+  @override
+  String get syncNoticesRead => 'Mark as read';
 }

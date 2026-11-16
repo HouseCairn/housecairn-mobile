@@ -12,6 +12,7 @@ import 'package:housecairn_mobile/sync/server_address.dart';
 import 'package:housecairn_mobile/sync/server_http.dart';
 import 'package:housecairn_mobile/sync/server_sign_in.dart';
 import 'package:housecairn_mobile/sync/server_transport.dart';
+import 'package:housecairn_mobile/sync/transport.dart';
 import 'package:housecairn_mobile/ui/state.dart';
 import 'package:housecairn_mobile/ui/ways.dart';
 
@@ -65,6 +66,61 @@ void main() {
     store = _Store();
     server = _Server();
     state = AppState(repo, store: store, serverHttp: (_) => server);
+    addTearDown(state.dispose);
+  });
+
+  group('changes the server refused (decision A)', () {
+    test('kept aside out of op_log with their reason; one sent again goes '
+        'back to op_log, one dropped is gone, and the row keeps its value '
+        'on the phone', () async {
+      await connect();
+      await repo.createRoom(home, name: 'Hall');
+      await repo.createRoom(home, name: 'Cellar');
+      final out = await repo.outgoing();
+      expect(out, hasLength(2));
+      await repo.setAside([
+        for (final o in out) RefusedOperation(o.operation, 'forbidden'),
+      ]);
+      await repo.acknowledge(out.last.seq);
+      final refused = await repo.refusedChanges();
+      expect(refused.map((r) => r.code), ['forbidden', 'forbidden']);
+      expect(await repo.outgoing(), isEmpty);
+      await repo.sendAgain(refused.first.id);
+      expect((await repo.outgoing()).single.operation, refused.first.operation);
+      await repo.dropRefused(refused.last.id);
+      expect(await repo.refusedChanges(), isEmpty);
+      expect(
+        (await repo.rooms(home)).map((r) => r.name),
+        containsAll(['Hall', 'Cellar']),
+      );
+    });
+
+    test('the engine keeps aside what the transport refused, then '
+        'acknowledges the push', () async {
+      await connect();
+      server.rejectNamed = 'Hall';
+      await repo.createRoom(home, name: 'Hall');
+      await repo.createRoom(home, name: 'Cellar');
+      await state.syncWithServer(throwing: true);
+      expect(await repo.outgoing(), isEmpty);
+      final refused = await repo.refusedChanges();
+      expect(refused.single.code, 'forbidden');
+      expect((refused.single.operation[Op.fields]! as Map)['name'], 'Hall');
+      expect(state.serverSync.refused, hasLength(1));
+      expect(server.pushedNames, contains('Cellar'));
+    });
+
+    test('leaving the server forgets them; the rows stay', () async {
+      await connect();
+      server.rejectNamed = 'Hall';
+      await repo.createRoom(home, name: 'Hall');
+      await state.syncWithServer(throwing: true);
+      expect(await repo.refusedChanges(), hasLength(1));
+      await state.leaveServer();
+      expect(await repo.refusedChanges(), isEmpty);
+      expect(state.serverSync.refused, isEmpty);
+      expect((await repo.rooms(home)).map((r) => r.name), contains('Hall'));
+    });
   });
 
   group('server → alone', () {
@@ -150,6 +206,44 @@ void main() {
       expect(await dumpOf(repo), before);
     });
 
+    test('a write of the screens made while a sync applies is still refused '
+        'to a read-only member: the exemption is the zone of the apply, not '
+        'a state of the repository', () async {
+      await connect(role: 'read_only');
+      final room = (await repo.rooms(home)).single;
+      final before = await repo.outgoing();
+      final refused = throwsA(
+        isA<Refused>().having((r) => r.reason, 'r', Refusal.readOnlyHome),
+      );
+      // The screen writes and the sync applies the server's change, all
+      // under way at once: the writes of the screen are checked whatever
+      // order the database runs them in, since only the zone of the apply
+      // is exempt.
+      final writes = [
+        expectLater(
+          repo.updateRoom(room.id, const RoomInput(name: 'Hall')),
+          refused,
+        ),
+        expectLater(repo.createRoom(home, name: 'Cellar'), refused),
+      ];
+      final applying = repo.applyOperations([
+        {
+          Op.type: 'rooms.room',
+          Op.home: home,
+          Op.id: room.id,
+          Op.kind: Op.put,
+          Op.clock: '7fff000000000000',
+          Op.device: 'q2Xh0dVt3kWmYc1bS8fP9A',
+          Op.schema: repo.schemaVersion,
+          Op.fields: {'name': 'Pantry'},
+        },
+      ]);
+      await Future.wait([...writes, applying]);
+      expect((await repo.room(room.id))!.name, 'Pantry');
+      expect((await repo.rooms(home)).map((r) => r.name), ['Pantry']);
+      expect((await repo.outgoing()).length, before.length);
+    });
+
     test('the server\'s changes still reach a read-only home', () async {
       await connect(role: 'read_only');
       final room = (await repo.rooms(home)).single;
@@ -228,6 +322,9 @@ class _Server implements ServerHttp {
   String home = '';
   String role = 'owner';
   bool offline = false;
+
+  /// A room of this name is rejected `forbidden` in a push taken.
+  String? rejectNamed;
   final revoked = <String>[];
   final pushedNames = <String>[];
 
@@ -271,14 +368,17 @@ class _Server implements ServerHttp {
     }
     if (path.endsWith('/push')) {
       final ops = (jsonDecode(utf8.decode(body!)) as Map)['ops'] as List;
-      for (final op in ops) {
-        final name = ((op as Map)['f'] as Map?)?['name'];
-        if (name is String) pushedNames.add(name);
+      final names = [for (final op in ops) ((op as Map)['f'] as Map?)?['name']];
+      for (final name in names) {
+        if (name is String && name != rejectNamed) pushedNames.add(name);
       }
       return _json(200, {
         'head': 1,
         'results': [
-          for (var i = 0; i < ops.length; i++) {'i': i, 'status': 'applied'},
+          for (var i = 0; i < ops.length; i++)
+            names[i] == rejectNamed
+                ? {'i': i, 'status': 'rejected', 'code': 'forbidden'}
+                : {'i': i, 'status': 'applied'},
         ],
       });
     }

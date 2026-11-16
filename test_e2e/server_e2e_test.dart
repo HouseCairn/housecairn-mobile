@@ -10,14 +10,20 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:housecairn_mobile/core/hlc.dart';
 import 'package:housecairn_mobile/core/store.dart';
 import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/domain/recurrence.dart' as recurrence;
+import 'package:housecairn_mobile/domain/stock.dart' as stock;
+import 'package:housecairn_mobile/sync/operation.dart';
 import 'package:housecairn_mobile/sync/server_address.dart';
 import 'package:housecairn_mobile/sync/server_http_io.dart';
 import 'package:housecairn_mobile/sync/server_sign_in.dart';
 import 'package:housecairn_mobile/sync/server_transport.dart';
+import 'package:housecairn_mobile/sync/transport.dart';
+import 'package:uuid/uuid.dart';
 
 import '../test/support/sync_fixture.dart';
 
@@ -366,6 +372,188 @@ void main() {
     skip: skip,
   );
 
+  // The three cases of ADR 0003 the engine tests of lot 4 ran between two
+  // phones only (decision C of the maintainer, 2026-11-16): against the web.
+
+  SyncOperation ownOp(String id, String kind, String clock) => {
+    Op.type: 'rooms.room',
+    Op.home: home,
+    Op.id: id,
+    Op.kind: kind,
+    Op.clock: clock,
+    Op.device: phone.repo.deviceB64,
+    Op.schema: phone.repo.schemaVersion,
+  };
+
+  String clockIn(Duration after) => Hlc.format(
+    DateTime.now().toUtc().add(after).millisecondsSinceEpoch << 16,
+  );
+
+  Future<int> webRoomStatus(String room) async {
+    final (status, _, _) = await web.raw(
+      'GET',
+      address.resolve('/api/v1/homes/$home/rooms/$room/'),
+      headers: {'authorization': 'Bearer ${web.apiToken}'},
+    );
+    return status;
+  }
+
+  test('ADR 0003, restore: a restore older than the deletion does not bring '
+      'the row back, a later one does, on the web and on the phone', () async {
+    phone.clock.set(DateTime.now().toUtc());
+    final room = await phone.repo.createRoom(home, name: 'Boiler room');
+    await phone.sync();
+    await phone.repo.deleteRoom(room);
+    await phone.sync();
+    expect(await webRoomStatus(room), 404);
+    final deleted =
+        (await phone.repo.snapshot()).rows
+                .singleWhere((r) => r.id == room)
+                .fields['deleted_at']![1]!
+            as String;
+    final older = Hlc.format(Hlc.parse(deleted) - (1 << 16));
+    var result = await transport.push([ownOp(room, Op.restore, older)]);
+    expect(result.refused, isEmpty);
+    await phone.sync();
+    expect(await webRoomStatus(room), 404);
+    expect(await phone.repo.room(room), isNull);
+    result = await transport.push([
+      ownOp(room, Op.restore, clockIn(const Duration(seconds: 1))),
+    ]);
+    expect(result.refused, isEmpty);
+    await phone.sync();
+    expect(await webRoomStatus(room), 200);
+    expect((await phone.repo.room(room))?.name, 'Boiler room');
+  }, skip: skip);
+
+  test('ADR 0003, the same article drawn twice: done on the phone offline and '
+      'on the web; one draw row, and the same stock on both', () async {
+    final (task, occurrence) = await repeatingTask('Filter of the extractor');
+    final article = await phone.repo.addArticle(
+      home,
+      const ArticleInput(name: 'Extractor filter'),
+    );
+    await phone.repo.recordMovement(
+      article,
+      kind: stock.entryKind,
+      quantity: '3',
+    );
+    await phone.repo.addMaterial(task, article, '1');
+    await phone.sync();
+    expect([
+      for (final r in transport.rejections) '${r.code} ${r.operation}',
+    ], isEmpty);
+    await phone.repo.complete(occurrence);
+    await web.send(
+      'POST',
+      '/api/v1/homes/$home/occurrences/$occurrence/complete/',
+      body: {'note': ''},
+    );
+    await syncTwice();
+    expect([
+      for (final r in transport.rejections) '${r.code} ${r.operation}',
+    ], isEmpty);
+    final draws = await phone.repo.db.select(phone.repo.db.materialDraws).get();
+    expect(draws.where((d) => d.occurrenceId == occurrence), hasLength(1));
+    final onWeb = await web.json(
+      'GET',
+      '/api/v1/homes/$home/articles/$article/',
+    );
+    expect(
+      Decimal.parse('${onWeb['quantity']}'),
+      await phone.repo.stockLevel(article),
+    );
+    await expectOccurrencesEqual(task);
+  }, skip: skip);
+
+  test('ADR 0003, versions: a field of a newer app is kept by the server and '
+      'by this phone, which does not know it; a phone below the server\'s '
+      'lowest sv reads but does not write', () async {
+    phone.clock.set(DateTime.now().toUtc());
+    final room = await phone.repo.createRoom(home, name: 'Loft');
+    await phone.sync();
+    // A newer app wrote a field this version has no column for.
+    final result = await transport.push([
+      {
+        ...ownOp(room, Op.put, clockIn(const Duration(seconds: 1))),
+        Op.fields: {'energy_rating': 'A'},
+      },
+    ]);
+    expect(result.refused, isEmpty);
+    await phone.sync();
+    expect(await phone.repo.extraFields('rooms.room', room), {
+      'energy_rating': 'A',
+    });
+    // This phone changes the row: the field it does not know stays.
+    phone.clock.set(DateTime.now().toUtc().add(const Duration(seconds: 2)));
+    await phone.repo.updateRoom(room, const RoomInput(name: 'Attic room'));
+    await phone.sync();
+    final access = (await ServerCredential.read(store))!.access;
+    final (status, text, _) = await web.raw(
+      'GET',
+      address.resolve('/api/v1/sync/homes/$home/snapshot'),
+      headers: {'authorization': 'Bearer $access'},
+    );
+    expect(status, 200);
+    final row = [
+      for (final line in const LineSplitter().convert(text))
+        if (line.trim().isNotEmpty) jsonDecode(line) as Map,
+    ].singleWhere((r) => r['id'] == room);
+    final fields = (row['f']! as Map).cast<String, Object?>();
+    expect((fields['energy_rating']! as List).first, 'A');
+    expect((fields['name']! as List).first, 'Attic room');
+    // Below the lowest schema version of the server (1): nothing written.
+    final old = ServerTransport(
+      address: address,
+      http: IoServerHttp(address),
+      store: store,
+      // A number this connection never used, so that the server reads the
+      // schema version and not the number.
+      state: _MemoryState()..value = ServerSyncState(nextPush: 900000).encode(),
+      device: phone.repo.deviceB64,
+      schemaVersion: 0,
+    );
+    await expectLater(
+      old.push([
+        {
+          ...ownOp(room, Op.put, clockIn(const Duration(seconds: 3))),
+          Op.fields: {'name': 'Old app'},
+        },
+      ]),
+      throwsA(
+        isA<ServerStopped>().having(
+          (e) => e.reason,
+          'reason',
+          ServerStop.updateApp,
+        ),
+      ),
+    );
+    final onWeb = await web.json('GET', '/api/v1/homes/$home/rooms/$room/');
+    expect(onWeb['name'], 'Attic room');
+  }, skip: skip);
+
+  test('decision A: an operation the server cannot read is kept aside with '
+      'its reason, the others of the push are written', () async {
+    phone.clock.set(DateTime.now().toUtc());
+    final good = const Uuid().v4();
+    final bad = const Uuid().v4();
+    final result = await transport.push([
+      {
+        ...ownOp(good, Op.put, clockIn(Duration.zero)),
+        Op.fields: {'name': 'Pantry', 'kind': 'other'},
+      },
+      // A clock out of form: the server cannot read the operation.
+      {
+        ...ownOp(bad, Op.put, 'not-a-clock'),
+        Op.fields: {'name': 'Larder', 'kind': 'other'},
+      },
+    ]);
+    expect(result.refused.map((r) => (r.operation[Op.id], r.code)), [
+      (bad, 'malformed'),
+    ]);
+    expect(await webRoomStatus(good), 200);
+  }, skip: skip);
+
   test('revoking the access on the server stops the phone at its next call, '
       'and the phone says so', () async {
     final access = (await ServerCredential.read(store))!.access;
@@ -419,6 +607,16 @@ void main() {
       expect(reply.$1, isNot(403), reason: route);
     }
   }, skip: skip);
+}
+
+class _MemoryState implements ServerStateStore {
+  String? value;
+
+  @override
+  Future<String?> readServerState() async => value;
+
+  @override
+  Future<void> writeServerState(String? state) async => value = state;
 }
 
 class _MemoryStore implements Store {

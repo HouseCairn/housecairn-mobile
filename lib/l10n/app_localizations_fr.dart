@@ -2601,4 +2601,118 @@ class AppLocalizationsFr extends AppLocalizations {
   String wayLeaveServerOther(int count) {
     return 'Autres modifications : $count';
   }
+
+  @override
+  String get syncTitle => 'Synchronisation avec le serveur';
+
+  @override
+  String get syncText =>
+      'Les modifications de ce téléphone partent vers le serveur peu après, et celles du serveur arrivent quand l\'appli s\'ouvre ou revient au premier plan.';
+
+  @override
+  String get syncNow => 'Synchroniser maintenant';
+
+  @override
+  String get syncRunning => 'Synchronisation en cours…';
+
+  @override
+  String syncLast(String time) {
+    return 'Dernière synchronisation : $time';
+  }
+
+  @override
+  String get syncNever => 'Pas encore synchronisé.';
+
+  @override
+  String get syncUnreachable =>
+      'Le serveur est injoignable pour l\'instant. Vos modifications restent sur ce téléphone et partiront à la prochaine synchronisation.';
+
+  @override
+  String get syncFailed =>
+      'La dernière synchronisation n\'a pas abouti. Elle sera retentée automatiquement.';
+
+  @override
+  String get syncRefusedTitle => 'Modifications refusées par le serveur';
+
+  @override
+  String syncRefusedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count modifications refusées par le serveur',
+      one: '1 modification refusée par le serveur',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncRefusedHelp =>
+      'Le serveur n\'a pas pris ces modifications ; elles sont toujours sur ce téléphone. Renvoyez-en une une fois sa cause corrigée, ou arrêtez de l\'envoyer : elle reste alors sur ce téléphone seulement.';
+
+  @override
+  String get syncSendAgain => 'Renvoyer';
+
+  @override
+  String get syncStopSending => 'Ne plus envoyer';
+
+  @override
+  String get syncRefusedUnnamed => 'Une modification sans nom';
+
+  @override
+  String get syncRefusedForbidden =>
+      'Votre rôle dans ce logement sur le serveur ne permet pas cette modification.';
+
+  @override
+  String get syncRefusedReference =>
+      'Elle désigne un élément qui n\'est pas dans ce logement sur le serveur.';
+
+  @override
+  String get syncRefusedClock =>
+      'La date de ce téléphone est en avance : vérifiez-la dans les réglages du téléphone, puis renvoyez.';
+
+  @override
+  String get syncRefusedIdTaken =>
+      'Le serveur a déjà un autre élément avec le même identifiant.';
+
+  @override
+  String get syncRefusedMalformed =>
+      'Le serveur n\'a pas pu lire cette modification.';
+
+  @override
+  String get syncRefusedTooLarge =>
+      'Cette modification est trop grande pour le serveur.';
+
+  @override
+  String get syncRefusedDevice =>
+      'Le serveur connaît ce téléphone sous un autre identifiant. Reconnectez ce téléphone.';
+
+  @override
+  String syncRefusedOther(String code) {
+    return 'Le serveur a refusé cette modification (code $code).';
+  }
+
+  @override
+  String get syncNoticesTitle => 'Depuis les dernières synchronisations';
+
+  @override
+  String syncNoticesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count informations sur la synchronisation',
+      one: '1 information sur la synchronisation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncNoticeUndoReverted =>
+      'Une annulation a été reprise : la prochaine échéance de cette tâche a été modifiée entre-temps sur un autre appareil.';
+
+  @override
+  String get syncNoticeDropped =>
+      'Un élément supprimé sur le serveur a été retiré de ce téléphone.';
+
+  @override
+  String get syncNoticesRead => 'Marquer comme lu';
 }

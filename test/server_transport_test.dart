@@ -55,7 +55,7 @@ void main() {
         'head': 0,
         'members': [
           {'id': 'u1', 'name': 'Sam', 'role': 'owner'},
-          {'id': 'u2', 'name': 'Alex', 'role': 'read_only'},
+          {'id': 'u2', 'name': 'Robin', 'role': 'read_only'},
         ],
       },
     ];
@@ -219,6 +219,166 @@ void main() {
           ),
         ),
       );
+    });
+  });
+
+  group('a push refused for good (decision A of the maintainer)', () {
+    String id(int n) =>
+        '${n.toRadixString(16).padLeft(8, '0')}-1111-4111-8111-111111111111';
+    List<SyncOperation> rooms(int count) => [
+      for (var n = 1; n <= count; n++) op(id(n), {'name': 'Room $n'}),
+    ];
+    Set<String> idsOf(Map<String, Object?> body) => {
+      for (final o in body['ops']! as List) (o as Map)['id']! as String,
+    };
+    Set<String> applied() => {for (final p in server.pushes) ...idsOf(p.body)};
+    bool noUnanswered() =>
+        ServerSyncState.decode(state.value).unanswered == null;
+
+    /// The server refuses every push that carries one of [faulty].
+    void refuse(Set<String> faulty, int status, String code) => server.judge = (
+      body,
+    ) => idsOf(body).intersection(faulty).isEmpty ? null : (status, code, null);
+
+    for (final (status, code) in [
+      (400, 'malformed'),
+      (400, 'too_large'),
+      (409, 'push_conflict'),
+    ]) {
+      test('$status $code: the push is cut in halves until the operations at '
+          'fault are alone; the others go, those are kept aside', () async {
+        final ops = rooms(9);
+        refuse({id(3), id(7)}, status, code);
+        final result = await transport.push(ops);
+        expect(result.refused.map((r) => r.operation[Op.id]), [id(3), id(7)]);
+        expect(result.refused.map((r) => r.code).toSet(), {code});
+        expect(applied(), {
+          for (var n = 1; n <= 9; n++)
+            if (n != 3 && n != 7) id(n),
+        });
+        expect(noUnanswered(), isTrue, reason: 'nothing is sent again');
+        // The next round sends nothing of them again.
+        server.tried.clear();
+        await transport.push(const []);
+        expect(server.tried, isEmpty);
+      });
+    }
+
+    test('400 malformed with the index of the operation: that one is kept '
+        'aside at once, the others go in the next push', () async {
+      final ops = rooms(6);
+      server.judge = (body) {
+        final ids = idsOf(body).toList();
+        final at = ids.indexOf(id(4));
+        return at < 0 ? null : (400, 'malformed', at);
+      };
+      final result = await transport.push(ops);
+      expect(result.refused.single.operation[Op.id], id(4));
+      expect(result.refused.single.detail, 'Refused.');
+      expect(server.tried, hasLength(2));
+      expect(applied(), hasLength(5));
+    });
+
+    test('409 push_conflict on the number only: the same operations go under '
+        'the next number, none is kept aside', () async {
+      var first = true;
+      server.judge = (body) {
+        if (!first) return null;
+        first = false;
+        return (409, 'push_conflict', null);
+      };
+      final result = await transport.push(rooms(4));
+      expect(result.refused, isEmpty);
+      expect(server.tried.map((b) => b['push']), [1, 2]);
+      expect(applied(), hasLength(4));
+    });
+
+    test('409 wrong_device: the device is the push\'s, so every operation is '
+        'kept aside at once, with one push', () async {
+      server.judge = (_) => (409, 'wrong_device', null);
+      final result = await transport.push(rooms(5));
+      expect(result.refused, hasLength(5));
+      expect(result.refused.map((r) => r.code).toSet(), {'wrong_device'});
+      expect(server.tried, hasLength(1));
+      expect(noUnanswered(), isTrue);
+    });
+
+    test('a refusal of the push sent again only clears it: its operations '
+        'still wait in op_log and go through the rule', () async {
+      server.failNextPush = true;
+      await expectLater(
+        transport.push(rooms(2)),
+        throwsA(isA<ServerHttpException>()),
+      );
+      expect(noUnanswered(), isFalse);
+      refuse({id(2)}, 400, 'malformed');
+      final result = await transport.push(rooms(2));
+      expect(result.refused.single.operation[Op.id], id(2));
+      expect(applied(), {id(1)});
+      expect(noUnanswered(), isTrue);
+    });
+
+    for (final status in [429, 500, 502, 503]) {
+      test('$status: no operation is kept aside, the same push (number and '
+          'bytes) goes again next time', () async {
+        server.pushError = (status, '');
+        await expectLater(
+          transport.push(rooms(2)),
+          throwsA(isA<ServerBusy>().having((e) => e.status, 's', status)),
+        );
+        final sent = server.lastPushBytes;
+        expect(noUnanswered(), isFalse);
+        server.pushError = null;
+        final result = await transport.push(const []);
+        expect(result.refused, isEmpty);
+        expect(server.pushes.single.raw, sent);
+        expect(server.pushes.single.body['push'], 1);
+      });
+    }
+
+    test(
+      'an operation rejected in a push taken is kept aside with its code',
+      () async {
+        server.pushResults = [
+          {'i': 0, 'status': 'applied'},
+          {'i': 1, 'status': 'rejected', 'code': 'clock_ahead'},
+        ];
+        final result = await transport.push(rooms(2));
+        expect(result.refused.single.operation[Op.id], id(2));
+        expect(result.refused.single.code, 'clock_ahead');
+      },
+    );
+
+    test('a push stays under 1 MiB of body and 200 operations', () async {
+      final notes = 'x' * (300 * 1024);
+      final big = [
+        for (var n = 1; n <= 7; n++)
+          op(id(n), {'name': 'Room $n', 'notes': notes}),
+      ];
+      await transport.push(big);
+      expect(server.pushes.length, greaterThanOrEqualTo(3));
+      for (final p in server.pushes) {
+        expect(p.raw.length, lessThanOrEqualTo(ServerTransport.pushBytes));
+      }
+      expect(applied(), hasLength(7));
+      server.pushes.clear();
+      await transport.push(rooms(450));
+      expect(server.pushes.map((p) => (p.body['ops']! as List).length), [
+        200,
+        200,
+        50,
+      ]);
+    });
+
+    test('one operation larger than 1 MiB is kept aside as too_large, never '
+        'sent', () async {
+      final result = await transport.push([
+        op(id(1), {'notes': 'x' * (ServerTransport.pushBytes + 1)}),
+        op(id(2), {'name': 'Hall'}),
+      ]);
+      expect(result.refused.single.operation[Op.id], id(1));
+      expect(result.refused.single.code, 'too_large');
+      expect(server.tried.expand(idsOf), [id(2)]);
     });
   });
 
@@ -466,7 +626,7 @@ void main() {
 
     test('the members of each home are kept, read only', () async {
       final homes = await transport.homes();
-      expect(homes.single.members.map((m) => m.name), ['Sam', 'Alex']);
+      expect(homes.single.members.map((m) => m.name), ['Sam', 'Robin']);
       expect(homes.single.owner, isTrue);
       final kept = ServerSyncState.decode(await state.readServerState());
       expect(kept.homes.single.members.last.role, 'read_only');
@@ -717,6 +877,13 @@ class _Server implements ServerHttp {
   List<Map<String, Object?>> changes = [];
   List<Map<String, Object?>>? pushResults;
   (int, String)? pushError;
+
+  /// Decides a push before it is applied: `(status, code, index)` refuses
+  /// it as a whole, `null` lets it through.
+  (int, String, int?)? Function(Map<String, Object?> body)? judge;
+
+  /// Every push that reached the server, refused ones included.
+  final tried = <Map<String, Object?>>[];
   final erased = <String>{};
   final pushes = <_Push>[];
   final refreshes = <String>[];
@@ -799,7 +966,17 @@ class _Server implements ServerHttp {
         if (pushError case (final status, final code)) {
           return _json(status, {'code': code});
         }
-        final push = _Push(h, body!);
+        final decoded = (jsonDecode(utf8.decode(body!)) as Map)
+            .cast<String, Object?>();
+        tried.add(decoded);
+        if (judge?.call(decoded) case (final status, final code, final i)) {
+          return _json(status, {
+            'detail': 'Refused.',
+            'code': code,
+            'index': ?i,
+          });
+        }
+        final push = _Push(h, body);
         pushes.add(push);
         final ops = push.body['ops'] as List;
         return _json(200, {

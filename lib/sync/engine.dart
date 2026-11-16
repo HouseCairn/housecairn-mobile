@@ -99,6 +99,9 @@ class SyncEngine {
     if (out.isEmpty) return 0;
     final result = await transport.push([for (final o in out) o.operation]);
     if (result.held) return 0;
+    // What the other side refused for good is kept aside before it leaves
+    // op_log: the person sends it again or drops it, nothing goes silently.
+    if (result.refused.isNotEmpty) await repository.setAside(result.refused);
     await repository.acknowledge(out.last.seq);
     // What won on the other side, for each field that lost there.
     if (result.lost.isNotEmpty) {

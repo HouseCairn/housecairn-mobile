@@ -4237,6 +4237,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other changes: {count}'**
   String wayLeaveServerOther(int count);
+
+  /// Title of the screen and row of More that show the sync with the server (lot 4b).
+  ///
+  /// In en, this message translates to:
+  /// **'Sync with the server'**
+  String get syncTitle;
+
+  /// Text of the sync screen: when the phone syncs (ADR 0010).
+  ///
+  /// In en, this message translates to:
+  /// **'The changes of this phone go to the server a moment after you make them; the server\'s come when the app opens or comes back.'**
+  String get syncText;
+
+  /// Button: one round of sync with the server at once.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get syncNow;
+
+  /// State of the sync while a round runs.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get syncRunning;
+
+  /// State of the sync: when it last went through.
+  ///
+  /// In en, this message translates to:
+  /// **'Last sync: {time}'**
+  String syncLast(String time);
+
+  /// State of the sync before the first round went through.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced yet.'**
+  String get syncNever;
+
+  /// State of the sync when the server did not answer, or was too busy (429, 5xx).
+  ///
+  /// In en, this message translates to:
+  /// **'The server cannot be reached for now. Your changes stay on this phone and go with the next sync.'**
+  String get syncUnreachable;
+
+  /// State of the sync after another failure.
+  ///
+  /// In en, this message translates to:
+  /// **'The last sync did not finish. It is tried again by itself.'**
+  String get syncFailed;
+
+  /// Heading of the changes the server refused for good (decision A of lot 4b).
+  ///
+  /// In en, this message translates to:
+  /// **'Changes the server refused'**
+  String get syncRefusedTitle;
+
+  /// Line of the sync banner: how many changes the server refused.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change refused by the server} other{{count} changes refused by the server}}'**
+  String syncRefusedCount(int count);
+
+  /// Text above the refused changes.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not take these changes; they are still on this phone. Send one again once its cause is fixed, or stop sending it: it then stays on this phone only.'**
+  String get syncRefusedHelp;
+
+  /// Button of a refused change: put it back to be sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Send again'**
+  String get syncSendAgain;
+
+  /// Button of a refused change: drop it, it stays on this phone only.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop sending'**
+  String get syncStopSending;
+
+  /// Title of a refused change whose row has no name or title in it.
+  ///
+  /// In en, this message translates to:
+  /// **'A change without a name'**
+  String get syncRefusedUnnamed;
+
+  /// Reason of a refused change: forbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your role in this home on the server does not allow this change.'**
+  String get syncRefusedForbidden;
+
+  /// Reason of a refused change: invalid_reference or wrong_home.
+  ///
+  /// In en, this message translates to:
+  /// **'It names something that is not in this home on the server.'**
+  String get syncRefusedReference;
+
+  /// Reason of a refused change: clock_ahead.
+  ///
+  /// In en, this message translates to:
+  /// **'The date of this phone is ahead: check it in the phone\'s settings, then send again.'**
+  String get syncRefusedClock;
+
+  /// Reason of a refused change: id_taken.
+  ///
+  /// In en, this message translates to:
+  /// **'The server already has another row with the same id.'**
+  String get syncRefusedIdTaken;
+
+  /// Reason of a refused change: malformed.
+  ///
+  /// In en, this message translates to:
+  /// **'The server could not read this change.'**
+  String get syncRefusedMalformed;
+
+  /// Reason of a refused change: too_large.
+  ///
+  /// In en, this message translates to:
+  /// **'This change is too large for the server.'**
+  String get syncRefusedTooLarge;
+
+  /// Reason of a refused change: wrong_device.
+  ///
+  /// In en, this message translates to:
+  /// **'The server knows this phone under another id. Sign in again on this phone.'**
+  String get syncRefusedDevice;
+
+  /// Reason of a refused change with another code, given as the server says it.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused this change (code {code}).'**
+  String syncRefusedOther(String code);
+
+  /// Heading of the notices of the sync (undo taken back, row dropped).
+  ///
+  /// In en, this message translates to:
+  /// **'Since the last syncs'**
+  String get syncNoticesTitle;
+
+  /// Line of the sync banner: how many notices wait to be read.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 thing to read about the sync} other{{count} things to read about the sync}}'**
+  String syncNoticesCount(int count);
+
+  /// Notice: an undo of this phone was reverted (ADR 0003).
+  ///
+  /// In en, this message translates to:
+  /// **'An undo was taken back: the next time of this task was changed on another device meanwhile.'**
+  String get syncNoticeUndoReverted;
+
+  /// Notice: a row seen by the server and gone from its snapshot was deleted here (protocol 2.10, rule 2).
+  ///
+  /// In en, this message translates to:
+  /// **'Something deleted on the server was removed from this phone.'**
+  String get syncNoticeDropped;
+
+  /// Button: the notices of the sync were read.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get syncNoticesRead;
 }
 
 class _AppLocalizationsDelegate

@@ -22,14 +22,36 @@ class SyncCapabilities {
 /// The answer to a push: the operations that lost against another change,
 /// each as the value that won (docs/adr/0010, `SyncTransport`).
 class PushResult {
-  const PushResult({this.lost = const [], this.held = false});
+  const PushResult({
+    this.lost = const [],
+    this.held = false,
+    this.refused = const [],
+  });
 
   final List<SyncOperation> lost;
+
+  /// The operations the other side refused for good: the phone keeps them
+  /// aside with their reason, and the person sends them again or drops them
+  /// (docs/protocol.md section 2.10, "A push refused"). None is lost in
+  /// silence.
+  final List<RefusedOperation> refused;
 
   /// Nothing was sent: the other side will answer the pull with a restart
   /// (410), and the operations wait in `op_log` for the rule that follows it
   /// (docs/protocol.md section 2.10), which may drop some.
   final bool held;
+}
+
+/// An operation the other side refused, with the code it gave (`forbidden`,
+/// `malformed`, `too_large`...).
+class RefusedOperation {
+  const RefusedOperation(this.operation, this.code, {this.detail});
+
+  final SyncOperation operation;
+  final String code;
+
+  /// What the other side said of it, as it said it; never shown as is.
+  final String? detail;
 }
 
 /// The answer to a pull.

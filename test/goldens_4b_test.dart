@@ -38,7 +38,7 @@ void main() {
       role: 'owner',
       members: [
         ServerMember(id: 'u1', name: 'Sam', role: 'owner'),
-        ServerMember(id: 'u2', name: 'Alex', role: 'member'),
+        ServerMember(id: 'u2', name: 'Robin', role: 'member'),
       ],
     ),
     ServerHome(

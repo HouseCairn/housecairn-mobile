@@ -445,6 +445,20 @@ phone has no home (with homes on the phone, the app says that keeping them on a 
 with lot 4c, and changes nothing), archiving by owners, the members read only. The e2e job runs
 against the image v0.4.1, pinned by digest.
 
+**Decisions of the maintainer after the review of PR #32 (2026-11-16):**
+
+- A. "Envoi refusé définitivement par le serveur : découper l'envoi pour isoler la ou les
+  opérations fautives, envoyer le reste, mettre les fautives de côté avec un message ; rien
+  n'est perdu en silence." Written as a rule in [protocol](protocol.md) section 2.10, "A push
+  refused".
+- B. "Le déclenchement de la synchro et l'affichage de son état se font dans ce lot." The
+  phone syncs at the opening, when the app comes back to the front, and two seconds after the
+  last change, one round at a time; a line above the bar of sections and the screen "Sync with
+  the server" (from More) say why the server stopped the phone, list the changes it refused
+  with their reason, and the notices of the sync.
+- C. "Les trois cas ADR 0003 non rejoués contre le web (restauration, double tirage, ancienne
+  `sv`) entrent dans l'e2e."
+
 ## Lot 4c. Homes of the phone and files on a server
 
 **Scope**: what lot 4b left for a later web version (decision 1 above): **keep this phone's
