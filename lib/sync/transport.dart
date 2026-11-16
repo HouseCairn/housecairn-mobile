@@ -62,6 +62,27 @@ class RefusedOperation {
   final String? detail;
 }
 
+/// A file the other side refused for good: it does not take it as it is, so
+/// the phone does not send it again by itself ([code]: `malformed` for a
+/// digest that is not the one of the bytes, `forbidden`, `file_conflict`,
+/// `too_large`, `quota_exceeded`, `unsupported_type`).
+class FileRefused implements Exception {
+  const FileRefused(this.code);
+
+  final String code;
+
+  @override
+  String toString() => 'FileRefused($code)';
+}
+
+/// The other side does not have the file, or the home of it (`404`).
+class FileNotFound implements Exception {
+  const FileNotFound();
+
+  @override
+  String toString() => 'FileNotFound';
+}
+
 /// The answer to a pull.
 class PullResult {
   const PullResult({
@@ -110,14 +131,27 @@ abstract interface class SyncTransport {
   /// The changes after [after] (`null`: from the start).
   Future<PullResult> pull({SyncPosition? after});
 
-  /// Stores the file [id] (a photo or an attachment).
-  Future<void> putFile(String id, Uint8List bytes);
+  /// Stores the file [id] (a photo or an attachment) of [home]; [sha256] is
+  /// the digest of [bytes] in lower-case hexadecimal and [type] their media
+  /// type. Throws [FileRefused] when the other side refuses it for good and
+  /// [FileNotFound] when the home is not there (any more); a busy or
+  /// unreachable other side throws what the transport throws for any request.
+  Future<void> putFile(
+    String home,
+    String id,
+    Uint8List bytes, {
+    required String sha256,
+    required String type,
+  });
 
-  /// Reads the file [id].
-  Future<Uint8List> getFile(String id);
+  /// Reads the file [id] of [home]. Throws [FileNotFound] when the other
+  /// side does not have it.
+  Future<Uint8List> getFile(String home, String id);
 
-  /// Deletes the file [id].
-  Future<void> deleteFile(String id);
+  /// Deletes the file [id] of [home]. A server has no route for it: it
+  /// removes a file no row refers to by itself (web ADR 0077, need 10), so
+  /// this does nothing there; the relay deletes the blob.
+  Future<void> deleteFile(String home, String id);
 
   /// The ids of the homes deleted on the other side, or no longer covered by
   /// the access of this phone.

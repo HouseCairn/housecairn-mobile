@@ -215,7 +215,7 @@ phone, so neither way needs a migration of the data to start.
 | `capabilities()` | `GET /v1/info` | the server's version and sync capabilities |
 | `push(operations)` | one sealed batch | one request applied as a whole; the answer gives, for each field that lost, the value that won |
 | `pull(after: cursor)` | batches after `pos`; "start again" on 410, from the snapshot | changes after the server's `pos`; on 410, the server's snapshot and the reconciliation rule of [protocol section 2.10](../protocol.md#210-with-a-housecairn-server), by the mark "seen by the server" |
-| `putFile`, `getFile`, `deleteFile` | blobs, encrypted with their own key | the files of the server's photos and attachments, in clear |
+| `putFile`, `getFile`, `deleteFile` | blobs, encrypted with their own key | the files of the server's photos and attachments, in clear: `PUT` and `GET` of `/files/{id}` of a home, with the digest in `HC-Sha256`; no route to delete ([ADR 0012](0012-files-with-a-server.md)) |
 | `homesGone()` | `purge` records of the membership log | homes deleted on the server, or no longer covered by the access |
 
 Members, invitations, epochs and the recovery code exist only with the relay: they stay outside
@@ -340,6 +340,12 @@ additive changes). These are needs, not a design of the web: the web lot decides
     without a duplicate, the size limit announced (`rooms/conf.py`, instance setting
     `file_max_bytes`), and the file and thumbnail readable by id as today
     (`rooms/api.py:520-531`).
+    *As decided (web ADR 0077, built in lot 4c, [ADR 0012](0012-files-with-a-server.md)).* The
+    upload is not multipart: it is the bytes as an octet-stream under the id of the phone, with
+    the digest in the header `HC-Sha256`; the server answers `201` or `200` for the same bytes,
+    and refuses with `400` `malformed`, `403`, `409` `file_conflict`, `413` `too_large` or
+    `quota_exceeded`, `415`. A file no row refers to is removed by the server itself, so there is
+    no route to delete one.
 11. **Versions and limits announced.** Needed: one route that says the server's version, the
     sync API version and its limits (batch size, file size, rate), so that the app refuses a
     server too old in words, and keeps the fields it does not know (`extra`) as with the

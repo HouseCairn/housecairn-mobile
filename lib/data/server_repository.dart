@@ -211,6 +211,11 @@ extension ServerSettings on Repository {
     ]) {
       await db.customStatement(sql, [type, bytes]);
     }
+    if (fileHolders.containsKey(table)) {
+      await db.customStatement('DELETE FROM file_sync WHERE row_id = ?', [
+        bytes,
+      ]);
+    }
     await db.customStatement('DELETE FROM $table WHERE id = ?', [bytes]);
     // Its local files: a photo and its thumbnail, an attachment.
     for (final name in [id, '$id.jpg', '$id.thumb.jpg']) {

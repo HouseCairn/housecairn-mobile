@@ -18429,6 +18429,559 @@ class ServerSeenCompanion extends UpdateCompanion<ServerSeenRow> {
   }
 }
 
+class $FileSyncTable extends FileSync
+    with TableInfo<$FileSyncTable, FileSyncRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FileSyncTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _fileIdMeta = const VerificationMeta('fileId');
+  @override
+  late final GeneratedColumn<String> fileId = GeneratedColumn<String>(
+    'file_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($FileSyncTable.$converterhomeId);
+  static const VerificationMeta _holderMeta = const VerificationMeta('holder');
+  @override
+  late final GeneratedColumn<String> holder = GeneratedColumn<String>(
+    'holder',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> rowId =
+      GeneratedColumn<Uint8List>(
+        'row_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($FileSyncTable.$converterrowId);
+  static const VerificationMeta _directionMeta = const VerificationMeta(
+    'direction',
+  );
+  @override
+  late final GeneratedColumn<String> direction = GeneratedColumn<String>(
+    'direction',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _attemptsMeta = const VerificationMeta(
+    'attempts',
+  );
+  @override
+  late final GeneratedColumn<int> attempts = GeneratedColumn<int>(
+    'attempts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _nextAtMeta = const VerificationMeta('nextAt');
+  @override
+  late final GeneratedColumn<int> nextAt = GeneratedColumn<int>(
+    'next_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _codeMeta = const VerificationMeta('code');
+  @override
+  late final GeneratedColumn<String> code = GeneratedColumn<String>(
+    'code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    fileId,
+    homeId,
+    holder,
+    rowId,
+    direction,
+    state,
+    attempts,
+    nextAt,
+    code,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'file_sync';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FileSyncRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('file_id')) {
+      context.handle(
+        _fileIdMeta,
+        fileId.isAcceptableOrUnknown(data['file_id']!, _fileIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fileIdMeta);
+    }
+    if (data.containsKey('holder')) {
+      context.handle(
+        _holderMeta,
+        holder.isAcceptableOrUnknown(data['holder']!, _holderMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_holderMeta);
+    }
+    if (data.containsKey('direction')) {
+      context.handle(
+        _directionMeta,
+        direction.isAcceptableOrUnknown(data['direction']!, _directionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_directionMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('attempts')) {
+      context.handle(
+        _attemptsMeta,
+        attempts.isAcceptableOrUnknown(data['attempts']!, _attemptsMeta),
+      );
+    }
+    if (data.containsKey('next_at')) {
+      context.handle(
+        _nextAtMeta,
+        nextAt.isAcceptableOrUnknown(data['next_at']!, _nextAtMeta),
+      );
+    }
+    if (data.containsKey('code')) {
+      context.handle(
+        _codeMeta,
+        code.isAcceptableOrUnknown(data['code']!, _codeMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {fileId};
+  @override
+  FileSyncRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FileSyncRow(
+      fileId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_id'],
+      )!,
+      homeId: $FileSyncTable.$converterhomeId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        )!,
+      ),
+      holder: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}holder'],
+      )!,
+      rowId: $FileSyncTable.$converterrowId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}row_id'],
+        )!,
+      ),
+      direction: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}direction'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      attempts: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}attempts'],
+      )!,
+      nextAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}next_at'],
+      )!,
+      code: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}code'],
+      ),
+    );
+  }
+
+  @override
+  $FileSyncTable createAlias(String alias) {
+    return $FileSyncTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterrowId =
+      const UuidConverter();
+}
+
+class FileSyncRow extends DataClass implements Insertable<FileSyncRow> {
+  final String fileId;
+  final String homeId;
+
+  /// The table of the row that holds the file: `photos` or `project_files`.
+  final String holder;
+  final String rowId;
+  final String direction;
+  final String state;
+  final int attempts;
+  final int nextAt;
+  final String? code;
+  const FileSyncRow({
+    required this.fileId,
+    required this.homeId,
+    required this.holder,
+    required this.rowId,
+    required this.direction,
+    required this.state,
+    required this.attempts,
+    required this.nextAt,
+    this.code,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['file_id'] = Variable<String>(fileId);
+    {
+      map['home_id'] = Variable<Uint8List>(
+        $FileSyncTable.$converterhomeId.toSql(homeId),
+      );
+    }
+    map['holder'] = Variable<String>(holder);
+    {
+      map['row_id'] = Variable<Uint8List>(
+        $FileSyncTable.$converterrowId.toSql(rowId),
+      );
+    }
+    map['direction'] = Variable<String>(direction);
+    map['state'] = Variable<String>(state);
+    map['attempts'] = Variable<int>(attempts);
+    map['next_at'] = Variable<int>(nextAt);
+    if (!nullToAbsent || code != null) {
+      map['code'] = Variable<String>(code);
+    }
+    return map;
+  }
+
+  FileSyncCompanion toCompanion(bool nullToAbsent) {
+    return FileSyncCompanion(
+      fileId: Value(fileId),
+      homeId: Value(homeId),
+      holder: Value(holder),
+      rowId: Value(rowId),
+      direction: Value(direction),
+      state: Value(state),
+      attempts: Value(attempts),
+      nextAt: Value(nextAt),
+      code: code == null && nullToAbsent ? const Value.absent() : Value(code),
+    );
+  }
+
+  factory FileSyncRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FileSyncRow(
+      fileId: serializer.fromJson<String>(json['fileId']),
+      homeId: serializer.fromJson<String>(json['homeId']),
+      holder: serializer.fromJson<String>(json['holder']),
+      rowId: serializer.fromJson<String>(json['rowId']),
+      direction: serializer.fromJson<String>(json['direction']),
+      state: serializer.fromJson<String>(json['state']),
+      attempts: serializer.fromJson<int>(json['attempts']),
+      nextAt: serializer.fromJson<int>(json['nextAt']),
+      code: serializer.fromJson<String?>(json['code']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'fileId': serializer.toJson<String>(fileId),
+      'homeId': serializer.toJson<String>(homeId),
+      'holder': serializer.toJson<String>(holder),
+      'rowId': serializer.toJson<String>(rowId),
+      'direction': serializer.toJson<String>(direction),
+      'state': serializer.toJson<String>(state),
+      'attempts': serializer.toJson<int>(attempts),
+      'nextAt': serializer.toJson<int>(nextAt),
+      'code': serializer.toJson<String?>(code),
+    };
+  }
+
+  FileSyncRow copyWith({
+    String? fileId,
+    String? homeId,
+    String? holder,
+    String? rowId,
+    String? direction,
+    String? state,
+    int? attempts,
+    int? nextAt,
+    Value<String?> code = const Value.absent(),
+  }) => FileSyncRow(
+    fileId: fileId ?? this.fileId,
+    homeId: homeId ?? this.homeId,
+    holder: holder ?? this.holder,
+    rowId: rowId ?? this.rowId,
+    direction: direction ?? this.direction,
+    state: state ?? this.state,
+    attempts: attempts ?? this.attempts,
+    nextAt: nextAt ?? this.nextAt,
+    code: code.present ? code.value : this.code,
+  );
+  FileSyncRow copyWithCompanion(FileSyncCompanion data) {
+    return FileSyncRow(
+      fileId: data.fileId.present ? data.fileId.value : this.fileId,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      holder: data.holder.present ? data.holder.value : this.holder,
+      rowId: data.rowId.present ? data.rowId.value : this.rowId,
+      direction: data.direction.present ? data.direction.value : this.direction,
+      state: data.state.present ? data.state.value : this.state,
+      attempts: data.attempts.present ? data.attempts.value : this.attempts,
+      nextAt: data.nextAt.present ? data.nextAt.value : this.nextAt,
+      code: data.code.present ? data.code.value : this.code,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FileSyncRow(')
+          ..write('fileId: $fileId, ')
+          ..write('homeId: $homeId, ')
+          ..write('holder: $holder, ')
+          ..write('rowId: $rowId, ')
+          ..write('direction: $direction, ')
+          ..write('state: $state, ')
+          ..write('attempts: $attempts, ')
+          ..write('nextAt: $nextAt, ')
+          ..write('code: $code')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    fileId,
+    homeId,
+    holder,
+    rowId,
+    direction,
+    state,
+    attempts,
+    nextAt,
+    code,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FileSyncRow &&
+          other.fileId == this.fileId &&
+          other.homeId == this.homeId &&
+          other.holder == this.holder &&
+          other.rowId == this.rowId &&
+          other.direction == this.direction &&
+          other.state == this.state &&
+          other.attempts == this.attempts &&
+          other.nextAt == this.nextAt &&
+          other.code == this.code);
+}
+
+class FileSyncCompanion extends UpdateCompanion<FileSyncRow> {
+  final Value<String> fileId;
+  final Value<String> homeId;
+  final Value<String> holder;
+  final Value<String> rowId;
+  final Value<String> direction;
+  final Value<String> state;
+  final Value<int> attempts;
+  final Value<int> nextAt;
+  final Value<String?> code;
+  final Value<int> rowid;
+  const FileSyncCompanion({
+    this.fileId = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.holder = const Value.absent(),
+    this.rowId = const Value.absent(),
+    this.direction = const Value.absent(),
+    this.state = const Value.absent(),
+    this.attempts = const Value.absent(),
+    this.nextAt = const Value.absent(),
+    this.code = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FileSyncCompanion.insert({
+    required String fileId,
+    required String homeId,
+    required String holder,
+    required String rowId,
+    required String direction,
+    required String state,
+    this.attempts = const Value.absent(),
+    this.nextAt = const Value.absent(),
+    this.code = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : fileId = Value(fileId),
+       homeId = Value(homeId),
+       holder = Value(holder),
+       rowId = Value(rowId),
+       direction = Value(direction),
+       state = Value(state);
+  static Insertable<FileSyncRow> custom({
+    Expression<String>? fileId,
+    Expression<Uint8List>? homeId,
+    Expression<String>? holder,
+    Expression<Uint8List>? rowId,
+    Expression<String>? direction,
+    Expression<String>? state,
+    Expression<int>? attempts,
+    Expression<int>? nextAt,
+    Expression<String>? code,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (fileId != null) 'file_id': fileId,
+      if (homeId != null) 'home_id': homeId,
+      if (holder != null) 'holder': holder,
+      if (rowId != null) 'row_id': rowId,
+      if (direction != null) 'direction': direction,
+      if (state != null) 'state': state,
+      if (attempts != null) 'attempts': attempts,
+      if (nextAt != null) 'next_at': nextAt,
+      if (code != null) 'code': code,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FileSyncCompanion copyWith({
+    Value<String>? fileId,
+    Value<String>? homeId,
+    Value<String>? holder,
+    Value<String>? rowId,
+    Value<String>? direction,
+    Value<String>? state,
+    Value<int>? attempts,
+    Value<int>? nextAt,
+    Value<String?>? code,
+    Value<int>? rowid,
+  }) {
+    return FileSyncCompanion(
+      fileId: fileId ?? this.fileId,
+      homeId: homeId ?? this.homeId,
+      holder: holder ?? this.holder,
+      rowId: rowId ?? this.rowId,
+      direction: direction ?? this.direction,
+      state: state ?? this.state,
+      attempts: attempts ?? this.attempts,
+      nextAt: nextAt ?? this.nextAt,
+      code: code ?? this.code,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (fileId.present) {
+      map['file_id'] = Variable<String>(fileId.value);
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $FileSyncTable.$converterhomeId.toSql(homeId.value),
+      );
+    }
+    if (holder.present) {
+      map['holder'] = Variable<String>(holder.value);
+    }
+    if (rowId.present) {
+      map['row_id'] = Variable<Uint8List>(
+        $FileSyncTable.$converterrowId.toSql(rowId.value),
+      );
+    }
+    if (direction.present) {
+      map['direction'] = Variable<String>(direction.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (attempts.present) {
+      map['attempts'] = Variable<int>(attempts.value);
+    }
+    if (nextAt.present) {
+      map['next_at'] = Variable<int>(nextAt.value);
+    }
+    if (code.present) {
+      map['code'] = Variable<String>(code.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FileSyncCompanion(')
+          ..write('fileId: $fileId, ')
+          ..write('homeId: $homeId, ')
+          ..write('holder: $holder, ')
+          ..write('rowId: $rowId, ')
+          ..write('direction: $direction, ')
+          ..write('state: $state, ')
+          ..write('attempts: $attempts, ')
+          ..write('nextAt: $nextAt, ')
+          ..write('code: $code, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -18465,6 +19018,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PurgedHomesTable purgedHomes = $PurgedHomesTable(this);
   late final $OtherVersionsTable otherVersions = $OtherVersionsTable(this);
   late final $ServerSeenTable serverSeen = $ServerSeenTable(this);
+  late final $FileSyncTable fileSync = $FileSyncTable(this);
   late final Index roomHomePosition = Index(
     'room_home_position',
     'CREATE INDEX room_home_position ON rooms (home_id, position)',
@@ -18549,6 +19103,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     purgedHomes,
     otherVersions,
     serverSeen,
+    fileSync,
     roomHomePosition,
     taskHomeCreated,
     occHomeStatusDue,
@@ -27859,6 +28414,288 @@ typedef $$ServerSeenTableProcessedTableManager =
       ServerSeenRow,
       PrefetchHooks Function()
     >;
+typedef $$FileSyncTableCreateCompanionBuilder = FileSyncCompanion Function({
+  required String fileId,
+  required String homeId,
+  required String holder,
+  required String rowId,
+  required String direction,
+  required String state,
+  Value<int> attempts,
+  Value<int> nextAt,
+  Value<String?> code,
+  Value<int> rowid,
+});
+typedef $$FileSyncTableUpdateCompanionBuilder = FileSyncCompanion Function({
+  Value<String> fileId,
+  Value<String> homeId,
+  Value<String> holder,
+  Value<String> rowId,
+  Value<String> direction,
+  Value<String> state,
+  Value<int> attempts,
+  Value<int> nextAt,
+  Value<String?> code,
+  Value<int> rowid,
+});
+
+class $$FileSyncTableFilterComposer
+    extends Composer<_$AppDatabase, $FileSyncTable> {
+  $$FileSyncTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get fileId => $composableBuilder(
+    column: $table.fileId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get holder => $composableBuilder(
+    column: $table.holder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get rowId =>
+      $composableBuilder(
+        column: $table.rowId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get direction => $composableBuilder(
+    column: $table.direction,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get attempts => $composableBuilder(
+    column: $table.attempts,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get nextAt => $composableBuilder(
+    column: $table.nextAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$FileSyncTableOrderingComposer
+    extends Composer<_$AppDatabase, $FileSyncTable> {
+  $$FileSyncTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get fileId => $composableBuilder(
+    column: $table.fileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get holder => $composableBuilder(
+    column: $table.holder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get rowId => $composableBuilder(
+    column: $table.rowId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get direction => $composableBuilder(
+    column: $table.direction,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get attempts => $composableBuilder(
+    column: $table.attempts,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get nextAt => $composableBuilder(
+    column: $table.nextAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FileSyncTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FileSyncTable> {
+  $$FileSyncTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get fileId =>
+      $composableBuilder(column: $table.fileId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumn<String> get holder =>
+      $composableBuilder(column: $table.holder, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get rowId =>
+      $composableBuilder(column: $table.rowId, builder: (column) => column);
+
+  GeneratedColumn<String> get direction =>
+      $composableBuilder(column: $table.direction, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<int> get attempts =>
+      $composableBuilder(column: $table.attempts, builder: (column) => column);
+
+  GeneratedColumn<int> get nextAt =>
+      $composableBuilder(column: $table.nextAt, builder: (column) => column);
+
+  GeneratedColumn<String> get code =>
+      $composableBuilder(column: $table.code, builder: (column) => column);
+}
+
+class $$FileSyncTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FileSyncTable,
+          FileSyncRow,
+          $$FileSyncTableFilterComposer,
+          $$FileSyncTableOrderingComposer,
+          $$FileSyncTableAnnotationComposer,
+          $$FileSyncTableCreateCompanionBuilder,
+          $$FileSyncTableUpdateCompanionBuilder,
+          (
+            FileSyncRow,
+            BaseReferences<_$AppDatabase, $FileSyncTable, FileSyncRow>,
+          ),
+          FileSyncRow,
+          PrefetchHooks Function()
+        > {
+  $$FileSyncTableTableManager(_$AppDatabase db, $FileSyncTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FileSyncTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FileSyncTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FileSyncTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> fileId = const Value.absent(),
+                Value<String> homeId = const Value.absent(),
+                Value<String> holder = const Value.absent(),
+                Value<String> rowId = const Value.absent(),
+                Value<String> direction = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<int> attempts = const Value.absent(),
+                Value<int> nextAt = const Value.absent(),
+                Value<String?> code = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FileSyncCompanion(
+                fileId: fileId,
+                homeId: homeId,
+                holder: holder,
+                rowId: rowId,
+                direction: direction,
+                state: state,
+                attempts: attempts,
+                nextAt: nextAt,
+                code: code,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String fileId,
+                required String homeId,
+                required String holder,
+                required String rowId,
+                required String direction,
+                required String state,
+                Value<int> attempts = const Value.absent(),
+                Value<int> nextAt = const Value.absent(),
+                Value<String?> code = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FileSyncCompanion.insert(
+                fileId: fileId,
+                homeId: homeId,
+                holder: holder,
+                rowId: rowId,
+                direction: direction,
+                state: state,
+                attempts: attempts,
+                nextAt: nextAt,
+                code: code,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$FileSyncTable, FileSyncRow>(table),
+                  BaseReferences<_$AppDatabase, $FileSyncTable, FileSyncRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$FileSyncTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FileSyncTable,
+      FileSyncRow,
+      $$FileSyncTableFilterComposer,
+      $$FileSyncTableOrderingComposer,
+      $$FileSyncTableAnnotationComposer,
+      $$FileSyncTableCreateCompanionBuilder,
+      $$FileSyncTableUpdateCompanionBuilder,
+      (FileSyncRow, BaseReferences<_$AppDatabase, $FileSyncTable, FileSyncRow>),
+      FileSyncRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -27925,4 +28762,6 @@ class $AppDatabaseManager {
       $$OtherVersionsTableTableManager(_db, _db.otherVersions);
   $$ServerSeenTableTableManager get serverSeen =>
       $$ServerSeenTableTableManager(_db, _db.serverSeen);
+  $$FileSyncTableTableManager get fileSync =>
+      $$FileSyncTableTableManager(_db, _db.fileSync);
 }

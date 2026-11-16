@@ -12,8 +12,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/data/database.dart' show uuidBytes;
 import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/domain/day.dart';
+import 'package:housecairn_mobile/domain/file_reference.dart';
 import 'package:housecairn_mobile/domain/photos.dart';
 import 'package:housecairn_mobile/domain/templates.dart';
+import 'package:uuid/uuid.dart';
 
 import 'support/fakes.dart';
 import 'support/fixture.dart';
@@ -395,7 +397,18 @@ void main() {
       expect(row.roomId, kitchen);
       expect(row.itemId, isNull);
       expect(row.category, 'behind_walls');
-      expect(jsonDecode(row.image!), jsonDecode(stored.reference));
+      // The reference of a server (web ADR 0077): an id of its own, not the
+      // id of the row, and the digest of the bytes of the file.
+      final reference = jsonDecode(row.image!) as Map<String, dynamic>;
+      expect(reference['file'], isNot(id));
+      expect(Uuid.isValidUUID(fromString: reference['file'] as String), isTrue);
+      expect(reference['sha256'], sha256Hex(stored.image));
+      expect(reference['size'], stored.image.length);
+      expect(reference['type'], 'image/jpeg');
+      expect(
+        [reference['width'], reference['height']],
+        [stored.width, stored.height],
+      );
       final file = repo.photoFile(row);
       expect(file.path, endsWith('/homes/${homes.main}/$id.jpg'));
       expect(file.readAsBytesSync(), stored.image);

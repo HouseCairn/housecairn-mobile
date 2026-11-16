@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 
+import '../data/repository.dart';
 import '../design/adaptive.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
@@ -528,6 +529,7 @@ class _ServerSettingsRowsState extends State<ServerSettingsRows> {
             text: l10n.serverDisconnected,
             onTap: _busy ? null : () => _run(() => _signInAgain(state)),
           ),
+        const FilesRow(),
         HcRow(
           key: const Key('settings-server-disconnect'),
           title: l10n.settingsServerDisconnect,
@@ -535,6 +537,86 @@ class _ServerSettingsRowsState extends State<ServerSettingsRows> {
           onTap: _busy ? null : () => _run(() => _disconnect(state)),
         ),
       ],
+    );
+  }
+}
+
+/// Why the server refused files, in one line (codes of the web's
+/// docs/api/sync.md, "Files").
+String filesProblem(AppLocalizations l10n, Set<String> codes) {
+  if (codes.length != 1) return l10n.filesRefusedSeveral;
+  return switch (codes.single) {
+    'too_large' => l10n.filesRefusedTooLarge,
+    'quota_exceeded' => l10n.filesRefusedQuota,
+    'unsupported_type' => l10n.filesRefusedType,
+    'malformed' => l10n.filesRefusedMalformed,
+    'forbidden' => l10n.filesRefusedForbidden,
+    'file_conflict' => l10n.filesRefusedConflict,
+    final code => l10n.filesRefusedOther(code),
+  };
+}
+
+/// The photos and files that wait to go to the server, in Settings on a
+/// server (lot 4c): how many, why the server refused some, and "Send now",
+/// which tries them all at once with no wait.
+class FilesRow extends StatefulWidget {
+  const FilesRow({super.key});
+
+  @override
+  State<FilesRow> createState() => _FilesRowState();
+}
+
+class _FilesRowState extends State<FilesRow> {
+  Future<FileQueue>? _queue;
+  (int, bool)? _for;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final state = AppScope.of(context);
+    final key = (state.revision, state.serverSync.running);
+    if (_for == key) return;
+    _for = key;
+    _queue = state.repository.fileQueue();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final state = AppScope.of(context);
+    return FutureBuilder<FileQueue>(
+      future: _queue,
+      builder: (context, snapshot) {
+        final queue = snapshot.data ?? const FileQueue();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            HcRow(
+              key: const Key('settings-files'),
+              title: l10n.settingsFilesTitle,
+              text: l10n.settingsFilesCount(queue.toSend),
+              moreText: queue.failed > 0
+                  ? filesProblem(l10n, queue.codes)
+                  : null,
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.only(
+                start: HcSpace.s4,
+                end: HcSpace.s4,
+                bottom: HcSpace.s3,
+              ),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: OutlinedButton(
+                  key: const Key('files-send-now'),
+                  onPressed: state.serverSync.running ? null : state.retryFiles,
+                  child: Text(l10n.settingsFilesSendNow),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

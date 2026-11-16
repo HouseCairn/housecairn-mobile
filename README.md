@@ -78,7 +78,8 @@ unsigned iOS build on every pull request), the data, the recurrence and several 
 the Today, Task and Homes screens (lot 2a), the look of the web application (lot 2d), and
 the rooms, items, contractors, task templates, photos and local reminders (lot 2b),
 the stock with the materials of the tasks (lot 3a), and the projects, quotes, budget and
-real cost (lot 3b). Family sync is still to come. How to build and
+real cost (lot 3b), then, with a Housecairn server, the sync of rows (lots 4 to 4b) and of
+photos and files (lot 4c). Family sync through the relay is still to come. How to build and
 test: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 | Document | What it settles |

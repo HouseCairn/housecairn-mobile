@@ -36,13 +36,19 @@ class FakeSyncTransport implements SyncTransport {
   }
 
   @override
-  Future<void> putFile(String id, Uint8List bytes) async => files[id] = bytes;
+  Future<void> putFile(
+    String home,
+    String id,
+    Uint8List bytes, {
+    required String sha256,
+    required String type,
+  }) async => files[id] = bytes;
 
   @override
-  Future<Uint8List> getFile(String id) async => files[id]!;
+  Future<Uint8List> getFile(String home, String id) async => files[id]!;
 
   @override
-  Future<void> deleteFile(String id) async => files.remove(id);
+  Future<void> deleteFile(String home, String id) async => files.remove(id);
 
   @override
   Future<List<String>> homesGone() async => gone;

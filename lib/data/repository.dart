@@ -15,6 +15,7 @@ import '../core/store.dart';
 import '../domain/choices.dart';
 import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
+import '../domain/file_reference.dart';
 import '../domain/photos.dart';
 import '../domain/recurrence.dart' as recurrence;
 import '../domain/reminders.dart';
@@ -28,6 +29,7 @@ import '../sync/transport.dart';
 import 'database.dart';
 
 part 'budget_repository.dart';
+part 'file_repository.dart';
 part 'server_repository.dart';
 part 'stock_repository.dart';
 part 'sync_repository.dart';
@@ -1650,7 +1652,7 @@ class Repository {
             'item_id': itemId,
             'category': category,
             'caption': '',
-            'image': photo.reference,
+            'image': photo.fileReference().encode(),
             'deleted_at': null,
           },
           homeId: homeId,

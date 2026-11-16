@@ -705,11 +705,7 @@ extension BudgetRepository on Repository {
             'project_id': projectId,
             'quote_id': quoteId,
             'name': shown,
-            'file': jsonEncode({
-              'id': id,
-              'size': stored.length,
-              'content_type': storedType,
-            }),
+            'file': FileReference.fresh(stored, type: storedType).encode(),
             'content_type': storedType,
             'is_image': isImage,
             'size_bytes': stored.length,

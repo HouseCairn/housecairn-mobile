@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import '../data/repository.dart';
+import 'files.dart';
+import 'server_transport.dart';
 import 'transport.dart';
 
 /// What one round of sync did.
@@ -10,7 +12,13 @@ class SyncReport {
     required this.received,
     required this.notices,
     required this.readOnly,
+    this.filesSent = 0,
+    this.filesFetched = 0,
   });
+
+  /// Files of this phone the server took, and files of other phones fetched.
+  final int filesSent;
+  final int filesFetched;
 
   /// Operations of this phone the other side took.
   final int sent;
@@ -33,10 +41,12 @@ class SyncReport {
 /// the relay (lots 5 and 6) and a Housecairn server (lot 4b) are each a
 /// [SyncTransport].
 class SyncEngine {
-  SyncEngine(this.repository, this.transport);
+  SyncEngine(this.repository, this.transport, {Thumbnailer? thumbnailer})
+    : _files = FileSyncer(repository, transport, thumbnailer: thumbnailer);
 
   final Repository repository;
   final SyncTransport transport;
+  final FileSyncer _files;
 
   /// One round: the homes gone are purged, this phone's operations are
   /// sent (unless the space asks for a newer app), the changes after the
@@ -46,6 +56,10 @@ class SyncEngine {
     await repository.retryPending();
     await repository.dropOldVersions();
     await _purgeGone();
+    // The files first: the push whose rows refer to them finds them on the
+    // server. A file that fails waits for the next round and never holds the
+    // rows back.
+    final filesSent = await _filesStep(_files.upload);
     var sent = await _push(notices);
     var received = 0;
     var cursor = await repository.syncCursor();
@@ -77,6 +91,8 @@ class SyncEngine {
     }
     await _purgeGone();
     sent += await _push(notices);
+    final filesFetched = await _filesStep(_files.download);
+    await _filesStep(repository.sweepFiles);
     final readOnly = await repository.updateRequired();
     if (readOnly) notices.add(const SyncNotice(SyncNoticeKind.updateRequired));
     return SyncReport(
@@ -84,7 +100,21 @@ class SyncEngine {
       received: received,
       notices: notices,
       readOnly: readOnly,
+      filesSent: filesSent,
+      filesFetched: filesFetched,
     );
+  }
+
+  /// One step of the files: what goes wrong in it never stops the rows of
+  /// the round, except the server stopping the phone.
+  Future<int> _filesStep(Future<int> Function() step) async {
+    try {
+      return await step();
+    } on ServerStopped {
+      rethrow;
+    } on Object {
+      return 0;
+    }
   }
 
   Future<void> _purgeGone() async {

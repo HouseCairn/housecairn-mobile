@@ -4489,6 +4489,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark as read'**
   String get syncNoticesRead;
+
+  /// Row of Settings on a server: the photos and files of this phone the server does not have yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos and files to send'**
+  String get settingsFilesTitle;
+
+  /// Line of the row: how many files wait to go to the server (to send or sent again).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Nothing is waiting to be sent.} =1{1 photo or file is waiting to be sent.} other{{count} photos or files are waiting to be sent.}}'**
+  String settingsFilesCount(int count);
+
+  /// Button of the row: send the photos and files that wait, with no further wait, and fetch the ones other devices made.
+  ///
+  /// In en, this message translates to:
+  /// **'Send now'**
+  String get settingsFilesSendNow;
+
+  /// Reason the server refused a file: too_large.
+  ///
+  /// In en, this message translates to:
+  /// **'A file is larger than the server takes. It stays on this phone.'**
+  String get filesRefusedTooLarge;
+
+  /// Reason the server refused a file: quota_exceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'The server has no room left for more files. Free some space on it, then send again.'**
+  String get filesRefusedQuota;
+
+  /// Reason the server refused a file: unsupported_type.
+  ///
+  /// In en, this message translates to:
+  /// **'The server does not take this kind of file. It stays on this phone.'**
+  String get filesRefusedType;
+
+  /// Reason the server refused a file: malformed (the digest is not the one of the bytes).
+  ///
+  /// In en, this message translates to:
+  /// **'A file did not match what this phone sent, so the server did not keep it. It stays on this phone.'**
+  String get filesRefusedMalformed;
+
+  /// Reason the server refused a file: forbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your role in this home on the server does not allow sending files.'**
+  String get filesRefusedForbidden;
+
+  /// Reason the server refused a file: file_conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'The server already holds another file under the same name.'**
+  String get filesRefusedConflict;
+
+  /// Reason when the files refused have different causes.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not take some files.'**
+  String get filesRefusedSeveral;
+
+  /// Reason the server refused a file, any other code.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not take a file (code {code}).'**
+  String filesRefusedOther(String code);
 }
 
 class _AppLocalizationsDelegate

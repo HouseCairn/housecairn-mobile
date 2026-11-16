@@ -20,6 +20,7 @@ import '../domain/reminders.dart';
 import '../domain/templates.dart';
 import '../l10n/app_localizations.dart';
 import '../sync/engine.dart';
+import '../sync/files.dart';
 import '../sync/mode.dart';
 import '../sync/server_address.dart';
 import '../sync/server_connection.dart';
@@ -35,6 +36,10 @@ typedef PhotoProcessor = Future<ProcessedPhoto> Function(Uint8List bytes);
 
 Future<ProcessedPhoto> processInIsolate(Uint8List bytes) =>
     compute(processPhoto, bytes);
+
+/// The thumbnail of a photo fetched from the server, made in an isolate.
+Future<Uint8List?> thumbnailInIsolate(Uint8List bytes) =>
+    compute(makeThumbnail, bytes);
 
 /// Opens an address in the app of the phone that handles it (a web page in
 /// the browser, `tel:` in the dialler, `mailto:` in the mail app); `false`
@@ -67,6 +72,7 @@ class AppState extends ChangeNotifier {
     this.documentSource,
     this.notifier,
     this.photoProcessor = processInIsolate,
+    this.thumbnailer = thumbnailInIsolate,
     this.loadTemplates = loadBundledTemplates,
     this.openUrl = openInSystem,
     this.store,
@@ -87,6 +93,9 @@ class AppState extends ChangeNotifier {
   /// The local notifications; `null` where there are none (tests).
   final Notifier? notifier;
   final PhotoProcessor photoProcessor;
+
+  /// Makes the thumbnail of a photo fetched from the server.
+  final Thumbnailer thumbnailer;
   final Future<TemplateLibrary> Function() loadTemplates;
   final UrlOpener openUrl;
 
@@ -364,7 +373,11 @@ class AppState extends ChangeNotifier {
     notifyListeners();
     try {
       final transport = _transport(address);
-      final report = await SyncEngine(repository, transport).sync();
+      final report = await SyncEngine(
+        repository,
+        transport,
+        thumbnailer: thumbnailer,
+      ).sync();
       await _restoreDropped(transport);
       status
         ..lastSync = repository.clock.now()
@@ -445,6 +458,13 @@ class AppState extends ChangeNotifier {
     await syncWithServer();
   }
 
+  /// "Try again" for the files the server did not take: every one that is
+  /// not done is tried at once, with no wait, the refused ones too.
+  Future<void> retryFiles() async {
+    await repository.retryFiles();
+    await syncWithServer();
+  }
+
   /// Drops the refused change [id]: it is no longer sent, and a sync at once
   /// puts the server's value back on the phone (maintainer's decision,
   /// 2026-11-16); out of reach, it comes with the next sync.
@@ -521,6 +541,7 @@ class AppState extends ChangeNotifier {
     final left = await repository.outgoing();
     if (left.isNotEmpty) await repository.acknowledge(left.last.seq);
     await repository.forgetServerSeen();
+    await repository.forgetFileSync();
     // The changes the server refused stay in the homes of this phone, as
     // they were made; they are no longer to be sent anywhere.
     await repository.forgetRefused();

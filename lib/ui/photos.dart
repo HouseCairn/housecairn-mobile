@@ -173,7 +173,12 @@ class _Thumbnail extends StatelessWidget {
         : (fallback.existsSync() ? fallback : null);
     return Semantics(
       button: true,
-      label: l10n.photoLabel(photoCategoryLabel(l10n, photo.category)),
+      // A photo whose file has not come yet is a plain tile, said as such:
+      // the file is fetched with the next sync (docs/adr/0012).
+      label: source == null
+          ? '${l10n.photoLabel(photoCategoryLabel(l10n, photo.category))}, '
+                '${l10n.photoNotHere}'
+          : l10n.photoLabel(photoCategoryLabel(l10n, photo.category)),
       child: InkWell(
         onTap: () => Navigator.of(context)
             .push(hcRoute(PhotoScreen(photoId: photo.id, writable: writable))),

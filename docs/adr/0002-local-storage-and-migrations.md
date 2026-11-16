@@ -175,6 +175,15 @@ with homes, tasks, an occurrence, clocks and local settings):
 and on those that merge, so that two phones with the same operations hold the same value. Deleting
 a home without sync is the purge of lot 4 (`purgeHome`), so its id is kept in `purged_homes`.
 
+## Schema 8 (lot 4c)
+
+Schema 8 adds `file_sync(file_id, home_id, holder, row_id, direction, state, attempts, next_at,
+code)`, new and empty (`test/drift/housecairn/migration_test.dart`): one row per file reference of
+a row of a home of a server, with the way it goes, the tries and the last refusal. Never synced,
+never exported, emptied when the phone leaves the server
+([ADR 0012](0012-files-with-a-server.md)). A photo fetched from a server is stored whole under
+the id of its row (`<id>.jpg`, its thumbnail `<id>.thumb.jpg`) as one made on the phone.
+
 ## Consequences
 
 - Every write goes through one repository layer that updates the row, `field_clock` and

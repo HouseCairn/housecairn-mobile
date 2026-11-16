@@ -2766,4 +2766,55 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncNoticesRead => 'Marquer comme lu';
+
+  @override
+  String get settingsFilesTitle => 'Photos et fichiers à envoyer';
+
+  @override
+  String settingsFilesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos ou fichiers attendent d\'être envoyés.',
+      one: '1 photo ou fichier attend d\'être envoyé.',
+      zero: 'Rien n\'attend d\'être envoyé.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsFilesSendNow => 'Envoyer maintenant';
+
+  @override
+  String get filesRefusedTooLarge =>
+      'Un fichier est plus gros que ce que le serveur accepte. Il reste sur ce téléphone.';
+
+  @override
+  String get filesRefusedQuota =>
+      'Le serveur n\'a plus de place pour d\'autres fichiers. Libérez de l\'espace dessus, puis renvoyez.';
+
+  @override
+  String get filesRefusedType =>
+      'Le serveur n\'accepte pas ce type de fichier. Il reste sur ce téléphone.';
+
+  @override
+  String get filesRefusedMalformed =>
+      'Un fichier ne correspondait pas à ce que ce téléphone a envoyé : le serveur ne l\'a pas gardé. Il reste sur ce téléphone.';
+
+  @override
+  String get filesRefusedForbidden =>
+      'Votre rôle dans ce logement sur le serveur ne permet pas d\'envoyer des fichiers.';
+
+  @override
+  String get filesRefusedConflict =>
+      'Le serveur a déjà un autre fichier sous le même nom.';
+
+  @override
+  String get filesRefusedSeveral =>
+      'Le serveur n\'a pas pris certains fichiers.';
+
+  @override
+  String filesRefusedOther(String code) {
+    return 'Le serveur n\'a pas pris un fichier (code $code).';
+  }
 }
