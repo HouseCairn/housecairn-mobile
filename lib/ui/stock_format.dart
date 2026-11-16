@@ -69,6 +69,34 @@ String formatMoney(String locale, String currency, Decimal value) {
       '${text.substring(at + zeros.length)}';
 }
 
+/// An amount as a field shows it, in the language of the phone: the grouping
+/// and decimal separators of [locale] and always two decimals (`1 200,00` in
+/// French, `1,200.00` in English), written from the decimal value itself.
+String moneyFieldText(String locale, Decimal value) {
+  final cents = (value.abs() * Decimal.fromInt(100)).round().toBigInt();
+  final whole = cents ~/ BigInt.from(100);
+  final fraction = (cents % BigInt.from(100)).toInt();
+  final format = NumberFormat.decimalPattern(locale);
+  return '${value < stock.zero ? '-' : ''}${format.format(whole.toInt())}'
+      '${format.symbols.DECIMAL_SEP}${fraction.toString().padLeft(2, '0')}';
+}
+
+/// What a person typed in an amount field, as the plain text the data layer
+/// reads (`1200.50`): spaces of any kind are ignored; where the language
+/// writes a decimal comma a point is read as the point; where it writes a
+/// decimal point a comma is read only as a grouping (`1,200.50`), never as a
+/// decimal. Text that is not an amount is returned as it is: the validators
+/// refuse it.
+String amountInput(String locale, String text) {
+  final clean = text.replaceAll(RegExp(r'[\s\u00a0\u202f]'), '');
+  final decimalComma =
+      NumberFormat.decimalPattern(locale).symbols.DECIMAL_SEP == ',';
+  if (!decimalComma && RegExp(r'^\d{1,3}(,\d{3})+(\.\d*)?$').hasMatch(clean)) {
+    return clean.replaceAll(',', '');
+  }
+  return clean.replaceAll(',', '.');
+}
+
 /// The unit of [article] as it reads after [quantity] ("1 litre",
 /// "2 litres"), or what Other stands for; empty without a unit
 /// (`stock/models.py` `unit_text`).

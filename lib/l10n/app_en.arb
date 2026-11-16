@@ -1016,6 +1016,8 @@
   "@reportProblem": {"description": "Web catalogue (projects, budget or reports): Signaler un problème."},
   "reports": "Reports",
   "@reports": {"description": "Web catalogue (projects, budget or reports): Signalements."},
+  "reportsOpen": "Open",
+  "@reportsOpen": {"description": "Web catalogue (projects, budget or reports): Ouverts."},
   "reportsClosed": "Closed",
   "@reportsClosed": {"description": "Web catalogue (projects, budget or reports): Classés."},
   "reportsAll": "All",

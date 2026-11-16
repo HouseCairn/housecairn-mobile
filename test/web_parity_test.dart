@@ -28,6 +28,7 @@ import 'package:housecairn_mobile/design/widgets.dart';
 import 'package:housecairn_mobile/ui/contractor_screens.dart';
 import 'package:housecairn_mobile/ui/homes_screen.dart';
 import 'package:housecairn_mobile/ui/item_screens.dart';
+import 'package:housecairn_mobile/ui/budget_parts.dart';
 import 'package:housecairn_mobile/ui/messages.dart';
 import 'package:housecairn_mobile/ui/project_screens.dart';
 import 'package:housecairn_mobile/ui/report_screens.dart';
@@ -56,6 +57,7 @@ class Demo {
   late String filter;
   late String shop;
   late String paintProject;
+  late String openReport;
   late String doneOccurrence;
 
   /// The day the web was measured on: the rows' dates are relative to it
@@ -248,7 +250,7 @@ class Demo {
         roomIds: [rooms['Salle de bain']!],
       ),
     );
-    await r.createReport(
+    openReport = await r.createReport(
       home,
       title: 'Le robinet de la cuisine fuit',
       roomId: rooms['Cuisine'],
@@ -834,6 +836,144 @@ void main() {
     final out = Directory('build/parity')..createSync(recursive: true);
     File('${out.path}/app_fr_390.json')
         .writeAsStringSync(const JsonEncoder.withIndent(' ').convert(results));
+  });
+
+  group('pills of state', () {
+    final pills = (jsonDecode(
+      File('test/parity/web_pills_fr_390.json').readAsStringSync(),
+    ) as Map<String, dynamic>);
+    final measured = pills['pills'] as Map<String, dynamic>;
+
+    test('the measure is of the web release the app is aligned on', () {
+      final pin =
+          (jsonDecode(File('tool/web_alignment.json').readAsStringSync())
+                  as Map<String, dynamic>)['elements']['web_parity']
+              as Map<String, dynamic>;
+      final web = pills['web'] as Map<String, dynamic>;
+      expect(
+        (web['release'], web['commit']),
+        (pin['release'], pin['commit']),
+        reason:
+            'the pin of web_parity moved: measure again with '
+            'tool/web_parity_pills.py',
+      );
+    });
+
+    // `rgb(r, g, b)` or `rgba(r, g, b, a)` of a computed style, as a colour
+    // (`null`: transparent).
+    Color? cssColor(String css) {
+      final parts = RegExp(r'\d+(\.\d+)?')
+          .allMatches(css)
+          .map((m) => double.parse(m[0]!))
+          .toList();
+      if (parts.length == 4 && parts[3] == 0) return null;
+      return Color.fromARGB(
+        255,
+        parts[0].round(),
+        parts[1].round(),
+        parts[2].round(),
+      );
+    }
+
+    HcPillTone tone(String key) {
+      final [kind, status] = key.split('.');
+      return kind == 'reports'
+          ? reportStatusTone(status)
+          : projectStatusTone(status);
+    }
+
+    // What the pill draws: the colour of its text, of its fill and of its
+    // border (a ghost pill has no fill and a border).
+    Future<void> expectDrawnAs(
+      WidgetTester tester,
+      Finder pill,
+      Map<String, dynamic> web,
+      String what,
+    ) async {
+      final text = tester.widget<Text>(
+        find.descendant(of: pill, matching: find.byType(Text)),
+      );
+      final box = tester.widget<DecoratedBox>(
+        find.descendant(of: pill, matching: find.byType(DecoratedBox)).first,
+      );
+      final decoration = box.decoration as BoxDecoration;
+      final border = decoration.border;
+      expect(
+        text.style!.color,
+        cssColor(web['color'] as String),
+        reason: '$what: colour of the text',
+      );
+      expect(
+        decoration.color,
+        cssColor(web['background'] as String),
+        reason: '$what: fill',
+      );
+      final webBorder = web['border_width'] != '0px';
+      expect(border != null, webBorder, reason: '$what: border');
+      if (border != null) {
+        expect(
+          (border as Border).top.color,
+          cssColor(web['border_color'] as String),
+          reason: '$what: colour of the border',
+        );
+      }
+    }
+
+    for (final entry in measured.entries) {
+      testWidgets('${entry.key}: a pill of the colours of the web', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: housecairnTheme(),
+            home: Scaffold(
+              body: Center(child: HcPill('x', tone: tone(entry.key))),
+            ),
+          ),
+        );
+        await expectDrawnAs(
+          tester,
+          find.byType(HcPill),
+          entry.value as Map<String, dynamic>,
+          entry.key,
+        );
+      });
+    }
+
+    testWidgets('the screens give their pill the tone of the web', (
+      tester,
+    ) async {
+      await onPhone(tester, width: 390, height: 844);
+      final demo = Demo(webToday);
+      final state = await pumpApp(
+        tester,
+        locale: 'fr',
+        seed: demo.seed,
+        notifier: FakeNotifier(),
+      );
+      await state.choose(demo.home);
+      await tester.pumpAndSettle();
+      await openScreen(
+        tester,
+        ReportScreen(homeId: demo.home, reportId: demo.openReport),
+      );
+      await expectDrawnAs(
+        tester,
+        find.byType(HcPill),
+        measured['reports.open'] as Map<String, dynamic>,
+        'the open report',
+      );
+      await openScreen(
+        tester,
+        ProjectScreen(homeId: demo.home, projectId: demo.paintProject),
+      );
+      await expectDrawnAs(
+        tester,
+        find.byType(HcPill).first,
+        measured['projects.planned'] as Map<String, dynamic>,
+        'the planned project',
+      );
+    });
   });
 
   for (final screen in screens) {

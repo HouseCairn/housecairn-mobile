@@ -19,6 +19,7 @@ import 'messages.dart';
 import 'parts.dart';
 import 'rooms.dart';
 import 'state.dart';
+import 'budget_parts.dart';
 import 'stock_format.dart';
 import 'task_screen.dart';
 
@@ -647,7 +648,10 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
             : stock.plain(stock.readQuantity(a.threshold!));
         _unitPrice.text = a.unitPrice == null
             ? ''
-            : stock.readQuantity(a.unitPrice!).toStringAsFixed(2);
+            : moneyFieldText(
+                Localizations.localeOf(context).toLanguageTag(),
+                stock.readQuantity(a.unitPrice!),
+              );
         _notes.text = a.notes;
         _rooms.addAll(linkedRooms.map((r) => r.id));
         _items.addAll(linkedItems.map((i) => i.id));
@@ -681,7 +685,7 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
     unit: _unit,
     unitOther: _unitOther.text,
     threshold: _threshold.text,
-    unitPrice: _unitPrice.text,
+    unitPrice: fieldAmount(context, _unitPrice),
     notes: _notes.text,
     roomIds: _rooms.toList(),
     itemIds: _items.toList(),
@@ -796,13 +800,12 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
                     validator: (v) => _quantityCheck(v, l10n),
                   ),
                   _help(l10n.articleThresholdHelp),
-                  hcText(
+                  hcAmount(
+                    context,
                     l10n.articleUnitPrice,
                     _unitPrice,
                     key: const Key('article-unit-price'),
-                    keyboard: number,
-                    sentences: false,
-                    validator: (v) => _quantityCheck(v, l10n),
+                    parse: stock.parseQuantity,
                   ),
                   _help(l10n.articleUnitPriceHelp(_currency)),
                   if (_itemChoices.isNotEmpty) ...[
@@ -904,7 +907,10 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
         _url.text = input.url;
         _lastPrice.text = s.lastPrice == null
             ? ''
-            : stock.readQuantity(s.lastPrice!).toStringAsFixed(2);
+            : moneyFieldText(
+                Localizations.localeOf(context).toLanguageTag(),
+                stock.readQuantity(s.lastPrice!),
+              );
       }
     });
   }
@@ -921,7 +927,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     name: _name.text,
     reference: _reference.text,
     url: _url.text,
-    lastPrice: _lastPrice.text,
+    lastPrice: fieldAmount(context, _lastPrice),
   );
 
   Future<void> _save() async {
@@ -987,20 +993,13 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
                     keyboard: TextInputType.url,
                     sentences: false,
                   ),
-                  hcText(
+                  hcAmount(
+                    context,
                     l10n.supplierLastPrice,
                     _lastPrice,
                     key: const Key('supplier-last-price'),
-                    keyboard: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    sentences: false,
-                    validator: (v) {
-                      final text = (v ?? '').trim();
-                      return text.isEmpty || stock.parseQuantity(text) != null
-                          ? null
-                          : l10n.errQuantityInvalid;
-                    },
+                    parse: stock.parseQuantity,
+                    invalid: l10n.errQuantityInvalid,
                   ),
                   _help(l10n.supplierHelp(_currency)),
                 ],

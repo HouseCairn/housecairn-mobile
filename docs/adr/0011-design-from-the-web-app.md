@@ -106,6 +106,19 @@ height of the rows and the gap of the unit with what `tool/web_parity_values.py`
 (`test/parity/web_values_fr_390.json`); that file carries the release and commit it measured,
 which the test compares with the pin `web_parity`.
 
+**Tones of the pills of state, measured** (`test/web_parity_test.dart`, group "pills of state"). The
+tone of the pill of a report (`reportStatusTone`: open `warning`, made a task `info`, closed
+`ghost`) and of a project (`projectStatusTone`: `info`) is the web's. The test draws a pill of each
+tone, and the pill of the open report and of the planned project on their screens, and compares
+the colour of the text, of the fill and of the border with what `tool/web_parity_pills.py`
+measured (`test/parity/web_pills_fr_390.json`, the same pin `web_parity`).
+
+**Amounts in the fields.** A field of money shows its value as the web does, in the language
+of the phone (`1 200,00` in French, `1,200.00` in English; `hcAmount`, `moneyFieldText`) and reads
+what is typed in that language (`amountInput`: spaces ignored, a comma or a point as the
+decimal in French, a comma only as a grouping in English). What is stored does not change: two
+decimals, as text (`docs/protocol.md`, 2.2).
+
 | Web | App | Why |
 | --- | --- | --- |
 | The value keeps up to 60 % of the line and wraps there, the label wraps in what is left | The same; the value goes under its label, at the left, only when the line cannot hold it (the value wider than 60 %, or the longest word of the label beside it), which happens at large text sizes | The value is never cut and never wraps beside its label; at the normal size the line is the web's |

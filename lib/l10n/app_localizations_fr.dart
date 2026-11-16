@@ -1303,7 +1303,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get projectInProgress => 'En cours';
 
   @override
-  String get projectPlanned => 'Prévue';
+  String get projectPlanned => 'Prévu';
 
   @override
   String get projectFinished => 'Terminé';
@@ -1850,6 +1850,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reports => 'Signalements';
+
+  @override
+  String get reportsOpen => 'Ouverts';
 
   @override
   String get reportsClosed => 'Classés';

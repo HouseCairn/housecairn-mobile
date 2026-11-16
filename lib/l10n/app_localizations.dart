@@ -3146,6 +3146,12 @@ abstract class AppLocalizations {
   /// **'Reports'**
   String get reports;
 
+  /// Web catalogue (projects, budget or reports): Ouverts.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get reportsOpen;
+
   /// Web catalogue (projects, budget or reports): Classés.
   ///
   /// In en, this message translates to:

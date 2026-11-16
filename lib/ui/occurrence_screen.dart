@@ -10,6 +10,7 @@ import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
 import '../l10n/app_localizations.dart';
 import 'budget_parts.dart';
+import 'stock_format.dart';
 import 'parts.dart';
 import 'state.dart';
 
@@ -63,7 +64,10 @@ class _OccurrenceScreenState extends State<OccurrenceScreen> {
           : Day.parse(found.completedOn!);
       _cost.text = found.actualCost == null
           ? ''
-          : budget.readMoney(found.actualCost!).toStringAsFixed(2);
+          : moneyFieldText(
+              Localizations.localeOf(context).toLanguageTag(),
+              budget.readMoney(found.actualCost!),
+            );
       _note.text = found.completionNote;
     });
   }
@@ -83,7 +87,7 @@ class _OccurrenceScreenState extends State<OccurrenceScreen> {
       (r) => r.updateOccurrence(
         widget.occurrenceId,
         completedOn: _doneOn,
-        actualCost: _cost.text,
+        actualCost: fieldAmount(context, _cost),
         note: _note.text,
       ),
     );
@@ -110,15 +114,11 @@ class _OccurrenceScreenState extends State<OccurrenceScreen> {
                     clearable: false,
                     onChanged: (day) => setState(() => _doneOn = day),
                   ),
-                  hcText(
+                  hcAmount(
+                    context,
                     l10n.realCostTitle,
                     _cost,
                     key: const Key('cost-amount'),
-                    keyboard: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    sentences: false,
-                    validator: moneyCheck(l10n),
                   ),
                   fieldHelp(l10n.amountIsIn(_currency)),
                   hcText(

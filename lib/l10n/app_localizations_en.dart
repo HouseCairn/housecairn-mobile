@@ -1837,6 +1837,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reports => 'Reports';
 
   @override
+  String get reportsOpen => 'Open';
+
+  @override
   String get reportsClosed => 'Closed';
 
   @override

@@ -1,0 +1,73 @@
+{
+ "$comment": "Colours of the pills of state of the web application, in French, with its demonstration data, written by tool/web_parity_pills.py; read by test/web_parity_test.dart. Measure again when the pin of web_parity moves.",
+ "web": {
+  "repository": "HouseCairn/housecairn",
+  "release": "v0.3.2",
+  "commit": "a76837fe30b5a313980184703454654a45b1f031"
+ },
+ "pills": {
+  "reports.open": {
+   "text": "Ouvert",
+   "color": "rgb(122, 79, 0)",
+   "background": "rgb(248, 235, 208)",
+   "border_width": "0px",
+   "border_color": "rgb(122, 79, 0)"
+  },
+  "reports.task": {
+   "text": "Transformé en tâche",
+   "color": "rgb(47, 93, 138)",
+   "background": "rgb(227, 238, 244)",
+   "border_width": "0px",
+   "border_color": "rgb(47, 93, 138)"
+  },
+  "reports.resolved": {
+   "text": "Résolu",
+   "color": "rgb(79, 96, 92)",
+   "background": "rgba(0, 0, 0, 0)",
+   "border_width": "1px",
+   "border_color": "rgb(122, 135, 131)"
+  },
+  "reports.no_action": {
+   "text": "Classé sans suite",
+   "color": "rgb(79, 96, 92)",
+   "background": "rgba(0, 0, 0, 0)",
+   "border_width": "1px",
+   "border_color": "rgb(122, 135, 131)"
+  },
+  "projects.idea": {
+   "text": "Idée",
+   "color": "rgb(47, 93, 138)",
+   "background": "rgb(227, 238, 244)",
+   "border_width": "0px",
+   "border_color": "rgb(47, 93, 138)"
+  },
+  "projects.planned": {
+   "text": "Prévue",
+   "color": "rgb(47, 93, 138)",
+   "background": "rgb(227, 238, 244)",
+   "border_width": "0px",
+   "border_color": "rgb(47, 93, 138)"
+  },
+  "projects.in_progress": {
+   "text": "En cours",
+   "color": "rgb(47, 93, 138)",
+   "background": "rgb(227, 238, 244)",
+   "border_width": "0px",
+   "border_color": "rgb(47, 93, 138)"
+  },
+  "projects.done": {
+   "text": "Terminé",
+   "color": "rgb(47, 93, 138)",
+   "background": "rgb(227, 238, 244)",
+   "border_width": "0px",
+   "border_color": "rgb(47, 93, 138)"
+  },
+  "projects.abandoned": {
+   "text": "Abandonné",
+   "color": "rgb(47, 93, 138)",
+   "background": "rgb(227, 238, 244)",
+   "border_width": "0px",
+   "border_color": "rgb(47, 93, 138)"
+  }
+ }
+}
