@@ -193,7 +193,10 @@ Homes and Settings shows the current home.
 4. **Rooms**: list in the household's order; a room shows its memory, items, photos, tasks.
    Its tab **Equipment** lists every item of the home, by room then name, with its next task
    and its warranty, filtered by a room and by words of the name, brand, model or serial number
-   (`rooms/services.py` `item_rows`, `rooms/item_list.html`).
+   (`rooms/services.py` `item_rows`, `rooms/item_list.html`). An **Add an item** button follows
+   the list (the room being filtered is the form's first choice, the form asks for the room;
+   absent in an archived home or while the home has no room). The web page has no such button
+   yet (card t_e30919c1); the app takes the form of the other lists.
 5. **Item**: details, the manufacturer's warranty (a duration in months or years, who gives it,
    its start, else the purchase date, and its end worked out; web ADR 0080), its state,
    contract, links, photos, tasks.

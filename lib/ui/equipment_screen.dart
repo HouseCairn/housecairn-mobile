@@ -39,6 +39,7 @@ class _EquipmentListState extends State<EquipmentList> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final home = widget.home;
+    final writable = home.archivedAt == null;
     // The search field and the room choice live in the outer view, keyed by
     // the home only, so that typing never rebuilds the field (it would lose
     // its focus and close the keyboard); only the list below is read again
@@ -83,6 +84,24 @@ class _EquipmentListState extends State<EquipmentList> {
                     );
             },
           ),
+          // After the list, as on the other lists; an item needs a room, so
+          // the button waits for the first one. The room being filtered is
+          // the one the form starts with.
+          if (writable && rooms.isNotEmpty)
+            HcAddButton(
+              key: const Key('equipment-add'),
+              label: l10n.addItem,
+              primary: false,
+              onPressed: () => Navigator.of(context).push(
+                hcRoute(
+                  ItemFormScreen(
+                    homeId: home.id,
+                    roomId: _room,
+                    chooseRoom: true,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
