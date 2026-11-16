@@ -40,8 +40,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutAttribution => 'Housecairn, by Robvred';
 
   @override
-  String aboutVersion(String version) {
-    return 'version $version';
+  String aboutVersion(String version, String build) {
+    return 'Version $version ($build)';
   }
 
   @override

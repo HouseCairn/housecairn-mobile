@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-/// Version of the app, the `version` of pubspec.yaml without its build
-/// number. test/version_test.dart fails when the two differ.
-const appVersion = '0.4.0';
-
 /// Address of the source code, shown on the About screen (AGPL-3.0,
 /// section 13: the source of a modified version must be offered).
+///
+/// The version of the app is not here: the About screen reads it from the
+/// platform at run time (package_info_plus), where it comes from the
+/// `version` of pubspec.yaml.
 const sourceAddress = 'github.com/HouseCairn/housecairn-mobile';
