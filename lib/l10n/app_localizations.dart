@@ -4021,6 +4021,408 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved'**
   String get saved;
+
+  /// Help text of the screen where the person types the address of their Housecairn server.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the address of your Housecairn: the web application, or the port of the Home Assistant add-on. You then sign in on your server\'s own page, in the browser.'**
+  String get serverAddressHelp;
+
+  /// Label of the field of the server's address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address of the server'**
+  String get serverAddressLabel;
+
+  /// Error: the typed text is not an address (no host, a user name, a query).
+  ///
+  /// In en, this message translates to:
+  /// **'This is not the address of a server. Type it as https://housecairn.example.com.'**
+  String get serverAddressInvalid;
+
+  /// Error: http:// was typed with a name or a public address (docs/protocol.md section 2.10).
+  ///
+  /// In en, this message translates to:
+  /// **'Use https://. Plain http:// works only with the IP address of a server on your own network, never with a name, not even one ending in .local.'**
+  String get serverHttpNeedsLocalIp;
+
+  /// Warning shown before connecting by plain http:// to a local IP address.
+  ///
+  /// In en, this message translates to:
+  /// **'This connection is not encrypted: anyone on this network can read what the phone sends, and the access to your server. Use it only on your own network.'**
+  String get serverHttpWarning;
+
+  /// Button after the warning: connect by plain http:// all the same.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue without encryption'**
+  String get serverHttpContinue;
+
+  /// Button: opens the sign-in page of the server in the browser.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get serverSignIn;
+
+  /// Shown while the browser is open for the sign-in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in on your server\'s page in the browser, then come back here.'**
+  String get serverSigningIn;
+
+  /// Title of the confirmation screen, before anything is sent or received.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to this server'**
+  String get serverConfirmTitle;
+
+  /// The sentence of ADR 0010 shown before connecting to a server. Must keep every point.
+  ///
+  /// In en, this message translates to:
+  /// **'This server will see everything in these homes: tasks, rooms, notes, amounts and photos. So can the people who run it, the people who are members of these homes on it, and its backups. Continue only with a server you trust.'**
+  String get serverSeesEverything;
+
+  /// Heading of the list of the homes the access chosen in the browser covers.
+  ///
+  /// In en, this message translates to:
+  /// **'Homes of this access'**
+  String get serverHomesHeading;
+
+  /// Shown when the sign-in gave an access to no home.
+  ///
+  /// In en, this message translates to:
+  /// **'This access covers no home. Choose at least one on your server\'s page.'**
+  String get serverNoHomes;
+
+  /// Pill of a home where the signed-in account is a read-only member.
+  ///
+  /// In en, this message translates to:
+  /// **'Read only'**
+  String get serverReadOnly;
+
+  /// Pill next to a server reached by plain http://.
+  ///
+  /// In en, this message translates to:
+  /// **'Not encrypted'**
+  String get serverNotEncrypted;
+
+  /// Button of the confirmation: the way is turned on and the homes of the server come to the phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get serverConnect;
+
+  /// Button of the confirmation: the access is forgotten, nothing was sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get serverCancel;
+
+  /// Error: the server has no sync API. {version} is the first version with it.
+  ///
+  /// In en, this message translates to:
+  /// **'This server is too old for the app. Update it to Housecairn {version} or later.'**
+  String serverTooOld(String version);
+
+  /// Error: the instance turned the mobile app off.
+  ///
+  /// In en, this message translates to:
+  /// **'This server does not allow the mobile app. Its administrator can turn it on in the instance settings.'**
+  String get serverMobileAppOff;
+
+  /// Error: the person pressed Cancel on the consent page.
+  ///
+  /// In en, this message translates to:
+  /// **'The sign-in was cancelled on the server\'s page.'**
+  String get serverSignInCancelled;
+
+  /// Error: the answer of the browser did not match, or the server refused the code.
+  ///
+  /// In en, this message translates to:
+  /// **'The sign-in did not finish. Try again.'**
+  String get serverSignInFailed;
+
+  /// Error: the server answered insecure_transport.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refuses this connection without encryption. Use its https:// address.'**
+  String get serverInsecureRefused;
+
+  /// Error: the access was revoked on the server or expired.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone was disconnected from the server. Sign in again to go on syncing; your homes stay on this phone.'**
+  String get serverDisconnected;
+
+  /// Error: the server answered sync_version.
+  ///
+  /// In en, this message translates to:
+  /// **'The server asks for a newer version of the app before this phone can send changes.'**
+  String get serverUpdateApp;
+
+  /// Error: the TLS certificate was refused by the system; there is no way to skip it.
+  ///
+  /// In en, this message translates to:
+  /// **'The certificate of this server is not valid. The app does not connect to it.'**
+  String get serverCertificate;
+
+  /// Error: a redirect, or an address of another host.
+  ///
+  /// In en, this message translates to:
+  /// **'The server sent the app to another address. The app talks only to the address you typed.'**
+  String get serverOtherHost;
+
+  /// Error: no connection.
+  ///
+  /// In en, this message translates to:
+  /// **'The server cannot be reached. Check the address and the network.'**
+  String get serverUnreachable;
+
+  /// Name the phone gives itself on the server's consent page.
+  ///
+  /// In en, this message translates to:
+  /// **'Housecairn mobile app'**
+  String get serverDeviceName;
+
+  /// Error: the signed-in account is a read-only member of this home of the server (lot 4b).
+  ///
+  /// In en, this message translates to:
+  /// **'You are a read-only member of this home on your server: nothing can be changed in it from this phone.'**
+  String get errReadOnlyHome;
+
+  /// Error: archiving a home of a server is for its owners (web ADR 0077).
+  ///
+  /// In en, this message translates to:
+  /// **'Only an owner of this home on your server can archive it or bring it back.'**
+  String get errOwnersOnly;
+
+  /// Error: a home of a server cannot be deleted from the phone.
+  ///
+  /// In en, this message translates to:
+  /// **'A home of your server is deleted on the server\'s web page, by an owner. It then goes from this phone too.'**
+  String get errDeleteOnServer;
+
+  /// Shown when the person picks My Housecairn server while the phone has homes of its own (docs/plan.md, lot 4c).
+  ///
+  /// In en, this message translates to:
+  /// **'Keeping this phone\'s homes on a Housecairn server comes with a later version of the app. Nothing on this phone has changed.'**
+  String get wayMoveToServerLater;
+
+  /// Title of the confirmation before the phone leaves the third way for Alone on this phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop syncing with the server?'**
+  String get wayLeaveServerTitle;
+
+  /// Body of the confirmation before leaving the server (docs/adr/0010, My server to alone).
+  ///
+  /// In en, this message translates to:
+  /// **'This phone keeps a copy of its homes as they were at the last sync. They will no longer sync, and the access of this phone is revoked on the server.'**
+  String get wayLeaveServerText;
+
+  /// Line of the confirmation before leaving the server: how many changes wait to be sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes not yet sent: {count}. They are sent first.'**
+  String wayLeaveServerUnsent(int count);
+
+  /// Button: leave the server, keep the homes on this phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop syncing'**
+  String get wayLeaveServerConfirm;
+
+  /// Second confirmation when the server does not answer: the unsent changes are named after it.
+  ///
+  /// In en, this message translates to:
+  /// **'The server cannot be reached, so these changes cannot be sent. If you stop now, they stay on this phone only:'**
+  String get wayLeaveServerUnreachable;
+
+  /// Button: leave the server without sending the changes listed.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop and keep them on this phone only'**
+  String get wayLeaveServerDrop;
+
+  /// Line after the names of the unsent changes, for those without a name.
+  ///
+  /// In en, this message translates to:
+  /// **'Other changes: {count}'**
+  String wayLeaveServerOther(int count);
+
+  /// Title of the screen and row of More that show the sync with the server (lot 4b).
+  ///
+  /// In en, this message translates to:
+  /// **'Sync with the server'**
+  String get syncTitle;
+
+  /// Text of the sync screen: when the phone syncs (ADR 0010).
+  ///
+  /// In en, this message translates to:
+  /// **'The changes of this phone go to the server a moment after you make them; the server\'s come when the app opens or comes back.'**
+  String get syncText;
+
+  /// Button: one round of sync with the server at once.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get syncNow;
+
+  /// State of the sync while a round runs.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get syncRunning;
+
+  /// State of the sync: when it last went through.
+  ///
+  /// In en, this message translates to:
+  /// **'Last sync: {time}'**
+  String syncLast(String time);
+
+  /// State of the sync before the first round went through.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced yet.'**
+  String get syncNever;
+
+  /// State of the sync when the server did not answer, or was too busy (429, 5xx).
+  ///
+  /// In en, this message translates to:
+  /// **'The server cannot be reached for now. Your changes stay on this phone and go with the next sync.'**
+  String get syncUnreachable;
+
+  /// State of the sync after another failure.
+  ///
+  /// In en, this message translates to:
+  /// **'The last sync did not finish. It is tried again by itself.'**
+  String get syncFailed;
+
+  /// Heading of the changes the server refused for good (decision A of lot 4b).
+  ///
+  /// In en, this message translates to:
+  /// **'Changes the server refused'**
+  String get syncRefusedTitle;
+
+  /// Line of the sync banner: how many changes the server refused.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change refused by the server} other{{count} changes refused by the server}}'**
+  String syncRefusedCount(int count);
+
+  /// Text above the refused changes.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not take these changes; they are still on this phone. Send one again once its cause is fixed, or stop sending it: the phone then takes back the value the server has.'**
+  String get syncRefusedHelp;
+
+  /// Button of a refused change: put it back to be sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Send again'**
+  String get syncSendAgain;
+
+  /// Button of a refused change: drop it; the phone takes back the value the server has.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop sending'**
+  String get syncStopSending;
+
+  /// Title of a refused change whose row has no name or title in it.
+  ///
+  /// In en, this message translates to:
+  /// **'A change without a name'**
+  String get syncRefusedUnnamed;
+
+  /// Reason of a refused change: forbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your role in this home on the server does not allow this change.'**
+  String get syncRefusedForbidden;
+
+  /// Reason of a refused change: invalid_reference or wrong_home.
+  ///
+  /// In en, this message translates to:
+  /// **'It names something that is not in this home on the server.'**
+  String get syncRefusedReference;
+
+  /// Reason of a refused change: clock_ahead.
+  ///
+  /// In en, this message translates to:
+  /// **'The date of this phone is ahead: check it in the phone\'s settings, then send again.'**
+  String get syncRefusedClock;
+
+  /// Reason of a refused change: id_taken.
+  ///
+  /// In en, this message translates to:
+  /// **'The server already has another row with the same id.'**
+  String get syncRefusedIdTaken;
+
+  /// Reason of a refused change: malformed.
+  ///
+  /// In en, this message translates to:
+  /// **'The server could not read this change.'**
+  String get syncRefusedMalformed;
+
+  /// Reason of a refused change: too_large.
+  ///
+  /// In en, this message translates to:
+  /// **'This change is too large for the server.'**
+  String get syncRefusedTooLarge;
+
+  /// Reason of a refused change: wrong_device.
+  ///
+  /// In en, this message translates to:
+  /// **'The server knows this phone under another id. Sign in again on this phone.'**
+  String get syncRefusedDevice;
+
+  /// Reason of a refused change: sso_required (the home requires a single sign-on provider the connection was not made with).
+  ///
+  /// In en, this message translates to:
+  /// **'This home asks for a sign-in with its own sign-in service. Sign in again on this phone with that service, then send it again.'**
+  String get syncRefusedSignIn;
+
+  /// Reason of a refused change: push_conflict, still refused after one more try under the next number.
+  ///
+  /// In en, this message translates to:
+  /// **'The server already took other changes under the number of this send. Send it again.'**
+  String get syncRefusedConflict;
+
+  /// Reason of a refused change with another code, given as the server says it.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused this change (code {code}).'**
+  String syncRefusedOther(String code);
+
+  /// Heading of the notices of the sync (undo taken back, row dropped).
+  ///
+  /// In en, this message translates to:
+  /// **'Since the last syncs'**
+  String get syncNoticesTitle;
+
+  /// Line of the sync banner: how many notices wait to be read.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 thing to read about the sync} other{{count} things to read about the sync}}'**
+  String syncNoticesCount(int count);
+
+  /// Notice: an undo of this phone was reverted (ADR 0003).
+  ///
+  /// In en, this message translates to:
+  /// **'An undo was taken back: the next time of this task was changed on another device meanwhile.'**
+  String get syncNoticeUndoReverted;
+
+  /// Notice: a row seen by the server and gone from its snapshot was deleted here (protocol 2.10, rule 2).
+  ///
+  /// In en, this message translates to:
+  /// **'Something deleted on the server was removed from this phone.'**
+  String get syncNoticeDropped;
+
+  /// Button: the notices of the sync were read.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get syncNoticesRead;
 }
 
 class _AppLocalizationsDelegate

@@ -2448,4 +2448,265 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saved => 'Saved';
+
+  @override
+  String get serverAddressHelp =>
+      'Type the address of your Housecairn: the web application, or the port of the Home Assistant add-on. You then sign in on your server\'s own page, in the browser.';
+
+  @override
+  String get serverAddressLabel => 'Address of the server';
+
+  @override
+  String get serverAddressInvalid =>
+      'This is not the address of a server. Type it as https://housecairn.example.com.';
+
+  @override
+  String get serverHttpNeedsLocalIp =>
+      'Use https://. Plain http:// works only with the IP address of a server on your own network, never with a name, not even one ending in .local.';
+
+  @override
+  String get serverHttpWarning =>
+      'This connection is not encrypted: anyone on this network can read what the phone sends, and the access to your server. Use it only on your own network.';
+
+  @override
+  String get serverHttpContinue => 'Continue without encryption';
+
+  @override
+  String get serverSignIn => 'Sign in';
+
+  @override
+  String get serverSigningIn =>
+      'Sign in on your server\'s page in the browser, then come back here.';
+
+  @override
+  String get serverConfirmTitle => 'Connect to this server';
+
+  @override
+  String get serverSeesEverything =>
+      'This server will see everything in these homes: tasks, rooms, notes, amounts and photos. So can the people who run it, the people who are members of these homes on it, and its backups. Continue only with a server you trust.';
+
+  @override
+  String get serverHomesHeading => 'Homes of this access';
+
+  @override
+  String get serverNoHomes =>
+      'This access covers no home. Choose at least one on your server\'s page.';
+
+  @override
+  String get serverReadOnly => 'Read only';
+
+  @override
+  String get serverNotEncrypted => 'Not encrypted';
+
+  @override
+  String get serverConnect => 'Connect';
+
+  @override
+  String get serverCancel => 'Cancel';
+
+  @override
+  String serverTooOld(String version) {
+    return 'This server is too old for the app. Update it to Housecairn $version or later.';
+  }
+
+  @override
+  String get serverMobileAppOff =>
+      'This server does not allow the mobile app. Its administrator can turn it on in the instance settings.';
+
+  @override
+  String get serverSignInCancelled =>
+      'The sign-in was cancelled on the server\'s page.';
+
+  @override
+  String get serverSignInFailed => 'The sign-in did not finish. Try again.';
+
+  @override
+  String get serverInsecureRefused =>
+      'The server refuses this connection without encryption. Use its https:// address.';
+
+  @override
+  String get serverDisconnected =>
+      'This phone was disconnected from the server. Sign in again to go on syncing; your homes stay on this phone.';
+
+  @override
+  String get serverUpdateApp =>
+      'The server asks for a newer version of the app before this phone can send changes.';
+
+  @override
+  String get serverCertificate =>
+      'The certificate of this server is not valid. The app does not connect to it.';
+
+  @override
+  String get serverOtherHost =>
+      'The server sent the app to another address. The app talks only to the address you typed.';
+
+  @override
+  String get serverUnreachable =>
+      'The server cannot be reached. Check the address and the network.';
+
+  @override
+  String get serverDeviceName => 'Housecairn mobile app';
+
+  @override
+  String get errReadOnlyHome =>
+      'You are a read-only member of this home on your server: nothing can be changed in it from this phone.';
+
+  @override
+  String get errOwnersOnly =>
+      'Only an owner of this home on your server can archive it or bring it back.';
+
+  @override
+  String get errDeleteOnServer =>
+      'A home of your server is deleted on the server\'s web page, by an owner. It then goes from this phone too.';
+
+  @override
+  String get wayMoveToServerLater =>
+      'Keeping this phone\'s homes on a Housecairn server comes with a later version of the app. Nothing on this phone has changed.';
+
+  @override
+  String get wayLeaveServerTitle => 'Stop syncing with the server?';
+
+  @override
+  String get wayLeaveServerText =>
+      'This phone keeps a copy of its homes as they were at the last sync. They will no longer sync, and the access of this phone is revoked on the server.';
+
+  @override
+  String wayLeaveServerUnsent(int count) {
+    return 'Changes not yet sent: $count. They are sent first.';
+  }
+
+  @override
+  String get wayLeaveServerConfirm => 'Stop syncing';
+
+  @override
+  String get wayLeaveServerUnreachable =>
+      'The server cannot be reached, so these changes cannot be sent. If you stop now, they stay on this phone only:';
+
+  @override
+  String get wayLeaveServerDrop => 'Stop and keep them on this phone only';
+
+  @override
+  String wayLeaveServerOther(int count) {
+    return 'Other changes: $count';
+  }
+
+  @override
+  String get syncTitle => 'Sync with the server';
+
+  @override
+  String get syncText =>
+      'The changes of this phone go to the server a moment after you make them; the server\'s come when the app opens or comes back.';
+
+  @override
+  String get syncNow => 'Sync now';
+
+  @override
+  String get syncRunning => 'Syncing…';
+
+  @override
+  String syncLast(String time) {
+    return 'Last sync: $time';
+  }
+
+  @override
+  String get syncNever => 'Not synced yet.';
+
+  @override
+  String get syncUnreachable =>
+      'The server cannot be reached for now. Your changes stay on this phone and go with the next sync.';
+
+  @override
+  String get syncFailed =>
+      'The last sync did not finish. It is tried again by itself.';
+
+  @override
+  String get syncRefusedTitle => 'Changes the server refused';
+
+  @override
+  String syncRefusedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes refused by the server',
+      one: '1 change refused by the server',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncRefusedHelp =>
+      'The server did not take these changes; they are still on this phone. Send one again once its cause is fixed, or stop sending it: the phone then takes back the value the server has.';
+
+  @override
+  String get syncSendAgain => 'Send again';
+
+  @override
+  String get syncStopSending => 'Stop sending';
+
+  @override
+  String get syncRefusedUnnamed => 'A change without a name';
+
+  @override
+  String get syncRefusedForbidden =>
+      'Your role in this home on the server does not allow this change.';
+
+  @override
+  String get syncRefusedReference =>
+      'It names something that is not in this home on the server.';
+
+  @override
+  String get syncRefusedClock =>
+      'The date of this phone is ahead: check it in the phone\'s settings, then send again.';
+
+  @override
+  String get syncRefusedIdTaken =>
+      'The server already has another row with the same id.';
+
+  @override
+  String get syncRefusedMalformed => 'The server could not read this change.';
+
+  @override
+  String get syncRefusedTooLarge => 'This change is too large for the server.';
+
+  @override
+  String get syncRefusedDevice =>
+      'The server knows this phone under another id. Sign in again on this phone.';
+
+  @override
+  String get syncRefusedSignIn =>
+      'This home asks for a sign-in with its own sign-in service. Sign in again on this phone with that service, then send it again.';
+
+  @override
+  String get syncRefusedConflict =>
+      'The server already took other changes under the number of this send. Send it again.';
+
+  @override
+  String syncRefusedOther(String code) {
+    return 'The server refused this change (code $code).';
+  }
+
+  @override
+  String get syncNoticesTitle => 'Since the last syncs';
+
+  @override
+  String syncNoticesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count things to read about the sync',
+      one: '1 thing to read about the sync',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncNoticeUndoReverted =>
+      'An undo was taken back: the next time of this task was changed on another device meanwhile.';
+
+  @override
+  String get syncNoticeDropped =>
+      'Something deleted on the server was removed from this phone.';
+
+  @override
+  String get syncNoticesRead => 'Mark as read';
 }

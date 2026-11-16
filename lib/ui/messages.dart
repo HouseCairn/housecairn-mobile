@@ -58,6 +58,9 @@ String refusalMessage(
   Refusal.onePlace => l10n.errOnePlace,
   Refusal.reportNotOpen => l10n.errReportNotOpen,
   Refusal.reportNotClosed => l10n.errReportNotClosed,
+  Refusal.readOnlyHome => l10n.errReadOnlyHome,
+  Refusal.ownersOnly => l10n.errOwnersOnly,
+  Refusal.deleteOnServer => l10n.errDeleteOnServer,
 };
 
 /// Shows a refusal in a bar at the bottom of the screen.

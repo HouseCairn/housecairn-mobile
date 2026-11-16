@@ -63,6 +63,13 @@ class SyncEngine {
         continue;
       }
       notices.addAll(await repository.applyOperations(page.operations));
+      if (restarted) {
+        // Rows the phone holds that the snapshot does not have: deleted and
+        // purged there, or never sent (docs/protocol.md section 2.10).
+        for (final MapEntry(key: home, value: rows) in page.complete.entries) {
+          notices.addAll(await repository.reconcileAfterRestart(home, rows));
+        }
+      }
       received += page.operations.length;
       cursor = page.position;
       await repository.setSyncCursor(cursor);
@@ -90,8 +97,33 @@ class SyncEngine {
     if (await repository.updateRequired()) return 0;
     final out = await repository.outgoing();
     if (out.isEmpty) return 0;
-    final result = await transport.push([for (final o in out) o.operation]);
-    await repository.acknowledge(out.last.seq);
+    final PushResult result;
+    try {
+      result = await transport.push([for (final o in out) o.operation]);
+    } on PushCutShort catch (cut) {
+      // Stopped part way: what was refused for good leaves op_log for the
+      // list aside, the rest waits there for the next round.
+      final refused = cut.partial.refused;
+      if (refused.isNotEmpty) {
+        await repository.setAsideAndAcknowledge(
+          refused,
+          seqs: [
+            for (final o in out)
+              if (refused.any((r) => identical(r.operation, o.operation)))
+                o.seq,
+          ],
+        );
+      }
+      if (cut.partial.lost.isNotEmpty) {
+        notices.addAll(await repository.applyOperations(cut.partial.lost));
+      }
+      rethrow;
+    }
+    if (result.held) return 0;
+    // What the other side refused for good is kept aside as it leaves
+    // op_log, in one transaction: the person sends it again or drops it,
+    // nothing goes silently, and nothing is listed twice.
+    await repository.setAsideAndAcknowledge(result.refused, upTo: out.last.seq);
     // What won on the other side, for each field that lost there.
     if (result.lost.isNotEmpty) {
       notices.addAll(await repository.applyOperations(result.lost));

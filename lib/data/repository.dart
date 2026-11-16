@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -10,6 +11,7 @@ import 'package:uuid/uuid.dart';
 
 import '../core/clock.dart';
 import '../core/hlc.dart';
+import '../core/store.dart';
 import '../domain/choices.dart';
 import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
@@ -20,10 +22,13 @@ import '../domain/stock.dart' as stock;
 import '../domain/warranty.dart' as warranty;
 import '../sync/mode.dart';
 import '../sync/operation.dart';
+import '../sync/server_sign_in.dart';
+import '../sync/server_transport.dart';
 import '../sync/transport.dart';
 import 'database.dart';
 
 part 'budget_repository.dart';
+part 'server_repository.dart';
 part 'stock_repository.dart';
 part 'sync_repository.dart';
 part 'task_repository.dart';
@@ -172,6 +177,18 @@ enum Refusal {
 
   /// Only a closed report can be reopened (`reopen_report`).
   reportNotClosed,
+
+  /// A home of a server where the signed-in account is a read-only member
+  /// (lot 4b): the phone writes nothing in it.
+  readOnlyHome,
+
+  /// Only an owner archives a home of a server, or brings it back (web ADR
+  /// 0077, need 9).
+  ownersOnly,
+
+  /// A home of a server is deleted on the server's web page, not on the
+  /// phone (web ADR 0077: the push never erases a home).
+  deleteOnServer,
 }
 
 class Refused implements Exception {
@@ -519,19 +536,57 @@ class Repository {
   late Hlc _hlc;
   late Uint8List _device;
 
+  /// The role of the signed-in account in each home of a server, read from
+  /// the transport's state; `null` until read, empty outside the third way.
+  Map<String, String>? _serverRoles;
+
+  /// Set in the zone of [SyncRepository.applyOperations] only: the repairs
+  /// of operations from the other side write in any home, as the server's
+  /// own repairs do. A zone value and not a field of the repository, so
+  /// that a write of the screens made while a sync applies is still
+  /// checked (lot 4b review).
+  static final _syncApply = Object();
+
+  bool get _inSyncApply => Zone.current[_syncApply] == true;
+
+  final _localWrites = StreamController<void>.broadcast();
+
+  /// An event after each change made on this phone (not those a sync
+  /// applies): the app syncs with a server a moment after (lot 4b).
+  Stream<void> get localWrites => _localWrites.stream;
+
+  /// The key of this phone's device id in the secure store: a copy that a
+  /// backup never carries (lot 4b, Android backup rules), so that a
+  /// database restored on a phone is told from the phone it was made on.
+  static const deviceMarkerKey = 'device_id';
+
+  /// Whether [open] found a database restored from a backup (its device id
+  /// was not in the secure store) and gave this phone a new device id.
+  bool restoredFromBackup = false;
+
+  Uint8List _newDevice() =>
+      Uint8List.fromList(List<int>.generate(16, (_) => _random.nextInt(256)));
+
   /// Opens the database and reads the id of this phone (16 random bytes,
   /// made at the first start) and the last clock it gave.
-  Future<void> open() async {
+  ///
+  /// With [secrets], the id is also kept in the secure store, which Android
+  /// backups and transfers exclude (`android/app/src/main/res/xml`) and the
+  /// iOS Keychain keeps on this device only. A database whose id was bound
+  /// there (`device_bound`) but is no longer found was restored on a phone:
+  /// it gets a new id, since one install has one device id and two phones
+  /// must never share one (docs/protocol.md section 2.10), and nothing is
+  /// sent under the old one ([_afterRestore]).
+  Future<void> open({Store? secrets}) async {
     await db.open();
     final stored = await _setting('device_id');
     if (stored == null) {
-      _device = Uint8List.fromList(
-        List<int>.generate(16, (_) => _random.nextInt(256)),
-      );
+      _device = _newDevice();
       await _setSetting('device_id', _hex(_device));
     } else {
       _device = _unhex(stored);
     }
+    if (secrets != null) await _checkRestored(secrets, created: stored == null);
     final last = await db
         .customSelect(
           'SELECT MAX(hlc) AS last FROM field_clock WHERE device = ?',
@@ -551,6 +606,62 @@ class Repository {
     final seen = others.data['last'] as String?;
     if (seen != null) _hlc.receive(Hlc.parse(seen));
   }
+
+  Future<void> _checkRestored(Store secrets, {required bool created}) async {
+    Uint8List? marker;
+    try {
+      marker = await secrets.read(deviceMarkerKey);
+    } on Object {
+      // The secure store cannot be read now: nothing is decided on it, the
+      // id stays as it is and the check runs at the next start.
+      return;
+    }
+    if (marker != null && _hex(marker) == _hex(_device)) return;
+    final bound = await _setting('device_bound') != null;
+    if (!created && (bound || marker != null)) {
+      final old = _device;
+      _device = _newDevice();
+      await _afterRestore(old);
+      // Whatever a restore brought of an access, it was of the old id: a
+      // home of a server asks for a new sign-in.
+      await ServerCredential.forget(secrets);
+      restoredFromBackup = true;
+    }
+    // The first start, or the first with this version: the id is bound.
+    await secrets.write(deviceMarkerKey, _device);
+    await _setSetting('device_bound', '1');
+  }
+
+  /// A restored database gets this phone's new id [_device] in place of
+  /// [old]: its waiting changes are this phone's to send now, under the new
+  /// id; the push whose answer never came (its bytes carry the old id) is
+  /// forgotten, its operations still wait in `op_log`. The access to a
+  /// server is not in the restored data (the secure store is not backed
+  /// up), so a home of a server waits for a new sign-in and sends nothing
+  /// before it.
+  Future<void> _afterRestore(Uint8List old) => db.transaction(() async {
+    await _setSetting('device_id', _hex(_device));
+    final waiting = await db
+        .customSelect(
+          'SELECT seq, body FROM op_log WHERE device = ?',
+          variables: [Variable<Uint8List>(old)],
+        )
+        .get();
+    for (final w in waiting) {
+      final op = (jsonDecode(w.data['body'] as String) as Map)
+          .cast<String, Object?>();
+      op[Op.device] = b64(_device);
+      await db.customStatement(
+        'UPDATE op_log SET device = ?, body = ? WHERE seq = ?',
+        [_device, jsonEncode(op), w.data['seq']],
+      );
+    }
+    final text = await _setting('server_sync');
+    if (text != null) {
+      final state = ServerSyncState.decode(text)..unanswered = null;
+      await _setSetting('server_sync', state.encode());
+    }
+  });
 
   Uint8List get device => _device;
 
@@ -588,6 +699,11 @@ class Repository {
     String? homeId,
     bool create = false,
   }) async {
+    if (!_inSyncApply) {
+      final home = table == 'homes' ? id : homeId ?? await _homeOf(table, id);
+      if (home != null) await _checkServerRole(home, table, fields);
+      _localWrites.add(null);
+    }
     final now = _now();
     final clock = _hlc.next();
     final hlc = Hlc.format(clock);
@@ -667,7 +783,13 @@ class Repository {
   /// of a later build) reads as none: it cannot be put in use.
   Future<SyncMode?> storedSyncMode() async {
     final mode = SyncMode.parse(await _setting('sync_mode'));
-    return mode != null && wayAvailable(mode) ? mode : null;
+    if (mode == null || !wayAvailable(mode)) return null;
+    // The third way needs its server: without an address it was never
+    // confirmed (lot 4b), and reads as none.
+    if (mode == SyncMode.server && await _setting('server_address') == null) {
+      return null;
+    }
+    return mode;
   }
 
   /// The way the phone is used: alone when none is written
@@ -815,6 +937,11 @@ class Repository {
   Future<void> deleteHome(String id, {required String typedName}) async {
     final found = await home(id);
     if (found == null) throw const Refused(Refusal.notFound);
+    // A home of a server is erased there, on the web, by an owner; the phone
+    // then erases it as a purge (docs/protocol.md section 2.10).
+    if (await serverRole(id) != null) {
+      throw const Refused(Refusal.deleteOnServer);
+    }
     if (typedName != found.name) throw const Refused(Refusal.nameMismatch);
     final active = await activeHomes();
     if (found.archivedAt == null && active.length <= 1) {

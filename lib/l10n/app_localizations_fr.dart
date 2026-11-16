@@ -2464,4 +2464,269 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get saved => 'Enregistré';
+
+  @override
+  String get serverAddressHelp =>
+      'Saisissez l\'adresse de votre Housecairn : l\'application web, ou le port du module Home Assistant. Vous vous connectez ensuite sur la page de votre serveur, dans le navigateur.';
+
+  @override
+  String get serverAddressLabel => 'Adresse du serveur';
+
+  @override
+  String get serverAddressInvalid =>
+      'Ce n\'est pas l\'adresse d\'un serveur. Saisissez-la sous la forme https://housecairn.example.com.';
+
+  @override
+  String get serverHttpNeedsLocalIp =>
+      'Utilisez https://. Le simple http:// ne marche qu\'avec l\'adresse IP d\'un serveur de votre réseau, jamais avec un nom, même terminé par .local.';
+
+  @override
+  String get serverHttpWarning =>
+      'Cette connexion n\'est pas chiffrée : toute personne sur ce réseau peut lire ce que le téléphone envoie, et l\'accès à votre serveur. Ne l\'utilisez que sur votre propre réseau.';
+
+  @override
+  String get serverHttpContinue => 'Continuer sans chiffrement';
+
+  @override
+  String get serverSignIn => 'Se connecter';
+
+  @override
+  String get serverSigningIn =>
+      'Connectez-vous sur la page de votre serveur dans le navigateur, puis revenez ici.';
+
+  @override
+  String get serverConfirmTitle => 'Confirmation';
+
+  @override
+  String get serverSeesEverything =>
+      'Ce serveur verra tout de ces logements : tâches, pièces, notes, montants et photos. Tout comme les personnes qui l\'administrent, les membres de ces logements sur ce serveur, et ses sauvegardes. Ne continuez qu\'avec un serveur de confiance.';
+
+  @override
+  String get serverHomesHeading => 'Logements de cet accès';
+
+  @override
+  String get serverNoHomes =>
+      'Cet accès ne couvre aucun logement. Choisissez-en au moins un sur la page de votre serveur.';
+
+  @override
+  String get serverReadOnly => 'Lecture seule';
+
+  @override
+  String get serverNotEncrypted => 'Non chiffré';
+
+  @override
+  String get serverConnect => 'Se connecter';
+
+  @override
+  String get serverCancel => 'Annuler';
+
+  @override
+  String serverTooOld(String version) {
+    return 'Ce serveur est trop ancien pour l\'application. Mettez-le à jour vers Housecairn $version ou plus récent.';
+  }
+
+  @override
+  String get serverMobileAppOff =>
+      'Ce serveur n\'autorise pas l\'application mobile. Son administrateur peut l\'activer dans les réglages de l\'instance.';
+
+  @override
+  String get serverSignInCancelled =>
+      'La connexion a été annulée sur la page du serveur.';
+
+  @override
+  String get serverSignInFailed => 'La connexion n\'a pas abouti. Réessayez.';
+
+  @override
+  String get serverInsecureRefused =>
+      'Le serveur refuse cette connexion sans chiffrement. Utilisez son adresse en https://.';
+
+  @override
+  String get serverDisconnected =>
+      'Ce téléphone a été déconnecté du serveur. Reconnectez-vous pour reprendre la synchronisation ; vos logements restent sur ce téléphone.';
+
+  @override
+  String get serverUpdateApp =>
+      'Le serveur demande une version plus récente de l\'application avant que ce téléphone puisse envoyer ses modifications.';
+
+  @override
+  String get serverCertificate =>
+      'Le certificat de ce serveur n\'est pas valide. L\'application ne s\'y connecte pas.';
+
+  @override
+  String get serverOtherHost =>
+      'Le serveur a renvoyé l\'application vers une autre adresse. L\'application ne parle qu\'à l\'adresse que vous avez saisie.';
+
+  @override
+  String get serverUnreachable =>
+      'Le serveur est injoignable. Vérifiez l\'adresse et le réseau.';
+
+  @override
+  String get serverDeviceName => 'Application mobile Housecairn';
+
+  @override
+  String get errReadOnlyHome =>
+      'Vous êtes membre en lecture seule de ce logement sur votre serveur : rien ne peut y être modifié depuis ce téléphone.';
+
+  @override
+  String get errOwnersOnly =>
+      'Seul un propriétaire de ce logement sur votre serveur peut l\'archiver ou le rétablir.';
+
+  @override
+  String get errDeleteOnServer =>
+      'Un logement de votre serveur se supprime sur la page web du serveur, par un propriétaire. Il disparaît alors aussi de ce téléphone.';
+
+  @override
+  String get wayMoveToServerLater =>
+      'Garder les logements de ce téléphone sur un serveur Housecairn viendra avec une prochaine version de l\'application. Rien n\'a changé sur ce téléphone.';
+
+  @override
+  String get wayLeaveServerTitle =>
+      'Arrêter la synchronisation avec le serveur ?';
+
+  @override
+  String get wayLeaveServerText =>
+      'Ce téléphone garde une copie de ses logements tels qu\'ils étaient à la dernière synchronisation. Ils ne se synchroniseront plus, et l\'accès de ce téléphone est révoqué sur le serveur.';
+
+  @override
+  String wayLeaveServerUnsent(int count) {
+    return 'Modifications pas encore envoyées : $count. Elles sont envoyées d\'abord.';
+  }
+
+  @override
+  String get wayLeaveServerConfirm => 'Arrêter la synchronisation';
+
+  @override
+  String get wayLeaveServerUnreachable =>
+      'Le serveur est injoignable, ces modifications ne peuvent pas être envoyées. Si vous arrêtez maintenant, elles restent sur ce téléphone seulement :';
+
+  @override
+  String get wayLeaveServerDrop =>
+      'Arrêter et les garder sur ce téléphone seulement';
+
+  @override
+  String wayLeaveServerOther(int count) {
+    return 'Autres modifications : $count';
+  }
+
+  @override
+  String get syncTitle => 'Synchronisation avec le serveur';
+
+  @override
+  String get syncText =>
+      'Les modifications de ce téléphone partent vers le serveur peu après, et celles du serveur arrivent quand l\'appli s\'ouvre ou revient au premier plan.';
+
+  @override
+  String get syncNow => 'Synchroniser maintenant';
+
+  @override
+  String get syncRunning => 'Synchronisation en cours…';
+
+  @override
+  String syncLast(String time) {
+    return 'Dernière synchronisation : $time';
+  }
+
+  @override
+  String get syncNever => 'Pas encore synchronisé.';
+
+  @override
+  String get syncUnreachable =>
+      'Le serveur est injoignable pour l\'instant. Vos modifications restent sur ce téléphone et partiront à la prochaine synchronisation.';
+
+  @override
+  String get syncFailed =>
+      'La dernière synchronisation n\'a pas abouti. Elle sera retentée automatiquement.';
+
+  @override
+  String get syncRefusedTitle => 'Modifications refusées par le serveur';
+
+  @override
+  String syncRefusedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count modifications refusées par le serveur',
+      one: '1 modification refusée par le serveur',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncRefusedHelp =>
+      'Le serveur n\'a pas pris ces modifications ; elles sont toujours sur ce téléphone. Renvoyez-en une une fois sa cause corrigée, ou arrêtez de l\'envoyer : le téléphone reprend alors la valeur du serveur.';
+
+  @override
+  String get syncSendAgain => 'Renvoyer';
+
+  @override
+  String get syncStopSending => 'Ne plus envoyer';
+
+  @override
+  String get syncRefusedUnnamed => 'Une modification sans nom';
+
+  @override
+  String get syncRefusedForbidden =>
+      'Votre rôle dans ce logement sur le serveur ne permet pas cette modification.';
+
+  @override
+  String get syncRefusedReference =>
+      'Elle désigne un élément qui n\'est pas dans ce logement sur le serveur.';
+
+  @override
+  String get syncRefusedClock =>
+      'La date de ce téléphone est en avance : vérifiez-la dans les réglages du téléphone, puis renvoyez.';
+
+  @override
+  String get syncRefusedIdTaken =>
+      'Le serveur a déjà un autre élément avec le même identifiant.';
+
+  @override
+  String get syncRefusedMalformed =>
+      'Le serveur n\'a pas pu lire cette modification.';
+
+  @override
+  String get syncRefusedTooLarge =>
+      'Cette modification est trop grande pour le serveur.';
+
+  @override
+  String get syncRefusedDevice =>
+      'Le serveur connaît ce téléphone sous un autre identifiant. Reconnectez ce téléphone.';
+
+  @override
+  String get syncRefusedSignIn =>
+      'Ce logement demande une connexion par son propre service de connexion. Reconnectez ce téléphone avec ce service, puis renvoyez.';
+
+  @override
+  String get syncRefusedConflict =>
+      'Le serveur a déjà reçu d\'autres modifications sous le numéro de cet envoi. Renvoyez.';
+
+  @override
+  String syncRefusedOther(String code) {
+    return 'Le serveur a refusé cette modification (code $code).';
+  }
+
+  @override
+  String get syncNoticesTitle => 'Depuis les dernières synchronisations';
+
+  @override
+  String syncNoticesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count informations sur la synchronisation',
+      one: '1 information sur la synchronisation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncNoticeUndoReverted =>
+      'Une annulation a été reprise : la prochaine échéance de cette tâche a été modifiée entre-temps sur un autre appareil.';
+
+  @override
+  String get syncNoticeDropped =>
+      'Un élément supprimé sur le serveur a été retiré de ce téléphone.';
+
+  @override
+  String get syncNoticesRead => 'Marquer comme lu';
 }

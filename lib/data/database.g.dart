@@ -18164,6 +18164,271 @@ class OtherVersionsCompanion extends UpdateCompanion<OtherVersionRow> {
   }
 }
 
+class $ServerSeenTable extends ServerSeen
+    with TableInfo<$ServerSeenTable, ServerSeenRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ServerSeenTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _entityMeta = const VerificationMeta('entity');
+  @override
+  late final GeneratedColumn<String> entity = GeneratedColumn<String>(
+    'entity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> rowId =
+      GeneratedColumn<Uint8List>(
+        'row_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($ServerSeenTable.$converterrowId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($ServerSeenTable.$converterhomeId);
+  @override
+  List<GeneratedColumn> get $columns => [entity, rowId, homeId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'server_seen';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ServerSeenRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('entity')) {
+      context.handle(
+        _entityMeta,
+        entity.isAcceptableOrUnknown(data['entity']!, _entityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {entity, rowId};
+  @override
+  ServerSeenRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ServerSeenRow(
+      entity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity'],
+      )!,
+      rowId: $ServerSeenTable.$converterrowId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}row_id'],
+        )!,
+      ),
+      homeId: $ServerSeenTable.$converterhomeId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        )!,
+      ),
+    );
+  }
+
+  @override
+  $ServerSeenTable createAlias(String alias) {
+    return $ServerSeenTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterrowId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+}
+
+class ServerSeenRow extends DataClass implements Insertable<ServerSeenRow> {
+  final String entity;
+  final String rowId;
+  final String homeId;
+  const ServerSeenRow({
+    required this.entity,
+    required this.rowId,
+    required this.homeId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['entity'] = Variable<String>(entity);
+    {
+      map['row_id'] = Variable<Uint8List>(
+        $ServerSeenTable.$converterrowId.toSql(rowId),
+      );
+    }
+    {
+      map['home_id'] = Variable<Uint8List>(
+        $ServerSeenTable.$converterhomeId.toSql(homeId),
+      );
+    }
+    return map;
+  }
+
+  ServerSeenCompanion toCompanion(bool nullToAbsent) {
+    return ServerSeenCompanion(
+      entity: Value(entity),
+      rowId: Value(rowId),
+      homeId: Value(homeId),
+    );
+  }
+
+  factory ServerSeenRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ServerSeenRow(
+      entity: serializer.fromJson<String>(json['entity']),
+      rowId: serializer.fromJson<String>(json['rowId']),
+      homeId: serializer.fromJson<String>(json['homeId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'entity': serializer.toJson<String>(entity),
+      'rowId': serializer.toJson<String>(rowId),
+      'homeId': serializer.toJson<String>(homeId),
+    };
+  }
+
+  ServerSeenRow copyWith({String? entity, String? rowId, String? homeId}) =>
+      ServerSeenRow(
+        entity: entity ?? this.entity,
+        rowId: rowId ?? this.rowId,
+        homeId: homeId ?? this.homeId,
+      );
+  ServerSeenRow copyWithCompanion(ServerSeenCompanion data) {
+    return ServerSeenRow(
+      entity: data.entity.present ? data.entity.value : this.entity,
+      rowId: data.rowId.present ? data.rowId.value : this.rowId,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ServerSeenRow(')
+          ..write('entity: $entity, ')
+          ..write('rowId: $rowId, ')
+          ..write('homeId: $homeId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(entity, rowId, homeId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ServerSeenRow &&
+          other.entity == this.entity &&
+          other.rowId == this.rowId &&
+          other.homeId == this.homeId);
+}
+
+class ServerSeenCompanion extends UpdateCompanion<ServerSeenRow> {
+  final Value<String> entity;
+  final Value<String> rowId;
+  final Value<String> homeId;
+  final Value<int> rowid;
+  const ServerSeenCompanion({
+    this.entity = const Value.absent(),
+    this.rowId = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ServerSeenCompanion.insert({
+    required String entity,
+    required String rowId,
+    required String homeId,
+    this.rowid = const Value.absent(),
+  }) : entity = Value(entity),
+       rowId = Value(rowId),
+       homeId = Value(homeId);
+  static Insertable<ServerSeenRow> custom({
+    Expression<String>? entity,
+    Expression<Uint8List>? rowId,
+    Expression<Uint8List>? homeId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (entity != null) 'entity': entity,
+      if (rowId != null) 'row_id': rowId,
+      if (homeId != null) 'home_id': homeId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ServerSeenCompanion copyWith({
+    Value<String>? entity,
+    Value<String>? rowId,
+    Value<String>? homeId,
+    Value<int>? rowid,
+  }) {
+    return ServerSeenCompanion(
+      entity: entity ?? this.entity,
+      rowId: rowId ?? this.rowId,
+      homeId: homeId ?? this.homeId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (entity.present) {
+      map['entity'] = Variable<String>(entity.value);
+    }
+    if (rowId.present) {
+      map['row_id'] = Variable<Uint8List>(
+        $ServerSeenTable.$converterrowId.toSql(rowId.value),
+      );
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $ServerSeenTable.$converterhomeId.toSql(homeId.value),
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ServerSeenCompanion(')
+          ..write('entity: $entity, ')
+          ..write('rowId: $rowId, ')
+          ..write('homeId: $homeId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -18199,6 +18464,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PendingTable pending = $PendingTable(this);
   late final $PurgedHomesTable purgedHomes = $PurgedHomesTable(this);
   late final $OtherVersionsTable otherVersions = $OtherVersionsTable(this);
+  late final $ServerSeenTable serverSeen = $ServerSeenTable(this);
   late final Index roomHomePosition = Index(
     'room_home_position',
     'CREATE INDEX room_home_position ON rooms (home_id, position)',
@@ -18282,6 +18548,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     pending,
     purgedHomes,
     otherVersions,
+    serverSeen,
     roomHomePosition,
     taskHomeCreated,
     occHomeStatusDue,
@@ -27421,6 +27688,177 @@ typedef $$OtherVersionsTableProcessedTableManager =
       OtherVersionRow,
       PrefetchHooks Function()
     >;
+typedef $$ServerSeenTableCreateCompanionBuilder = ServerSeenCompanion Function({
+  required String entity,
+  required String rowId,
+  required String homeId,
+  Value<int> rowid,
+});
+typedef $$ServerSeenTableUpdateCompanionBuilder = ServerSeenCompanion Function({
+  Value<String> entity,
+  Value<String> rowId,
+  Value<String> homeId,
+  Value<int> rowid,
+});
+
+class $$ServerSeenTableFilterComposer
+    extends Composer<_$AppDatabase, $ServerSeenTable> {
+  $$ServerSeenTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get rowId =>
+      $composableBuilder(
+        column: $table.rowId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+}
+
+class $$ServerSeenTableOrderingComposer
+    extends Composer<_$AppDatabase, $ServerSeenTable> {
+  $$ServerSeenTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get rowId => $composableBuilder(
+    column: $table.rowId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ServerSeenTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ServerSeenTable> {
+  $$ServerSeenTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get entity =>
+      $composableBuilder(column: $table.entity, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get rowId =>
+      $composableBuilder(column: $table.rowId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+}
+
+class $$ServerSeenTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ServerSeenTable,
+          ServerSeenRow,
+          $$ServerSeenTableFilterComposer,
+          $$ServerSeenTableOrderingComposer,
+          $$ServerSeenTableAnnotationComposer,
+          $$ServerSeenTableCreateCompanionBuilder,
+          $$ServerSeenTableUpdateCompanionBuilder,
+          (
+            ServerSeenRow,
+            BaseReferences<_$AppDatabase, $ServerSeenTable, ServerSeenRow>,
+          ),
+          ServerSeenRow,
+          PrefetchHooks Function()
+        > {
+  $$ServerSeenTableTableManager(_$AppDatabase db, $ServerSeenTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ServerSeenTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ServerSeenTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ServerSeenTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> entity = const Value.absent(),
+                Value<String> rowId = const Value.absent(),
+                Value<String> homeId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ServerSeenCompanion(
+                entity: entity,
+                rowId: rowId,
+                homeId: homeId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String entity,
+                required String rowId,
+                required String homeId,
+                Value<int> rowid = const Value.absent(),
+              }) => ServerSeenCompanion.insert(
+                entity: entity,
+                rowId: rowId,
+                homeId: homeId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ServerSeenTable, ServerSeenRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ServerSeenTable,
+                    ServerSeenRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ServerSeenTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ServerSeenTable,
+      ServerSeenRow,
+      $$ServerSeenTableFilterComposer,
+      $$ServerSeenTableOrderingComposer,
+      $$ServerSeenTableAnnotationComposer,
+      $$ServerSeenTableCreateCompanionBuilder,
+      $$ServerSeenTableUpdateCompanionBuilder,
+      (
+        ServerSeenRow,
+        BaseReferences<_$AppDatabase, $ServerSeenTable, ServerSeenRow>,
+      ),
+      ServerSeenRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -27485,4 +27923,6 @@ class $AppDatabaseManager {
       $$PurgedHomesTableTableManager(_db, _db.purgedHomes);
   $$OtherVersionsTableTableManager get otherVersions =>
       $$OtherVersionsTableTableManager(_db, _db.otherVersions);
+  $$ServerSeenTableTableManager get serverSeen =>
+      $$ServerSeenTableTableManager(_db, _db.serverSeen);
 }

@@ -479,6 +479,23 @@ class PurgedHomes extends Table {
   Set<Column<Object>> get primaryKey => {homeId};
 }
 
+/// The rows a Housecairn server has seen (docs/protocol.md section 2.10,
+/// "Starting again after 410"): a row of the feed or of a snapshot, or of a
+/// push the server applied, ignored or repaired. Never synced, never in an
+/// export; emptied when the phone leaves the server.
+@DataClassName('ServerSeenRow')
+class ServerSeen extends Table {
+  TextColumn get entity => text()();
+  BlobColumn get rowId => blob().map(const UuidConverter())();
+  BlobColumn get homeId => blob().map(const UuidConverter())();
+
+  @override
+  String get tableName => 'server_seen';
+
+  @override
+  Set<Column<Object>> get primaryKey => {entity, rowId};
+}
+
 /// A long text that lost the merge, kept 30 days on this phone and never
 /// synced (docs/adr/0003-sync-protocol.md, "Long text"). [keptUntil] is in
 /// UTC milliseconds.

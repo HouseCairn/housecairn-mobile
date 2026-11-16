@@ -5,8 +5,9 @@
 // `local_settings`, Settings, the texts, and the interface of the transport.
 
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoAlertDialog;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/app.dart';
 import 'package:housecairn_mobile/data/repository.dart';
@@ -14,6 +15,7 @@ import 'package:housecairn_mobile/domain/photos.dart';
 import 'package:housecairn_mobile/domain/templates.dart';
 import 'package:housecairn_mobile/sync/mode.dart';
 import 'package:housecairn_mobile/ui/state.dart';
+import 'package:housecairn_mobile/ui/server_screens.dart';
 import 'package:housecairn_mobile/ui/ways.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -21,6 +23,7 @@ import 'support/app.dart';
 import 'support/arb.dart';
 import 'support/fake_transport.dart';
 import 'support/fixture.dart';
+import 'support/sync_fixture.dart';
 
 const _words = {
   'en': (
@@ -105,8 +108,9 @@ void main() {
         final cards = tester.widgetList<WayCard>(find.byType(WayCard)).toList();
         expect(cards.map((c) => c.way), SyncMode.values);
         expect(cards.map((c) => c.selected), [true, false, false]);
-        expect(cards.map((c) => c.onTap != null), [true, false, false]);
-        expect(find.text(w.later), findsNWidgets(2));
+        // My Housecairn server is available from lot 4b.
+        expect(cards.map((c) => c.onTap != null), [true, false, true]);
+        expect(find.text(w.later), findsOneWidget);
       });
 
       testWidgets('a tap on a way that is coming later opens nothing', (
@@ -115,7 +119,7 @@ void main() {
         // Tall, so that the three cards are built together.
         await onPhone(tester, height: 1600);
         final state = await pumpApp(tester, locale: locale, firstStart: true);
-        for (final way in ['relay', 'server']) {
+        for (final way in ['relay']) {
           await tester.ensureVisible(find.byKey(Key('way-$way')));
           await tester.pumpAndSettle();
           await tester.tap(find.byKey(Key('way-$way')));
@@ -129,6 +133,22 @@ void main() {
         expect(await state.repository.storedSyncMode(), isNull);
         expect(state.homes, isEmpty);
         expect(state.firstStart, isTrue);
+      });
+
+      testWidgets('My Housecairn server is chosen, and Continue asks the '
+          'address; nothing is stored before the confirmation', (tester) async {
+        await onPhone(tester, height: 1600);
+        final state = await pumpApp(tester, locale: locale, firstStart: true);
+        await tester.ensureVisible(find.byKey(const Key('way-server')));
+        await tester.tap(find.byKey(const Key('way-server')));
+        await tester.pumpAndSettle();
+        final cards = tester.widgetList<WayCard>(find.byType(WayCard)).toList();
+        expect(cards.map((c) => c.selected), [false, false, true]);
+        await tester.tap(find.byKey(const Key('ways-continue')));
+        await tester.pumpAndSettle();
+        expect(find.byType(ServerAddressScreen), findsOneWidget);
+        expect(await state.repository.storedSyncMode(), isNull);
+        expect(state.homes, isEmpty);
       });
 
       testWidgets('choosing Alone stores the way and makes the first home', (
@@ -244,7 +264,7 @@ void main() {
             expect(pill('relay', w.inUse), findsNothing);
             expect(pill('server', w.inUse), findsNothing);
             expect(pill('relay', w.later), findsOneWidget);
-            expect(pill('server', w.later), findsOneWidget);
+            expect(pill('server', w.later), findsNothing);
           },
         );
       }
@@ -279,11 +299,11 @@ void main() {
         expect(await state.repository.storedSyncMode(), SyncMode.alone);
       });
 
-      testWidgets('More shows the way in use and the two others disabled', (
-        tester,
-      ) async {
+      testWidgets('More shows the way in use, family sync coming later, and '
+          'a phone with homes is told that moving them to a server comes '
+          'with lot 4c, nothing changed', (tester) async {
         await onPhone(tester);
-        await pumpApp(tester, locale: locale);
+        final state = await pumpApp(tester, locale: locale);
         await openMore(tester, w.more);
         await tester.scrollUntilVisible(
           find.byKey(const Key('way-row-server')),
@@ -295,14 +315,26 @@ void main() {
         );
         expect(pill('alone', w.inUse), findsOneWidget);
         expect(pill('relay', w.later), findsOneWidget);
-        expect(pill('server', w.later), findsOneWidget);
-        // Nothing opens: no row of the group is tappable.
+        expect(pill('server', w.later), findsNothing);
+        final before = await dumpOf(state.repository);
+        // Family sync opens nothing.
+        await tester.ensureVisible(find.byKey(const Key('way-row-relay')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('way-row-relay')));
+        await tester.pumpAndSettle();
+        expect(find.byType(Dialog), findsNothing);
+        // The server, with homes on the phone: a message, nothing else.
         await tester.ensureVisible(find.byKey(const Key('way-row-server')));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('way-row-server')));
         await tester.pumpAndSettle();
+        expect(find.byKey(const Key('way-message')), findsOneWidget);
+        await tester.tap(find.text('OK'));
+        await tester.pumpAndSettle();
         expect(find.byType(Dialog), findsNothing);
-        expect(find.text(w.server), findsOneWidget);
+        expect(state.syncMode, SyncMode.alone);
+        expect(await state.repository.storedSyncMode(), SyncMode.alone);
+        expect(await dumpOf(state.repository), before);
       });
 
       for (final scale in [1.0, 2.0]) {
@@ -339,6 +371,39 @@ void main() {
     });
   }
 
+  group('the message of lot 4c follows the platform (ADR 0011)', () {
+    for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+      testWidgets('the dialog of ${platform.name}', (tester) async {
+        debugDefaultTargetPlatformOverride = platform;
+        try {
+          await onPhone(tester);
+          final state = await pumpApp(tester);
+          await openMore(tester, _words['en']!.more);
+          await tester.scrollUntilVisible(
+            find.byKey(const Key('way-row-server')),
+            100,
+          );
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('way-row-server')));
+          await tester.pumpAndSettle();
+          final ios = platform == TargetPlatform.iOS;
+          expect(find.byKey(const Key('way-message')), findsOneWidget);
+          expect(
+            find.byType(CupertinoAlertDialog),
+            ios ? findsOneWidget : findsNothing,
+          );
+          expect(find.byType(AlertDialog), ios ? findsNothing : findsOneWidget);
+          await tester.tap(find.byKey(const Key('way-message-ok')));
+          await tester.pumpAndSettle();
+          expect(find.byKey(const Key('way-message')), findsNothing);
+          expect(state.syncMode, SyncMode.alone);
+        } finally {
+          debugDefaultTargetPlatformOverride = null;
+        }
+      });
+    }
+  });
+
   group('sync_mode in local_settings', () {
     test(
       'absent means alone, and only alone, relay and server exist',
@@ -357,10 +422,17 @@ void main() {
           await repository.setSyncMode(mode);
           expect(
             await repository.storedSyncMode(),
-            wayAvailable(mode) ? mode : isNull,
+            // The third way needs its server's address (lot 4b).
+            wayAvailable(mode) && mode != SyncMode.server ? mode : isNull,
           );
         }
-        expect(SyncMode.values.where(wayAvailable), [SyncMode.alone]);
+        await repository.setServerAddress('https://housecairn.example.com');
+        await repository.setSyncMode(SyncMode.server);
+        expect(await repository.storedSyncMode(), SyncMode.server);
+        expect(SyncMode.values.where(wayAvailable), [
+          SyncMode.alone,
+          SyncMode.server,
+        ]);
         expect(SyncMode.parse('mesh'), isNull, reason: 'unknown value');
       },
     );
@@ -494,7 +566,7 @@ void main() {
       },
     );
 
-    test('nothing in lib/ implements it', () {
+    test('only the server transport of lot 4b implements it in lib/', () {
       final implementers = [
         for (final file
             in Directory('lib')
@@ -505,7 +577,8 @@ void main() {
               .hasMatch(file.readAsStringSync()))
             file.path,
       ];
-      expect(implementers, isEmpty);
+      // The relay's transport comes with lots 5 and 6.
+      expect(implementers, ['lib/sync/server_transport.dart']);
     });
   });
 
@@ -547,7 +620,8 @@ void main() {
       expect(found, isEmpty);
     });
 
-    test('dart:io stays where the files are, and nothing opens a socket', () {
+    test('dart:io stays where the files are, and only the server transport '
+        'opens a connection', () {
       final io = [
         for (final MapEntry(:key, :value) in imports.entries)
           if (value.contains('dart:io')) key,
@@ -556,6 +630,9 @@ void main() {
         'lib/core/photo_source.dart',
         'lib/data/repository.dart',
         'lib/main.dart',
+        // The third way (lot 4b): requests to the address typed, nothing
+        // else (test/server_transport_test.dart).
+        'lib/sync/server_http_io.dart',
       ]);
       final sockets = RegExp(
         r'\b(Socket|RawSocket|SecureSocket|ServerSocket|HttpClient|'
@@ -563,12 +640,13 @@ void main() {
       );
       final found = [
         for (final MapEntry(:key, :value) in sources.entries)
-          if (sockets.hasMatch(
-            value
-                .split('\n')
-                .where((l) => !l.trimLeft().startsWith('//'))
-                .join('\n'),
-          ))
+          if (key != 'lib/sync/server_http_io.dart' &&
+              sockets.hasMatch(
+                value
+                    .split('\n')
+                    .where((l) => !l.trimLeft().startsWith('//'))
+                    .join('\n'),
+              ))
             key,
       ];
       expect(found, isEmpty);

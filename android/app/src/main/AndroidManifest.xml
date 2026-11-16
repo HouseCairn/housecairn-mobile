@@ -6,10 +6,21 @@
          system's own camera app, which needs none. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Backups and transfers to a new phone carry the app's data but never
+         the secure store (lot 4b, maintainer's decision of 2026-11-16): the
+         access to a server and the copy of the device id stay on this
+         phone. The rules are in res/xml: data_extraction_rules for Android
+         12 and later, backup_rules (fullBackupContent) for Android 11 and
+         earlier. A restored database finds no copy of its device id there,
+         takes a new one and asks to sign in to a server again
+         (Repository.open, docs/threat-model.md). -->
     <application
         android:label="Housecairn"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -30,6 +41,14 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- The end of the sign-in to a Housecairn server in the browser
+                 (OAuth 2 with PKCE, web ADR 0078): app.housecairn.mobile:/oauth/callback. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="app.housecairn.mobile" android:path="/oauth/callback"/>
             </intent-filter>
         </activity>
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />

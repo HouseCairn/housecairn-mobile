@@ -16,6 +16,11 @@ enum SyncNoticeKind {
   /// The space asks for a newer app (`min_sv`): this phone reads but does
   /// not write ("Versions of the schema between phones").
   updateRequired,
+
+  /// After a server answered 410, a row it had seen was no longer in its
+  /// snapshot (deleted, then purged, there): the phone deleted it and
+  /// dropped its waiting changes (docs/protocol.md section 2.10, rule 2).
+  droppedAfterRestart,
 }
 
 class SyncNotice {
@@ -27,6 +32,36 @@ class SyncNotice {
 
   @override
   String toString() => 'SyncNotice(${kind.name}, $entity, $rowId)';
+}
+
+/// A change of this phone the other side refused for good, kept aside with
+/// the reason it gave (docs/protocol.md section 2.10, "A push refused").
+class RefusedChange {
+  const RefusedChange({
+    required this.id,
+    required this.operation,
+    required this.code,
+    this.detail,
+  });
+
+  final int id;
+  final SyncOperation operation;
+  final String code;
+  final String? detail;
+
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'op': operation,
+    'code': code,
+    'detail': ?detail,
+  };
+
+  static RefusedChange fromJson(Map<String, Object?> json) => RefusedChange(
+    id: json['id']! as int,
+    operation: (json['op']! as Map).cast<String, Object?>(),
+    code: json['code'] as String? ?? '',
+    detail: json['detail'] as String?,
+  );
 }
 
 /// An operation waiting in `op_log` to be sent.
@@ -206,6 +241,206 @@ extension SyncRepository on Repository {
   Future<void> acknowledge(int seq) =>
       db.customStatement('DELETE FROM op_log WHERE seq <= ?', [seq]);
 
+  // ---------- changes refused by the other side (lot 4b, decision A) ----------
+
+  static const _refusedKey = 'refused_changes';
+
+  Future<({int next, List<RefusedChange> items})> _readRefused() async {
+    final text = await _setting(_refusedKey);
+    if (text == null) return (next: 1, items: <RefusedChange>[]);
+    final json = (jsonDecode(text) as Map).cast<String, Object?>();
+    return (
+      next: json['next'] as int? ?? 1,
+      items: [
+        for (final i in (json['items'] as List? ?? const []))
+          RefusedChange.fromJson((i as Map).cast<String, Object?>()),
+      ],
+    );
+  }
+
+  Future<void> _writeRefused(int next, List<RefusedChange> items) =>
+      _setSetting(
+        _refusedKey,
+        items.isEmpty
+            ? null
+            : jsonEncode({
+                'next': next,
+                'items': [for (final i in items) i.toJson()],
+              }),
+      );
+
+  /// The changes the other side refused for good, oldest first: kept on
+  /// this phone, out of `op_log`, until the person sends one again or drops
+  /// it (local_settings, never synced).
+  Future<List<RefusedChange>> refusedChanges() async =>
+      (await _readRefused()).items;
+
+  /// Keeps [refused] aside, each with its reason.
+  Future<void> setAside(List<RefusedOperation> refused) async {
+    final (:next, :items) = await _readRefused();
+    var id = next;
+    await _writeRefused(next + refused.length, [
+      ...items,
+      for (final r in refused)
+        RefusedChange(
+          id: id++,
+          operation: r.operation,
+          code: r.code,
+          detail: r.detail,
+        ),
+    ]);
+  }
+
+  /// Puts the refused change [id] back in `op_log`, to go with the next
+  /// sync as it was made.
+  Future<void> sendAgain(int id) => db.transaction(() async {
+    final (:next, :items) = await _readRefused();
+    final change = items.where((i) => i.id == id).firstOrNull;
+    if (change == null) return;
+    final op = change.operation;
+    final home = op[Op.home] as String?;
+    await db.customInsert(
+      'INSERT INTO op_log (device, hlc, home_id, body) VALUES (?, ?, ?, ?)',
+      variables: [
+        Variable<Uint8List>(_device),
+        Variable<String>(op[Op.clock]! as String),
+        Variable<Uint8List>(home == null ? null : uuidBytes(home)),
+        Variable<String>(jsonEncode(op)),
+      ],
+    );
+    await _writeRefused(next, [
+      for (final i in items)
+        if (i.id != id) i,
+    ]);
+  });
+
+  /// Keeps [refused] aside and removes from `op_log` the operations up to
+  /// [upTo], or those of [seqs], in one transaction: a stop between the two
+  /// would list a change aside and send it again (lot 4b review).
+  Future<void> setAsideAndAcknowledge(
+    List<RefusedOperation> refused, {
+    int? upTo,
+    Iterable<int> seqs = const [],
+  }) => db.transaction(() async {
+    if (refused.isNotEmpty) await setAside(refused);
+    if (upTo != null) await acknowledge(upTo);
+    for (final seq in seqs) {
+      await db.customStatement('DELETE FROM op_log WHERE seq = ?', [seq]);
+    }
+  });
+
+  static const _rereadKey = 'server_reread';
+
+  /// Drops the refused change [id]: it is not sent any more, and the
+  /// server's value comes back on the phone (decision of the maintainer,
+  /// 2026-11-16). The fields it wrote lose their clock while it is still
+  /// theirs, so that the server's write wins them; the row is asked of the
+  /// server at the next sync ([serverRereads], [restoreServerRows]).
+  Future<void> dropRefused(int id) => db.transaction(() async {
+    final (:next, :items) = await _readRefused();
+    final change = items.where((i) => i.id == id).firstOrNull;
+    if (change == null) return;
+    final op = change.operation;
+    final type = op[Op.type]! as String;
+    final row = op[Op.id]! as String;
+    final device = op[Op.device] as String?;
+    for (final field in fieldsOf(op).keys) {
+      await db.customStatement(
+        'DELETE FROM field_clock WHERE entity = ? AND row_id = ? AND field = ? '
+        'AND hlc = ? AND device = ?',
+        [
+          type,
+          uuidBytes(row),
+          field,
+          op[Op.clock],
+          device == null ? _device : unb64(device),
+        ],
+      );
+    }
+    await _writeRefused(next, [
+      for (final i in items)
+        if (i.id != id) i,
+    ]);
+    if (op[Op.home] case final String home) {
+      final rereads = await serverRereads();
+      (rereads[home] ??= {}).add((type, row));
+      await _writeRereads(rereads);
+    }
+  });
+
+  /// The rows to read again from the server, by home: those of dropped
+  /// changes not yet put back to the server's value.
+  Future<Map<String, Set<(String, String)>>> serverRereads() async {
+    final text = await _setting(_rereadKey);
+    if (text == null) return {};
+    return {
+      for (final MapEntry(:key, :value)
+          in (jsonDecode(text) as Map).cast<String, Object?>().entries)
+        key: {
+          for (final r in value! as List)
+            ((r as List)[0] as String, r[1] as String),
+        },
+    };
+  }
+
+  Future<void> _writeRereads(Map<String, Set<(String, String)>> rereads) =>
+      _setSetting(
+        _rereadKey,
+        rereads.isEmpty
+            ? null
+            : jsonEncode({
+                for (final MapEntry(:key, :value) in rereads.entries)
+                  key: [
+                    for (final (t, id) in value) [t, id],
+                  ],
+              }),
+      );
+
+  /// The rows [asked] of [homeId] as the server holds them: [operations]
+  /// are their writes there, applied by the field rules (the dropped
+  /// change no longer holds the clocks, so the server's values win); a row
+  /// the server does not have ([present] lacks it) goes from the phone as
+  /// by rule 2 of protocol section 2.10, since the server has no value of
+  /// it to give. `null` [operations] (the home is no longer there) only
+  /// forgets the ask.
+  Future<List<SyncNotice>> restoreServerRows(
+    String homeId,
+    Set<(String, String)> asked, {
+    List<SyncOperation>? operations,
+    Set<(String, String)> present = const {},
+  }) async {
+    final notices = <SyncNotice>[];
+    if (operations != null) {
+      notices.addAll(await applyOperations(operations));
+    }
+    await db.transaction(() async {
+      if (operations != null) {
+        final now = _now();
+        for (final (type, id) in asked) {
+          if (present.contains((type, id))) continue;
+          final table = tableOfEntity[type];
+          if (table != null) await _dropRow(table, type, id, homeId, now);
+        }
+        await markServerSeen([for (final (t, id) in present) (t, homeId, id)]);
+      }
+      final rereads = await serverRereads();
+      final left = (rereads[homeId] ?? {}).difference(asked);
+      if (left.isEmpty) {
+        rereads.remove(homeId);
+      } else {
+        rereads[homeId] = left;
+      }
+      await _writeRereads(rereads);
+    });
+    return notices;
+  }
+
+  /// Leaving the server: the refused changes go with it.
+  Future<void> forgetRefused() async {
+    await _setSetting(_refusedKey, null);
+    await _setSetting(_rereadKey, null);
+  }
+
   // ---------- in ----------
 
   Future<bool> isPurged(String homeId) async =>
@@ -246,12 +481,18 @@ extension SyncRepository on Repository {
     bool repair = true,
   }) async {
     final notices = <SyncNotice>[];
-    await db.transaction(() async {
-      for (final op in operations) {
-        await _applyOne(op, notices);
-      }
-      if (repair) notices.addAll(await repairMerged());
-    });
+    // Only the writes of this zone skip the check of the server role (and
+    // are not local changes): a write of the screens made meanwhile runs
+    // outside it, and is checked.
+    await runZoned(
+      () => db.transaction(() async {
+        for (final op in operations) {
+          await _applyOne(op, notices);
+        }
+        if (repair) notices.addAll(await repairMerged());
+      }),
+      zoneValues: {Repository._syncApply: true},
+    );
     return notices;
   }
 
@@ -537,7 +778,13 @@ extension SyncRepository on Repository {
         [key],
       );
       await db.customStatement('DELETE FROM homes WHERE id = ?', [key]);
-      for (final table in ['extra', 'pending', 'op_log', 'other_versions']) {
+      for (final table in [
+        'extra',
+        'pending',
+        'op_log',
+        'other_versions',
+        'server_seen',
+      ]) {
         await db.customStatement('DELETE FROM $table WHERE home_id = ?', [key]);
       }
       await db.customStatement(
@@ -694,6 +941,21 @@ extension SyncRepository on Repository {
       final id = record.key.substring('undo:'.length);
       final closed = await occurrence(id);
       if (closed == null || !openStatuses.contains(closed.status)) {
+        // Closed again by the other side's write (a server that refused the
+        // undo gives the values that won, lot 4b): the undo was taken back
+        // there, and the person is told so here.
+        final by = closed == null
+            ? null
+            : (await _clocksOf('tasks.occurrence', id))['status'];
+        if (by != null && b64(by.device) != b64(_device)) {
+          notices.add(
+            SyncNotice(
+              SyncNoticeKind.undoReverted,
+              entity: 'tasks.occurrence',
+              rowId: id,
+            ),
+          );
+        }
         await _setSetting(record.key, null);
         continue;
       }

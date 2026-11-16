@@ -57,6 +57,13 @@ class _FirstStart extends StatefulWidget {
 
 class _FirstStartState extends State<_FirstStart> {
   bool _started = false;
+  AppLifecycleListener? _lifecycle;
+
+  @override
+  void dispose() {
+    _lifecycle?.dispose();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -68,9 +75,10 @@ class _FirstStartState extends State<_FirstStart> {
     state.l10n = l10n;
     if (!_started) {
       _started = true;
-      state
-          .refresh(firstHomeName: l10n.firstHomeName)
-          .then((_) => state.openLaunchReminder());
+      // The homes, the reminder tapped, and a sync with the server in the
+      // third way; another each time the app comes back to the front.
+      state.open(firstHomeName: l10n.firstHomeName);
+      _lifecycle = AppLifecycleListener(onResume: state.resumed);
     } else if (languageChanged) {
       state.reschedule();
     }

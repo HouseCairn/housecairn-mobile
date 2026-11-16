@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../core/document_source.dart';
 import '../core/notifier.dart';
 import '../core/photo_source.dart';
+import '../core/store.dart';
 import '../data/database.dart';
 import '../data/repository.dart';
 import '../domain/day.dart';
@@ -16,7 +19,14 @@ import '../domain/photos.dart';
 import '../domain/reminders.dart';
 import '../domain/templates.dart';
 import '../l10n/app_localizations.dart';
+import '../sync/engine.dart';
 import '../sync/mode.dart';
+import '../sync/server_address.dart';
+import '../sync/server_connection.dart';
+import '../sync/server_http.dart';
+import '../sync/server_http_io.dart';
+import '../sync/server_transport.dart';
+import '../sync/transport.dart';
 
 /// Re-encodes a photo off the main isolate (a photo of 12 megapixels takes a
 /// second or two); tests give [processPhoto] itself.
@@ -58,6 +68,10 @@ class AppState extends ChangeNotifier {
     this.photoProcessor = processInIsolate,
     this.loadTemplates = loadBundledTemplates,
     this.openUrl = openInSystem,
+    this.store,
+    this.serverHttp = IoServerHttp.new,
+    this.signInCallbacks,
+    this.syncDelay = const Duration(seconds: 2),
   });
 
   final Repository repository;
@@ -74,6 +88,18 @@ class AppState extends ChangeNotifier {
   final PhotoProcessor photoProcessor;
   final Future<TemplateLibrary> Function() loadTemplates;
   final UrlOpener openUrl;
+
+  /// The secrets at rest (the Keychain or the Android Keystore): the access
+  /// to a server in the third way; `null` where there is none (tests that
+  /// never connect).
+  final Store? store;
+
+  /// The connection to the address typed, in the third way.
+  final ServerHttp Function(ServerAddress address) serverHttp;
+
+  /// The redirects of the browser back to the app; the app's
+  /// [SignInCallbacks] when `null`.
+  final Stream<Uri>? signInCallbacks;
 
   /// Whether the data was read once; until then the app shows nothing.
   bool loaded = false;
@@ -122,6 +148,8 @@ class AppState extends ChangeNotifier {
     homes = await repository.homes();
     current = await repository.currentHome();
     todayAllHomes = await repository.todayShowsAllHomes();
+    serverSync.refused = await repository.refusedChanges();
+    _watchLocalWrites();
     remindersOn = await _remindersStillAllowed();
     revision++;
     notifyListeners();
@@ -133,6 +161,269 @@ class AppState extends ChangeNotifier {
   Future<void> startAlone(String firstHomeName) async {
     await repository.setSyncMode(SyncMode.alone);
     await refresh(firstHomeName: firstHomeName);
+  }
+
+  // ---------- the third way: a Housecairn server (lot 4b) ----------
+
+  Store get _store =>
+      store ?? (throw StateError('No secure store on this build.'));
+
+  ServerTransport _transport(ServerAddress address) => ServerTransport(
+    address: address,
+    http: serverHttp(address),
+    store: _store,
+    state: repository.serverState,
+    device: repository.deviceB64,
+    schemaVersion: repository.schemaVersion,
+    seenStore: repository.serverSeen,
+  );
+
+  /// Signs in to [address] in the system browser (OAuth 2 with PKCE); the
+  /// access is then in [store], nothing of the homes was sent or received.
+  Future<void> signInToServer(ServerAddress address) => ServerConnector(
+    http: serverHttp,
+    store: _store,
+    openBrowser: openUrl,
+    deviceName: l10n?.serverDeviceName ?? 'Housecairn',
+    callbacks: signInCallbacks,
+  ).signIn(address);
+
+  /// The homes the access chosen in the browser covers, and their members.
+  Future<List<ServerHome>> serverHomesOffered(ServerAddress address) async {
+    final transport = _transport(address);
+    await transport.capabilities();
+    return transport.homes();
+  }
+
+  /// Forgets an access signed in but not confirmed: revoked on the server
+  /// when it answers, deleted from [store] whatever happens.
+  Future<void> forgetServer(ServerAddress address) =>
+      _transport(address).disconnect();
+
+  /// The confirmation of the third way at the first start: the phone has no
+  /// home, so it keeps the server's (docs/adr/0010, "Moving from one way to
+  /// another"): the way and the address are stored, then the first sync
+  /// brings the homes of the access.
+  Future<void> startServer(ServerAddress address) async {
+    await repository.setServerAddress(address.display);
+    await repository.setSyncMode(SyncMode.server);
+    await syncWithServer(throwing: true);
+  }
+
+  /// The address of the server in use, in the third way.
+  Future<ServerAddress?> serverAddress() async =>
+      ServerAddress.stored(await repository.serverAddress());
+
+  /// What the screens show of the sync with the server (lot 4b).
+  final serverSync = ServerSyncStatus();
+
+  Future<SyncReport?>? _syncing;
+  bool _syncAgain = false;
+  Timer? _syncSoon;
+  StreamSubscription<void>? _localWrites;
+
+  /// Syncs with the server: at the opening, when the app comes back to the
+  /// front, and [syncDelay] after the last change made on the phone (lot 4b,
+  /// ADR 0010, "the phone syncs at the opening and in the background").
+  /// One round at a time: asked while one runs, another follows it. An
+  /// error is kept in [serverSync] for the screens; with [throwing], the
+  /// caller gets it too (the confirmation of the third way).
+  Future<SyncReport?> syncWithServer({bool throwing = false}) async {
+    if (_syncing case final running?) {
+      _syncAgain = true;
+      return running;
+    }
+    final done = Completer<SyncReport?>();
+    _syncing = done.future;
+    SyncReport? report;
+    try {
+      do {
+        _syncAgain = false;
+        report = await _syncRound();
+      } while (_syncAgain);
+      done.complete(report);
+      return report;
+    } on Object {
+      done.complete(null);
+      if (throwing) rethrow;
+      return null;
+    } finally {
+      _syncing = null;
+      await refresh();
+    }
+  }
+
+  /// One round of sync with the server; nothing outside the third way.
+  Future<SyncReport?> _syncRound() async {
+    if (syncMode != SyncMode.server &&
+        await repository.storedSyncMode() != SyncMode.server) {
+      return null;
+    }
+    final address = await serverAddress();
+    if (address == null) return null;
+    final status = serverSync;
+    status.running = true;
+    notifyListeners();
+    try {
+      final transport = _transport(address);
+      final report = await SyncEngine(repository, transport).sync();
+      await _restoreDropped(transport);
+      status
+        ..lastSync = repository.clock.now()
+        ..stopped = null
+        ..unreachable = false
+        ..failed = false
+        ..notices = [
+          ...status.notices,
+          for (final n in report.notices)
+            if (ServerSyncStatus.shown.contains(n.kind)) n,
+        ];
+      return report;
+    } on ServerStopped catch (e) {
+      status.stopped = e.reason;
+      rethrow;
+    } on ServerHttpException {
+      status.unreachable = true;
+      rethrow;
+    } on ServerBusy {
+      status.unreachable = true;
+      rethrow;
+    } on Object {
+      status.failed = true;
+      rethrow;
+    } finally {
+      status.running = false;
+    }
+  }
+
+  /// How long after the last change of the phone it syncs.
+  final Duration syncDelay;
+
+  /// Syncs [syncDelay] after now, unless another change comes first; not
+  /// while the server stopped this phone (a sign-in, an update or another
+  /// address is needed: [syncWithServer] from the screens still tries).
+  void syncSoon() {
+    if (syncMode != SyncMode.server || serverSync.stoppedForGood) return;
+    _syncSoon?.cancel();
+    _syncSoon = Timer(syncDelay, syncWithServer);
+  }
+
+  /// The app comes back to the front: a sync, at once.
+  Future<void> resumed() async {
+    if (syncMode != SyncMode.server || serverSync.stoppedForGood) return;
+    _syncSoon?.cancel();
+    await syncWithServer();
+  }
+
+  /// The opening of the app: the homes, the reminder tapped, then a sync in
+  /// the third way.
+  Future<void> open({String? firstHomeName}) async {
+    await refresh(firstHomeName: firstHomeName);
+    await openLaunchReminder();
+    if (syncMode == SyncMode.server) await syncWithServer();
+  }
+
+  void _watchLocalWrites() {
+    if (syncMode == SyncMode.server) {
+      _localWrites ??= repository.localWrites.listen((_) => syncSoon());
+    } else {
+      _localWrites?.cancel();
+      _localWrites = null;
+      _syncSoon?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _syncSoon?.cancel();
+    _localWrites?.cancel();
+    super.dispose();
+  }
+
+  /// Sends the refused change [id] again, with a sync at once.
+  Future<void> sendAgain(int id) async {
+    await repository.sendAgain(id);
+    await syncWithServer();
+  }
+
+  /// Drops the refused change [id]: it is no longer sent, and a sync at once
+  /// puts the server's value back on the phone (maintainer's decision,
+  /// 2026-11-16); out of reach, it comes with the next sync.
+  Future<void> dropRefused(int id) async {
+    await repository.dropRefused(id);
+    await syncWithServer();
+  }
+
+  /// The rows of the changes dropped, read again from the server's snapshot
+  /// of their home and put back as it holds them.
+  Future<List<SyncNotice>> _restoreDropped(ServerTransport transport) async {
+    final notices = <SyncNotice>[];
+    for (final MapEntry(key: home, value: rows)
+        in (await repository.serverRereads()).entries) {
+      final found = await transport.serverRows(home, rows);
+      notices.addAll(
+        await repository.restoreServerRows(
+          home,
+          rows,
+          operations: found?.operations,
+          present: found?.present ?? const {},
+        ),
+      );
+    }
+    return notices;
+  }
+
+  /// The notices of the past syncs were read.
+  void dismissNotices() {
+    serverSync.notices = const [];
+    notifyListeners();
+  }
+
+  /// The move alone → server is open only to a phone with no home
+  /// (docs/plan.md, lot 4b): keeping this phone's homes on a server is lot
+  /// 4c, and the phone never merges nor drops them on its own.
+  bool get canMoveToServer => homes.isEmpty;
+
+  /// The changes of this phone not yet sent to the server, oldest first.
+  Future<List<SyncOperation>> unsentChanges() async => [
+    for (final o in await repository.outgoing()) o.operation,
+  ];
+
+  /// The move server → alone (docs/adr/0010, "Moving from one way to
+  /// another"): the changes not sent are sent first; when the server cannot
+  /// be reached, nothing changes and they are given back, unless
+  /// [keepUnsent] says the person confirmed leaving with them on this phone
+  /// only. Then the access is revoked and deleted from [store], the marks
+  /// and the transport's state go, and the homes stay as they were at the
+  /// last sync, no longer synced.
+  Future<List<SyncOperation>> leaveServer({bool keepUnsent = false}) async {
+    // Never two rounds at once: the one running ends first.
+    _syncSoon?.cancel();
+    await _syncing;
+    final address = await serverAddress();
+    if (address != null && (await unsentChanges()).isNotEmpty) {
+      try {
+        await SyncEngine(repository, _transport(address)).sync();
+      } on ServerHttpException {
+        if (!keepUnsent) return unsentChanges();
+      } on ServerBusy {
+        if (!keepUnsent) return unsentChanges();
+      } on ServerStopped {
+        if (!keepUnsent) return unsentChanges();
+      }
+    }
+    if (address != null) await _transport(address).disconnect();
+    final left = await repository.outgoing();
+    if (left.isNotEmpty) await repository.acknowledge(left.last.seq);
+    await repository.forgetServerSeen();
+    // The changes the server refused stay in the homes of this phone, as
+    // they were made; they are no longer to be sent anywhere.
+    await repository.forgetRefused();
+    serverSync.reset();
+    await repository.setServerAddress(null);
+    await repository.setSyncMode(SyncMode.alone);
+    await refresh();
+    return const [];
   }
 
   Future<void> choose(String homeId) async {
@@ -233,6 +524,50 @@ class AppState extends ChangeNotifier {
     _launchChecked = true;
     final payload = await notifier?.launchPayload();
     if (payload != null) await openReminder(payload);
+  }
+}
+
+/// The sync with the server as the screens show it (lot 4b): running, when
+/// it last went through, why the server stopped the phone, the notices to
+/// read, and the changes the server refused.
+class ServerSyncStatus {
+  /// The notices of a sync shown to the person: an undo taken back, a row
+  /// dropped after a restart from the snapshot.
+  static const shown = {
+    SyncNoticeKind.undoReverted,
+    SyncNoticeKind.droppedAfterRestart,
+  };
+
+  bool running = false;
+  DateTime? lastSync;
+
+  /// Why the server stopped this phone at the last round; `null` when it
+  /// went through.
+  ServerStop? stopped;
+
+  /// The last round found no server, or a server too busy to answer: the
+  /// phone tries again by itself.
+  bool unreachable = false;
+
+  /// The last round failed for another reason.
+  bool failed = false;
+
+  List<SyncNotice> notices = const [];
+  List<RefusedChange> refused = const [];
+
+  /// The server stopped the phone until the person acts (sign in again,
+  /// update the app or the server, use https): the phone does not try by
+  /// itself until then, nor at the next opening of the app.
+  bool get stoppedForGood => stopped != null;
+
+  void reset() {
+    running = false;
+    lastSync = null;
+    stopped = null;
+    unreachable = false;
+    failed = false;
+    notices = const [];
+    refused = const [];
   }
 }
 

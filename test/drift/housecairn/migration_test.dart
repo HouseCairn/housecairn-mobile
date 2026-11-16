@@ -2,11 +2,12 @@
 
 // Migration tests of drift's guided migrations
 // (docs/adr/0002-local-storage-and-migrations.md): from every schema version
-// in drift_schemas/housecairn/ to the current one (schema 6). Each step runs
+// in drift_schemas/housecairn/ to the current one (schema 7). Each step runs
 // in turn: 1 to 2 (lot 2a), 2 to 3 (stock), 3 to 4 (lot 3b: projects, budget,
 // reports), 4 to 5 (the manufacturer's warranty, six columns of `items`) and
-// 5 to 6 (the tables of sync of lot 4, new and empty); 6 to 6 checks that the
-// schema of AppDatabase is the one of drift_schema_v6.json. The steps from
+// 5 to 6 (the tables of sync of lot 4, new and empty) and 6 to 7
+// (`server_seen` of lot 4b, new and empty); 7 to 7 checks that the schema of
+// AppDatabase is the one of drift_schema_v7.json. The steps from
 // schemas 2, 3, 4 and 5 also run on a file with data: every row is there
 // after them, every column it had unchanged, the new columns empty or at
 // their default and the new tables empty. Regenerate `generated/` with:
@@ -40,7 +41,7 @@ void main() {
   }
 
   for (final from in [2, 3]) {
-    test('migrates a schema $from file with data to schema 6, keeping every '
+    test('migrates a schema $from file with data to schema 7, keeping every '
         'row', () async {
       final schema = await verifier.schemaAt(from);
       final raw = schema.rawDatabase;
@@ -101,7 +102,7 @@ void main() {
       expect(dumped, contains('Second gutters'));
 
       final db = AppDatabase(schema.newConnection());
-      await verifier.migrateAndValidate(db, 6);
+      await verifier.migrateAndValidate(db, 7);
       expect(dump(), dumped);
       for (final (table, column) in [
         ('rooms', 'paint_article_id'),
@@ -140,7 +141,7 @@ void main() {
     });
   }
 
-  test('migrates a schema 4 file with items to schema 6: the end of a '
+  test('migrates a schema 4 file with items to schema 7: the end of a '
       'warranty typed before stays, the new columns are empty', () async {
     final schema = await verifier.schemaAt(4);
     final raw = schema.rawDatabase;
@@ -197,7 +198,7 @@ void main() {
     expect(dumped, contains('2027-03-01'));
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 6);
+    await verifier.migrateAndValidate(db, 7);
     expect(dump(), dumped);
     final rows = raw.select(
       'SELECT purchased_on, warranty_duration, warranty_duration_unit, '
@@ -212,7 +213,7 @@ void main() {
     await db.close();
   });
 
-  test('migrates a schema 5 file with data to schema 6: every row and clock '
+  test('migrates a schema 5 file with data to schema 7: every row and clock '
       'stays, the tables of sync are new and empty', () async {
     final schema = await verifier.schemaAt(5);
     final raw = schema.rawDatabase;
@@ -309,7 +310,7 @@ void main() {
     expect(dumped, contains('0193a1b2c3d40002'));
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 6);
+    await verifier.migrateAndValidate(db, 7);
     expect(dump(), dumped);
     for (final table in [
       'op_log',

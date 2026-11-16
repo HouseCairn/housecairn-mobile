@@ -423,6 +423,64 @@ mobile lots, as a card of its own in the web repository. A change in the Home As
 the way works against the add-on, and is made in the add-on's repository. Not on lots 5 to 7:
 no crypto, no relay, no subscription. **Lot 8 waits for this lot.**
 
+**Decisions of the maintainer (2026-11-16)**, after the web release v0.4.0 (then v0.4.1) brought
+the sync API without the right to create homes and without the files:
+
+1. "**M5c and M6 leave lot 4b** for a new **lot 4c**, which waits for a web version that has
+   `POST /api/v1/sync/homes/` (M5c) and the files (M6). Lot 4c carries: 'keep this phone's
+   homes' when moving to the server, and the photos and attachments in server mode."
+2. "**Reminders**: the web adds the current member of the signed-in account to the
+   sync API. Reminders in server mode wait for that version." The criterion "Reminders on the
+   phone cover the tasks of the signed-in account and the tasks with no assignee" waits for
+   it, and is done in the first lot after that web version.
+3. "**In-app purchase**: out of lot 4b, in a dedicated lot later." The criterion "The way
+   stays locked until the purchase is made" moves with it.
+4. "**Settings** (server address, the sentence of ADR 0010, Disconnect): not in this card. A
+   dedicated card will do it after the merge of D5 (#26)."
+
+So lot 4b, as merged, covers with web v0.4.1: `ServerTransport`, the address rule, the sign-in
+and confirmation screens, the mark **seen by the server** and the reconciliation after 410, the
+cases of ADR 0003 against the web, the move server → alone, the move alone → server when the
+phone has no home (with homes on the phone, the app says that keeping them on a server comes
+with lot 4c, and changes nothing), archiving by owners, the members read only. The e2e job runs
+against the image v0.4.1, pinned by digest.
+
+**Decisions of the maintainer after the review of PR #32 (2026-11-16):**
+
+- A. "Envoi refusé définitivement par le serveur : découper l'envoi pour isoler la ou les
+  opérations fautives, envoyer le reste, mettre les fautives de côté avec un message ; rien
+  n'est perdu en silence." Written as a rule in [protocol](protocol.md) section 2.10, "A push
+  refused".
+- B. "Le déclenchement de la synchro et l'affichage de son état se font dans ce lot." The
+  phone syncs at the opening, when the app comes back to the front, and two seconds after the
+  last change, one round at a time; a line above the bar of sections and the screen "Sync with
+  the server" (from More) say why the server stopped the phone, list the changes it refused
+  with their reason, and the notices of the sync.
+- C. "Les trois cas ADR 0003 non rejoués contre le web (restauration, double tirage, ancienne
+  `sv`) entrent dans l'e2e."
+- D. "Remplacer `allowBackup=false` par une sauvegarde qui exclut seulement le stockage sécurisé
+  (jeton, secrets) [...]. Après restauration, l'identifiant d'appareil est régénéré [...], et un
+  foyer serveur restauré demande une reconnexion au lieu d'envoyer sous l'ancien identifiant."
+  Android backups and transfers carry the database and the files, not the secure store
+  (`android/app/src/main/res/xml`); the rule on the phone is in
+  [threat model](threat-model.md), "Lost or stolen phone", and protocol section 2.10.
+- E. "Abandonner une modification refusée remet tout de suite la valeur du serveur sur le
+  téléphone." Written in protocol section 2.10, "A push refused": the server's snapshot of the
+  home is read again, since the sync API has no route that reads one row.
+
+## Lot 4c. Homes of the phone and files on a server
+
+**Scope**: what lot 4b left for a later web version (decision 1 above): **keep this phone's
+homes** when moving alone → server (the phone creates empty homes on the server under its
+access's right, `POST /api/v1/sync/homes/`, then sends every row with its own ids), and, with
+data on both sides, the choice between keeping the phone's homes and keeping the server's,
+after an export is offered; the files of photos and attachments in server mode (web M6).
+
+**Acceptance**: the criteria of lot 4b that name these (send with two homes, the take after an
+export and a typed confirmation, the files), against the web release that brings M5c and M6.
+
+**Depends on**: lot 4b, and that web release.
+
 ## Lot 5. Encryption and family
 
 **Scope**: device keys in secure storage; epochs; batch, snapshot and blob formats of

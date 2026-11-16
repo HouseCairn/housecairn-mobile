@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<!-- Android 12 and later: a backup or a transfer to a new phone carries the
+     app's data (database, files of the homes, settings) but never the secure
+     store of flutter_secure_storage, whose two files hold the access to a
+     server and the copy of the device id, wrapped by a Keystore key that
+     never leaves the phone. See AndroidManifest.xml; backup_rules.xml says
+     the same for Android 11 and earlier. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="FlutterSecureStorage.xml" />
+        <exclude domain="sharedpref" path="FlutterSecureKeyStorage.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="FlutterSecureStorage.xml" />
+        <exclude domain="sharedpref" path="FlutterSecureKeyStorage.xml" />
+    </device-transfer>
+</data-extraction-rules>
