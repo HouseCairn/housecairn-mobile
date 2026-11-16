@@ -182,8 +182,15 @@ Homes and Settings shows the current home.
    names its home. Grouped by urgency, room or home (or person, with sync). Done is one tap,
    with an undo bar; skip and postpone from the same row. In season lists the tasks of a season
    that is on, due beyond the week or without a date (`tasks/agenda.py`, `today_sections`). On one
-   home, a tab **All** opens the list of every task (by room, the hidden ones on demand, 30 to a
-   page) and, under Done, the history with its real cost (`tasks/task_list.html`).
+   home, a tab **All** opens the list of every task (the hidden ones on demand, 30 to a page)
+   and, under Done, the history with its real cost (`tasks/task_list.html`). Both lists have the
+   tabs **To do** and **Done**, a search field and a sheet **Filters (n)** (web `design/patterns.md`,
+   Filters and search): the search follows the typing after a short pause and looks in the title,
+   the room and the item (the history also in the note of what was done), without regard to case
+   or accents; the sheet holds the room and, under Done, the item, the contractor, the outcome
+   and the dates, n being the criteria that apply. What was chosen stays while a task is opened
+   and closed again, and starts from nothing on coming back to the list from elsewhere. A list
+   that a search or a filter emptied offers to clear the filters.
 2. **Task**: opens on its page, to read, in the order of the web (`tasks/task_detail.html`;
    web `design/patterns.md`, Record page): the pills of state, priority and repetition, the
    title, the place (room and item as links), the row of actions (Done as the primary one,
@@ -223,7 +230,9 @@ changed (web ADR 0082): a choice, a date or a tick at once, a text 800 ms after 
 stops, one write of the fields that changed, a discreet "Saved" said by the screen reader. A
 creation and a deletion keep their button, as does a task that adds a room, an item or a
 contractor with it.
-6. **Stock**: articles with low-stock flag (`stock/models.py:90-96`), an article with its
+6. **Stock**: articles with the **Low stock** flag (`stock/models.py:90-96`), under the tabs
+   **All** and **Low stock**, with a search field (name, manufacturer reference, supplier name
+   or reference; without regard to case or accents) that follows the typing; an article with its
    movements and suppliers, add an entry, an exit or an inventory. **Edit the stock item** and
    **Report a problem** (Where starts with the article) are the action row of its page. Saved,
    a new article opens, and Back from it returns to the list (web design guide, After a form).

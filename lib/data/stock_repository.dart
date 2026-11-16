@@ -209,7 +209,7 @@ extension StockRepository on Repository {
               ]))
             .get();
     final levels = await _levels(homeId);
-    final needle = query.trim().toLowerCase();
+    final needle = foldForSearch(query.trim());
     final bySupplier = <String>{};
     if (needle.isNotEmpty) {
       final suppliers =
@@ -218,8 +218,10 @@ extension StockRepository on Repository {
               ))
               .get();
       for (final s in suppliers) {
-        if (s.name.toLowerCase().contains(needle) ||
-            s.reference.toLowerCase().contains(needle)) {
+        if (matchesSearch(needle, [
+          foldForSearch(s.name),
+          foldForSearch(s.reference),
+        ])) {
           bySupplier.add(s.articleId);
         }
       }
@@ -227,8 +229,10 @@ extension StockRepository on Repository {
     return [
       for (final a in rows)
         if (needle.isEmpty ||
-            a.name.toLowerCase().contains(needle) ||
-            a.manufacturerReference.toLowerCase().contains(needle) ||
+            matchesSearch(needle, [
+              foldForSearch(a.name),
+              foldForSearch(a.manufacturerReference),
+            ]) ||
             bySupplier.contains(a.id))
           ArticleEntry(a, levels[a.id] ?? stock.zero),
     ].where((e) => !low || e.low).toList();

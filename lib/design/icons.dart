@@ -58,6 +58,9 @@ enum HcIcons {
     _C(12, 17, 0.6),
   ]),
   chevronDown([_P('M6 9l6 6 6-6')]),
+
+  /// The magnifier of a search field (`components/icon.html`, `search`).
+  search([_C(11, 11, 6.5), _P('m16 16 4.5 4.5')]),
   clear([_P('M7 7l10 10'), _P('M17 7L7 17')]);
 
   const HcIcons(this.shapes);

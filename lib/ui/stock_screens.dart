@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
+import '../design/filters.dart';
 import '../design/icons.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
@@ -66,6 +67,9 @@ class StockList extends StatefulWidget {
 
 class _StockListState extends State<StockList> {
   final _query = TextEditingController();
+
+  /// What the list was last asked: the field's text, after a pause.
+  String _search = '';
   bool _low = false;
 
   @override
@@ -74,78 +78,93 @@ class _StockListState extends State<StockList> {
     super.dispose();
   }
 
+  void _clearAll() => setState(() {
+    _query.clear();
+    _search = '';
+    _low = false;
+  });
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final locale = localeOf(context);
     final home = widget.home;
     final writable = home.archivedAt == null;
-    return DataView<List<ArticleEntry>>(
-      key: ValueKey('${home.id}|${_query.text}|$_low'),
-      load: (r) => r.articles(home.id, query: _query.text, low: _low),
-      builder: (context, entries) {
-        final everything = _query.text.trim().isEmpty && !_low;
-        return HcScreenList(
-          children: [
-            widget.tabs,
-            HcField(
-              label: l10n.stockSearch,
-              child: TextField(
-                key: const Key('stock-search'),
-                controller: _query,
-                textInputAction: TextInputAction.search,
-                onSubmitted: (_) => setState(() {}),
-                onChanged: (_) => setState(() {}),
-              ),
-            ),
-            CheckboxListTile(
-              key: const Key('stock-low'),
-              value: _low,
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              title: Text(l10n.stockLowOnly, style: HcText.body),
-              onChanged: (v) => setState(() => _low = v ?? false),
-            ),
-            if (entries.isEmpty)
-              HcEmpty(everything ? l10n.stockEmpty : l10n.stockNoMatch)
-            else
-              HcCardList(
-                children: [
-                  for (final entry in entries)
-                    HcRow(
-                      key: Key('article-${entry.article.id}'),
-                      title: entry.article.name,
-                      text: [
-                        amountOf(l10n, locale, entry.article, entry.level),
-                        if (entry.article.storageLocation.isNotEmpty)
-                          entry.article.storageLocation,
-                      ].join(' · '),
-                      pills: [
-                        if (entry.low)
-                          HcPill(l10n.stockLow, tone: HcPillTone.warning),
-                      ],
-                      onTap: () => Navigator.of(context).push(
-                        hcRoute(
-                          ArticleScreen(
-                            homeId: home.id,
-                            articleId: entry.article.id,
+    // The tabs and the search stay where they are while the list under them
+    // is read again, so that the field keeps its focus as the person types.
+    return HcScreenList(
+      children: [
+        widget.tabs,
+        // All and Low stock as tabs, the search under them (web ADR on
+        // filters, `stock/article_list.html`).
+        HcFilterBar(
+          tabsKey: const Key('stock-tabs'),
+          tabLabels: [l10n.stockTabAll, l10n.articleLowStock],
+          currentTab: _low ? 1 : 0,
+          onTab: (index) => setState(() => _low = index == 1),
+          searchController: _query,
+          searchKey: const Key('stock-search'),
+          searchLabel: l10n.stockSearch,
+          onSearch: (text) {
+            if (text != _search) setState(() => _search = text);
+          },
+        ),
+        DataView<List<ArticleEntry>>(
+          key: ValueKey(home.id),
+          reloadKey: (_search, _low),
+          load: (r) => r.articles(home.id, query: _search, low: _low),
+          builder: (context, entries) {
+            final everything = _search.trim().isEmpty && !_low;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (entries.isEmpty && everything)
+                  HcEmpty(l10n.stockEmpty)
+                else if (entries.isEmpty)
+                  HcNoMatch(text: l10n.stockNoMatch, onClear: _clearAll)
+                else
+                  HcCardList(
+                    children: [
+                      for (final entry in entries)
+                        HcRow(
+                          key: Key('article-${entry.article.id}'),
+                          title: entry.article.name,
+                          text: [
+                            amountOf(l10n, locale, entry.article, entry.level),
+                            if (entry.article.storageLocation.isNotEmpty)
+                              entry.article.storageLocation,
+                          ].join(' · '),
+                          pills: [
+                            if (entry.low)
+                              HcPill(
+                                l10n.articleLowStock,
+                                tone: HcPillTone.warning,
+                              ),
+                          ],
+                          onTap: () => Navigator.of(context).push(
+                            hcRoute(
+                              ArticleScreen(
+                                homeId: home.id,
+                                articleId: entry.article.id,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                ],
-              ),
-            if (writable)
-              HcAddButton(
-                key: const Key('article-add'),
-                label: l10n.addArticle,
-                primary: false,
-                gap: entries.isEmpty ? HcSpace.s2 : HcSpace.s3,
-                onPressed: () => _add(context),
-              ),
-          ],
-        );
-      },
+                    ],
+                  ),
+                if (writable)
+                  HcAddButton(
+                    key: const Key('article-add'),
+                    label: l10n.addArticle,
+                    primary: false,
+                    gap: entries.isEmpty ? HcSpace.s2 : HcSpace.s3,
+                    onPressed: () => _add(context),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 

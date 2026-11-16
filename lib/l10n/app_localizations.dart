@@ -1682,17 +1682,11 @@ abstract class AppLocalizations {
   /// **'Search by name, reference or supplier'**
   String get stockSearch;
 
-  /// Web catalogue (stock or tasks): Stock bas seulement.
+  /// Tab of the stock list: every article, beside Low stock. Web catalogue (stock or tasks): Tous.
   ///
   /// In en, this message translates to:
-  /// **'Low stock only'**
-  String get stockLowOnly;
-
-  /// Pill of an article at or below its threshold, in the list. Web catalogue (stock or tasks): Basse.
-  ///
-  /// In en, this message translates to:
-  /// **'Low'**
-  String get stockLow;
+  /// **'All'**
+  String get stockTabAll;
 
   /// Web catalogue (stock or tasks): Aucun article pour l'instant.
   ///
@@ -3350,12 +3344,6 @@ abstract class AppLocalizations {
   /// **'Tasks'**
   String get tasksTitle;
 
-  /// Label of the choice between the tasks to do and the history. Web catalogue: Afficher.
-  ///
-  /// In en, this message translates to:
-  /// **'Show'**
-  String get tasksFilterShow;
-
   /// Choice of the list of tasks: the open ones. Web catalogue: À faire.
   ///
   /// In en, this message translates to:
@@ -3409,6 +3397,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Page {number} of {total}'**
   String pageOf(int number, int total);
+
+  /// Button of a sheet of filters, with how many criteria apply. Web catalogue: Filtres (2).
+  ///
+  /// In en, this message translates to:
+  /// **'Filters ({count})'**
+  String filtersCount(int count);
+
+  /// Button of an empty list that a search or a filter emptied: shows everything again. Web catalogue: Effacer les filtres.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get filtersClearAll;
+
+  /// What a screen reader says of the button that empties a search field.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the search'**
+  String get searchClear;
+
+  /// What a screen reader says of the search field of the tasks and of the history.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by task, room or item'**
+  String get tasksSearchLabel;
 
   /// Heading of the filters of the history. Web catalogue: Filtres.
   ///

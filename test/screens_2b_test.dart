@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:housecairn_mobile/data/repository.dart';
+import 'package:housecairn_mobile/design/filters.dart';
 import 'package:housecairn_mobile/domain/choices.dart';
 import 'package:housecairn_mobile/domain/day.dart';
 import 'package:housecairn_mobile/domain/photos.dart';
@@ -72,6 +73,8 @@ Future<void> type(WidgetTester tester, String key, String text) async {
   await reveal(tester, target);
   await tester.enterText(target, text);
   await tester.pump();
+  // A search follows the typing after a short pause.
+  await tester.pump(hcSearchDelay);
 }
 
 void main() {

@@ -56,13 +56,33 @@ void main() {
         find.text(t('2.50 litres · Garage', '2,50 litres · Garage')),
         findsOneWidget,
       );
-      // The filter: 2 in stock, threshold 2, flagged.
-      expect(find.text(t('Low', 'Basse')), findsOneWidget);
-      // Low only, then a search by the supplier's name.
-      await tapKey(tester, 'stock-low');
+      // The filter: 2 in stock, threshold 2, flagged as the tab and the page
+      // of the article say it: Low stock.
+      final low = t('Low stock', 'Stock bas');
+      expect(
+        find.descendant(
+          of: find.byKey(Key('article-${data.filter}')),
+          matching: find.text(low),
+        ),
+        findsOneWidget,
+      );
+      // Low stock, then All again, then a search by the supplier's name.
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const Key('stock-tabs')),
+          matching: find.text(low),
+        ),
+      );
+      await tester.pumpAndSettle();
       expect(find.text('White paint'), findsNothing);
       expect(find.text('Main filter'), findsOneWidget);
-      await tapKey(tester, 'stock-low');
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const Key('stock-tabs')),
+          matching: find.text(t('All', 'Tous')),
+        ),
+      );
+      await tester.pumpAndSettle();
       await type(tester, 'stock-search', 'main shop');
       await tester.pumpAndSettle();
       expect(find.text('White paint'), findsNothing);
