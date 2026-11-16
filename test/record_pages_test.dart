@@ -296,66 +296,69 @@ void main() {
       expect(find.byKey(const Key('report-resolve')), findsOneWidget);
     });
 
-    testWidgets('a project: pills with what is left, title, goal as a '
-        'paragraph, rooms as links, then Tasks, Budget and Quotes, $locale', (
-      tester,
-    ) async {
-      final (_, data) = await start(tester, height: 3000);
-      await openScreen(
-        tester,
-        ProjectScreen(homeId: data.main, projectId: data.project),
-      );
-      final pills = find.byKey(const Key('project-pills'));
-      // The state of the budget, as on the web: the lines plan 1 300, the
-      // accepted quote commits 1 200.01 on a line of 1 000, so the project
-      // is over its budget by 20.01.
-      expect(
-        find.descendant(
-          of: pills,
-          // The French amount has a no-break space before the euro sign.
-          matching: find.textContaining(
-            t('Over budget by', 'Budget dépassé de'),
-          ),
-        ),
-        findsOneWidget,
-      );
-      expect(find.text(t('Goal', 'Objectif')), findsNothing);
-      expect(find.byKey(const Key('project-goal')), findsOneWidget);
-      expect(headings(tester).take(3), [
-        t('Tasks', 'Tâches'),
-        t('Budget', 'Budget'),
-        t('Quotes', 'Devis'),
-      ]);
-      // A budget line: Planned, Committed, Paid and Gap, without Used.
-      final line = find.byKey(Key('line-${data.line}'));
-      await reveal(tester, line);
-      for (final label in [
-        t('Planned', 'Prévu'),
-        t('Committed', 'Engagé'),
-        t('Paid', 'Payé'),
-        t('Gap', 'Écart'),
-      ]) {
+    testWidgets(
+      'a project: pills with what is left, title, goal as a '
+      'paragraph, rooms as links, then Tasks, Budget, Quotes, Inspiration and Files, $locale',
+      (tester) async {
+        final (_, data) = await start(tester, height: 3000);
+        await openScreen(
+          tester,
+          ProjectScreen(homeId: data.main, projectId: data.project),
+        );
+        final pills = find.byKey(const Key('project-pills'));
+        // The state of the budget, as on the web: the lines plan 1 300, the
+        // accepted quote commits 1 200.01 on a line of 1 000, so the project
+        // is over its budget by 20.01.
         expect(
-          find.descendant(of: line, matching: find.text(label)),
+          find.descendant(
+            of: pills,
+            // The French amount has a no-break space before the euro sign.
+            matching: find.textContaining(
+              t('Over budget by', 'Budget dépassé de'),
+            ),
+          ),
           findsOneWidget,
         );
-      }
-      expect(find.byKey(const Key('amount-gauge')), findsNothing);
-      expect(
-        find.text(t('Where it stands', 'Où en est le budget')),
-        findsNothing,
-      );
-      // The line opens its form.
-      await tester.tap(line);
-      await tester.pumpAndSettle();
-      expect(find.byType(LineFormScreen), findsOneWidget);
-      await back(tester);
-      // The room concerned is a link to its page.
-      await tester.drag(find.byType(Scrollable).last, const Offset(0, 3000));
-      await tester.pumpAndSettle();
-      await tapKey(tester, 'project-room-${data.base.base.kitchen}');
-      expect(find.byType(RoomScreen), findsOneWidget);
-    });
+        expect(find.text(t('Goal', 'Objectif')), findsNothing);
+        expect(find.byKey(const Key('project-goal')), findsOneWidget);
+        expect(headings(tester), [
+          t('Tasks', 'Tâches'),
+          t('Budget', 'Budget'),
+          t('Quotes', 'Devis'),
+          t('Inspiration', 'Inspiration'),
+          t('Files', 'Fichiers'),
+        ]);
+        // A budget line: Planned, Committed, Paid and Gap, without Used.
+        final line = find.byKey(Key('line-${data.line}'));
+        await reveal(tester, line);
+        for (final label in [
+          t('Planned', 'Prévu'),
+          t('Committed', 'Engagé'),
+          t('Paid', 'Payé'),
+          t('Gap', 'Écart'),
+        ]) {
+          expect(
+            find.descendant(of: line, matching: find.text(label)),
+            findsOneWidget,
+          );
+        }
+        expect(find.byKey(const Key('amount-gauge')), findsNothing);
+        expect(
+          find.text(t('Where it stands', 'Où en est le budget')),
+          findsNothing,
+        );
+        // The line opens its form.
+        await tester.tap(line);
+        await tester.pumpAndSettle();
+        expect(find.byType(LineFormScreen), findsOneWidget);
+        await back(tester);
+        // The room concerned is a link to its page.
+        await tester.drag(find.byType(Scrollable).last, const Offset(0, 3000));
+        await tester.pumpAndSettle();
+        await tapKey(tester, 'project-room-${data.base.base.kitchen}');
+        expect(find.byType(RoomScreen), findsOneWidget);
+      },
+    );
 
     for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
       testWidgets('Projects: saving a new project opens its page, Back '
