@@ -59,6 +59,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get aboutLicences => 'Licences open source';
 
   @override
+  String get aboutBeta => 'Bêta iPhone (TestFlight)';
+
+  @override
+  String get aboutBetaOpen => 'Ouvrir le lien';
+
+  @override
+  String get aboutBetaCopy => 'Copier le lien';
+
+  @override
+  String get aboutBetaCopied => 'Lien copié';
+
+  @override
+  String get aboutBetaCannotOpen =>
+      'Rien sur ce téléphone ne peut ouvrir ce lien.';
+
+  @override
   String get moreHomeGroup => 'Logement';
 
   @override
