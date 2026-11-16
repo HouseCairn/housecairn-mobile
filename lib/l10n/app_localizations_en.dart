@@ -2368,6 +2368,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get itemsAllEmpty => 'No item yet. Add one from the page of a room.';
 
   @override
+  String get itemsEmptyShort => 'No item yet.';
+
+  @override
   String get itemsNoMatch => 'No item matches.';
 
   @override

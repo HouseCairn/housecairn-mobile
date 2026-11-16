@@ -2384,6 +2384,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun élément pour l\'instant. Ajoutez-en un depuis la page d\'une pièce.';
 
   @override
+  String get itemsEmptyShort => 'Aucun élément pour l\'instant.';
+
+  @override
   String get itemsNoMatch => 'Aucun élément ne correspond.';
 
   @override

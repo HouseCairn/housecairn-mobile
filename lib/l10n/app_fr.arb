@@ -789,6 +789,7 @@
   "itemsWarrantyUntil": "garantie jusqu'au {date}",
   "itemsWarrantyEnded": "garantie terminée le {date}",
   "itemsAllEmpty": "Aucun élément pour l'instant. Ajoutez-en un depuis la page d'une pièce.",
+  "itemsEmptyShort": "Aucun élément pour l'instant.",
   "itemsNoMatch": "Aucun élément ne correspond.",
   "itemManufacturerWarranty": "Garantie constructeur",
   "itemPurchasedOn": "Acheté le",

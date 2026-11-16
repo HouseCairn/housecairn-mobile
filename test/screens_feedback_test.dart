@@ -8,6 +8,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:housecairn_mobile/data/database.dart' show HomeRow;
 import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/domain/day.dart';
 import 'package:housecairn_mobile/design/widgets.dart';
@@ -164,6 +165,44 @@ void main() {
       );
       expect(find.text('Coffee machine'), findsOneWidget);
       expect(find.byKey(const Key('equipment-add')), findsNothing);
+    });
+
+    testWidgets('Equipment empty: with rooms the short text sits above the '
+        'button, with no room the long text and no button, $locale', (
+      tester,
+    ) async {
+      final (state, _) = await start(tester);
+      final id = await state.repository.createHome(name: 'Bare home');
+      Future<HomeRow> reread() async =>
+          (await state.repository.homes()).firstWhere((h) => h.id == id);
+      final short = t('No item yet.', 'Aucun élément pour l\'instant.');
+      final long = t(
+        'No item yet. Add one from the page of a room.',
+        'Aucun élément pour l\'instant. Ajoutez-en un depuis la page d\'une '
+            'pièce.',
+      );
+      // No room yet: the long text points to the page of a room.
+      await openScreen(
+        tester,
+        HcScaffold(
+          title: 'Equipment',
+          body: EquipmentList(home: await reread(), tabs: const SizedBox()),
+        ),
+      );
+      expect(find.text(long), findsOneWidget);
+      expect(find.byKey(const Key('equipment-add')), findsNothing);
+      // A room and no item: the short text, and the button under it.
+      await state.repository.createRoom(id, name: 'Bare room');
+      await openScreen(
+        tester,
+        HcScaffold(
+          title: 'Equipment',
+          body: EquipmentList(home: await reread(), tabs: const SizedBox()),
+        ),
+      );
+      expect(find.text(short), findsOneWidget);
+      expect(find.text(long), findsNothing);
+      expect(find.byKey(const Key('equipment-add')), findsOneWidget);
     });
 
     for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
