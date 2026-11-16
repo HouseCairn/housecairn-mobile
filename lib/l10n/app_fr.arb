@@ -10,7 +10,7 @@
   "moreHelpGroup": "Aide",
   "about": "À propos",
   "aboutAttribution": "Housecairn, by Robvred",
-  "aboutVersion": "version {version}",
+  "aboutVersion": "Version {version} ({build})",
   "aboutLicence": "Logiciel libre sous licence AGPL-3.0.",
   "aboutSource": "Code source et signalement de sécurité : {address}",
   "aboutAi": "Développé avec un agent IA, sous revue humaine.",
