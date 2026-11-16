@@ -89,6 +89,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homes => 'Mes logements';
 
   @override
+  String get brandName => 'HouseCairn';
+
+  @override
+  String get helpTooltip => 'Aide sur cette page';
+
+  @override
   String get homeSelectorTooltip => 'Choisir un logement';
 
   @override

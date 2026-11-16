@@ -88,6 +88,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homes => 'My homes';
 
   @override
+  String get brandName => 'HouseCairn';
+
+  @override
+  String get helpTooltip => 'Help for this page';
+
+  @override
   String get homeSelectorTooltip => 'Choose a home';
 
   @override

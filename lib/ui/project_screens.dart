@@ -20,6 +20,7 @@ import 'messages.dart';
 import 'parts.dart';
 import 'state.dart';
 import 'task_screen.dart';
+import 'help_button.dart';
 
 /// The statuses of each tab of Projects, as on the web (`PROJECT_VIEWS` of
 /// `core/templatetags/tabs.py`): what is going on, the ideas, what is over.
@@ -50,7 +51,11 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     final home = AppScope.of(context).current;
     return HcScaffold(
       title: l10n.navProjects,
-      actions: const [HomeSelector()],
+      brand: true,
+      actions: const [
+        HomeSelector(),
+        HelpButton(page: HelpPages.projects),
+      ],
       body: home == null
           ? const SizedBox.shrink()
           : DataView<(List<ProjectEntry>, Map<int, Decimal>)>(

@@ -242,6 +242,18 @@ abstract class AppLocalizations {
   /// **'My homes'**
   String get homes;
 
+  /// The name beside the cairn in the bar of a section root, and the label of the brand for screen readers (web: shell/brand.html, instance name). A name, not translated; written HouseCairn here, Housecairn (appTitle) in running text.
+  ///
+  /// In en, this message translates to:
+  /// **'HouseCairn'**
+  String get brandName;
+
+  /// Tooltip and label of the help button of the app bar, which opens the page of the documentation that describes the screen. Web catalogue: Aide sur cette page.
+  ///
+  /// In en, this message translates to:
+  /// **'Help for this page'**
+  String get helpTooltip;
+
   /// Tooltip of the home selector of the app bar.
   ///
   /// In en, this message translates to:

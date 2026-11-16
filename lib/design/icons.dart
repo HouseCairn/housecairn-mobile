@@ -50,6 +50,13 @@ enum HcIcons {
   /// the field of a date, the field of a list and the button that removes a
   /// date (design lot D5), in the same stroke.
   calendar([_R(4, 5, 16, 15, 2), _P('M4 10h16'), _P('M8 3v4'), _P('M16 3v4')]),
+
+  /// The help link of the bar (`components/icon.html`, `help`).
+  help([
+    _C(12, 12, 9),
+    _P('M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1.9-1.1 1.8'),
+    _C(12, 17, 0.6),
+  ]),
   chevronDown([_P('M6 9l6 6 6-6')]),
   clear([_P('M7 7l10 10'), _P('M17 7L7 17')]);
 
@@ -90,7 +97,8 @@ sealed class _Shape {
   const _Shape();
 }
 
-/// A path of the web icon: M, L, H, V and Z, absolute or relative.
+/// A path of the web icon: M, L, H, V, C, A (circular, unrotated) and Z, absolute or
+/// relative.
 class _P extends _Shape {
   const _P(this.d);
 
@@ -98,7 +106,7 @@ class _P extends _Shape {
 
   Path toPath() {
     final path = Path();
-    final tokens = RegExp(r'[MmLlHhVvZz]|-?\d*\.?\d+')
+    final tokens = RegExp(r'[MmLlHhVvCcAaZz]|-?\d*\.?\d+')
         .allMatches(d)
         .map((m) => m.group(0)!)
         .toList();
@@ -132,6 +140,29 @@ class _P extends _Shape {
           final ny = next();
           y = relative ? y + ny : ny;
           path.lineTo(x, y);
+        case 'C':
+          final x1 = next(), y1 = next(), x2 = next(), y2 = next();
+          final nx = next(), ny = next();
+          final ox = relative ? x : 0.0, oy = relative ? y : 0.0;
+          path.cubicTo(ox + x1, oy + y1, ox + x2, oy + y2, ox + nx, oy + ny);
+          x = ox + nx;
+          y = oy + ny;
+        case 'A':
+          // rx ry rotation large-arc sweep x y; the arcs of the icons are
+          // circles, so the rotation is 0 and rx equals ry.
+          final r = next();
+          next();
+          next();
+          final large = next() != 0, sweep = next() != 0;
+          final nx = next(), ny = next();
+          x = relative ? x + nx : nx;
+          y = relative ? y + ny : ny;
+          path.arcToPoint(
+            Offset(x, y),
+            radius: Radius.circular(r),
+            largeArc: large,
+            clockwise: sweep,
+          );
         case 'Z':
           path.close();
           x = startX;

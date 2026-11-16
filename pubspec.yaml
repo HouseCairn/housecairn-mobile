@@ -65,3 +65,6 @@ flutter:
     # The library of task templates, a copy of the web file
     # (tool/web_alignment.json), read by lib/domain/templates.dart.
     - assets/task_templates.yaml
+    # The cairn of the bar of the app (design/brand/housecairn-icon.svg of the
+    # web, drawn at 1x, 2x and 3x by tool/generate_icons.py).
+    - assets/brand/housecairn-icon.png

@@ -24,6 +24,8 @@
   "moreNotificationsText": "Quand le téléphone vous rappelle une tâche",
   "reportPhotoHelp": "La photo est facultative. Sa localisation et ses autres métadonnées sont supprimées.",
   "homes": "Mes logements",
+  "brandName": "HouseCairn",
+  "helpTooltip": "Aide sur cette page",
   "homeSelectorTooltip": "Choisir un logement",
   "allHomes": "Tous les logements",
   "todayOverdue": "En retard",

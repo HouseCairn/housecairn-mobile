@@ -20,6 +20,15 @@ abstract final class HcText {
     color: HcColors.text,
   );
 
+  /// `.brand-name`: the name beside the icon in the bar, 20/800.
+  static const brand = TextStyle(
+    fontFamily: HcFont.family,
+    fontSize: HcFont.sizeLg,
+    fontWeight: HcFont.heavy,
+    letterSpacing: HcFont.sizeLg * -0.01,
+    color: HcColors.text,
+  );
+
   /// `h2`: the heading of a group of rows, in capitals.
   static const sectionHeading = TextStyle(
     fontFamily: HcFont.family,
