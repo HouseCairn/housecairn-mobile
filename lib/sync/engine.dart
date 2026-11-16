@@ -63,6 +63,13 @@ class SyncEngine {
         continue;
       }
       notices.addAll(await repository.applyOperations(page.operations));
+      if (restarted) {
+        // Rows the phone holds that the snapshot does not have: deleted and
+        // purged there, or never sent (docs/protocol.md section 2.10).
+        for (final MapEntry(key: home, value: rows) in page.complete.entries) {
+          notices.addAll(await repository.reconcileAfterRestart(home, rows));
+        }
+      }
       received += page.operations.length;
       cursor = page.position;
       await repository.setSyncCursor(cursor);
@@ -91,6 +98,7 @@ class SyncEngine {
     final out = await repository.outgoing();
     if (out.isEmpty) return 0;
     final result = await transport.push([for (final o in out) o.operation]);
+    if (result.held) return 0;
     await repository.acknowledge(out.last.seq);
     // What won on the other side, for each field that lost there.
     if (result.lost.isNotEmpty) {

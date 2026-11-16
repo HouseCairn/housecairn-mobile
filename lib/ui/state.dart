@@ -169,6 +169,7 @@ class AppState extends ChangeNotifier {
     state: repository.serverState,
     device: repository.deviceB64,
     schemaVersion: repository.schemaVersion,
+    seenStore: repository.serverSeen,
   );
 
   /// Signs in to [address] in the system browser (OAuth 2 with PKCE); the

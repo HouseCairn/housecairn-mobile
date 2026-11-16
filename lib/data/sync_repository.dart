@@ -16,6 +16,11 @@ enum SyncNoticeKind {
   /// The space asks for a newer app (`min_sv`): this phone reads but does
   /// not write ("Versions of the schema between phones").
   updateRequired,
+
+  /// After a server answered 410, a row it had seen was no longer in its
+  /// snapshot (deleted, then purged, there): the phone deleted it and
+  /// dropped its waiting changes (docs/protocol.md section 2.10, rule 2).
+  droppedAfterRestart,
 }
 
 class SyncNotice {
@@ -537,7 +542,13 @@ extension SyncRepository on Repository {
         [key],
       );
       await db.customStatement('DELETE FROM homes WHERE id = ?', [key]);
-      for (final table in ['extra', 'pending', 'op_log', 'other_versions']) {
+      for (final table in [
+        'extra',
+        'pending',
+        'op_log',
+        'other_versions',
+        'server_seen',
+      ]) {
         await db.customStatement('DELETE FROM $table WHERE home_id = ?', [key]);
       }
       await db.customStatement(

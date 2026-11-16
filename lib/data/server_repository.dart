@@ -18,7 +18,182 @@ extension ServerSettings on Repository {
 
   /// The [ServerStateStore] of the transport, on `local_settings`.
   ServerStateStore get serverState => _RepositoryServerState(this);
+
+  /// The [ServerSeenStore] of the transport, on `server_seen`.
+  ServerSeenStore get serverSeen => _RepositoryServerSeen(this);
+
+  // ---------- the mark "seen by the server" (protocol section 2.10) ----------
+
+  /// Marks [rows] (`(t, h, id)`) as seen by the server.
+  Future<void> markServerSeen(Iterable<ServerRowKey> rows) async {
+    await db.transaction(() async {
+      for (final (type, home, id) in rows) {
+        if (!tableOfEntity.containsKey(type)) continue;
+        await db.customInsert(
+          'INSERT OR IGNORE INTO server_seen (entity, row_id, home_id) '
+          'VALUES (?, ?, ?)',
+          variables: [
+            Variable<String>(type),
+            Variable<Uint8List>(uuidBytes(id)),
+            Variable<Uint8List>(uuidBytes(home)),
+          ],
+        );
+      }
+    });
+  }
+
+  /// The rows of [homeId] marked seen by the server, as `(t, id)`.
+  Future<Set<(String, String)>> serverSeenIn(String homeId) async {
+    final rows = await db
+        .customSelect(
+          'SELECT entity, row_id FROM server_seen WHERE home_id = ?',
+          variables: [Variable<Uint8List>(uuidBytes(homeId))],
+        )
+        .get();
+    return {
+      for (final r in rows)
+        (
+          r.data['entity'] as String,
+          Uuid.unparse(r.data['row_id'] as Uint8List),
+        ),
+    };
+  }
+
+  /// Leaving the server: every mark goes.
+  Future<void> forgetServerSeen() =>
+      db.customStatement('DELETE FROM server_seen');
+
+  /// The rule of protocol section 2.10, "Starting again after 410", for
+  /// [homeId], once the server's snapshot of it is applied: [present] is
+  /// every row (`(t, id)`) of that snapshot, tombstones included.
+  ///
+  /// 1. a row of the snapshot was merged as any change: it gets the mark;
+  /// 2. a row absent from the snapshot with the mark was deleted, then
+  ///    purged, on the server: it is deleted here with its clocks and what
+  ///    `extra` keeps of it, its waiting changes are dropped (a long text of
+  ///    them goes to the other versions), and it is listed;
+  /// 3. a row absent without the mark never reached the server: it is kept
+  ///    and sent again as a `put` of every field with its clock;
+  /// 4. the changes still waiting for the rows of 1 and 3 are pushed as
+  ///    usual;
+  /// 5. the rows of the snapshot the phone did not have came with it.
+  Future<List<SyncNotice>> reconcileAfterRestart(
+    String homeId,
+    Set<(String, String)> present,
+  ) async {
+    final notices = <SyncNotice>[];
+    final seen = await serverSeenIn(homeId);
+    final key = uuidBytes(homeId);
+    final resend = <(String, String)>{};
+    final now = _now();
+    await db.transaction(() async {
+      for (final table in homeTables) {
+        final type = entityOf[table]!;
+        final rows = await db
+            .customSelect(
+              'SELECT id FROM $table WHERE home_id = ?',
+              variables: [Variable<Uint8List>(key)],
+            )
+            .get();
+        for (final r in rows) {
+          final id = Uuid.unparse(r.data['id'] as Uint8List);
+          final row = (type, id);
+          if (present.contains(row)) continue;
+          if (!seen.contains(row)) {
+            resend.add(row);
+            continue;
+          }
+          await _dropRow(table, type, id, homeId, now);
+          notices.add(
+            SyncNotice(
+              SyncNoticeKind.droppedAfterRestart,
+              entity: type,
+              rowId: id,
+            ),
+          );
+        }
+      }
+      await markServerSeen([
+        for (final (type, id) in present) (type, homeId, id),
+      ]);
+      if (resend.isEmpty) return;
+      final snapshot = await this.snapshot();
+      for (final row in snapshot.rows) {
+        if (!resend.contains((row.type, row.id))) continue;
+        for (final op in row.operations(schemaVersion: schemaVersion)) {
+          await db.customInsert(
+            'INSERT INTO op_log (device, hlc, home_id, body) '
+            'VALUES (?, ?, ?, ?)',
+            variables: [
+              Variable<Uint8List>(_device),
+              Variable<String>(op[Op.clock]! as String),
+              Variable<Uint8List>(key),
+              Variable<String>(jsonEncode(op)),
+            ],
+          );
+        }
+      }
+    });
+    return notices;
+  }
+
+  /// Rule 2: the row [id] of [table] goes, with its clocks, `extra`, mark
+  /// and waiting changes; a long text of those changes is kept 30 days as
+  /// an other version.
+  Future<void> _dropRow(
+    String table,
+    String type,
+    String id,
+    String homeId,
+    int now,
+  ) async {
+    final bytes = uuidBytes(id);
+    final waiting = await db
+        .customSelect(
+          "SELECT seq, body FROM op_log WHERE json_extract(body, '\$.t') = ? "
+          "AND json_extract(body, '\$.id') = ?",
+          variables: [Variable<String>(type), Variable<String>(id)],
+        )
+        .get();
+    for (final w in waiting) {
+      final op = (jsonDecode(w.data['body'] as String) as Map)
+          .cast<String, Object?>();
+      final fields = (op[Op.fields] as Map?)?.cast<String, Object?>() ?? {};
+      for (final MapEntry(:key, :value) in fields.entries) {
+        if (longTextFields.contains(key) && value is String && value != '') {
+          await _keepOtherVersion(
+            type,
+            id,
+            homeId,
+            key,
+            value,
+            _Clock(op[Op.clock]! as String, _device),
+            now,
+          );
+        }
+      }
+      await db.customStatement('DELETE FROM op_log WHERE seq = ?', [
+        w.data['seq'],
+      ]);
+    }
+    for (final sql in [
+      'DELETE FROM field_clock WHERE entity = ? AND row_id = ?',
+      'DELETE FROM extra WHERE entity = ? AND row_id = ?',
+      'DELETE FROM server_seen WHERE entity = ? AND row_id = ?',
+    ]) {
+      await db.customStatement(sql, [type, bytes]);
+    }
+    await db.customStatement('DELETE FROM $table WHERE id = ?', [bytes]);
+    // Its local files: a photo and its thumbnail, an attachment.
+    for (final name in [id, '$id.jpg', '$id.thumb.jpg']) {
+      final file = File('${homeDirectory(homeId).path}/$name');
+      if (file.existsSync()) file.deleteSync();
+    }
+  }
 }
+
+/// A row as the server names it: `(t, h, id)`.
+typedef ServerRowKey = (String, String, String);
 
 class _RepositoryServerState implements ServerStateStore {
   _RepositoryServerState(this.repository);
@@ -31,4 +206,14 @@ class _RepositoryServerState implements ServerStateStore {
   @override
   Future<void> writeServerState(String? state) =>
       repository._setSetting('server_sync', state);
+}
+
+class _RepositoryServerSeen implements ServerSeenStore {
+  _RepositoryServerSeen(this.repository);
+
+  final Repository repository;
+
+  @override
+  Future<void> markSeen(Iterable<ServerRowKey> rows) =>
+      repository.markServerSeen(rows);
 }

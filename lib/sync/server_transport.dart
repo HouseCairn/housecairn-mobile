@@ -155,6 +155,13 @@ abstract interface class ServerStateStore {
   Future<void> writeServerState(String? state);
 }
 
+/// Where the transport keeps the mark "seen by the server" of each row
+/// (docs/protocol.md section 2.10): in the phone's sync tables.
+abstract interface class ServerSeenStore {
+  /// Marks the rows `(t, h, id)`.
+  Future<void> markSeen(Iterable<(String, String, String)> rows);
+}
+
 /// Why the server stopped this phone.
 enum ServerStop {
   /// The access was revoked on the server, or expired: sign in again.
@@ -202,6 +209,7 @@ class ServerTransport implements SyncTransport {
     required this.state,
     required this.device,
     required this.schemaVersion,
+    this.seenStore,
   });
 
   final ServerAddress address;
@@ -212,6 +220,14 @@ class ServerTransport implements SyncTransport {
   /// This phone's device id, in `b64`.
   final String device;
   final int schemaVersion;
+
+  /// The mark "seen by the server"; `null` keeps it in [seen] only (tests).
+  final ServerSeenStore? seenStore;
+
+  Future<void> _mark(Iterable<(String, String, String)> rows) async {
+    final list = rows.toList();
+    if (list.isNotEmpty) await seenStore?.markSeen(list);
+  }
 
   /// The operations the server refused in the last push, for the screens.
   final rejections = <ServerRejection>[];
@@ -438,6 +454,21 @@ class ServerTransport implements SyncTransport {
       if (home == null || s.gone.contains(home)) continue;
       (byHome[home] ??= []).add(op);
     }
+    // A cursor the server no longer keeps: the pull starts again from the
+    // snapshot, and the rule of protocol section 2.10 decides first which of
+    // these operations still go (a change to a row purged there does not).
+    for (final home in byHome.keys) {
+      final cursor = s.cursors[home];
+      if (cursor == null) continue;
+      final probe = await _call(
+        'GET',
+        '/api/v1/sync/homes/$home/changes',
+        query: {'after': '$cursor', 'limit': '1'},
+      );
+      if (probe.status == 410 && _code(probe) == 'cursor_expired') {
+        return const PushResult(held: true);
+      }
+    }
     for (final MapEntry(key: home, value: ops) in byHome.entries) {
       for (var start = 0; start < ops.length; start += pushSize) {
         final chunk = ops.sublist(
@@ -549,18 +580,21 @@ class ServerTransport implements SyncTransport {
               for (final op in (jsonDecode(body) as Map)['ops'] as List)
                 (op as Map).cast<String, Object?>(),
             ];
+      final marked = <(String, String, String)>[];
       for (final result in (_json(reply)['results'] as List? ?? const [])) {
         final r = (result as Map).cast<String, Object?>();
         final op = sent[r['i']! as int];
         final key = (op[Op.type]! as String, op[Op.id]! as String);
         final status = r['status'];
         seen[key] = status != 'rejected';
+        if (status != 'rejected') marked.add((key.$1, home, key.$2));
         if (status == 'rejected') {
           rejections.add(ServerRejection(op, r['code'] as String? ?? ''));
         }
         final fields = (r['lost'] as Map?)?.cast<String, Object?>();
         if (fields != null) lost.addAll(_lostOperations(op, fields));
       }
+      await _mark(marked);
     }
     s.unanswered = null;
     await _save(s);
@@ -604,13 +638,16 @@ class ServerTransport implements SyncTransport {
         if (!s.gone.contains(h.id)) h.id,
     ];
     final operations = <SyncOperation>[];
+    final complete = <String, Set<(String, String)>>{};
     var more = false;
     for (final (index, home) in homes.indexed) {
       final cursor = s.cursors[home];
       if (cursor == null) {
-        final (ops, covers) = await _snapshot(home);
+        final (ops, covers, rows) = await _snapshot(home);
         if (covers == null) continue;
         operations.addAll(ops);
+        complete[home] = rows;
+        await _mark([for (final (t, id) in complete[home]!) (t, home, id)]);
         s.staged[home] = covers;
       } else {
         final reply = await _call(
@@ -632,12 +669,15 @@ class ServerTransport implements SyncTransport {
         if (reply.status == 404) continue;
         if (reply.status != 200) _unexpected(reply);
         final json = _json(reply);
+        final marked = <(String, String, String)>[];
         for (final change in (json['changes'] as List? ?? const [])) {
           final c = (change as Map).cast<String, Object?>();
           final op = (c['op']! as Map).cast<String, Object?>();
           operations.add({...op, Op.device: c['device']});
+          marked.add((op[Op.type]! as String, home, op[Op.id]! as String));
           s.staged[home] = c['pos']! as int;
         }
+        await _mark(marked);
         if (json['more'] == true) more = true;
       }
       // One home a page when it is large, so a page stays bounded.
@@ -649,20 +689,29 @@ class ServerTransport implements SyncTransport {
     s.round++;
     s.stagedAt = s.round;
     await _save(s);
-    return PullResult(operations: operations, position: s.round, more: more);
+    return PullResult(
+      operations: operations,
+      position: s.round,
+      more: more,
+      complete: complete,
+    );
   }
 
-  /// The snapshot of [home] as operations, and its `covers`; `null` covers
-  /// when the home is gone.
-  Future<(List<SyncOperation>, int?)> _snapshot(String home) async {
+  /// The snapshot of [home] as operations, its `covers`, and every row of
+  /// it (`(t, id)`); `null` covers when the home is gone.
+  Future<(List<SyncOperation>, int?, Set<(String, String)>)> _snapshot(
+    String home,
+  ) async {
     final reply = await _call('GET', '/api/v1/sync/homes/$home/snapshot');
+    const none = (<SyncOperation>[], null, <(String, String)>{});
     if (reply.status == 410) {
       (await _state()).gone.add(home);
-      return (const <SyncOperation>[], null);
+      return none;
     }
-    if (reply.status == 404) return (const <SyncOperation>[], null);
+    if (reply.status == 404) return none;
     if (reply.status != 200) _unexpected(reply);
     final ops = <SyncOperation>[];
+    final rows = <(String, String)>{};
     int? covers;
     for (final line in const LineSplitter().convert(utf8.decode(reply.body))) {
       if (line.trim().isEmpty) continue;
@@ -673,9 +722,10 @@ class ServerTransport implements SyncTransport {
         continue;
       } else {
         ops.addAll(snapshotRowOperations(json));
+        rows.add((json['t']! as String, json['id']! as String));
       }
     }
-    return (ops, covers);
+    return (ops, covers, rows);
   }
 
   /// A row of the server's snapshot (`{"t", "h", "id", "f": {field: [value,
