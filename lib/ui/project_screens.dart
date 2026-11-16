@@ -946,9 +946,11 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
         ),
         fieldHelp(
           l10n.projectSeasonHemisphereHelp(
-            _hemisphere == recurrence.south
-                ? l10n.hemisphereSouth
-                : l10n.hemisphereNorth,
+            // In lower case, as the web words it: "(northern)", "(nord)".
+            (_hemisphere == recurrence.south
+                    ? l10n.hemisphereSouth
+                    : l10n.hemisphereNorth)
+                .toLowerCase(),
           ),
         ),
       ],

@@ -4,8 +4,9 @@
 // help of the web, the title of the home, the one Delete, the folded sections
 // of the project and of the task), at 360 px, in English and French, at text
 // scale 1 and 2, on Android and on iOS, and each refused as well. The forms
-// whose Android capture already is in a file of lot 2b or 3b are captured here
-// on iOS only. Regenerate after a deliberate change:
+// whose Android capture at the usual text size already is in a file of lot 2b
+// or 3b are captured here too, so that these forms have Android at both sizes.
+// Regenerate after a deliberate change:
 //   flutter test --update-goldens test/goldens_d11_test.dart
 // and review every changed image in the pull request.
 
@@ -127,7 +128,7 @@ final _pages = <(String, bool, _Open)>[
   ),
   (
     'report_form',
-    false,
+    true,
     (tester, d, m) => openScreen(tester, ReportFormScreen(homeId: d.main)),
   ),
   (
@@ -145,11 +146,32 @@ final _pages = <(String, bool, _Open)>[
   ),
   (
     'project_form',
-    false,
+    true,
     (tester, d, m) => openScreen(
       tester,
       ProjectFormScreen(homeId: d.main, projectId: d.project),
     ),
+  ),
+  (
+    'project_form_season',
+    true,
+    (tester, d, m) async {
+      await openScreen(
+        tester,
+        ProjectFormScreen(homeId: d.main, projectId: d.project),
+      );
+      // To the end: the season and its help, which names the hemisphere.
+      await tester.drag(
+        find
+            .byWidgetPredicate(
+              (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+            )
+            .hitTestable()
+            .last,
+        const Offset(0, -3000),
+      );
+      await tester.pumpAndSettle();
+    },
   ),
   (
     'project_form_error',

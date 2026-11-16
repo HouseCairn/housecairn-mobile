@@ -3,7 +3,10 @@
 // The forms as the web has them (design lot D11): the order of the fields, the
 // help of the web under them, the title of the home, one style of Delete,
 // folded sections (the rooms, duration and season of a project; the
-// materials of a task). Each test fails without the change it is named for.
+// materials of a task). Nine of the tests (room order, name from type, item
+// room help, home title, report Photo label, folded project section, season
+// help, one Delete, task materials saved) were each run with the change they
+// are named for undone, and failed.
 
 import 'dart:io';
 
@@ -238,6 +241,43 @@ void main() {
         expect(saved.estimatedMinutes, 3 * 24 * 60);
         expect(saved.season, 'spring');
       });
+
+      for (final south in [false, true]) {
+        testWidgets('the project: the help of the season names the hemisphere '
+            'in lower case, as the web does (${south ? 'south' : 'north'})', (
+          tester,
+        ) async {
+          await onPhone(tester);
+          late Lot3b data;
+          await pumpApp(
+            tester,
+            locale: locale,
+            seed: (r) async {
+              data = await Lot3b.seed(r);
+              if (south) await r.updateHome(data.main, hemisphere: 'south');
+            },
+          );
+          await openScreen(tester, ProjectFormScreen(homeId: data.main));
+          await see(tester, find.text(m['projectSectionRooms']!));
+          await tester.tap(find.text(m['projectSectionRooms']!));
+          await tester.pumpAndSettle();
+          // The words of the web, written out: not read back from the file
+          // of messages that the app itself is built from.
+          final hemisphere = {
+            ('en', false): 'northern',
+            ('en', true): 'southern',
+            ('fr', false): 'nord',
+            ('fr', true): 'sud',
+          }[(locale, south)]!;
+          final help = locale == 'fr'
+              ? 'La saison suit l\'hémisphère du logement ($hemisphere) : '
+                    'modifiez-le dans les réglages du logement.'
+              : 'The season follows the hemisphere of the home ($hemisphere): '
+                    'change it in the settings of the home.';
+          await see(tester, find.text(help));
+          expect(find.text(help), findsOneWidget);
+        });
+      }
 
       testWidgets('a project keeps its duration and its season when it is '
           'saved', (tester) async {

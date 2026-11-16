@@ -1495,7 +1495,7 @@
   "projectSeasonAnyTime": "Any time",
   "@projectSeasonAnyTime": {"description": "No season for a project. Web catalogue (projects): Toute l'année."},
   "projectSeasonHemisphereHelp": "The season follows the hemisphere of the home ({hemisphere}): change it in the settings of the home.",
-  "@projectSeasonHemisphereHelp": {"description": "Help under the season of the project form. Web catalogue (projects): same text.", "placeholders": {"hemisphere": {"type": "String", "example": "Northern"}}},
+  "@projectSeasonHemisphereHelp": {"description": "Help under the season of the project form. Web catalogue (projects): same text.", "placeholders": {"hemisphere": {"type": "String", "example": "northern"}}},
   "materialsFormHelp": "Stock items the task needs, with the quantity. Marking the task done takes these quantities from the stock.",
   "@materialsFormHelp": {"description": "Help of the Materials section of the task form. Web catalogue (tasks): same text."},
   "addMaterialLine": "Add a line",
