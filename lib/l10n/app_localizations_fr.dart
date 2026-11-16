@@ -1268,6 +1268,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get errMoneyInvalid => 'Indiquez un montant, par exemple 1250,50.';
 
   @override
+  String get errDecimalMark =>
+      'Saisissez un nombre avec un point comme séparateur décimal, par exemple 12.5.';
+
+  @override
   String get errQuoteNeedsLine =>
       'Choisissez la ligne de budget sur laquelle le devis est engagé.';
 
@@ -1303,7 +1307,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get projectInProgress => 'En cours';
 
   @override
-  String get projectPlanned => 'Prévue';
+  String get projectPlanned => 'Prévu';
 
   @override
   String get projectFinished => 'Terminé';
@@ -1850,6 +1854,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reports => 'Signalements';
+
+  @override
+  String get reportsOpen => 'Ouverts';
 
   @override
   String get reportsClosed => 'Classés';

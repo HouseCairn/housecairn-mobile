@@ -29,6 +29,10 @@ String projectStatusLabel(AppLocalizations l10n, String status) =>
       _ => l10n.projectIdea,
     };
 
+/// The tone of the pill of a project, as the web's
+/// `projects/project_detail.html` has it: `info` whatever the status.
+HcPillTone projectStatusTone(String status) => HcPillTone.info;
+
 List<(String, String)> projectStatusChoices(AppLocalizations l10n) => [
   for (final s in const ['idea', 'planned', 'in_progress', 'done', 'abandoned'])
     (s, projectStatusLabel(l10n, s)),
@@ -187,13 +191,45 @@ Widget fieldHelp(String text) => Padding(
   child: Text(text, style: HcText.bodySmall),
 );
 
-/// A validator of an optional amount of money.
-String? Function(String?) moneyCheck(AppLocalizations l10n) => (value) {
-  final text = (value ?? '').trim();
-  return text.isEmpty || budget.parseMoney(text) != null
-      ? null
-      : l10n.errMoneyInvalid;
-};
+/// What the person typed in an amount field, as the plain text the data
+/// layer reads (`1200.50`), in the language of the phone ([amountInput]).
+String fieldAmount(BuildContext context, TextEditingController controller) =>
+    amountInput(
+      Localizations.localeOf(context).toLanguageTag(),
+      controller.text,
+    );
+
+/// An optional amount of money in a field, written and read in the language
+/// of the phone (`1 200,00` in French, `1,200.00` in English; a comma or a
+/// point is read as the decimal in French; in English a comma only groups
+/// thousands, and any other comma is refused with the web's message about
+/// the decimal mark; spaces are ignored). The stored value does not change:
+/// read it with [fieldAmount]. [parse] says what an amount is (money by
+/// default), [invalid] what is said of one that is not.
+Widget hcAmount(
+  BuildContext context,
+  String label,
+  TextEditingController controller, {
+  Key? key,
+  Decimal? Function(String) parse = budget.parseMoney,
+  String? invalid,
+}) {
+  final l10n = AppLocalizations.of(context);
+  final message = invalid ?? l10n.errMoneyInvalid;
+  final locale = Localizations.localeOf(context).toLanguageTag();
+  return hcText(
+    label,
+    controller,
+    key: key,
+    keyboard: const TextInputType.numberWithOptions(decimal: true),
+    sentences: false,
+    validator: (value) {
+      final text = amountInput(locale, value ?? '');
+      if (isDecimalCommaMisuse(text)) return l10n.errDecimalMark;
+      return text.isEmpty || parse(text) != null ? null : message;
+    },
+  );
+}
 
 /// Chips to choose several among [choices].
 Widget choiceChips(

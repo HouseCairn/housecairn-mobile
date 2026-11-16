@@ -2198,6 +2198,12 @@ abstract class AppLocalizations {
   /// **'Give an amount of money, such as 1250.50.'**
   String get errMoneyInvalid;
 
+  /// Web catalogue (core forms): Saisissez un nombre avec un point comme séparateur décimal, par exemple 12.5.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number with a point as the decimal mark, for example 12.5.'**
+  String get errDecimalMark;
+
   /// Web catalogue (projects, budget or reports): Choisissez la ligne de budget sur laquelle le devis est engagé.
   ///
   /// In en, this message translates to:
@@ -3145,6 +3151,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reports'**
   String get reports;
+
+  /// Web catalogue (projects, budget or reports): Ouverts.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get reportsOpen;
 
   /// Web catalogue (projects, budget or reports): Classés.
   ///

@@ -12,9 +12,9 @@ import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
-import '../domain/stock.dart' as stock;
 import '../l10n/app_localizations.dart';
 import 'budget_parts.dart';
+import 'stock_format.dart';
 import 'home_selector.dart';
 import 'messages.dart';
 import 'parts.dart';
@@ -274,7 +274,10 @@ class ProjectScreen extends StatelessWidget {
                         spacing: HcSpace.s2,
                         runSpacing: HcSpace.s1,
                         children: [
-                          HcPill(projectStatusLabel(l10n, p.status)),
+                          HcPill(
+                            projectStatusLabel(l10n, p.status),
+                            tone: projectStatusTone(p.status),
+                          ),
                           if (p.priority == 'high')
                             HcPill(l10n.highPriority, tone: HcPillTone.warning),
                           if (p.priority == 'low')
@@ -698,7 +701,7 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
       status: _status,
       priority: _priority,
       roomIds: _rooms.toList(),
-      budget: _budget.text,
+      budget: fieldAmount(context, _budget),
       budgetLabel: l10n.budgetHeading,
     );
     final saved = await runChange(
@@ -756,15 +759,11 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                       keyPrefix: 'project-room',
                     ),
                   if (widget.projectId == null) ...[
-                    hcText(
+                    hcAmount(
+                      context,
                       l10n.budgetHeading,
                       _budget,
                       key: const Key('project-budget'),
-                      keyboard: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      sentences: false,
-                      validator: moneyCheck(l10n),
                     ),
                     fieldHelp(l10n.amountsAreIn(_currency)),
                   ],
@@ -826,8 +825,14 @@ class _LineFormScreenState extends State<LineFormScreen> {
       if (line != null) {
         _label.text = line.label;
         _nature = line.nature;
-        _planned.text = budget.readMoney(line.planned).toStringAsFixed(2);
-        _paid.text = budget.readMoney(line.paid).toStringAsFixed(2);
+        _planned.text = moneyFieldText(
+          Localizations.localeOf(context).toLanguageTag(),
+          budget.readMoney(line.planned),
+        );
+        _paid.text = moneyFieldText(
+          Localizations.localeOf(context).toLanguageTag(),
+          budget.readMoney(line.paid),
+        );
       }
     });
   }
@@ -846,8 +851,8 @@ class _LineFormScreenState extends State<LineFormScreen> {
     final input = LineInput(
       label: _label.text,
       nature: _nature,
-      planned: _planned.text,
-      paid: _paid.text,
+      planned: fieldAmount(context, _planned),
+      paid: fieldAmount(context, _paid),
     );
     final saved = await runChange(
       context,
@@ -877,7 +882,6 @@ class _LineFormScreenState extends State<LineFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    const number = TextInputType.numberWithOptions(decimal: true);
     return HcScaffold(
       title: widget.lineId == null ? l10n.addLine : l10n.editLine,
       actions: [HcBarAction(label: l10n.save, onPressed: _save)],
@@ -904,21 +908,17 @@ class _LineFormScreenState extends State<LineFormScreen> {
                     (v) => setState(() => _nature = v),
                     key: const Key('line-nature'),
                   ),
-                  hcText(
+                  hcAmount(
+                    context,
                     l10n.amountPlanned,
                     _planned,
                     key: const Key('line-planned'),
-                    keyboard: number,
-                    sentences: false,
-                    validator: moneyCheck(l10n),
                   ),
-                  hcText(
+                  hcAmount(
+                    context,
                     l10n.amountPaid,
                     _paid,
                     key: const Key('line-paid'),
-                    keyboard: number,
-                    sentences: false,
-                    validator: moneyCheck(l10n),
                   ),
                   fieldHelp(l10n.linePaidHelp),
                   fieldHelp(l10n.amountsAreIn(_currency)),
@@ -1007,7 +1007,10 @@ class _QuoteFormScreenState extends State<QuoteFormScreen> {
       _files = files;
       if (q != null) {
         final input = QuoteInput.of(q);
-        _amount.text = budget.readMoney(q.amount).toStringAsFixed(2);
+        _amount.text = moneyFieldText(
+          Localizations.localeOf(context).toLanguageTag(),
+          budget.readMoney(q.amount),
+        );
         _note.text = input.note;
         _status = input.status;
         _line = input.budgetLineId;
@@ -1027,7 +1030,7 @@ class _QuoteFormScreenState extends State<QuoteFormScreen> {
 
   QuoteInput _input() => QuoteInput(
     contractorId: _contractor,
-    amount: _amount.text,
+    amount: fieldAmount(context, _amount),
     issuedOn: _issued,
     validUntil: _validUntil,
     status: _status,
@@ -1103,15 +1106,11 @@ class _QuoteFormScreenState extends State<QuoteFormScreen> {
                     (v) => setState(() => _contractor = v),
                     key: const Key('quote-contractor'),
                   ),
-                  hcText(
+                  hcAmount(
+                    context,
                     l10n.amount,
                     _amount,
                     key: const Key('quote-amount'),
-                    keyboard: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    sentences: false,
-                    validator: moneyCheck(l10n),
                   ),
                   fieldHelp(l10n.amountIsIn(_currency)),
                   HcDateField(
@@ -1240,7 +1239,12 @@ class _EnvelopeFormScreenState extends State<EnvelopeFormScreen> {
 
   void _fill() {
     final value = _envelopes[_year];
-    _amount.text = value == null ? '' : stock.plain(value);
+    _amount.text = value == null
+        ? ''
+        : moneyFieldText(
+            Localizations.localeOf(context).toLanguageTag(),
+            value,
+          );
   }
 
   @override
@@ -1254,7 +1258,8 @@ class _EnvelopeFormScreenState extends State<EnvelopeFormScreen> {
     final navigator = Navigator.of(context);
     final saved = await runChange(
       context,
-      (r) => r.setEnvelope(widget.homeId, _year!, _amount.text),
+      (r) =>
+          r.setEnvelope(widget.homeId, _year!, fieldAmount(context, _amount)),
     );
     if (saved) navigator.pop();
   }
@@ -1286,15 +1291,11 @@ class _EnvelopeFormScreenState extends State<EnvelopeFormScreen> {
                       }),
                       key: const Key('envelope-year'),
                     ),
-                  hcText(
+                  hcAmount(
+                    context,
                     l10n.envelope,
                     _amount,
                     key: const Key('envelope-amount'),
-                    keyboard: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    sentences: false,
-                    validator: moneyCheck(l10n),
                   ),
                   fieldHelp(l10n.envelopeHelp),
                   fieldHelp(l10n.amountsAreIn(_currency)),

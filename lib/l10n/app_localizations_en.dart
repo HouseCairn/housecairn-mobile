@@ -1259,6 +1259,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errMoneyInvalid => 'Give an amount of money, such as 1250.50.';
 
   @override
+  String get errDecimalMark =>
+      'Enter a number with a point as the decimal mark, for example 12.5.';
+
+  @override
   String get errQuoteNeedsLine =>
       'Choose the budget line the quote is committed on.';
 
@@ -1835,6 +1839,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reports => 'Reports';
+
+  @override
+  String get reportsOpen => 'Open';
 
   @override
   String get reportsClosed => 'Closed';

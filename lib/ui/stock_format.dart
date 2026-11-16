@@ -69,6 +69,44 @@ String formatMoney(String locale, String currency, Decimal value) {
       '${text.substring(at + zeros.length)}';
 }
 
+/// An amount as a field shows it, in the language of the phone: the grouping
+/// and decimal separators of [locale] and always two decimals (`1 200,00` in
+/// French, `1,200.00` in English), written from the decimal value itself.
+String moneyFieldText(String locale, Decimal value) {
+  final cents = (value.abs() * Decimal.fromInt(100)).round().toBigInt();
+  final whole = cents ~/ BigInt.from(100);
+  final fraction = (cents % BigInt.from(100)).toInt();
+  final format = NumberFormat.decimalPattern(locale);
+  return '${value < stock.zero ? '-' : ''}${format.format(whole.toInt())}'
+      '${format.symbols.DECIMAL_SEP}${fraction.toString().padLeft(2, '0')}';
+}
+
+/// What a person typed in an amount field, as the plain text the data layer
+/// reads (`1200.50`): spaces of any kind are ignored. Where the language
+/// writes a decimal comma, a comma or a point is read as the decimal. Where it
+/// writes a decimal point, a comma is read only as the grouping of thousands
+/// (`1,200.50`, matching `^\d{1,3}(,\d{3})+(\.\d*)?$`) and is dropped; any
+/// other comma (`12,5`, `1,20`) is left in the text, as the web refuses it,
+/// and [isDecimalCommaMisuse] tells the validators to answer with
+/// [AppLocalizations.errDecimalMark]. Text that is not an amount is returned
+/// as it is: the validators refuse it.
+String amountInput(String locale, String text) {
+  final clean = text.replaceAll(RegExp(r'[\s\u00a0\u202f]'), '');
+  if (_decimalComma(locale)) return clean.replaceAll(',', '.');
+  if (RegExp(r'^\d{1,3}(,\d{3})+(\.\d*)?$').hasMatch(clean)) {
+    return clean.replaceAll(',', '');
+  }
+  return clean;
+}
+
+bool _decimalComma(String locale) =>
+    NumberFormat.decimalPattern(locale).symbols.DECIMAL_SEP == ',';
+
+/// Whether [read], the result of [amountInput], still holds a comma: a comma
+/// typed where the language writes a decimal point and that is not a grouping
+/// of thousands. The web refuses it with a message that says what to type.
+bool isDecimalCommaMisuse(String read) => read.contains(',');
+
 /// The unit of [article] as it reads after [quantity] ("1 litre",
 /// "2 litres"), or what Other stands for; empty without a unit
 /// (`stock/models.py` `unit_text`).

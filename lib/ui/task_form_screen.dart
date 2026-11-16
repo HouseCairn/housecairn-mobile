@@ -15,6 +15,7 @@ import '../domain/recurrence.dart' as recurrence;
 import '../l10n/app_localizations.dart';
 import 'autosave.dart';
 import 'budget_parts.dart';
+import 'stock_format.dart';
 import 'choices.dart';
 import 'messages.dart';
 import 'parts.dart';
@@ -82,6 +83,8 @@ class _TaskFormScreenState extends State<TaskFormScreen>
     final minutes = typed == null
         ? null
         : durations.toMinutes(typed, _durationUnit);
+    final material = fieldAmount(context, _material);
+    final labour = fieldAmount(context, _labour);
     await repository.atomic(() async {
       await repository.updateTask(
         widget.taskId!,
@@ -89,8 +92,8 @@ class _TaskFormScreenState extends State<TaskFormScreen>
       );
       await repository.setTaskBudgets(
         widget.taskId!,
-        material: _material.text,
-        labour: _labour.text,
+        material: material,
+        labour: labour,
       );
     });
   }
@@ -190,10 +193,16 @@ class _TaskFormScreenState extends State<TaskFormScreen>
       }
       _material.text = task.materialBudget == null
           ? ''
-          : budget.readMoney(task.materialBudget!).toStringAsFixed(2);
+          : moneyFieldText(
+              Localizations.localeOf(context).toLanguageTag(),
+              budget.readMoney(task.materialBudget!),
+            );
       _labour.text = task.labourBudget == null
           ? ''
-          : budget.readMoney(task.labourBudget!).toStringAsFixed(2);
+          : moneyFieldText(
+              Localizations.localeOf(context).toLanguageTag(),
+              budget.readMoney(task.labourBudget!),
+            );
       _mode = task.repeatMode;
       _unit = task.repeatUnit;
       _season = task.season;
@@ -264,6 +273,8 @@ class _TaskFormScreenState extends State<TaskFormScreen>
     final minutes = typed == null
         ? null
         : durations.toMinutes(typed, _durationUnit);
+    final material = fieldAmount(context, _material);
+    final labour = fieldAmount(context, _labour);
     try {
       await repository.atomic(() async {
         // A room, an item and a contractor added with the task join the home
@@ -302,11 +313,7 @@ class _TaskFormScreenState extends State<TaskFormScreen>
             ? await repository.createTask(widget.homeId, input)
             : widget.taskId!;
         if (widget.taskId != null) await repository.updateTask(id, input);
-        await repository.setTaskBudgets(
-          id,
-          material: _material.text,
-          labour: _labour.text,
-        );
+        await repository.setTaskBudgets(id, material: material, labour: labour);
       });
     } on Refused catch (refused) {
       if (mounted) showRefusal(context, refused);
@@ -676,21 +683,17 @@ class _TaskFormScreenState extends State<TaskFormScreen>
           ],
         ),
       ),
-      hcText(
+      hcAmount(
+        context,
         l10n.labourBudget,
         _labour,
         key: const Key('task-labour-budget'),
-        keyboard: const TextInputType.numberWithOptions(decimal: true),
-        sentences: false,
-        validator: moneyCheck(l10n),
       ),
-      hcText(
+      hcAmount(
+        context,
         l10n.materialBudget,
         _material,
         key: const Key('task-material-budget'),
-        keyboard: const TextInputType.numberWithOptions(decimal: true),
-        sentences: false,
-        validator: moneyCheck(l10n),
       ),
       fieldHelp(l10n.taskBudgetHelp(_currency)),
     ],

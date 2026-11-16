@@ -24,6 +24,14 @@ String reportStatusLabel(AppLocalizations l10n, String status) =>
       _ => l10n.reportOpen,
     };
 
+/// The tone of the pill of a report, as the web's `reports/report_detail.html`
+/// has it: open is `warning`, made a task `info`, the rest `ghost`.
+HcPillTone reportStatusTone(String status) => switch (status) {
+  reportTask => HcPillTone.info,
+  reportResolved || reportNoAction => HcPillTone.ghost,
+  _ => HcPillTone.warning,
+};
+
 Day _dayOf(int millis) =>
     Day.of(DateTime.fromMillisecondsSinceEpoch(millis).toLocal());
 
@@ -107,7 +115,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           children: [
             HcTabs(
               key: const Key('reports-tabs'),
-              labels: [l10n.reportOpen, l10n.reportsClosed, l10n.reportsAll],
+              labels: [l10n.reportsOpen, l10n.reportsClosed, l10n.reportsAll],
               current: _filter,
               onSelect: (i) => setState(() => _filter = i),
             ),
@@ -190,7 +198,10 @@ class ReportScreen extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: HcSpace.s3),
                       child: Align(
                         alignment: AlignmentDirectional.centerStart,
-                        child: HcPill(reportStatusLabel(l10n, report.status)),
+                        child: HcPill(
+                          reportStatusLabel(l10n, report.status),
+                          tone: reportStatusTone(report.status),
+                        ),
                       ),
                     ),
                     if (report.place.isNotEmpty)
