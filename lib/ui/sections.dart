@@ -19,6 +19,7 @@ import 'shell.dart';
 import 'state.dart';
 import 'today.dart';
 import 'ways.dart';
+import 'help_button.dart';
 
 /// The root screen of a section.
 Widget sectionRoot(Section section) => switch (section) {
@@ -65,6 +66,8 @@ class MoreScreen extends StatelessWidget {
     void open(Widget screen) => Navigator.of(context).push(hcRoute(screen));
     return HcScaffold(
       title: l10n.navMore,
+      brand: true,
+      actions: const [HelpButton(page: HelpPages.more)],
       body: HcScreenList(
         children: [
           HcSectionHeading(l10n.moreHomeGroup),
