@@ -145,6 +145,14 @@ more (`homes/current.py:3-6`).
   the web (`homes/services.py:239-252`); the app offers an export first. Final on every phone:
   rows and photos of that home are erased, and its photos are deleted from the relay
   ([ADR 0008](adr/0008-several-homes-one-family-space.md)).
+- The form of an existing home is titled *Edit the home*, has the help of the web under the
+  currency and the hemisphere, and ends with
+  *Archive this home* (or *Bring this home back*) above *Delete this home*, each the width of
+  the column, as the web's page of a home.
+- **Delete, everywhere**: the button that deletes a record (room, item, line, quote, task,
+  stock item, supplier, contractor, project, photo, home) is one component, `HcDeleteButton`,
+  filled in the danger colour and the width of the column, at the end of the form or page, as
+  the web's `.button-danger`. Not an outlined button.
 - The last active home can be neither archived nor deleted: the app always has a home to open.
 
 **Current home**, as the web defines it (`homes/current.py:1-13`, `:106-118`): the home last
@@ -193,15 +201,18 @@ Homes and Settings shows the current home.
    opening its details (day, real cost, note). Edit the task opens the form, in the order and
    the folded sections of the web (`tasks/task_form.html`): title, room, item and due date, then
    Repeat (with a preview of the next five dates, `tasks/recurrence.py:341-351`), Who, Time and
-   budget, How to do it; only the title is required; a room, an item or a contractor can be
+   budget, Materials (one line per stock item and quantity, one empty line offered, up to 50,
+   saved with the task; the stock items themselves are added in Rooms, Stock, not in the form),
+   How to do it; only the title is required; a room, an item or a contractor can be
    added with the task; Save and Cancel end it, deletion is under them. The files attached to a
    task (web: Photos and files) are not in the app yet.
 3. **Add from a template**: the bundled library, filtered by the equipment ticked.
 4. **Rooms**: list in the household's order; a room shows its type, then **Report a problem**
    (Where starts with the room), its memory (the short values as lines of label and value, with
    **Edit the memory**, its own form as on the web), its photos, its items and its tasks, in the
-   order of the web (`rooms/room_detail.html`). **Edit** in the bar opens the name, type and
-   notes.
+   order of the web (`rooms/room_detail.html`). **Edit** in the bar opens the type, the name and
+   the notes, in that order, with the help of the web; choosing a type fills the name in with the
+   label of the type while the name is empty or still that of the previous type.
    Its tab **Equipment** lists every item of the home, by room then name, with its next task
    and its warranty, filtered by a room and by words of the name, brand, model or serial number
    (`rooms/services.py` `item_rows`, `rooms/item_list.html`). An **Add an item** button follows
@@ -228,8 +239,12 @@ contractor with it.
 7. **Projects**: list by status (`projects/models.py:61-67`); a project with its pills (state,
    priority, what is left of the budget), its goal, its rooms as links, then its tasks, its
    budget lines (Planned, Committed, Paid, Gap; a line opens its form), quotes, links and
-   photos, in the order of the web (`projects/project_detail.html`). Saved, a new project
-   opens, and Back from it returns to the list.
+   photos, in the order of the web (`projects/project_detail.html`). Its form is the web's:
+   title, goal, status, priority and (new project) budget, then the folded section *Rooms,
+   duration and season* (closed on a new project, open when one of its fields has a value):
+   the rooms as chips, the estimated duration and the preferred season (months typed on the
+   web for a custom season are kept, not edited). Saved, a new project opens, and Back from it
+   returns to the list.
 8. **Budget**: the year of the current home against its envelope, by room, by project, upkeep
    (read only). Each home has its own currency and envelopes (`homes/models.py:33-39`,
    `projects/models.py:355-377`), so homes are never added together.

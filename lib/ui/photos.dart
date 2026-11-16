@@ -320,12 +320,10 @@ class _PhotoScreenState extends State<PhotoScreen> {
             ),
           ),
           if (widget.writable) ...[
-            const SizedBox(height: HcSpace.s4),
-            OutlinedButton(
+            HcDeleteButton(
               key: const Key('photo-delete'),
-              style: OutlinedButton.styleFrom(foregroundColor: HcColors.danger),
+              label: l10n.photoDelete,
               onPressed: _delete,
-              child: Text(l10n.photoDelete),
             ),
           ],
         ],

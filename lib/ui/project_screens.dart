@@ -12,6 +12,8 @@ import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
+import '../domain/durations.dart' as durations;
+import '../domain/recurrence.dart' as recurrence;
 import '../l10n/app_localizations.dart';
 import 'budget_parts.dart';
 import 'stock_format.dart';
@@ -560,14 +562,10 @@ class ProjectScreen extends StatelessWidget {
                 ),
               ],
               if (writable) ...[
-                const SizedBox(height: HcSpace.s4),
-                OutlinedButton(
+                HcDeleteButton(
                   key: const Key('project-delete'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: HcColors.danger,
-                  ),
+                  label: l10n.deleteProject,
                   onPressed: () => _delete(context, p.id),
-                  child: Text(l10n.deleteProject),
                 ),
               ],
               const SizedBox(height: HcSpace.s5),
@@ -710,12 +708,21 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
   final _title = TextEditingController();
   final _goal = TextEditingController();
   final _budget = TextEditingController();
+  final _duration = TextEditingController();
   String _status = 'idea';
   String _priority = 'normal';
+  String _durationUnit = durations.day;
+  String _season = '';
+  int? _seasonStart;
+  int? _seasonEnd;
+  String _hemisphere = recurrence.north;
   final _rooms = <String>{};
   List<RoomRow> _choices = const [];
   String _currency = '';
   bool _loaded = false;
+
+  /// Set once the project is read: the section opens on what it holds.
+  bool _ready = false;
 
   @override
   void didChangeDependencies() {
@@ -734,6 +741,7 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
     if (!mounted) return;
     setState(() {
       _currency = home?.currency ?? '';
+      _hemisphere = home?.hemisphere ?? recurrence.north;
       _choices = rooms;
       if (p != null) {
         _title.text = p.title;
@@ -741,13 +749,23 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
         _status = p.status;
         _priority = p.priority;
         _rooms.addAll(linked.map((r) => r.id));
+        final minutes = p.estimatedMinutes;
+        if (minutes != null) {
+          final (value, unit) = durations.split(minutes);
+          _duration.text = '$value';
+          _durationUnit = unit;
+        }
+        _season = p.season;
+        _seasonStart = p.seasonStartMonth;
+        _seasonEnd = p.seasonEndMonth;
       }
+      _ready = true;
     });
   }
 
   @override
   void dispose() {
-    for (final c in [_title, _goal, _budget]) {
+    for (final c in [_title, _goal, _budget, _duration]) {
       c.dispose();
     }
     super.dispose();
@@ -757,11 +775,18 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
     if (!_form.currentState!.validate()) return;
     final l10n = AppLocalizations.of(context);
     final navigator = Navigator.of(context);
+    final typed = int.tryParse(_duration.text.trim());
     final input = ProjectInput(
       title: _title.text,
       goal: _goal.text,
       status: _status,
       priority: _priority,
+      estimatedMinutes: typed == null
+          ? null
+          : durations.toMinutes(typed, _durationUnit),
+      season: _season,
+      seasonStartMonth: _seasonStart,
+      seasonEndMonth: _seasonEnd,
       roomIds: _rooms.toList(),
       budget: fieldAmount(context, _budget),
       budgetLabel: l10n.budgetHeading,
@@ -814,16 +839,6 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                     ('normal', l10n.priorityNormal),
                     ('low', l10n.priorityLow),
                   ], (v) => setState(() => _priority = v)),
-                  if (_choices.isNotEmpty)
-                    choiceChips(
-                      l10n.roomsConcerned,
-                      [for (final r in _choices) (r.id, r.name)],
-                      _rooms,
-                      (id, on) => setState(
-                        () => on ? _rooms.add(id) : _rooms.remove(id),
-                      ),
-                      keyPrefix: 'project-room',
-                    ),
                   if (widget.projectId == null) ...[
                     hcAmount(
                       context,
@@ -836,12 +851,116 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
                 ],
               ),
             ),
+            // Folded, as the web's `details`: closed on a new project, open
+            // on a project that holds one of its fields.
+            if (_ready) _roomsDurationSeason(l10n),
           ],
         ),
       ),
     );
   }
+
+  /// Rooms, duration and season: what is optional, folded as on the web. The
+  /// rooms are chips, closed with the section.
+  Widget _roomsDurationSeason(AppLocalizations l10n) {
+    final wide = MediaQuery.textScalerOf(context).scale(1) > 1.3;
+    return HcFoldSection(
+      key: const Key('project-section-rooms'),
+      title: l10n.projectSectionRooms,
+      open:
+          _rooms.isNotEmpty ||
+          _duration.text.trim().isNotEmpty ||
+          _season.isNotEmpty,
+      children: [
+        if (_choices.isNotEmpty)
+          choiceChips(
+            l10n.roomsConcerned,
+            [for (final r in _choices) (r.id, r.name)],
+            _rooms,
+            (id, on) => setState(() => on ? _rooms.add(id) : _rooms.remove(id)),
+            keyPrefix: 'project-room',
+          ),
+        HcField(
+          label: l10n.taskDuration,
+          child: Flex(
+            direction: wide ? Axis.vertical : Axis.horizontal,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _pair(
+                wide,
+                TextFormField(
+                  key: const Key('project-duration'),
+                  controller: _duration,
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    final text = (value ?? '').trim();
+                    if (text.isEmpty) return null;
+                    final n = int.tryParse(text);
+                    return n == null ||
+                            !durations.withinBounds(
+                              durations.toMinutes(n, _durationUnit),
+                            )
+                        ? l10n.errDuration
+                        : null;
+                  },
+                ),
+              ),
+              const SizedBox(width: HcSpace.s2, height: HcSpace.s2),
+              _pair(
+                wide,
+                Semantics(
+                  label: l10n.taskDurationUnit,
+                  child: HcSelect<String>(
+                    key: const Key('project-duration-unit'),
+                    value: _durationUnit,
+                    choices: [
+                      (durations.minute, l10n.unitMinutes),
+                      (durations.hour, l10n.unitHours),
+                      (durations.day, l10n.unitDays),
+                      (durations.week, l10n.unitWeeks),
+                      (durations.month, l10n.unitMonths),
+                      (durations.year, l10n.unitYears),
+                    ],
+                    onChanged: (v) => setState(() => _durationUnit = v),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        hcChoice<String>(
+          l10n.projectSeason,
+          _season,
+          [
+            ('', l10n.projectSeasonAnyTime),
+            (recurrence.spring, l10n.seasonSpring),
+            (recurrence.summer, l10n.seasonSummer),
+            (recurrence.autumn, l10n.seasonAutumn),
+            (recurrence.winter, l10n.seasonWinter),
+            // Months typed on the web are kept, not edited here.
+            if (_season == recurrence.custom)
+              (recurrence.custom, l10n.seasonCustom),
+          ],
+          (v) => setState(() => _season = v),
+          key: const Key('project-season'),
+        ),
+        fieldHelp(
+          l10n.projectSeasonHemisphereHelp(
+            // In lower case, as the web words it: "(northern)", "(nord)".
+            (_hemisphere == recurrence.south
+                    ? l10n.hemisphereSouth
+                    : l10n.hemisphereNorth)
+                .toLowerCase(),
+          ),
+        ),
+      ],
+    );
+  }
 }
+
+/// One field of a pair: half the line, or the whole line when they stack.
+Widget _pair(bool stacked, Widget field) =>
+    stacked ? field : Expanded(child: field);
 
 /// The form of a budget line (`projects/line_form.html`).
 class LineFormScreen extends StatefulWidget implements HcFormScreen {
@@ -992,14 +1111,10 @@ class _LineFormScreenState extends State<LineFormScreen> {
               ),
             ),
             if (widget.lineId != null) ...[
-              const SizedBox(height: HcSpace.s4),
-              OutlinedButton(
+              HcDeleteButton(
                 key: const Key('line-delete'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: HcColors.danger,
-                ),
+                label: l10n.deleteLine,
                 onPressed: _delete,
-                child: Text(l10n.deleteLine),
               ),
             ],
           ],
@@ -1244,13 +1359,10 @@ class _QuoteFormScreenState extends State<QuoteFormScreen> {
                 ),
               const SizedBox(height: HcSpace.s4),
               if (_writable)
-                OutlinedButton(
+                HcDeleteButton(
                   key: const Key('quote-delete'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: HcColors.danger,
-                  ),
+                  label: l10n.deleteQuote,
                   onPressed: _delete,
-                  child: Text(l10n.deleteQuote),
                 ),
             ],
           ],
