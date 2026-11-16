@@ -12,6 +12,9 @@ class ProjectInput {
     this.status = 'idea',
     this.priority = 'normal',
     this.estimatedMinutes,
+    this.season,
+    this.seasonStartMonth,
+    this.seasonEndMonth,
     this.roomIds = const [],
     this.budget = '',
     this.budgetLabel = 'Budget',
@@ -22,6 +25,13 @@ class ProjectInput {
   final String status;
   final String priority;
   final int? estimatedMinutes;
+
+  /// The preferred season: `''` for any time, a predefined season or custom
+  /// months (`recurrence.custom`, with the two months). `null` leaves what
+  /// the project holds as it is.
+  final String? season;
+  final int? seasonStartMonth;
+  final int? seasonEndMonth;
   final List<String> roomIds;
   final String budget;
 
@@ -296,12 +306,37 @@ extension BudgetRepository on Repository {
       throw const Refused(Refusal.choiceInvalid);
     }
     if (input.goal.length > 5000) throw const Refused(Refusal.tooLong);
+    final season = input.season;
+    var start = input.seasonStartMonth;
+    var end = input.seasonEndMonth;
+    if (season != null) {
+      Repository._oneOf(season, [
+        '',
+        ...recurrence.predefinedSeasons,
+        recurrence.custom,
+      ]);
+      if (season != recurrence.custom) {
+        start = end = null;
+      } else if (start == null ||
+          end == null ||
+          start < 1 ||
+          start > 12 ||
+          end < 1 ||
+          end > 12) {
+        throw const Refused(Refusal.seasonMonthsRequired);
+      }
+    }
     return {
       'title': Repository._name(input.title, 200),
       'goal': input.goal.trim(),
       'status': input.status,
       'priority': input.priority,
       'estimated_minutes': minutes,
+      if (season != null) ...{
+        'season': season,
+        'season_start_month': start,
+        'season_end_month': end,
+      },
     };
   }
 
@@ -356,10 +391,10 @@ extension BudgetRepository on Repository {
         'projects',
         id,
         {
-          ...fields,
           'season': '',
           'season_start_month': null,
           'season_end_month': null,
+          ...fields,
           'deleted_at': null,
         },
         homeId: homeId,

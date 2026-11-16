@@ -4,7 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../core/photo_source.dart';
 import '../data/database.dart';
-import '../data/repository.dart';
+import '../data/repository.dart' hide maxFileBytes;
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/values.dart';
@@ -13,6 +13,7 @@ import '../domain/day.dart';
 import '../domain/photos.dart';
 import 'help_button.dart';
 import '../l10n/app_localizations.dart';
+import 'budget_parts.dart';
 import 'parts.dart';
 import 'messages.dart';
 import 'state.dart';
@@ -495,16 +496,22 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                     key: const Key('report-room'),
                   ),
                   if (AppScope.of(context).photoSource != null) ...[
-                    Text(l10n.reportPhotoHelp, style: HcText.bodySmall),
-                    const SizedBox(height: HcSpace.s2),
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: OutlinedButton(
-                        key: const Key('report-photo-add'),
-                        onPressed: _addPhoto,
-                        child: Text(
-                          _photo == null ? l10n.addPhoto : l10n.photoChosen,
+                    HcField(
+                      label: l10n.photo,
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: OutlinedButton(
+                          key: const Key('report-photo-add'),
+                          onPressed: _addPhoto,
+                          child: Text(
+                            _photo == null ? l10n.addPhoto : l10n.photoChosen,
+                          ),
                         ),
+                      ),
+                    ),
+                    fieldHelp(
+                      l10n.reportPhotoHelpSize(
+                        l10n.sizeMegabytes(maxFileBytes ~/ (1024 * 1024)),
                       ),
                     ),
                   ],

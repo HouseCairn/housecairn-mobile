@@ -5,6 +5,8 @@ import 'package:material_ui/material_ui.dart';
 import '../data/database.dart';
 import '../data/repository.dart';
 import '../design/adaptive.dart';
+import '../design/icons.dart';
+import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/budget.dart' as budget;
@@ -12,6 +14,7 @@ import '../domain/choices.dart';
 import '../domain/day.dart';
 import '../domain/durations.dart' as durations;
 import '../domain/recurrence.dart' as recurrence;
+import '../domain/stock.dart' as stock;
 import '../l10n/app_localizations.dart';
 import 'autosave.dart';
 import 'budget_parts.dart';
@@ -29,11 +32,12 @@ const _newChoice = '+new';
 /// its page, or to add a task. Title, Room, Item and Due date first (the place
 /// before the date), then what is optional in folded sections, as on the web:
 /// Repeat, with a preview of the next five dates
-/// (`tasks/recurrence.py:341-351`); Who; Time and budget; How to do it. Only
+/// (`tasks/recurrence.py:341-351`); Who; Time and budget; Materials; How to
+/// do it. Only
 /// the title is required. The title of the form is in the page, under the
 /// bar, so that it is never cut; Save and Cancel end the form, and Delete the
-/// task comes under them, as on the web. The materials of a task are changed
-/// on its page, line by line, as the web's page does. On iOS the form opens as
+/// task comes under them, as on the web. The materials are lines of the form,
+/// saved with the task (they are also changed on its page, line by line). On iOS the form opens as
 /// a sheet (lot D4), with Cancel on the left of its bar.
 class TaskFormScreen extends StatefulWidget implements HcFormScreen {
   const TaskFormScreen({
@@ -95,7 +99,24 @@ class _TaskFormScreenState extends State<TaskFormScreen>
         material: material,
         labour: labour,
       );
+      await _writeMaterials(repository, widget.taskId!);
     });
+  }
+
+  /// Makes the materials of the task those of the lines of the form: a line
+  /// without a stock item is the empty line the form offers, and is ignored.
+  Future<void> _writeMaterials(Repository repository, String taskId) async {
+    final wanted = {
+      for (final line in _materials)
+        if (line.article != null) line.article!: line.quantity.text,
+    };
+    for (final id in _listedMaterials.difference(wanted.keys.toSet())) {
+      await repository.removeMaterial(taskId, id);
+    }
+    for (final MapEntry(key: id, value: quantity) in wanted.entries) {
+      await repository.saveMaterial(taskId, id, quantity);
+    }
+    _listedMaterials = wanted.keys.toSet();
   }
 
   final _title = TextEditingController();
@@ -128,6 +149,14 @@ class _TaskFormScreenState extends State<TaskFormScreen>
   List<ContractorRow> _contractors = const [];
   bool _loaded = false;
 
+  /// The stock items of the home, the lines of the Materials section, and the
+  /// articles the task lists in the data now (a line removed is removed from
+  /// the task when it is saved).
+  List<ArticleEntry> _articles = const [];
+  final _materials = <_MaterialLine>[];
+  Set<String> _listedMaterials = {};
+  bool _materialsLoaded = false;
+
   /// Set once the task is read: the sections open on what it holds.
   bool _ready = false;
 
@@ -153,6 +182,10 @@ class _TaskFormScreenState extends State<TaskFormScreen>
     final rooms = await repository.rooms(widget.homeId);
     final contractors = await repository.contractors(widget.homeId);
     final home = await repository.home(widget.homeId);
+    final articles = await repository.articles(widget.homeId);
+    final listed = widget.taskId == null
+        ? const <MaterialEntry>[]
+        : await repository.materialsOf(widget.taskId!);
     var roomId = _roomId;
     if (roomId == null && _itemId != null) {
       roomId = (await repository.item(_itemId!))?.roomId;
@@ -167,6 +200,18 @@ class _TaskFormScreenState extends State<TaskFormScreen>
       _contractors = contractors;
       _roomId = roomId;
       _items = items;
+      _articles = articles;
+      _materialsLoaded = true;
+      if (_materials.isEmpty) {
+        for (final entry in listed) {
+          _materials.add(
+            _MaterialLine(entry.article.id, entry.quantity.toString()),
+          );
+        }
+        _listedMaterials = {for (final entry in listed) entry.article.id};
+        // One empty line is offered, as on the web.
+        if (_materials.isEmpty) _materials.add(_MaterialLine(null, '1'));
+      }
     });
   }
 
@@ -235,6 +280,9 @@ class _TaskFormScreenState extends State<TaskFormScreen>
       _newContractorOther,
     ]) {
       c.dispose();
+    }
+    for (final line in _materials) {
+      line.quantity.dispose();
     }
     super.dispose();
   }
@@ -314,6 +362,7 @@ class _TaskFormScreenState extends State<TaskFormScreen>
             : widget.taskId!;
         if (widget.taskId != null) await repository.updateTask(id, input);
         await repository.setTaskBudgets(id, material: material, labour: labour);
+        await _writeMaterials(repository, id);
       });
     } on Refused catch (refused) {
       if (mounted) showRefusal(context, refused);
@@ -699,6 +748,110 @@ class _TaskFormScreenState extends State<TaskFormScreen>
     ],
   );
 
+  /// Materials: the stock items the task needs, a line each (the stock item
+  /// and the quantity), as the web's section; one empty line is offered, `+`
+  /// adds a line and the button of a line removes it, up to
+  /// [stock.maxMaterialsPerTask]. Marking the task done takes the quantities
+  /// from the stock. A stock item is added in Rooms, Stock, not in the form.
+  Widget _materialsSection(AppLocalizations l10n) {
+    final taken = {
+      for (final line in _materials)
+        if (line.article != null) line.article!,
+    };
+    final full = _materials.length >= stock.maxMaterialsPerTask;
+    return HcFoldSection(
+      key: const Key('task-section-materials'),
+      title: l10n.materials,
+      open: taken.isNotEmpty,
+      children: [
+        if (_articles.isEmpty)
+          Text(l10n.materialsNoArticle, style: HcText.bodySmall)
+        else ...[
+          fieldHelp(l10n.materialsFormHelp),
+          for (final (i, line) in _materials.indexed)
+            Padding(
+              key: ObjectKey(line),
+              padding: const EdgeInsets.only(bottom: HcSpace.s2),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  hcChoice<String?>(
+                    l10n.materialArticle,
+                    line.article,
+                    [
+                      (null, '—'),
+                      for (final a in _articles)
+                        if (a.article.id == line.article ||
+                            !taken.contains(a.article.id))
+                          (a.article.id, a.article.name),
+                    ],
+                    (v) => setState(() => line.article = v),
+                    key: Key('task-material-article-$i'),
+                  ),
+                  hcText(
+                    l10n.movementQuantity,
+                    line.quantity,
+                    key: Key('task-material-quantity-$i'),
+                    keyboard: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    sentences: false,
+                    validator: (v) {
+                      if (line.article == null) return null;
+                      final value = stock.parseQuantity(v ?? '');
+                      if (value == null) return l10n.errQuantityInvalid;
+                      return value <= stock.zero
+                          ? l10n.errQuantityNotPositive
+                          : null;
+                    },
+                  ),
+                  if (_materials.length > 1 || line.article != null)
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Semantics(
+                        label: l10n.removeMaterialLine,
+                        button: true,
+                        excludeSemantics: true,
+                        child: TextButton(
+                          key: Key('task-material-remove-$i'),
+                          onPressed: () {
+                            setState(() {
+                              final removed = _materials.removeAt(i);
+                              removed.quantity.dispose();
+                              if (_materials.isEmpty) {
+                                _materials.add(_MaterialLine(null, '1'));
+                              }
+                            });
+                            sheetChanged(now: true);
+                          },
+                          child: Text(l10n.remove),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          if (full)
+            Text(
+              l10n.materialsLimit(stock.maxMaterialsPerTask),
+              style: HcText.bodySmall,
+            )
+          else
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: OutlinedButton.icon(
+                key: const Key('task-material-add'),
+                icon: const HcIcon(HcIcons.add, color: HcColors.primary),
+                onPressed: () =>
+                    setState(() => _materials.add(_MaterialLine(null, '1'))),
+                label: Text(l10n.addMaterialLine),
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+
   /// How to do it: the procedure and the notes.
   Widget _howTo(AppLocalizations l10n) => HcFoldSection(
     key: const Key('task-section-how'),
@@ -756,6 +909,7 @@ class _TaskFormScreenState extends State<TaskFormScreen>
               _repeat(l10n, wide, _preview(hemisphere)),
               _who(l10n),
               _timeAndBudget(l10n, wide),
+              if (_materialsLoaded) _materialsSection(l10n),
               _howTo(l10n),
               const SizedBox(height: HcSpace.s4),
               FilledButton(
@@ -772,14 +926,10 @@ class _TaskFormScreenState extends State<TaskFormScreen>
                 child: Text(l10n.cancel),
               ),
               if (_task != null && writable)
-                Padding(
-                  padding: const EdgeInsets.only(top: HcSpace.s6),
-                  child: FilledButton(
-                    key: const Key('task-delete'),
-                    style: hcDangerStyle(),
-                    onPressed: _delete,
-                    child: Text(l10n.taskDelete),
-                  ),
+                HcDeleteButton(
+                  key: const Key('task-delete'),
+                  label: l10n.taskDelete,
+                  onPressed: _delete,
                 ),
             ],
           ],
@@ -792,3 +942,13 @@ class _TaskFormScreenState extends State<TaskFormScreen>
 /// One field of a pair: half the line, or the whole line when they stack.
 Widget _pairPart(bool stacked, Widget field) =>
     stacked ? field : Expanded(child: field);
+
+/// A line of the Materials section: a stock item (none on the empty line) and
+/// the quantity typed.
+class _MaterialLine {
+  _MaterialLine(this.article, String quantity)
+    : quantity = TextEditingController(text: quantity);
+
+  String? article;
+  final TextEditingController quantity;
+}

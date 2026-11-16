@@ -95,10 +95,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Quand le téléphone vous rappelle une tâche';
 
   @override
-  String get reportPhotoHelp =>
-      'La photo est facultative. Sa localisation et ses autres métadonnées sont supprimées.';
-
-  @override
   String get homes => 'Mes logements';
 
   @override
@@ -283,17 +279,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get hemisphereSouth => 'Sud';
 
   @override
-  String get homeArchive => 'Archiver';
+  String get homeArchive => 'Archiver ce logement';
 
   @override
-  String get homeUnarchive => 'Désarchiver';
+  String get homeUnarchive => 'Remettre ce logement en service';
 
   @override
   String get homeArchivedNotice =>
       'Ce logement est archivé : il est en lecture seule.';
 
   @override
-  String get homeDelete => 'Supprimer';
+  String get homeDelete => 'Supprimer ce logement';
 
   @override
   String homeDeleteTitle(String home) {
@@ -2790,4 +2786,66 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncNoticesRead => 'Marquer comme lu';
+
+  @override
+  String get roomKindHelp =>
+      'Détermine l\'icône et les filtres de la pièce et, plus tard, les modèles de tâches proposés pour elle. Choisissez Autre si aucun ne convient.';
+
+  @override
+  String get roomNameHelp =>
+      'Se remplit tout seul d\'après le type ; modifiez-le pour nommer la pièce.';
+
+  @override
+  String get itemRoomHelp =>
+      'Où se trouve l\'élément. Choisissez une autre pièce pour le déplacer.';
+
+  @override
+  String get homeCurrencyHelp =>
+      'Code ISO 4217 de la devise du budget de ce logement.';
+
+  @override
+  String get homeHemisphereHelp =>
+      'Où se trouve le logement, pour les saisons : le printemps commence en mars dans l\'hémisphère nord, en septembre dans l\'hémisphère sud.';
+
+  @override
+  String get editHome => 'Modifier le logement';
+
+  @override
+  String get projectSectionRooms => 'Pièces, durée et saison';
+
+  @override
+  String get projectSeason => 'Saison souhaitée';
+
+  @override
+  String get projectSeasonAnyTime => 'Toute l\'année';
+
+  @override
+  String projectSeasonHemisphereHelp(String hemisphere) {
+    return 'La saison suit l\'hémisphère du logement ($hemisphere) : modifiez-le dans les réglages du logement.';
+  }
+
+  @override
+  String get materialsFormHelp =>
+      'Articles dont la tâche a besoin, avec la quantité. Marquer la tâche faite prend ces quantités dans le stock.';
+
+  @override
+  String get addMaterialLine => 'Ajouter une ligne';
+
+  @override
+  String get removeMaterialLine => 'Retirer cette ligne';
+
+  @override
+  String materialsLimit(int max) {
+    return 'Une tâche liste $max articles au plus.';
+  }
+
+  @override
+  String reportPhotoHelpSize(String max) {
+    return 'La photo est facultative : une image JPEG, PNG ou WebP, $max au plus. Sa localisation et ses autres métadonnées sont supprimées.';
+  }
+
+  @override
+  String sizeMegabytes(int count) {
+    return '$count Mo';
+  }
 }

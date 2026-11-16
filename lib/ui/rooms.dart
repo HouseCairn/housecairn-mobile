@@ -11,6 +11,7 @@ import '../design/widgets.dart';
 import '../domain/choices.dart';
 import '../l10n/app_localizations.dart';
 import 'autosave.dart';
+import 'budget_parts.dart';
 import 'choices.dart';
 import 'equipment_screen.dart';
 import 'home_selector.dart';
@@ -529,6 +530,20 @@ class _RoomFormScreenState extends State<RoomFormScreen>
     super.dispose();
   }
 
+  /// Choosing a type fills the name in with the label of the type, as the web
+  /// does, while the name is empty or still the label of the previous type;
+  /// a name that was typed stays.
+  void _chooseKind(String kind) {
+    final l10n = AppLocalizations.of(context);
+    final typed = _name.text.trim();
+    final automatic = typed.isEmpty || typed == roomKindLabel(l10n, _kind);
+    setState(() {
+      _kind = kind;
+      if (automatic && kind != 'other') _name.text = roomKindLabel(l10n, kind);
+    });
+    sheetChanged();
+  }
+
   RoomInput _input() => RoomInput(
     name: _name.text,
     kind: _kind,
@@ -608,6 +623,14 @@ class _RoomFormScreenState extends State<RoomFormScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    hcChoice<String>(
+                      l10n.fieldType,
+                      _kind,
+                      [for (final k in roomKinds) (k, roomKindLabel(l10n, k))],
+                      _chooseKind,
+                      key: const Key('room-kind'),
+                    ),
+                    fieldHelp(l10n.roomKindHelp),
                     hcText(
                       l10n.fieldName,
                       _name,
@@ -616,13 +639,7 @@ class _RoomFormScreenState extends State<RoomFormScreen>
                           ? l10n.errTitleRequired
                           : null,
                     ),
-                    hcChoice<String>(
-                      l10n.fieldType,
-                      _kind,
-                      [for (final k in roomKinds) (k, roomKindLabel(l10n, k))],
-                      (v) => setState(() => _kind = v),
-                      key: const Key('room-kind'),
-                    ),
+                    fieldHelp(l10n.roomNameHelp),
                     hcText(l10n.fieldNotes, _notes, minLines: 2, maxLines: 6),
                   ],
                 ),
@@ -662,14 +679,10 @@ class _RoomFormScreenState extends State<RoomFormScreen>
                 ),
               ),
             if (widget.roomId != null && !widget.memory) ...[
-              const SizedBox(height: HcSpace.s4),
-              OutlinedButton(
+              HcDeleteButton(
                 key: const Key('room-delete'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: HcColors.danger,
-                ),
+                label: l10n.deleteRoom,
                 onPressed: _delete,
-                child: Text(l10n.deleteRoom),
               ),
             ],
           ],

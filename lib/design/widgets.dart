@@ -420,6 +420,31 @@ ButtonStyle hcDangerStyle() => FilledButton.styleFrom(
   foregroundColor: HcColors.textInverse,
 );
 
+/// The button that deletes a record, at the end of its form or page: the web's
+/// `.button.button-danger.button-block`, filled in the danger colour and the
+/// width of the column, the one style of Delete (design/patterns.md of the web,
+/// Forms). Not an outlined button, whatever the record.
+class HcDeleteButton extends StatelessWidget {
+  const HcDeleteButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: HcSpace.s4),
+    child: FilledButton(
+      style: hcDangerStyle(),
+      onPressed: onPressed,
+      child: Text(label),
+    ),
+  );
+}
+
 /// The button that adds to a list, after it, as on the web (`.button`,
 /// `.button-block`): primary or secondary, the width of the column or of its
 /// label, a gap of `--hc-space-3` above it. Not a floating button: the web
