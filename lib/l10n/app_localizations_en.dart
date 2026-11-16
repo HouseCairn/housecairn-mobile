@@ -2814,6 +2814,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String filesRefusedOther(String code) {
     return 'The server did not take a file (code $code).';
+  }
+
+  @override
   String get roomKindHelp =>
       'Sets the icon and the filters of the room and, later, the task templates offered for it. Choose Other if none fits.';
 

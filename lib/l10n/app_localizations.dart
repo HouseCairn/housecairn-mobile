@@ -4591,6 +4591,7 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The server did not take a file (code {code}).'**
   String filesRefusedOther(String code);
+
   /// Help under the Type of the room form. Web catalogue (rooms): same text.
   ///
   /// In en, this message translates to:

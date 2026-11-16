@@ -2836,6 +2836,9 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String filesRefusedOther(String code) {
     return 'Le serveur n\'a pas pris un fichier (code $code).';
+  }
+
+  @override
   String get roomKindHelp =>
       'Détermine l\'icône et les filtres de la pièce et, plus tard, les modèles de tâches proposés pour elle. Choisissez Autre si aucun ne convient.';
 
