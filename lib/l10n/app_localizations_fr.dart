@@ -1268,6 +1268,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get errMoneyInvalid => 'Indiquez un montant, par exemple 1250,50.';
 
   @override
+  String get errDecimalMark =>
+      'Saisissez un nombre avec un point comme séparateur décimal, par exemple 12.5.';
+
+  @override
   String get errQuoteNeedsLine =>
       'Choisissez la ligne de budget sur laquelle le devis est engagé.';
 

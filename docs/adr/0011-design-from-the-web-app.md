@@ -116,7 +116,9 @@ measured (`test/parity/web_pills_fr_390.json`, the same pin `web_parity`).
 **Amounts in the fields.** A field of money shows its value as the web does, in the language
 of the phone (`1 200,00` in French, `1,200.00` in English; `hcAmount`, `moneyFieldText`) and reads
 what is typed in that language (`amountInput`: spaces ignored, a comma or a point as the
-decimal in French, a comma only as a grouping in English). What is stored does not change: two
+decimal in French; in English a comma is read only as the grouping of thousands, as in `1,200.50`,
+and any other comma such as `12,5` or `1,20` is refused with the web's message, "Enter a number
+with a point as the decimal mark, for example 12.5."). What is stored does not change: two
 decimals, as text (`docs/protocol.md`, 2.2).
 
 | Web | App | Why |

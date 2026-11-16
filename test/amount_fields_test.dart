@@ -13,6 +13,9 @@ import 'support/fakes.dart';
 import 'support/lot2b.dart';
 import 'support/lot3b.dart';
 
+const decimalMark =
+    'Enter a number with a point as the decimal mark, for example 12.5.';
+
 /// The amount fields write and read money in the language of the phone, and
 /// store what they stored before (docs/protocol.md, 2.2: two decimals).
 void main() {
@@ -46,8 +49,17 @@ void main() {
       expect(amountInput('en', '1,200.50'), '1200.50');
       expect(amountInput('en', '1200.50'), '1200.50');
       expect(amountInput('en', '1 200.50'), '1200.50');
-      // Not a grouping: left for the validator, as a decimal comma.
-      expect(amountInput('en', '12,5'), '12.5');
+      // Not a grouping: the comma stays, and the validator refuses it.
+      for (final typed in ['12,5', '1,20', '1,2,3', '1200,50']) {
+        expect(
+          isDecimalCommaMisuse(amountInput('en', typed)),
+          isTrue,
+          reason: typed,
+        );
+        expect(amountInput('en', typed), contains(','), reason: typed);
+      }
+      expect(isDecimalCommaMisuse(amountInput('en', '1,200.50')), isFalse);
+      expect(isDecimalCommaMisuse(amountInput('fr', '12,5')), isFalse);
     });
 
     test('what a field shows is what it reads back', () {
@@ -137,9 +149,9 @@ void main() {
     });
 
     for (final (typed, stored) in [
-      ('1 200,50', '1200.50'),
       ('1200.50', '1200.50'),
-      ('1\u00a0200,5', '1200.50'),
+      if (locale == 'fr') ('1 200,50', '1200.50'),
+      if (locale == 'fr') ('1\u00a0200,5', '1200.50'),
       if (locale == 'en') ('1,200.50', '1200.50'),
     ]) {
       testWidgets('"$typed" is saved as $stored, $locale', (tester) async {
@@ -175,12 +187,16 @@ void main() {
       for (final typed in ['abc', '12.345', '1.2.3', '-5', '1,2,3']) {
         await tester.enterText(find.byKey(const Key('line-planned')), typed);
         await save(tester);
+        // In English a comma that is not a grouping has its own message.
+        final comma = locale == 'en' && typed.contains(',');
         expect(
           find.text(
-            t(
-              'Give an amount of money, such as 1250.50.',
-              'Indiquez un montant, par exemple 1250,50.',
-            ),
+            comma
+                ? decimalMark
+                : t(
+                    'Give an amount of money, such as 1250.50.',
+                    'Indiquez un montant, par exemple 1250,50.',
+                  ),
           ),
           findsOneWidget,
           reason: typed,
@@ -191,6 +207,31 @@ void main() {
         );
       }
     });
+
+    if (locale == 'en') {
+      testWidgets('a decimal comma is refused with the web message, en', (
+        tester,
+      ) async {
+        final (data, state) = await start(tester);
+        await openScreen(
+          tester,
+          LineFormScreen(
+            homeId: data.main,
+            projectId: data.project,
+            lineId: data.line,
+          ),
+        );
+        for (final typed in ['12,5', '1,20', '1200,50']) {
+          await tester.enterText(find.byKey(const Key('line-planned')), typed);
+          await save(tester);
+          expect(find.text(decimalMark), findsOneWidget, reason: typed);
+          expect(
+            (await state.repository.budgetLine(data.line))!.planned,
+            '300.00',
+          );
+        }
+      });
+    }
 
     testWidgets('a quote saved untouched keeps its amount, $locale', (
       tester,

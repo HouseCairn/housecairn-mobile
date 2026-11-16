@@ -505,6 +505,7 @@
   "wayInUse": "Utilisé",
   "@wayInUse": {"description": "Label of the way to use the app that this phone is in."},
   "errMoneyInvalid": "Indiquez un montant, par exemple 1250,50.",
+  "errDecimalMark": "Saisissez un nombre avec un point comme séparateur décimal, par exemple 12.5.",
   "errQuoteNeedsLine": "Choisissez la ligne de budget sur laquelle le devis est engagé.",
   "errNotInProject": "Cette ligne de budget n'est pas dans ce projet.",
   "errValidityBeforeDate": "La validité ne peut pas finir avant la date du devis.",

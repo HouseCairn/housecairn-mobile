@@ -201,9 +201,11 @@ String fieldAmount(BuildContext context, TextEditingController controller) =>
 
 /// An optional amount of money in a field, written and read in the language
 /// of the phone (`1 200,00` in French, `1,200.00` in English; a comma or a
-/// point is read as the decimal in French; spaces are ignored). The stored
-/// value does not change: read it with [fieldAmount]. [parse] says what an
-/// amount is (money by default), [invalid] what is said of one that is not.
+/// point is read as the decimal in French; in English a comma only groups
+/// thousands, and any other comma is refused with the web's message about
+/// the decimal mark; spaces are ignored). The stored value does not change:
+/// read it with [fieldAmount]. [parse] says what an amount is (money by
+/// default), [invalid] what is said of one that is not.
 Widget hcAmount(
   BuildContext context,
   String label,
@@ -212,7 +214,8 @@ Widget hcAmount(
   Decimal? Function(String) parse = budget.parseMoney,
   String? invalid,
 }) {
-  final message = invalid ?? AppLocalizations.of(context).errMoneyInvalid;
+  final l10n = AppLocalizations.of(context);
+  final message = invalid ?? l10n.errMoneyInvalid;
   final locale = Localizations.localeOf(context).toLanguageTag();
   return hcText(
     label,
@@ -222,6 +225,7 @@ Widget hcAmount(
     sentences: false,
     validator: (value) {
       final text = amountInput(locale, value ?? '');
+      if (isDecimalCommaMisuse(text)) return l10n.errDecimalMark;
       return text.isEmpty || parse(text) != null ? null : message;
     },
   );
