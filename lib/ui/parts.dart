@@ -3,6 +3,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../data/repository.dart';
+import '../design/adaptive.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
@@ -106,19 +107,31 @@ Widget hcChoice<T>(
   bool enabled = true,
 }) => HcField(
   label: label,
-  child: DropdownButtonFormField<T>(
+  child: HcSelect<T>(
     key: key,
-    initialValue: value,
-    isExpanded: true,
-    items: [
-      for (final (choice, text) in choices)
-        DropdownMenuItem(value: choice, child: Text(text)),
-    ],
-    onChanged: enabled ? (v) => onChanged(v as T) : null,
+    value: value,
+    choices: choices,
+    onChanged: onChanged,
+    enabled: enabled,
   ),
 );
 
-/// A date with its label above, a button to choose it and one to remove it.
+/// A date the person chooses, from [initial], within [dateSpanYears] of
+/// today unless [first] is given: the picker of the platform (D5).
+Future<Day?> pickDay(BuildContext context, {Day? initial, Day? first}) async {
+  final today = AppScope.of(context).repository.today();
+  final picked = await hcPickDate(
+    context,
+    initial: asDateTime(initial ?? today),
+    first: asDateTime(first ?? today.addYears(-dateSpanYears)),
+    last: asDateTime(today.addYears(dateSpanYears)),
+  );
+  return picked == null ? null : Day.of(picked);
+}
+
+/// A date with its label above, in the look of a field: the date, a calendar
+/// icon, the picker of the platform on a tap and, when it may be removed, a
+/// button that removes it (design lot D5, T8 of the audit).
 class HcDateField extends StatelessWidget {
   const HcDateField({
     super.key,
@@ -142,36 +155,18 @@ class HcDateField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final repository = AppScope.of(context).repository;
     return HcField(
       label: label,
-      child: Wrap(
-        spacing: HcSpace.s2,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          Text(
-            value == null ? noDate : formatDay(context, value!),
-            style: HcText.body,
-          ),
-          TextButton(
-            onPressed: () async {
-              final today = repository.today();
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: asDateTime(value ?? today),
-                firstDate: asDateTime(today.addYears(-dateSpanYears)),
-                lastDate: asDateTime(today.addYears(dateSpanYears)),
-              );
-              if (picked != null) onChanged(Day.of(picked));
-            },
-            child: Text(l10n.taskChooseDate),
-          ),
-          if (value != null && clearable)
-            TextButton(
-              onPressed: () => onChanged(null),
-              child: Text(l10n.taskClearDate),
-            ),
-        ],
+      child: HcDateInput(
+        text: value == null ? noDate : formatDay(context, value!),
+        empty: value == null,
+        chooseLabel: l10n.taskChooseDate,
+        onTap: () async {
+          final picked = await pickDay(context, initial: value);
+          if (picked != null) onChanged(picked);
+        },
+        onClear: value != null && clearable ? () => onChanged(null) : null,
+        clearLabel: l10n.taskClearDate,
       ),
     );
   }
@@ -185,21 +180,22 @@ Future<bool> confirmDelete(
   required String body,
 }) async {
   final l10n = AppLocalizations.of(context);
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
+  final confirmed = await showHcDialog<bool>(
+    context,
+    (context) => HcDialog(
       scrollable: true,
-      title: Text(title),
+      title: title,
       content: Text(body),
       actions: [
-        TextButton(
+        HcDialogAction(
+          label: l10n.cancel,
+          kind: HcDialogKind.cancel,
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text(l10n.cancel),
         ),
-        FilledButton(
-          style: hcDangerStyle(),
+        HcDialogAction(
+          label: l10n.delete,
+          kind: HcDialogKind.danger,
           onPressed: () => Navigator.of(context).pop(true),
-          child: Text(l10n.delete),
         ),
       ],
     ),

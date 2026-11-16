@@ -2,6 +2,7 @@
 
 import 'package:material_ui/material_ui.dart';
 
+import '../design/adaptive.dart';
 import '../design/icons.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
@@ -25,7 +26,7 @@ class RemindersRow extends StatelessWidget {
       text: l10n.remindersExplain,
       trailing: Semantics(
         label: l10n.reminders,
-        child: Switch(
+        child: HcSwitch(
           key: const Key('reminders-switch'),
           value: state.remindersOn,
           onChanged: (on) async {

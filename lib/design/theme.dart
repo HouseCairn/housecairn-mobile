@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import 'package:cupertino_ui/cupertino_ui.dart'
+    show CupertinoTextThemeData, CupertinoThemeData;
 import 'package:material_ui/material_ui.dart';
 
 import 'tokens.dart';
@@ -129,7 +131,35 @@ abstract final class HcText {
     fontWeight: HcFont.medium,
     height: HcFont.lineHeightTight,
   );
+
+  /// A line of the wheel pickers of iOS (design lot D5): the size the wheels
+  /// of iOS give their text, in the font of Housecairn.
+  static const picker = TextStyle(
+    fontFamily: HcFont.family,
+    fontSize: HcFont.sizeLg,
+    fontWeight: HcFont.regular,
+    color: HcColors.text,
+  );
 }
+
+/// What the widgets of iOS read (design lot D5, `design/patterns.md` of the
+/// web, "Platform adaptations"): the controls are those of iOS, the colours
+/// and the font stay those of Housecairn.
+const housecairnCupertinoTheme = CupertinoThemeData(
+  brightness: Brightness.light,
+  primaryColor: HcColors.primary,
+  primaryContrastingColor: HcColors.textInverse,
+  barBackgroundColor: HcColors.surface,
+  scaffoldBackgroundColor: HcColors.background,
+  textTheme: CupertinoTextThemeData(
+    primaryColor: HcColors.primary,
+    textStyle: HcText.body,
+    actionTextStyle: HcText.button,
+    actionSmallTextStyle: HcText.buttonSmall,
+    pickerTextStyle: HcText.picker,
+    dateTimePickerTextStyle: HcText.picker,
+  ),
+);
 
 /// The theme of Housecairn, built from the design tokens: the light look of
 /// the web application, adapted to a phone (docs/adr/0011). The web
@@ -207,6 +237,7 @@ ThemeData housecairnTheme() {
     hoverColor: Colors.transparent,
     materialTapTargetSize: MaterialTapTargetSize.padded,
     visualDensity: VisualDensity.standard,
+    cupertinoOverrideTheme: housecairnCupertinoTheme,
     dividerTheme: const DividerThemeData(
       color: HcColors.border,
       thickness: HcComponent.borderWidth,

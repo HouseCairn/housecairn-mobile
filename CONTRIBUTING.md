@@ -113,6 +113,12 @@ golden files and review every changed image in the pull request:
 flutter test --update-goldens test/goldens_test.dart
 ```
 
+A control that differs by platform (a list, a date, a dialog, a switch) comes from
+`lib/design/adaptive.dart`, never from a screen: the controls of iOS on an iPhone, those of
+Material on Android ([ADR 0011](docs/adr/0011-design-from-the-web-app.md)).
+`test/adaptive_test.dart` runs each on both platforms and holds the golden files of iOS
+(`flutter test --update-goldens test/adaptive_test.dart`).
+
 The font Manrope is bundled from its official repository (`assets/fonts/README.md`); a new
 font file needs its row there, with its SHA-256, or the licence check fails.
 
