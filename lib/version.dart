@@ -7,3 +7,7 @@
 /// platform at run time (package_info_plus), where it comes from the
 /// `version` of pubspec.yaml.
 const sourceAddress = 'github.com/HouseCairn/housecairn-mobile';
+
+/// Address of the public iPhone beta (TestFlight), shown on the About screen
+/// with two actions: open it, copy it. The only place that writes it.
+const testFlightAddress = 'https://testflight.apple.com/join/eygTuxTT';
