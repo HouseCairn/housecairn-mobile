@@ -22,6 +22,7 @@ import 'stock_format.dart';
 import 'stock_screens.dart';
 import 'task_screen.dart';
 import 'templates_screen.dart';
+import 'help_button.dart';
 
 /// Rooms (docs/spec.md, "Screens of v1"): the rooms of the current home in the
 /// household's order, each with its kind and how many items it holds; its
@@ -54,7 +55,11 @@ class _RoomsScreenState extends State<RoomsScreen> {
         1 => l10n.equipmentTab,
         _ => l10n.stock,
       },
-      actions: const [HomeSelector()],
+      brand: true,
+      actions: const [
+        HomeSelector(),
+        HelpButton(page: HelpPages.rooms),
+      ],
       body: home == null
           ? const SizedBox.shrink()
           : _tab == 1

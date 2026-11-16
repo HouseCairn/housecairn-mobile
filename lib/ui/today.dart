@@ -12,6 +12,7 @@ import 'state.dart';
 import 'report_screens.dart';
 import 'task_list_screen.dart';
 import 'task_screen.dart';
+import 'help_button.dart';
 
 /// Today (docs/spec.md, "Screens of v1"): overdue, today, coming up within a
 /// week, and without a date, each with its count as the web's headings, of
@@ -91,7 +92,11 @@ class _TodayScreenState extends State<TodayScreen> {
     }
     return HcScaffold(
       title: l10n.navToday,
-      actions: const [HomeSelector(withAllHomes: true)],
+      brand: true,
+      actions: const [
+        HomeSelector(withAllHomes: true),
+        HelpButton(page: HelpPages.today),
+      ],
       body: entries == null
           ? const SizedBox.shrink()
           : HcScreenList(

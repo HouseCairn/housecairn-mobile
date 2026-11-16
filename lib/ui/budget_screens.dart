@@ -16,6 +16,7 @@ import 'messages.dart';
 import 'parts.dart';
 import 'project_screens.dart';
 import 'state.dart';
+import 'help_button.dart';
 
 /// Budget (`budget/overview.html`, `rooms.html`, `projects.html`,
 /// `tasks.html`): the tabs Summary, Rooms, Projects and Upkeep of the web,
@@ -39,7 +40,11 @@ class _BudgetScreenState extends State<BudgetScreen> {
     final home = state.current;
     return HcScaffold(
       title: l10n.navBudget,
-      actions: const [HomeSelector()],
+      brand: true,
+      actions: const [
+        HomeSelector(),
+        HelpButton(page: HelpPages.budget),
+      ],
       body: home == null
           ? const SizedBox.shrink()
           : DataView<budget.Ledger>(

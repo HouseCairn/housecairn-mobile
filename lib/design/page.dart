@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../l10n/app_localizations.dart';
+import 'brand.dart';
 import 'theme.dart';
 import 'tokens.dart';
 
@@ -26,6 +27,7 @@ class HcScaffold extends StatefulWidget {
     this.floatingActionButton,
     this.bottomNavigationBar,
     this.drawsTitle = true,
+    this.brand = false,
   });
 
   /// The `h1` of the screen; null for a screen still loading.
@@ -35,6 +37,12 @@ class HcScaffold extends StatefulWidget {
   /// for a screen that draws its `h1` itself (the page of a task, under its
   /// pills, lot D2). The title still folds into the bar on iOS.
   final bool drawsTitle;
+
+  /// Whether the bar shows the brand (icon and name), on the roots of the
+  /// five sections only, as the web's phone bar does (`.has-nav.subpage
+  /// .brand { display: none }`). The `h1` stays under it, and does not fold
+  /// into the bar on iOS: the brand keeps the place.
+  final bool brand;
 
   /// The action of the bar: Edit on a record, the save of a form, or the
   /// selector of the home on a section root.
@@ -71,7 +79,9 @@ class _HcScaffoldState extends State<HcScaffold> {
     return Scaffold(
       appBar: AppBar(
         // The bar shows the title only on iOS, once the h1 is scrolled away.
-        title: title != null && cupertino
+        title: widget.brand
+            ? const HcBrand()
+            : title != null && cupertino
             ? AnimatedOpacity(
                 opacity: _folded ? 1 : 0,
                 duration: kThemeAnimationDuration,
@@ -82,7 +92,7 @@ class _HcScaffoldState extends State<HcScaffold> {
                 ),
               )
             : null,
-        centerTitle: cupertino,
+        centerTitle: cupertino && !widget.brand,
         automaticallyImplyLeading: !sheet,
         leadingWidth: sheet ? HcSpace.s12 + HcSpace.s12 + HcSpace.s4 : null,
         leading: sheet

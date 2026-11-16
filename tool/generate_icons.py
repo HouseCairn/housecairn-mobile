@@ -20,6 +20,8 @@ redrawn. Three things a platform requires differ from the web icon, and only the
 - The Android 13 themed icon is the silhouette of the cairn (alpha only), same geometry.
 
 Legacy Android icons (before API 26) are the rounded square of the SVG, as is.
+The icon of the bar (assets/brand/, three densities) is design/brand/housecairn-icon.svg, the
+cairn of the web as is, on a transparent background.
 Output is deterministic: files are compared by decoded pixels, not by bytes, so that the
 zlib version does not matter.
 """
@@ -33,6 +35,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SVG = ROOT / "design/brand/housecairn-icone-app.svg"
+BRAND_SVG = ROOT / "design/brand/housecairn-icon.svg"
+BRAND_DIR = ROOT / "assets/brand"
+LOGO_ICON_DP = 40  # layout.logo-icon of design/tokens.json (2.5rem)
 TOKENS = ROOT / "design/tokens.json"
 IOS = ROOT / "ios/Runner/Assets.xcassets/AppIcon.appiconset"
 RES = ROOT / "android/app/src/main/res"
@@ -70,6 +75,19 @@ class Source:
             polygon = flatten(m.group(2))
             polygon = [((x + tx2) * k + tx1, (y + ty2) * k + ty1) for x, y in polygon]
             self.paths.append((hex_rgb(m.group(1)), polygon))
+        if len(self.paths) != 3:
+            raise SystemExit("unexpected SVG: expected the three stones of the cairn")
+
+
+class BrandSource:
+    """The three stones of the web icon (housecairn-icon.svg, no background), as drawn."""
+
+    def __init__(self, text):
+        self.size = float(re.search(r'viewBox="0 0 (\d+) (\d+)"', text).group(1))
+        self.paths = [
+            (hex_rgb(m.group(1)), flatten(m.group(2)))
+            for m in re.finditer(r'<path fill="(#[0-9A-Fa-f]{6})" d="([^"]+)"', text)
+        ]
         if len(self.paths) != 3:
             raise SystemExit("unexpected SVG: expected the three stones of the cairn")
 
@@ -209,6 +227,14 @@ def render(src, pixels, kind):
     return c.rgba8()
 
 
+def render_brand(brand, pixels):
+    """The web icon on a transparent background, for the bar of the app."""
+    c = Canvas(pixels, pixels)
+    for rgb, polygon in brand.paths:
+        c.fill(polygon, rgb, pixels / brand.size, 0, 0)
+    return c.rgba8()
+
+
 def check_safe_zone(src):
     """The cairn, mapped on the 108 dp canvas as the SVG on its 256 box, stays in 66 dp."""
     k = CANVAS_DP / src.size
@@ -291,6 +317,13 @@ def targets(src):
         out[RES / f"mipmap-{density}/ic_launcher.png"] = png(get(legacy, "rounded"), alpha=True)
         out[RES / f"drawable-{density}/ic_launcher_foreground.png"] = png(get(layer, "foreground"), True)
         out[RES / f"drawable-{density}/ic_launcher_monochrome.png"] = png(get(layer, "mono"), True)
+    # The icon of the bar, flutter_svg not being a dependency (docs/adr/0001): the PNG at the
+    # logical size of layout.logo-icon, then @2x and @3x in the folders Flutter resolves.
+    brand = BrandSource(BRAND_SVG.read_text())
+    for folder, factor in (("", 1), ("2.0x/", 2), ("3.0x/", 3)):
+        out[BRAND_DIR / f"{folder}housecairn-icon.png"] = png(
+            render_brand(brand, LOGO_ICON_DP * factor), alpha=True
+        )
     return out
 
 
