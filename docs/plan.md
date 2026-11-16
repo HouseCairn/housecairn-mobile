@@ -476,11 +476,15 @@ server, read only, with the sentence of the confirmation of
 move server → alone of the same ADR (unsent changes sent first, or named and kept after a second
 confirmation; the access revoked at `/o/revoke_token/`, or left to the server's page when it
 cannot be reached; the secure store emptied whatever happens; the homes kept). When the server
-revoked or expired the access, **Sign in again** signs in to the same address in the browser,
-reads the homes of the new access without recording them, and shows the confirmation, which
-names the homes of the phone the new access no longer covers (they leave the phone at the next
-sync, as any home gone); Connect resumes the sync where it was, Cancel revokes the new access and
-leaves the phone as it was. Alone, the row "My Housecairn server" of the same group is the entry
+revoked or expired the access, the phone sends nothing more, not even from "Sync now", and
+**Sign in again** signs in to the same address in the browser, reads the homes of the new access
+without recording them, and shows the confirmation, which names the homes of the phone the new
+access no longer covers (they leave the phone at the next sync, as any home gone). The new access
+stays in memory until **Connect**, which writes it to the secure store, revokes the old one at
+best (it may only have expired, and would otherwise stay known to the server) and resumes the
+sync where it was. Cancel, the system back, the back gesture or a failure before Connect revoke
+the new access at best and forget it: the secure store and the phone's record of the server stay
+as they were, byte for byte. Alone, the row "My Housecairn server" of the same group is the entry
 to the address screen (with homes on the phone, the message of lot 4c).
 
 ## Lot 4c. Homes of the phone and files on a server

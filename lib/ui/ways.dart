@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 
 import '../design/adaptive.dart';
@@ -472,16 +474,20 @@ class _ServerSettingsRowsState extends State<ServerSettingsRows> {
   }
 
   /// A new sign-in to the same server in the browser, then the
-  /// confirmation, which names the homes that would leave the phone.
+  /// confirmation, which names the homes that would leave the phone. The
+  /// new access stays in memory until Connect; leaving the confirmation in
+  /// any other way (Cancel, the system back, the back gesture) drops it.
   Future<void> _signInAgain(AppState state) async {
     final l10n = AppLocalizations.of(context);
     final navigator = Navigator.of(context);
     final address = await state.serverAddress();
     if (address == null) return;
     try {
-      await state.signInToServer(address);
-      final homes = await state.serverHomesOffered(address, keep: false);
-      if (!mounted) return;
+      final homes = await state.signInAgain(address);
+      if (!mounted) {
+        unawaited(state.dropSignInAgain());
+        return;
+      }
       await navigator.push(
         MaterialPageRoute<void>(
           builder: (_) => ServerConfirmScreen(
@@ -491,6 +497,8 @@ class _ServerSettingsRowsState extends State<ServerSettingsRows> {
           ),
         ),
       );
+      // Connect took the new access already; otherwise it is dropped.
+      unawaited(state.dropSignInAgain());
     } on Object catch (e) {
       if (!mounted) return;
       await WaysRows._tell(

@@ -174,8 +174,8 @@ class _ServerAddressScreenState extends State<ServerAddressScreen> {
 /// names the server and says what it gets (docs/adr/0010, "What the screen
 /// says"), with the homes the access covers. With [reconnect], after a new
 /// sign-in to the server in use: it also names the homes of the phone the
-/// new access no longer covers, Connect resumes the sync where it was, and
-/// Cancel forgets the new access only.
+/// new access no longer covers, Connect stores the new access and resumes
+/// the sync where it was, and leaving otherwise forgets the new access only.
 class ServerConfirmScreen extends StatefulWidget {
   const ServerConfirmScreen({
     super.key,
@@ -206,7 +206,7 @@ class _ServerConfirmScreenState extends State<ServerConfirmScreen> {
     });
     try {
       if (widget.reconnect) {
-        await state.reconnectServer();
+        await state.confirmSignInAgain();
       } else {
         await state.startServer(widget.address);
       }
@@ -221,7 +221,9 @@ class _ServerConfirmScreenState extends State<ServerConfirmScreen> {
   Future<void> _cancel() async {
     final state = AppScope.of(context);
     final navigator = Navigator.of(context);
-    await state.forgetServer(widget.address, keepState: widget.reconnect);
+    // A new sign-in to the server in use is dropped by the screen that
+    // opened this one, whatever way the person leaves it.
+    if (!widget.reconnect) await state.forgetServer(widget.address);
     navigator.pop();
   }
 

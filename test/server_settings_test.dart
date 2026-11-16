@@ -252,7 +252,7 @@ void main() {
       await onPhone(tester, height: 1600);
       final run = await startOnServer(tester);
       final l10n = words['en']!;
-      run.server.revokedOnServer = true;
+      run.server.revokeAccess();
       await run.state.syncWithServer();
       await tester.pumpAndSettle();
       expect(run.state.serverSync.stopped, ServerStop.disconnected);
@@ -267,35 +267,79 @@ void main() {
   });
 
   group('the access revoked on the server', () {
-    testWidgets('Settings offers to sign in again; the new access, '
-        'confirmed, resumes the sync where it was', (tester) async {
+    /// The phone stopped by the server: the access of the first sign-in
+    /// (`hca_access_1`) is revoked, and a round of sync found it so.
+    Future<OnServer> stopped(WidgetTester tester) async {
       await onPhone(tester, height: 1600);
       final run = await startOnServer(tester);
-      final l10n = words['en']!;
-      run.server.revokedOnServer = true;
+      run.server.revokeAccess();
       await run.state.syncWithServer();
       await tester.pumpAndSettle();
       expect(run.state.serverSync.stopped, ServerStop.disconnected);
+      return run;
+    }
+
+    /// What the phone keeps of the server, to compare byte for byte.
+    /// A list, which `expect` compares deeply.
+    Future<List<Object?>> kept(OnServer run) async => [
+      {for (final e in run.store.values.entries) e.key: e.value.toList()},
+      await run.state.repository.serverState.readServerState(),
+    ];
+
+    testWidgets('Settings offers to sign in again; the new access, '
+        'confirmed, resumes the sync where it was, and every request '
+        'after Connect carries it, none the old one', (tester) async {
+      final run = await stopped(tester);
+      final l10n = words['en']!;
       await openMore(tester, l10n);
       expect(
         find.byKey(const Key('settings-server-sign-in-again')),
         findsOneWidget,
       );
-      // The person signs in again on the web; the new grant is good.
-      run.server.revokedOnServer = false;
+      // A change made while stopped: it goes with the first round after
+      // Connect.
+      await run.state.repository.createRoom(FakeServer.home, name: 'Attic');
       final before = run.opened.length;
       await tapRow(tester, 'settings-server-sign-in-again');
       expect(run.opened, hasLength(before + 1), reason: 'the browser');
       expect(find.byType(ServerConfirmScreen), findsOneWidget);
       expect(find.text(l10n.serverSeesEverything), findsOneWidget);
       expect(find.byKey(const Key('server-reconnect-dropped')), findsNothing);
+      expect(
+        (await ServerCredential.read(run.store))!.access,
+        'hca_access_1',
+        reason: 'the new access is in memory only until Connect',
+      );
+      final atConnect = run.server.requests.length;
       await tester.tap(find.byKey(const Key('server-connect')));
       await tester.pumpAndSettle();
+      // The token each request carried, as the server saw it: the new one
+      // on every request after Connect, never the old one.
+      final after = [
+        for (var i = atConnect; i < run.server.requests.length; i++)
+          (run.server.requests[i].path, run.server.authorizations[i]),
+      ];
+      expect(
+        [for (final (_, authorization) in after) authorization],
+        isNot(contains('Bearer hca_access_1')),
+        reason: 'no request under the old access',
+      );
+      for (final (path, authorization) in after) {
+        if (path == '/o/revoke_token/') continue;
+        expect(authorization, 'Bearer hca_access_2', reason: path);
+      }
+      expect([
+        for (final (path, _) in after) path,
+      ], contains('/api/v1/sync/homes/${FakeServer.home}/push'));
       expect(run.state.serverSync.stopped, isNull);
       expect(run.state.serverSync.lastSync, isNotNull);
       expect(run.state.syncMode, SyncMode.server);
       expect((await ServerCredential.read(run.store))!.access, 'hca_access_2');
       expect([for (final h in run.state.homes) h.name], ['House']);
+      expect(await run.state.unsentChanges(), isEmpty, reason: 'Attic sent');
+      expect(run.server.revoked, [
+        'hcr_refresh_1',
+      ], reason: 'the old access is revoked at best: it may only be expired');
       await openMore(tester, l10n);
       expect(
         find.byKey(const Key('settings-server-sign-in-again')),
@@ -304,18 +348,12 @@ void main() {
     });
 
     testWidgets('a new access without a home of the phone names it before '
-        'Connect; Cancel forgets the new access and keeps the phone as it '
+        'Connect; Cancel revokes the new access and keeps the phone as it '
         'was', (tester) async {
-      await onPhone(tester, height: 1600);
-      final run = await startOnServer(tester);
+      final run = await stopped(tester);
       final l10n = words['en']!;
-      run.server.revokedOnServer = true;
-      await run.state.syncWithServer();
-      await tester.pumpAndSettle();
-      run.server
-        ..revokedOnServer = false
-        ..homeOffered = false;
-      final cursor = await run.state.repository.serverState.readServerState();
+      run.server.homeOffered = false;
+      final was = await kept(run);
       await openMore(tester, l10n);
       await tapRow(tester, 'settings-server-sign-in-again');
       expect(
@@ -326,14 +364,64 @@ void main() {
       await tester.tap(find.byKey(const Key('server-cancel')));
       await tester.pumpAndSettle();
       expect(run.server.revoked, ['hcr_refresh_2'], reason: 'the new access');
-      expect(await ServerCredential.read(run.store), isNull);
       expect(
-        await run.state.repository.serverState.readServerState(),
-        cursor,
-        reason: 'the cursor and the homes of the server stay',
+        await kept(run),
+        was,
+        reason: 'store and server state as they were',
       );
       expect(run.state.syncMode, SyncMode.server);
       expect(run.state.serverSync.stopped, ServerStop.disconnected);
+      expect([for (final h in run.state.homes) h.name], ['House']);
+    });
+
+    testWidgets('the system back on the confirmation drops the new access; '
+        'the next sync sends nothing and loses no home', (tester) async {
+      final run = await stopped(tester);
+      final l10n = words['en']!;
+      // A sync under the new access would take House off the phone.
+      run.server.homeOffered = false;
+      final was = await kept(run);
+      await openMore(tester, l10n);
+      await tapRow(tester, 'settings-server-sign-in-again');
+      expect(find.byType(ServerConfirmScreen), findsOneWidget);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(ServerConfirmScreen), findsNothing);
+      expect(run.server.revoked, ['hcr_refresh_2'], reason: 'the new access');
+      expect(
+        await kept(run),
+        was,
+        reason: 'store and server state as they were',
+      );
+      final sent = run.server.requests.length;
+      // What "Sync now" and the opening of the app call.
+      await run.state.syncWithServer();
+      await tester.pumpAndSettle();
+      expect(run.server.requests, hasLength(sent), reason: 'no request');
+      expect(run.state.serverSync.stopped, ServerStop.disconnected);
+      expect([for (final h in run.state.homes) h.name], ['House']);
+      expect(await kept(run), was);
+    });
+
+    testWidgets('the homes of the new access cannot be read: it is revoked '
+        'and forgotten, the phone stays as it was', (tester) async {
+      final run = await stopped(tester);
+      final l10n = words['en']!;
+      run.server.homesFail = true;
+      final was = await kept(run);
+      await openMore(tester, l10n);
+      await tapRow(tester, 'settings-server-sign-in-again');
+      expect(find.byType(ServerConfirmScreen), findsNothing);
+      expect(run.server.revoked, ['hcr_refresh_2'], reason: 'the new access');
+      expect(
+        await kept(run),
+        was,
+        reason: 'store and server state as they were',
+      );
+      run.server.homesFail = false;
+      final sent = run.server.requests.length;
+      await run.state.syncWithServer();
+      expect(run.server.requests, hasLength(sent), reason: 'no request');
       expect([for (final h in run.state.homes) h.name], ['House']);
     });
   });

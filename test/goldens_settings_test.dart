@@ -45,6 +45,14 @@ void main() {
       alignment: 0.05,
     );
     await tester.pumpAndSettle();
+    // The cairn of the header, decoded before the capture: the first test
+    // of the file would take it before its image is ready.
+    await tester.runAsync(() async {
+      for (final element in find.byType(Image).evaluate()) {
+        await precacheImage((element.widget as Image).image, element);
+      }
+    });
+    await tester.pumpAndSettle();
   }
 
   for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {

@@ -35,19 +35,36 @@ class MemoryStore implements Store {
 /// A Housecairn server of one home, "House", for the screens of the third
 /// way: info, the OAuth token and its revocation, the list of homes, the
 /// snapshot, an empty feed and pushes applied. [offline] makes every request
-/// fail as with no network; [revokedOnServer] makes it refuse the access
-/// (the person revoked it on the web page "Connected apps").
+/// fail as with no network; [revokeAccess] makes it refuse the tokens given
+/// so far (the person revoked the access on the web page "Connected apps"),
+/// while those of a new sign-in are good.
 class FakeServer implements ServerHttp {
   late ServerAddress address;
   final requests = <Uri>[];
 
+  /// The `authorization` header of each request, in the order of
+  /// [requests]; `null` for a request without one.
+  final authorizations = <String?>[];
+
   /// The tokens sent to `/o/revoke_token/`, in order.
   final revoked = <String>[];
   bool offline = false;
-  bool revokedOnServer = false;
+
+  /// The tokens given so far, access and refresh.
+  final _given = <String>{};
+
+  /// The tokens the server refuses.
+  final _refused = <String>{};
+
+  /// The access is revoked on the server: every token given so far is
+  /// refused, as a call (401) or as a refresh (`invalid_grant`).
+  void revokeAccess() => _refused.addAll(_given);
 
   /// Whether the home is in the access of the next sign-in.
   bool homeOffered = true;
+
+  /// The list of homes answers 500.
+  bool homesFail = false;
 
   /// The number of sign-ins: each gives new tokens.
   int signIns = 0;
@@ -69,11 +86,14 @@ class FakeServer implements ServerHttp {
       throw const ServerHttpException(ServerHttpFailure.unreachable);
     }
     requests.add(url);
+    authorizations.add(headers['authorization']);
     expect(address.owns(url), isTrue, reason: '$url');
     final form = body == null ? const <String, String>{} : _form(body);
-    if (revokedOnServer &&
-        (headers['authorization'] != null ||
-            form['grant_type'] == 'refresh_token')) {
+    final bearer = headers['authorization']?.replaceFirst('Bearer ', '');
+    final refresh = form['grant_type'] == 'refresh_token'
+        ? form['refresh_token']
+        : null;
+    if (_refused.contains(bearer) || _refused.contains(refresh)) {
       return _json(401, {'error': 'invalid_grant'});
     }
     switch (url.path) {
@@ -90,6 +110,7 @@ class FakeServer implements ServerHttp {
         });
       case '/o/token/':
         signIns++;
+        _given.addAll(['hca_access_$signIns', 'hcr_refresh_$signIns']);
         return _json(200, {
           'access_token': 'hca_access_$signIns',
           'refresh_token': 'hcr_refresh_$signIns',
@@ -98,6 +119,7 @@ class FakeServer implements ServerHttp {
         revoked.add(form['token']!);
         return _json(200, {});
       case '/api/v1/sync/homes/':
+        if (homesFail) return _json(500, {});
         return _json(200, {
           'homes': [
             if (homeOffered)

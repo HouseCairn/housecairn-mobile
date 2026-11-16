@@ -25,6 +25,7 @@ import '../sync/server_address.dart';
 import '../sync/server_connection.dart';
 import '../sync/server_http.dart';
 import '../sync/server_http_io.dart';
+import '../sync/server_sign_in.dart';
 import '../sync/server_transport.dart';
 import '../sync/transport.dart';
 
@@ -171,15 +172,16 @@ class AppState extends ChangeNotifier {
   Store get _store =>
       store ?? (throw StateError('No secure store on this build.'));
 
-  ServerTransport _transport(ServerAddress address) => ServerTransport(
-    address: address,
-    http: serverHttp(address),
-    store: _store,
-    state: repository.serverState,
-    device: repository.deviceB64,
-    schemaVersion: repository.schemaVersion,
-    seenStore: repository.serverSeen,
-  );
+  ServerTransport _transport(ServerAddress address, {Store? store}) =>
+      ServerTransport(
+        address: address,
+        http: serverHttp(address),
+        store: store ?? _store,
+        state: repository.serverState,
+        device: repository.deviceB64,
+        schemaVersion: repository.schemaVersion,
+        seenStore: repository.serverSeen,
+      );
 
   /// Signs in to [address] in the system browser (OAuth 2 with PKCE); the
   /// access is then in [store], nothing of the homes was sent or received.
@@ -192,23 +194,16 @@ class AppState extends ChangeNotifier {
   ).signIn(address);
 
   /// The homes the access chosen in the browser covers, and their members.
-  /// With [keep] `false` (a new sign-in to the server in use, not confirmed
-  /// yet) the homes are only read: the phone's record of them is unchanged.
-  Future<List<ServerHome>> serverHomesOffered(
-    ServerAddress address, {
-    bool keep = true,
-  }) async {
+  Future<List<ServerHome>> serverHomesOffered(ServerAddress address) async {
     final transport = _transport(address);
     await transport.capabilities();
-    return transport.homes(keep: keep);
+    return transport.homes();
   }
 
   /// Forgets an access signed in but not confirmed: revoked on the server
-  /// when it answers, deleted from [store] whatever happens. With
-  /// [keepState] (a new sign-in to the server in use, cancelled) the
-  /// phone's cursor and homes of the server stay.
-  Future<void> forgetServer(ServerAddress address, {bool keepState = false}) =>
-      _transport(address).disconnect(keepState: keepState);
+  /// when it answers, deleted from [store] whatever happens.
+  Future<void> forgetServer(ServerAddress address) =>
+      _transport(address).disconnect();
 
   /// The confirmation of the third way at the first start: the phone has no
   /// home, so it keeps the server's (docs/adr/0010, "Moving from one way to
@@ -228,13 +223,89 @@ class AppState extends ChangeNotifier {
   /// the third way.
   String? serverAddressShown;
 
-  /// After a new sign-in to the server in use (the access was revoked or
-  /// expired, [ServerStop.disconnected]), confirmed: the phone stops being
-  /// held and syncs at once, from where it was. The homes the new access
-  /// no longer covers leave the phone at that sync, as any home gone.
-  Future<void> reconnectServer() async {
+  /// A new sign-in to the server in use, not confirmed yet: its credential
+  /// is in memory only ([HeldCredentialStore]), the secure store still holds
+  /// the access the server stopped.
+  HeldCredentialStore? _signInHeld;
+
+  /// After the server revoked or expired the access
+  /// ([ServerStop.disconnected]): a new sign-in to [address] in the browser,
+  /// then the homes the new access covers, read only. Nothing is written to
+  /// the secure store nor to the phone's record of the server until
+  /// [confirmSignInAgain]; on any failure the new access is dropped
+  /// ([dropSignInAgain]) and the error goes to the caller.
+  Future<List<ServerHome>> signInAgain(ServerAddress address) async {
+    await dropSignInAgain();
+    final held = HeldCredentialStore(_store);
+    _signInHeld = held;
+    try {
+      await ServerConnector(
+        http: serverHttp,
+        store: held,
+        openBrowser: openUrl,
+        deviceName: l10n?.serverDeviceName ?? 'Housecairn',
+        callbacks: signInCallbacks,
+      ).signIn(address);
+      final transport = _transport(address, store: held);
+      await transport.capabilities();
+      return await transport.homes(keep: false);
+    } on Object {
+      await dropSignInAgain();
+      rethrow;
+    }
+  }
+
+  /// Connect, after [signInAgain]: the new access goes to the secure store,
+  /// the old one is revoked on the server at best (it may only have
+  /// expired, and would stay known to the server), and the phone syncs at
+  /// once from where it was. The homes the new access no longer covers
+  /// leave the phone at that sync, as any home gone; the confirmation named
+  /// them.
+  Future<void> confirmSignInAgain() async {
+    final credential = _signInHeld?.credential;
+    if (credential == null) {
+      // Connect again after a sync that failed: the new access is stored
+      // already, only the sync is tried again.
+      await syncWithServer(throwing: true);
+      if (serverSync.stopped case final reason?) throw ServerStopped(reason);
+      return;
+    }
+    _signInHeld = null;
+    final address = await serverAddress();
+    final old = await ServerCredential.read(_store);
+    await credential.write(_store);
+    if (address != null && old != null && old.refresh != credential.refresh) {
+      await _revokeAtBest(address, old);
+    }
     serverSync.stopped = null;
     await syncWithServer(throwing: true);
+  }
+
+  /// Back, Cancel or a failure after [signInAgain]: the new access is
+  /// forgotten at once and revoked on the server at best; the secure store
+  /// and the phone's record of the server stay as they were.
+  Future<void> dropSignInAgain() async {
+    final held = _signInHeld;
+    _signInHeld = null;
+    final credential = held?.credential;
+    if (held == null || credential == null) return;
+    final address = await serverAddress();
+    if (address != null) await _revokeAtBest(address, credential);
+  }
+
+  /// Revokes [credential] on [address] when the server answers; never
+  /// throws, and leaves the secure store and the record of the server alone.
+  Future<void> _revokeAtBest(
+    ServerAddress address,
+    ServerCredential credential,
+  ) async {
+    final alone = HeldCredentialStore(_store);
+    try {
+      await credential.write(alone);
+      await _transport(address, store: alone).disconnect(keepState: true);
+    } on Object {
+      // At best: the access can still be revoked on the server's page.
+    }
   }
 
   /// What the screens show of the sync with the server (lot 4b).
@@ -276,8 +347,12 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  /// One round of sync with the server; nothing outside the third way.
+  /// One round of sync with the server; nothing outside the third way, and
+  /// nothing while the server stopped the access ([ServerStop.disconnected]),
+  /// not even from "Sync now": only a new sign-in, confirmed, lets the
+  /// phone send again ([confirmSignInAgain]).
   Future<SyncReport?> _syncRound() async {
+    if (serverSync.stopped == ServerStop.disconnected) return null;
     if (syncMode != SyncMode.server &&
         await repository.storedSyncMode() != SyncMode.server) {
       return null;
@@ -324,7 +399,8 @@ class AppState extends ChangeNotifier {
 
   /// Syncs [syncDelay] after now, unless another change comes first; not
   /// while the server stopped this phone (a sign-in, an update or another
-  /// address is needed: [syncWithServer] from the screens still tries).
+  /// address is needed: [syncWithServer] from the screens still tries, but
+  /// for a stopped access, which waits for a new sign-in).
   void syncSoon() {
     if (syncMode != SyncMode.server || serverSync.stoppedForGood) return;
     _syncSoon?.cancel();
@@ -424,7 +500,13 @@ class AppState extends ChangeNotifier {
     _syncSoon?.cancel();
     await _syncing;
     final address = await serverAddress();
-    if (address != null && (await unsentChanges()).isNotEmpty) {
+    // The access stopped by the server sends nothing more: the changes not
+    // sent are named, as with no network.
+    final stopped = serverSync.stopped == ServerStop.disconnected;
+    if (stopped && !keepUnsent && (await unsentChanges()).isNotEmpty) {
+      return unsentChanges();
+    }
+    if (!stopped && address != null && (await unsentChanges()).isNotEmpty) {
       try {
         await SyncEngine(repository, _transport(address)).sync();
       } on ServerHttpException {
