@@ -278,12 +278,19 @@ class ItemFormScreen extends StatefulWidget implements HcFormScreen {
   const ItemFormScreen({
     super.key,
     required this.homeId,
-    required this.roomId,
+    this.roomId,
+    this.chooseRoom = false,
     this.itemId,
   });
 
   final String homeId;
-  final String roomId;
+
+  /// The room of the item; for a new item opened from Equipment, the room
+  /// the form starts with, `null` for the first one.
+  final String? roomId;
+
+  /// Whether the form asks for the room (a new item opened from Equipment).
+  final bool chooseRoom;
 
   /// `null` for a new item.
   final String? itemId;
@@ -324,6 +331,8 @@ class _ItemFormScreenState extends State<ItemFormScreen>
   String _warrantyProvider = '';
   String? _contractor;
   List<ContractorRow> _contractors = const [];
+  List<RoomRow> _rooms = const [];
+  String? _room;
   bool _loaded = false;
 
   @override
@@ -338,12 +347,21 @@ class _ItemFormScreenState extends State<ItemFormScreen>
 
   Future<void> _load(Repository repository) async {
     final contractors = await repository.contractors(widget.homeId);
+    final rooms = widget.chooseRoom
+        ? await repository.rooms(widget.homeId)
+        : const <RoomRow>[];
     final item = widget.itemId == null
         ? null
         : await repository.item(widget.itemId!);
     if (!mounted) return;
     setState(() {
       _contractors = contractors;
+      _rooms = rooms;
+      _room = !widget.chooseRoom
+          ? widget.roomId
+          : rooms.any((r) => r.id == widget.roomId)
+          ? widget.roomId
+          : (rooms.isEmpty ? null : rooms.first.id);
       if (item == null) return;
       _name.text = item.name;
       _kind = item.kind;
@@ -433,7 +451,7 @@ class _ItemFormScreenState extends State<ItemFormScreen>
     final saved = await runChange(
       context,
       (r) => widget.itemId == null
-          ? r.addItem(widget.roomId, _input())
+          ? r.addItem(_room ?? widget.roomId!, _input())
           : r.updateItem(widget.itemId!, _input()),
     );
     if (saved) navigator.pop();
@@ -567,6 +585,14 @@ class _ItemFormScreenState extends State<ItemFormScreen>
                     validator: (v) =>
                         (v ?? '').trim().isEmpty ? l10n.errTitleRequired : null,
                   ),
+                  if (widget.chooseRoom && widget.itemId == null)
+                    hcChoice<String?>(
+                      l10n.room,
+                      _room,
+                      [for (final r in _rooms) (r.id, r.name)],
+                      (v) => setState(() => _room = v),
+                      key: const Key('item-room'),
+                    ),
                   hcChoice<String>(
                     l10n.fieldType,
                     _kind,

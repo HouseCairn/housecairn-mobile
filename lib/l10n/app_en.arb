@@ -1268,6 +1268,8 @@
   "@itemsWarrantyEnded": {"description": "Pill of an item whose warranty ended, in the list of every item. Web catalogue: garantie terminée le.", "placeholders": {"date": {"type": "String", "example": "1 March 2025"}}},
   "itemsAllEmpty": "No item yet. Add one from the page of a room.",
   "@itemsAllEmpty": {"description": "Empty list of every item. Web catalogue: Aucun élément pour l'instant."},
+  "itemsEmptyShort": "No item yet.",
+  "@itemsEmptyShort": {"description": "Empty list of every item while the Add an item button is under it. Web catalogue: Aucun élément pour l'instant."},
   "itemsNoMatch": "No item matches.",
   "@itemsNoMatch": {"description": "The filters of the list of every item leave nothing. Web catalogue: Aucun élément ne correspond."},
   "itemManufacturerWarranty": "Manufacturer's warranty",
