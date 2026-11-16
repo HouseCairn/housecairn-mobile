@@ -41,6 +41,7 @@ void main() {
           await state.choose(data.main);
           await tester.pumpAndSettle();
           await open(tester, data, l);
+          await precacheImages(tester);
           await expectLater(
             find.byType(MaterialApp),
             matchesGoldenFile('goldens/${page}_$name.png'),

@@ -114,6 +114,10 @@ void main() {
         250,
         scrollable: _vertical(),
       );
+      // Inspiration comes after the tasks, the budget and the quotes, as on
+      // the web: bring the row above the bar of the sections.
+      await tester.drag(_vertical(), const Offset(0, -300));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Colour ideas'));
       await tester.pumpAndSettle();
       expect(opened, [Uri.parse('https://example.com/colours')]);

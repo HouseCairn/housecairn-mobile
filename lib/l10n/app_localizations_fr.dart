@@ -28,9 +28,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navMore => 'Plus';
 
   @override
-  String get emptySection => 'Rien ici pour l\'instant.';
-
-  @override
   String get moreHelpGroup => 'Aide';
 
   @override
@@ -514,6 +511,9 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get roomMemoryEmpty =>
       'Rien de noté pour l\'instant : peinture, revêtements de sol et de murs, et ce qui passe derrière les murs.';
+
+  @override
+  String get editMemory => 'Modifier la mémoire';
 
   @override
   String get paintColour => 'Couleur de la peinture';
@@ -1374,6 +1374,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get amountPaid => 'Payé';
 
   @override
+  String get amountGap => 'Écart';
+
+  @override
   String get amountUsed => 'Consommé';
 
   @override
@@ -1869,6 +1872,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reportWhere => 'Où ?';
+
+  @override
+  String get reportWhereFact => 'Où';
 
   @override
   String get reportedOn => 'Signalé le';

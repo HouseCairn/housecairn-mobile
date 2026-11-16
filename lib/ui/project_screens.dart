@@ -19,6 +19,7 @@ import 'home_selector.dart';
 import 'messages.dart';
 import 'parts.dart';
 import 'state.dart';
+import 'rooms.dart';
 import 'task_screen.dart';
 import 'help_button.dart';
 
@@ -172,14 +173,25 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                         label: l10n.addProject,
                         primary: false,
                         gap: shown.isEmpty ? HcSpace.s2 : HcSpace.s3,
-                        onPressed: () =>
-                            _open(context, ProjectFormScreen(homeId: home.id)),
+                        onPressed: () => _add(context, home.id),
                       ),
                   ],
                 );
               },
             ),
     );
+  }
+
+  /// Created from the list of its own section, the new project opens (web
+  /// design guide, After a form): the next step is there, a quote or a
+  /// budget line. Back from it returns to this list, on the same tab.
+  Future<void> _add(BuildContext context, String homeId) async {
+    final navigator = Navigator.of(context);
+    final id = await navigator.push(
+      hcRouteOf<String?>(ProjectFormScreen(homeId: homeId)),
+    );
+    if (id == null || !mounted) return;
+    await navigator.push(hcRoute(ProjectScreen(homeId: homeId, projectId: id)));
   }
 
   /// What the projects going on plan and paid (`envelope_summary`).
@@ -214,10 +226,10 @@ class _ProjectData {
   final List<TaskRow> attachable;
 }
 
-/// A project (`projects/project_detail.html`): its facts, its budget lines
-/// with the three amounts and the gap, its quotes, its tasks, its links of
-/// inspiration (opened in the browser of the phone, never read) and its
-/// files.
+/// A project (`projects/project_detail.html`): its pills, title, goal and
+/// rooms, then, in the order of the web, its tasks, its budget lines with
+/// the three amounts and the gap, its quotes, its links of inspiration
+/// (opened in the browser of the phone, never read) and its files.
 class ProjectScreen extends StatelessWidget {
   const ProjectScreen({
     super.key,
@@ -259,60 +271,148 @@ class ProjectScreen extends StatelessWidget {
         final total = budget.sumOf(data.lines.map((l) => l.amounts));
         return HcScaffold(
           title: p.title,
+          // The title is drawn under the pills, as on the web.
+          drawsTitle: false,
           actions: const [HelpButton(page: HelpPages.project)],
           body: HcScreenList(
             children: [
-              const SizedBox(height: HcSpace.s2),
+              // The head of the record (`projects/project_detail.html`): the
+              // pills (status, priority, what is left of the budget), the
+              // title, the goal as a paragraph, the rooms as links, then the
+              // action row.
               HcCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: HcSpace.s3),
-                      child: Wrap(
-                        spacing: HcSpace.s2,
-                        runSpacing: HcSpace.s1,
-                        children: [
-                          HcPill(
-                            projectStatusLabel(l10n, p.status),
-                            tone: projectStatusTone(p.status),
-                          ),
-                          if (p.priority == 'high')
-                            HcPill(l10n.highPriority, tone: HcPillTone.warning),
-                          if (p.priority == 'low')
-                            HcPill(l10n.lowPriority, tone: HcPillTone.ghost),
-                        ],
-                      ),
+                    Wrap(
+                      key: const Key('project-pills'),
+                      spacing: HcSpace.s2,
+                      runSpacing: HcSpace.s1,
+                      children: [
+                        HcPill(
+                          projectStatusLabel(l10n, p.status),
+                          tone: projectStatusTone(p.status),
+                        ),
+                        if (p.priority == 'high')
+                          HcPill(l10n.highPriority, tone: HcPillTone.warning),
+                        if (p.priority == 'low')
+                          HcPill(l10n.lowPriority, tone: HcPillTone.ghost),
+                        ...gapPills(total, currency),
+                      ],
+                    ),
+                    const SizedBox(height: HcSpace.s2),
+                    Semantics(
+                      header: true,
+                      child: Text(p.title, style: HcText.pageTitle),
                     ),
                     if (p.goal.isNotEmpty)
-                      HcFact(l10n.projectGoal, factText(p.goal)),
+                      Padding(
+                        padding: const EdgeInsets.only(top: HcSpace.s2),
+                        child: Text(
+                          p.goal,
+                          key: const Key('project-goal'),
+                          style: HcText.body,
+                        ),
+                      ),
                     if (data.rooms.isNotEmpty)
                       Padding(
-                        padding: const EdgeInsets.only(bottom: HcSpace.s3),
+                        padding: const EdgeInsets.only(top: HcSpace.s3),
                         child: HcValueList(
                           children: [
                             HcValueRow(
                               l10n.roomsConcerned,
-                              data.rooms.map((r) => r.name).join(', '),
+                              '',
+                              child: Wrap(
+                                alignment: WrapAlignment.end,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  for (final (i, room)
+                                      in data.rooms.indexed) ...[
+                                    if (i > 0)
+                                      Text(', ', style: HcValueText.value),
+                                    HcValueLink(
+                                      room.name,
+                                      key: Key('project-room-${room.id}'),
+                                      onTap: () => _open(
+                                        context,
+                                        RoomScreen(
+                                          homeId: homeId,
+                                          roomId: room.id,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
                     if (writable)
-                      Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: OutlinedButton(
-                          key: const Key('project-edit'),
-                          onPressed: () => _open(
-                            context,
-                            ProjectFormScreen(homeId: homeId, projectId: p.id),
+                      RecordActions(
+                        children: [
+                          OutlinedButton(
+                            key: const Key('project-edit'),
+                            onPressed: () => _open(
+                              context,
+                              ProjectFormScreen(
+                                homeId: homeId,
+                                projectId: p.id,
+                              ),
+                            ),
+                            child: Text(l10n.editProject),
                           ),
-                          child: Text(l10n.editProject),
-                        ),
+                        ],
                       ),
                   ],
                 ),
               ),
+              // The sections in the order of the web: tasks, budget, quotes,
+              // inspiration, then the files.
+              HcSectionHeading(l10n.tasksHeading),
+              if (data.tasks.isEmpty)
+                HcEmpty(l10n.projectTasksEmpty)
+              else
+                HcCardList(
+                  children: [
+                    for (final t in data.tasks)
+                      HcRow(
+                        key: Key('project-task-${t.task.id}'),
+                        title: t.task.title,
+                        text: t.occurrence?.dueOn == null
+                            ? (t.occurrence == null
+                                  ? l10n.taskDoneLabel
+                                  : l10n.todayNoDate)
+                            : l10n.dueOn(
+                                formatDay(
+                                  context,
+                                  Day.parse(t.occurrence!.dueOn!),
+                                ),
+                              ),
+                        onTap: () => _open(
+                          context,
+                          TaskScreen(homeId: homeId, taskId: t.task.id),
+                        ),
+                      ),
+                  ],
+                ),
+              if (writable) ...[
+                HcAddButton(
+                  key: const Key('project-task-add'),
+                  label: l10n.addProjectTask,
+                  primary: false,
+                  gap: HcSpace.s3,
+                  onPressed: () => _addTask(context, p.id),
+                ),
+                if (data.attachable.isNotEmpty)
+                  HcAddButton(
+                    key: const Key('project-task-attach'),
+                    label: l10n.attachTask,
+                    primary: false,
+                    gap: HcSpace.s2,
+                    onPressed: () => _attach(context, p.id, data.attachable),
+                  ),
+              ],
               HcSectionHeading(l10n.budgetHeading),
               if (data.lines.isEmpty)
                 HcEmpty(l10n.linesEmpty)
@@ -320,22 +420,28 @@ class ProjectScreen extends StatelessWidget {
                 HcCardList(
                   children: [
                     for (final line in data.lines)
-                      AmountCard(
-                        key: Key('line-${line.line.id}'),
-                        title: line.line.label,
-                        subtitle: natureLabel(l10n, line.line.nature),
-                        amounts: line.amounts,
-                        currency: currency,
-                        onTap: writable
-                            ? () => _open(
-                                context,
-                                LineFormScreen(
-                                  homeId: homeId,
-                                  projectId: p.id,
-                                  lineId: line.line.id,
-                                ),
-                              )
-                            : null,
+                      Semantics(
+                        button: writable,
+                        hint: writable ? l10n.editLine : null,
+                        child: AmountCard(
+                          key: Key('line-${line.line.id}'),
+                          title: line.line.label,
+                          subtitle: natureLabel(l10n, line.line.nature),
+                          amounts: line.amounts,
+                          currency: currency,
+                          lines: true,
+                          chevron: true,
+                          onTap: writable
+                              ? () => _open(
+                                  context,
+                                  LineFormScreen(
+                                    homeId: homeId,
+                                    projectId: p.id,
+                                    lineId: line.line.id,
+                                  ),
+                                )
+                              : null,
+                        ),
                       ),
                     if (data.lines.length > 1)
                       AmountCard(
@@ -343,6 +449,7 @@ class ProjectScreen extends StatelessWidget {
                         title: l10n.total,
                         amounts: total,
                         currency: currency,
+                        lines: true,
                       ),
                   ],
                 ),
@@ -402,50 +509,6 @@ class ProjectScreen extends StatelessWidget {
                     QuoteFormScreen(homeId: homeId, projectId: p.id),
                   ),
                 ),
-              HcSectionHeading(l10n.tasksHeading),
-              if (data.tasks.isEmpty)
-                HcEmpty(l10n.projectTasksEmpty)
-              else
-                HcCardList(
-                  children: [
-                    for (final t in data.tasks)
-                      HcRow(
-                        key: Key('project-task-${t.task.id}'),
-                        title: t.task.title,
-                        text: t.occurrence?.dueOn == null
-                            ? (t.occurrence == null
-                                  ? l10n.taskDoneLabel
-                                  : l10n.todayNoDate)
-                            : l10n.dueOn(
-                                formatDay(
-                                  context,
-                                  Day.parse(t.occurrence!.dueOn!),
-                                ),
-                              ),
-                        onTap: () => _open(
-                          context,
-                          TaskScreen(homeId: homeId, taskId: t.task.id),
-                        ),
-                      ),
-                  ],
-                ),
-              if (writable) ...[
-                HcAddButton(
-                  key: const Key('project-task-add'),
-                  label: l10n.addProjectTask,
-                  primary: false,
-                  gap: HcSpace.s3,
-                  onPressed: () => _addTask(context, p.id),
-                ),
-                if (data.attachable.isNotEmpty)
-                  HcAddButton(
-                    key: const Key('project-task-attach'),
-                    label: l10n.attachTask,
-                    primary: false,
-                    gap: HcSpace.s2,
-                    onPressed: () => _attach(context, p.id, data.attachable),
-                  ),
-              ],
               HcSectionHeading(l10n.inspiration),
               if (data.links.isEmpty)
                 HcEmpty(l10n.linksEmpty)
@@ -703,13 +766,17 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
       budget: fieldAmount(context, _budget),
       budgetLabel: l10n.budgetHeading,
     );
-    final saved = await runChange(
-      context,
-      (r) => widget.projectId == null
-          ? r.createProject(widget.homeId, input)
-          : r.updateProject(widget.projectId!, input),
-    );
-    if (saved) navigator.pop();
+    String? added;
+    final saved = await runChange(context, (r) async {
+      if (widget.projectId == null) {
+        added = await r.createProject(widget.homeId, input);
+      } else {
+        await r.updateProject(widget.projectId!, input);
+      }
+    });
+    // A new project is given back, for the list that opened the form to
+    // open it.
+    if (saved) navigator.pop(added);
   }
 
   @override

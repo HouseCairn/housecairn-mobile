@@ -6,6 +6,7 @@ import '../data/database.dart';
 import '../data/repository.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
+import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/choices.dart';
 import '../l10n/app_localizations.dart';
@@ -17,6 +18,7 @@ import 'item_screens.dart';
 import 'messages.dart';
 import 'parts.dart';
 import 'photos.dart';
+import 'report_screens.dart';
 import 'state.dart';
 import 'stock_format.dart';
 import 'stock_screens.dart';
@@ -194,7 +196,8 @@ class TaskRows extends StatelessWidget {
   }
 }
 
-/// A room: what it is, its memory, its items, its photos and its tasks.
+/// A room (`rooms/room_detail.html`): what it is and Report a problem, its
+/// memory, its photos, its items and its tasks.
 class RoomScreen extends StatelessWidget {
   const RoomScreen({super.key, required this.homeId, required this.roomId});
 
@@ -229,77 +232,133 @@ class RoomScreen extends StatelessWidget {
             body: HcScreenList(children: [HcEmpty(l10n.errNotFound)]),
           );
         }
+        // The short values of the memory on lines of label and value, in
+        // the order of the web; its notes, a long text, under their label.
         final memory = [
           (l10n.paintColour, room.paintColour),
           (l10n.paintBrand, room.paintBrand),
           (l10n.paintReference, room.paintReference),
           (l10n.paintBatch, room.paintBatch),
+        ].where((m) => m.$2.isNotEmpty).toList();
+        final coverings = [
           (l10n.floorCovering, room.floorCovering),
           (l10n.wallCovering, room.wallCovering),
-          (l10n.memoryNotes, room.memoryNotes),
         ].where((m) => m.$2.isNotEmpty).toList();
+        void open(Widget screen) => Navigator.of(context).push(hcRoute(screen));
         return HcScaffold(
           title: room.name,
           actions: actionsOrHelp([
             if (writable)
               HcBarAction(
                 label: l10n.edit,
-                onPressed: () => Navigator.of(
-                  context,
-                ).push(hcRoute(RoomFormScreen(homeId: homeId, roomId: roomId))),
+                onPressed: () =>
+                    open(RoomFormScreen(homeId: homeId, roomId: roomId)),
               ),
           ], HelpPages.room),
           body: HcScreenList(
             children: [
               const SizedBox(height: HcSpace.s2),
+              // The head of the record (`rooms/room_detail.html`): the type
+              // on a line of label and value, the notes under their label,
+              // then the action row; Edit is the action of the bar.
               HcCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    HcFact(
-                      l10n.fieldType,
-                      factText(roomKindLabel(l10n, room.kind)),
+                    HcValueList(
+                      children: [
+                        HcValueRow(
+                          l10n.fieldType,
+                          roomKindLabel(l10n, room.kind),
+                        ),
+                      ],
                     ),
-                    if (room.notes.isNotEmpty)
+                    if (room.notes.isNotEmpty) ...[
+                      const SizedBox(height: HcSpace.s3),
                       HcFact(l10n.fieldNotes, factText(room.notes)),
+                    ],
+                    RecordActions(
+                      children: [
+                        OutlinedButton(
+                          key: const Key('room-report'),
+                          onPressed: () => open(
+                            ReportFormScreen(homeId: homeId, roomId: roomId),
+                          ),
+                          child: Text(l10n.reportProblem),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
+              // The sections in the order of the web: memory, photos, items,
+              // tasks. The stock of a room is a web feature (ADR 0011).
               HcSectionHeading(l10n.roomMemory),
               HcCard(
-                child: memory.isEmpty && paint == null
-                    ? Text(l10n.roomMemoryEmpty, style: HcText.rowText)
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                key: const Key('room-memory'),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (memory.isEmpty &&
+                        coverings.isEmpty &&
+                        paint == null &&
+                        room.memoryNotes.isEmpty)
+                      Text(l10n.roomMemoryEmpty, style: HcText.rowText)
+                    else if (memory.isNotEmpty ||
+                        coverings.isNotEmpty ||
+                        paint != null)
+                      HcValueList(
                         children: [
                           for (final (label, value) in memory)
-                            HcFact(label, factText(value)),
-                          // The paint left over, from the stock (lot 3b).
+                            HcValueRow(label, value),
+                          // The paint left over, from the stock (lot 3b),
+                          // after the batch as on the web.
                           if (paint != null)
-                            HcFact(
+                            HcValueRow(
                               l10n.paintArticle,
-                              InkWell(
+                              '',
+                              child: HcValueLink(
+                                '${paint.article.name} · ${amountOf(l10n, localeOf(context), paint.article, paint.level)}',
                                 key: const Key('room-paint'),
-                                onTap: () => Navigator.of(context).push(
-                                  hcRoute(
-                                    ArticleScreen(
-                                      homeId: homeId,
-                                      articleId: paint.article.id,
-                                    ),
-                                  ),
-                                ),
-                                child: Text(
-                                  '${paint.article.name} · ${amountOf(l10n, localeOf(context), paint.article, paint.level)}',
-                                  style: HcText.body.copyWith(
-                                    color: HcColors.primary,
-                                    decoration: TextDecoration.underline,
+                                onTap: () => open(
+                                  ArticleScreen(
+                                    homeId: homeId,
+                                    articleId: paint.article.id,
                                   ),
                                 ),
                               ),
                             ),
+                          for (final (label, value) in coverings)
+                            HcValueRow(label, value),
                         ],
                       ),
+                    if (room.memoryNotes.isNotEmpty) ...[
+                      if (memory.isNotEmpty ||
+                          coverings.isNotEmpty ||
+                          paint != null)
+                        const SizedBox(height: HcSpace.s3),
+                      HcFact(l10n.memoryNotes, factText(room.memoryNotes)),
+                    ],
+                    if (writable)
+                      RecordActions(
+                        children: [
+                          OutlinedButton(
+                            key: const Key('room-memory-edit'),
+                            onPressed: () => open(
+                              RoomFormScreen(
+                                homeId: homeId,
+                                roomId: roomId,
+                                memory: true,
+                              ),
+                            ),
+                            child: Text(l10n.editMemory),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
               ),
+              PhotoSection(homeId: homeId, roomId: roomId, writable: writable),
               HcSectionHeading(l10n.items),
               if (items.isEmpty)
                 HcEmpty(l10n.itemsEmpty)
@@ -321,9 +380,8 @@ class RoomScreen extends StatelessWidget {
                               'active')
                             HcPill(l10n.itemWarranty, tone: HcPillTone.sand),
                         ],
-                        onTap: () => Navigator.of(context).push(
-                          hcRoute(ItemScreen(homeId: homeId, itemId: item.id)),
-                        ),
+                        onTap: () =>
+                            open(ItemScreen(homeId: homeId, itemId: item.id)),
                       ),
                   ],
                 ),
@@ -331,13 +389,11 @@ class RoomScreen extends StatelessWidget {
                 const SizedBox(height: HcSpace.s3),
                 OutlinedButton(
                   key: const Key('item-add'),
-                  onPressed: () => Navigator.of(context).push(
-                    hcRoute(ItemFormScreen(homeId: homeId, roomId: roomId)),
-                  ),
+                  onPressed: () =>
+                      open(ItemFormScreen(homeId: homeId, roomId: roomId)),
                   child: Text(l10n.addItem),
                 ),
               ],
-              PhotoSection(homeId: homeId, roomId: roomId, writable: writable),
               TaskRows(homeId: homeId, roomId: roomId, writable: writable),
             ],
           ),
@@ -347,18 +403,46 @@ class RoomScreen extends StatelessWidget {
   }
 }
 
-/// The form of a room: its name, kind and notes, and its memory (what was
-/// used and fitted in it).
+/// The action row of a record page (design/patterns.md of the web, Record
+/// page): buttons as wide as their label, on lines that wrap, never stacked
+/// to the full width.
+class RecordActions extends StatelessWidget {
+  const RecordActions({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: HcSpace.s3),
+    child: Wrap(
+      spacing: HcSpace.s2,
+      runSpacing: HcSpace.s2,
+      children: children,
+    ),
+  );
+}
+
+/// The form of a room, as the web has two: its name, kind and notes (Edit),
+/// or its memory, what was used and fitted in it (Edit the memory,
+/// `rooms/room_memory_form.html`).
 class RoomFormScreen extends StatefulWidget implements HcFormScreen {
   @override
   bool get opensAsSheet => true;
 
-  const RoomFormScreen({super.key, required this.homeId, this.roomId});
+  const RoomFormScreen({
+    super.key,
+    required this.homeId,
+    this.roomId,
+    this.memory = false,
+  });
 
   final String homeId;
 
   /// `null` for a new room.
   final String? roomId;
+
+  /// Whether the form is the memory of the room (an existing room only).
+  final bool memory;
 
   @override
   State<RoomFormScreen> createState() => _RoomFormScreenState();
@@ -504,7 +588,11 @@ class _RoomFormScreenState extends State<RoomFormScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return HcScaffold(
-      title: widget.roomId == null ? l10n.newRoom : l10n.editRoom,
+      title: widget.memory
+          ? l10n.roomMemory
+          : widget.roomId == null
+          ? l10n.newRoom
+          : l10n.editRoom,
       actions: [
         Center(child: savedStatus()),
         HcBarAction(label: l10n.save, onPressed: _save),
@@ -515,63 +603,65 @@ class _RoomFormScreenState extends State<RoomFormScreen>
         child: HcScreenList(
           children: [
             const SizedBox(height: HcSpace.s2),
-            HcCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  hcText(
-                    l10n.fieldName,
-                    _name,
-                    key: const Key('room-name'),
-                    validator: (v) =>
-                        (v ?? '').trim().isEmpty ? l10n.errTitleRequired : null,
-                  ),
-                  hcChoice<String>(
-                    l10n.fieldType,
-                    _kind,
-                    [for (final k in roomKinds) (k, roomKindLabel(l10n, k))],
-                    (v) => setState(() => _kind = v),
-                    key: const Key('room-kind'),
-                  ),
-                  hcText(l10n.fieldNotes, _notes, minLines: 2, maxLines: 6),
-                ],
-              ),
-            ),
-            HcSectionHeading(l10n.roomMemory),
-            HcCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  hcText(l10n.paintColour, _paintColour),
-                  hcText(l10n.paintBrand, _paintBrand),
-                  hcText(l10n.paintReference, _paintReference),
-                  hcText(l10n.paintBatch, _paintBatch),
-                  if (_articles.isNotEmpty)
-                    hcChoice<String?>(
-                      l10n.paintArticle,
-                      _articles.any((a) => a.article.id == _paintArticle)
-                          ? _paintArticle
+            if (!widget.memory)
+              HcCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    hcText(
+                      l10n.fieldName,
+                      _name,
+                      key: const Key('room-name'),
+                      validator: (v) => (v ?? '').trim().isEmpty
+                          ? l10n.errTitleRequired
                           : null,
-                      [
-                        (null, l10n.paintArticleNone),
-                        for (final a in _articles)
-                          (a.article.id, a.article.name),
-                      ],
-                      (v) => setState(() => _paintArticle = v),
-                      key: const Key('room-paint-article'),
                     ),
-                  hcText(l10n.floorCovering, _floor),
-                  hcText(l10n.wallCovering, _wall),
-                  hcText(
-                    l10n.memoryNotes,
-                    _memoryNotes,
-                    minLines: 2,
-                    maxLines: 6,
-                  ),
-                ],
+                    hcChoice<String>(
+                      l10n.fieldType,
+                      _kind,
+                      [for (final k in roomKinds) (k, roomKindLabel(l10n, k))],
+                      (v) => setState(() => _kind = v),
+                      key: const Key('room-kind'),
+                    ),
+                    hcText(l10n.fieldNotes, _notes, minLines: 2, maxLines: 6),
+                  ],
+                ),
               ),
-            ),
-            if (widget.roomId != null) ...[
+            if (widget.memory)
+              HcCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    hcText(l10n.paintColour, _paintColour),
+                    hcText(l10n.paintBrand, _paintBrand),
+                    hcText(l10n.paintReference, _paintReference),
+                    hcText(l10n.paintBatch, _paintBatch),
+                    if (_articles.isNotEmpty)
+                      hcChoice<String?>(
+                        l10n.paintArticle,
+                        _articles.any((a) => a.article.id == _paintArticle)
+                            ? _paintArticle
+                            : null,
+                        [
+                          (null, l10n.paintArticleNone),
+                          for (final a in _articles)
+                            (a.article.id, a.article.name),
+                        ],
+                        (v) => setState(() => _paintArticle = v),
+                        key: const Key('room-paint-article'),
+                      ),
+                    hcText(l10n.floorCovering, _floor),
+                    hcText(l10n.wallCovering, _wall),
+                    hcText(
+                      l10n.memoryNotes,
+                      _memoryNotes,
+                      minLines: 2,
+                      maxLines: 6,
+                    ),
+                  ],
+                ),
+              ),
+            if (widget.roomId != null && !widget.memory) ...[
               const SizedBox(height: HcSpace.s4),
               OutlinedButton(
                 key: const Key('room-delete'),

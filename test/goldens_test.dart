@@ -61,6 +61,7 @@ void main() {
         // that is not fixed.
         await state.choose(homes.main);
         await tester.pumpAndSettle();
+        await precacheImages(tester);
         await expectLater(
           find.byType(MaterialApp),
           matchesGoldenFile('goldens/today_$name.png'),
@@ -79,6 +80,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        await precacheImages(tester);
         await expectLater(
           find.byType(MaterialApp),
           matchesGoldenFile('goldens/task_$name.png'),
@@ -94,6 +96,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text(l.homes));
         await tester.pumpAndSettle();
+        await precacheImages(tester);
         await expectLater(
           find.byType(MaterialApp),
           matchesGoldenFile('goldens/homes_$name.png'),
