@@ -4313,7 +4313,7 @@ abstract class AppLocalizations {
   /// Text above the refused changes.
   ///
   /// In en, this message translates to:
-  /// **'The server did not take these changes; they are still on this phone. Send one again once its cause is fixed, or stop sending it: it then stays on this phone only.'**
+  /// **'The server did not take these changes; they are still on this phone. Send one again once its cause is fixed, or stop sending it: the phone then takes back the value the server has.'**
   String get syncRefusedHelp;
 
   /// Button of a refused change: put it back to be sent.
@@ -4322,7 +4322,7 @@ abstract class AppLocalizations {
   /// **'Send again'**
   String get syncSendAgain;
 
-  /// Button of a refused change: drop it, it stays on this phone only.
+  /// Button of a refused change: drop it; the phone takes back the value the server has.
   ///
   /// In en, this message translates to:
   /// **'Stop sending'**
@@ -4375,6 +4375,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The server knows this phone under another id. Sign in again on this phone.'**
   String get syncRefusedDevice;
+
+  /// Reason of a refused change: sso_required (the home requires a single sign-on provider the connection was not made with).
+  ///
+  /// In en, this message translates to:
+  /// **'This home asks for a sign-in with its own sign-in service. Sign in again on this phone with that service, then send it again.'**
+  String get syncRefusedSignIn;
+
+  /// Reason of a refused change: push_conflict, still refused after one more try under the next number.
+  ///
+  /// In en, this message translates to:
+  /// **'The server already took other changes under the number of this send. Send it again.'**
+  String get syncRefusedConflict;
 
   /// Reason of a refused change with another code, given as the server says it.
   ///

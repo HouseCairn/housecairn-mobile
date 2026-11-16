@@ -265,7 +265,9 @@ class AppState extends ChangeNotifier {
     status.running = true;
     notifyListeners();
     try {
-      final report = await SyncEngine(repository, _transport(address)).sync();
+      final transport = _transport(address);
+      final report = await SyncEngine(repository, transport).sync();
+      await _restoreDropped(transport);
       status
         ..lastSync = repository.clock.now()
         ..stopped = null
@@ -344,10 +346,31 @@ class AppState extends ChangeNotifier {
     await syncWithServer();
   }
 
-  /// Drops the refused change [id]: it stays on this phone only.
+  /// Drops the refused change [id]: it is no longer sent, and a sync at once
+  /// puts the server's value back on the phone (maintainer's decision,
+  /// 2026-11-16); out of reach, it comes with the next sync.
   Future<void> dropRefused(int id) async {
     await repository.dropRefused(id);
-    await refresh();
+    await syncWithServer();
+  }
+
+  /// The rows of the changes dropped, read again from the server's snapshot
+  /// of their home and put back as it holds them.
+  Future<List<SyncNotice>> _restoreDropped(ServerTransport transport) async {
+    final notices = <SyncNotice>[];
+    for (final MapEntry(key: home, value: rows)
+        in (await repository.serverRereads()).entries) {
+      final found = await transport.serverRows(home, rows);
+      notices.addAll(
+        await repository.restoreServerRows(
+          home,
+          rows,
+          operations: found?.operations,
+          present: found?.present ?? const {},
+        ),
+      );
+    }
+    return notices;
   }
 
   /// The notices of the past syncs were read.

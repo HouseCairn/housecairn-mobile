@@ -303,6 +303,44 @@ void main() {
       expect(noUnanswered(), isTrue);
     });
 
+    test('403 sso_required: the sign-in the home asks for is the '
+        'connection\'s, so every operation is kept aside at once, with one '
+        'push', () async {
+      server.judge = (_) => (403, 'sso_required', null);
+      final result = await transport.push(rooms(5));
+      expect(result.refused, hasLength(5));
+      expect(result.refused.map((r) => r.code).toSet(), {'sso_required'});
+      expect(server.tried, hasLength(1));
+      expect(applied(), isEmpty);
+      expect(noUnanswered(), isTrue, reason: 'nothing is sent again');
+      server.tried.clear();
+      await transport.push(const []);
+      expect(server.tried, isEmpty);
+    });
+
+    test('a server busy part way through a cut: the operations already '
+        'refused come with the stop, the rest waits', () async {
+      // [1..4] refused, then [1, 2] refused, [1] refused, [2] taken, and
+      // the server is busy for [3, 4].
+      server.judge = (body) {
+        final ids = idsOf(body);
+        if (ids.contains(id(1))) return (400, 'malformed', null);
+        if (ids.contains(id(4))) return (503, '', null);
+        return null;
+      };
+      final ops = rooms(4);
+      final busy = await transport
+          .push(ops)
+          .then<ServerBusy?>(
+            (_) => null,
+            onError: (Object e) => e as ServerBusy,
+          );
+      expect(busy!.status, 503);
+      expect(busy.partial.refused.single.operation, same(ops.first));
+      expect(busy.partial.refused.single.code, 'malformed');
+      expect(applied(), {id(2)});
+    });
+
     test('a refusal of the push sent again only clears it: its operations '
         'still wait in op_log and go through the rule', () async {
       server.failNextPush = true;

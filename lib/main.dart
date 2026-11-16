@@ -32,7 +32,10 @@ Future<void> main() async {
     clock: const SystemClock(),
     files: File(path).parent,
   );
-  await repository.open();
+  // The secure store holds a copy of the device id that no backup carries:
+  // a database restored from a backup gets a new one (lot 4b).
+  final secrets = SecureStore();
+  await repository.open(secrets: secrets);
   // The camera, the gallery and the local notifications: each asks for its
   // permission at the moment of use, never here.
   late final AppState state;
@@ -44,7 +47,7 @@ Future<void> main() async {
     photoSource: ImagePickerSource(),
     documentSource: const FilePickerSource(),
     notifier: notifier,
-    store: SecureStore(),
+    store: secrets,
   );
   // Before the app's navigator: the end of a sign-in in the browser comes
   // back as a link to the app, which is not a route (lot 4b).

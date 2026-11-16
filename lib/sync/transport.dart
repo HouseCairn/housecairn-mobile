@@ -42,6 +42,14 @@ class PushResult {
   final bool held;
 }
 
+/// A push stopped part way (the other side busy, `429` or `5xx`): what it
+/// settled before is in [partial], so that the operations already refused
+/// for good are kept aside and the fields that lost are applied; the rest
+/// waits in `op_log` (lot 4b review).
+abstract interface class PushCutShort implements Exception {
+  PushResult get partial;
+}
+
 /// An operation the other side refused, with the code it gave (`forbidden`,
 /// `malformed`, `too_large`...).
 class RefusedOperation {

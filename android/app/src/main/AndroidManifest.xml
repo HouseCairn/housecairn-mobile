@@ -6,17 +6,20 @@
          system's own camera app, which needs none. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <!-- No backup and no device-to-device transfer of the app's data (lot 4b):
-         the access to a server is in the Keystore, whose key never leaves
-         the phone, so a restored copy could not read it; and the database
-         carries this phone's device id, which a second phone must never
-         share (docs/protocol.md section 2.10). allowBackup covers the
-         backups, dataExtractionRules the transfers of Android 12 and later. -->
+    <!-- Backups and transfers to a new phone carry the app's data but never
+         the secure store (lot 4b, maintainer's decision of 2026-11-16): the
+         access to a server and the copy of the device id stay on this
+         phone. The rules are in res/xml: data_extraction_rules for Android
+         12 and later, backup_rules (fullBackupContent) for Android 11 and
+         earlier. A restored database finds no copy of its device id there,
+         takes a new one and asks to sign in to a server again
+         (Repository.open, docs/threat-model.md). -->
     <application
         android:label="Housecairn"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:allowBackup="false"
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules">
         <activity
             android:name=".MainActivity"

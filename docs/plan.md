@@ -458,6 +458,15 @@ against the image v0.4.1, pinned by digest.
   with their reason, and the notices of the sync.
 - C. "Les trois cas ADR 0003 non rejoués contre le web (restauration, double tirage, ancienne
   `sv`) entrent dans l'e2e."
+- D. "Remplacer `allowBackup=false` par une sauvegarde qui exclut seulement le stockage sécurisé
+  (jeton, secrets) [...]. Après restauration, l'identifiant d'appareil est régénéré [...], et un
+  foyer serveur restauré demande une reconnexion au lieu d'envoyer sous l'ancien identifiant."
+  Android backups and transfers carry the database and the files, not the secure store
+  (`android/app/src/main/res/xml`); the rule on the phone is in
+  [threat model](threat-model.md), "Lost or stolen phone", and protocol section 2.10.
+- E. "Abandonner une modification refusée remet tout de suite la valeur du serveur sur le
+  téléphone." Written in protocol section 2.10, "A push refused": the server's snapshot of the
+  home is read again, since the sync API has no route that reads one row.
 
 ## Lot 4c. Homes of the phone and files on a server
 

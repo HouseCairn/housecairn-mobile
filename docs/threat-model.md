@@ -55,8 +55,20 @@ relay that shows different logs to different phones (a fork) is not in v1.
 
 - **Locked**: the database is protected by the OS file encryption, keys by the Keychain or
   Keystore. The app adds neither its own lock nor its own database encryption in v1
-  (maintainer's decision); an optional app lock may come in lot 8. OS backups (iCloud,
-  Google) exclude the app's data, so no copy leaves the phone outside the person's control.
+  (maintainer's decision); an optional app lock may come in lot 8.
+- **Backups by the OS** (maintainer's decision of 2026-11-16, lot 4b): an Android backup or a
+  transfer to a new phone carries the database and the files of the homes, so a person alone on
+  the phone gets their homes back; it never carries the secure store (the two files of
+  `flutter_secure_storage`, excluded in `data_extraction_rules.xml` for Android 12 and later and
+  `backup_rules.xml` for Android 11 and earlier), where the access to a server and a copy of the
+  device id are kept, wrapped by a Keystore key that never leaves the phone. Such a backup is a
+  copy of the homes held by Google under the person's account, not encrypted end to end by the
+  app; the encrypted export stays the backup the app controls. A restored database finds no
+  copy of its device id in the secure store: the phone takes a new device id (one install, one
+  id; two phones never share one), forgets the push whose answer never came (its bytes name the
+  old id) and any access that came with it, and the waiting changes go under the new id. A home
+  of a server then asks for a new sign-in before anything is sent (`Repository.open`,
+  `test/server_restore_test.dart`). On iOS the Keychain items are of this device only.
 - **Unlocked, or its code known**: the thief reads the whole home, as the owner does. Remedy:
   another phone of the family removes it; the relay refuses it at once; the epoch rotates. What
   it already holds stays readable offline, forever. With no other phone, the recovery code on a
@@ -128,7 +140,9 @@ screen, before anything is sent or received. What the app still holds to:
 - the server cannot make the phone write outside the homes the access covers, and a home it
   stops listing is removed from the phone as a purge;
 - disconnecting deletes the credential at once, and the access can be revoked on the server,
-  per phone; a revoked access stops the phone at its next call, and the phone says so.
+  per phone; a revoked access stops the phone at its next call, and the phone says so;
+- a phone restored from a backup never pushes under the device id of the phone it came from
+  (above, "Backups by the OS").
 
 A server can still feed the phone false data in its homes, as any member could; it cannot
 reach the relay, the other ways, or another server.

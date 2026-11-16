@@ -2653,7 +2653,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncRefusedHelp =>
-      'Le serveur n\'a pas pris ces modifications ; elles sont toujours sur ce téléphone. Renvoyez-en une une fois sa cause corrigée, ou arrêtez de l\'envoyer : elle reste alors sur ce téléphone seulement.';
+      'Le serveur n\'a pas pris ces modifications ; elles sont toujours sur ce téléphone. Renvoyez-en une une fois sa cause corrigée, ou arrêtez de l\'envoyer : le téléphone reprend alors la valeur du serveur.';
 
   @override
   String get syncSendAgain => 'Renvoyer';
@@ -2691,6 +2691,14 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get syncRefusedDevice =>
       'Le serveur connaît ce téléphone sous un autre identifiant. Reconnectez ce téléphone.';
+
+  @override
+  String get syncRefusedSignIn =>
+      'Ce logement demande une connexion par son propre service de connexion. Reconnectez ce téléphone avec ce service, puis renvoyez.';
+
+  @override
+  String get syncRefusedConflict =>
+      'Le serveur a déjà reçu d\'autres modifications sous le numéro de cet envoi. Renvoyez.';
 
   @override
   String syncRefusedOther(String code) {

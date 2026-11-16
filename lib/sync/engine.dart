@@ -97,12 +97,33 @@ class SyncEngine {
     if (await repository.updateRequired()) return 0;
     final out = await repository.outgoing();
     if (out.isEmpty) return 0;
-    final result = await transport.push([for (final o in out) o.operation]);
+    final PushResult result;
+    try {
+      result = await transport.push([for (final o in out) o.operation]);
+    } on PushCutShort catch (cut) {
+      // Stopped part way: what was refused for good leaves op_log for the
+      // list aside, the rest waits there for the next round.
+      final refused = cut.partial.refused;
+      if (refused.isNotEmpty) {
+        await repository.setAsideAndAcknowledge(
+          refused,
+          seqs: [
+            for (final o in out)
+              if (refused.any((r) => identical(r.operation, o.operation)))
+                o.seq,
+          ],
+        );
+      }
+      if (cut.partial.lost.isNotEmpty) {
+        notices.addAll(await repository.applyOperations(cut.partial.lost));
+      }
+      rethrow;
+    }
     if (result.held) return 0;
-    // What the other side refused for good is kept aside before it leaves
-    // op_log: the person sends it again or drops it, nothing goes silently.
-    if (result.refused.isNotEmpty) await repository.setAside(result.refused);
-    await repository.acknowledge(out.last.seq);
+    // What the other side refused for good is kept aside as it leaves
+    // op_log, in one transaction: the person sends it again or drops it,
+    // nothing goes silently, and nothing is listed twice.
+    await repository.setAsideAndAcknowledge(result.refused, upTo: out.last.seq);
     // What won on the other side, for each field that lost there.
     if (result.lost.isNotEmpty) {
       notices.addAll(await repository.applyOperations(result.lost));

@@ -133,6 +133,54 @@ void main() {
       expect(server.pulls, 2, reason: 'the round, then one for the asks');
     });
 
+    test('a refused change dropped: the field shows the server\'s value at '
+        'once, and nothing waits (maintainer\'s decision)', () async {
+      final repo = await serverPhone();
+      final state = stateOf(repo);
+      addTearDown(state.dispose);
+      await state.refresh();
+      await state.syncWithServer();
+      final kitchen = server.kitchen;
+      server.rejectNamed = 'Pantry';
+      await repo.updateRoom(kitchen, const RoomInput(name: 'Pantry'));
+      await state.syncWithServer();
+      expect(state.serverSync.refused, hasLength(1));
+      expect((await repo.room(kitchen))!.name, 'Pantry');
+      final snapshots = server.pulls;
+      await state.dropRefused(state.serverSync.refused.single.id);
+      expect((await repo.room(kitchen))!.name, 'Kitchen');
+      expect(server.pulls, greaterThan(snapshots), reason: 'read again');
+      expect(state.serverSync.refused, isEmpty);
+      expect(await repo.outgoing(), isEmpty);
+      expect(await repo.serverRereads(), isEmpty);
+      expect(server.pushedNames, isNot(contains('Pantry')));
+      // Another sync changes nothing more.
+      await state.syncWithServer();
+      expect((await repo.room(kitchen))!.name, 'Kitchen');
+    });
+
+    test('a refused change dropped out of reach of the server: the value '
+        'comes back with the next sync', () async {
+      final repo = await serverPhone();
+      final state = stateOf(repo);
+      addTearDown(state.dispose);
+      await state.refresh();
+      await state.syncWithServer();
+      final kitchen = server.kitchen;
+      server.rejectNamed = 'Pantry';
+      await repo.updateRoom(kitchen, const RoomInput(name: 'Pantry'));
+      await state.syncWithServer();
+      server.offline = true;
+      await state.dropRefused(state.serverSync.refused.single.id);
+      expect(state.serverSync.refused, isEmpty);
+      expect(await repo.serverRereads(), isNotEmpty);
+      server.offline = false;
+      await state.syncWithServer();
+      expect((await repo.room(kitchen))!.name, 'Kitchen');
+      expect(await repo.serverRereads(), isEmpty);
+      expect(await repo.outgoing(), isEmpty);
+    });
+
     test('not in the other ways', () async {
       final repo = await openRepository();
       addTearDown(repo.db.close);
@@ -213,7 +261,8 @@ void main() {
         await tester.pumpAndSettle();
         expect(state.serverSync.refused, isEmpty);
         expect(server.pushedNames, contains('Hall'));
-        // Another refused, no longer sent: it stays on the phone only.
+        // Another refused, no longer sent: the phone takes back what the
+        // server has, and the server has no room Attic.
         server.rejectNamed = 'Attic';
         await state.repository.createRoom(home, name: 'Attic');
         await afterDelay(tester);
@@ -224,7 +273,7 @@ void main() {
         expect(await state.repository.outgoing(), isEmpty);
         expect(
           (await state.repository.rooms(home)).map((r) => r.name),
-          contains('Attic'),
+          isNot(contains('Attic')),
         );
         expect(server.pushedNames, isNot(contains('Attic')));
       });

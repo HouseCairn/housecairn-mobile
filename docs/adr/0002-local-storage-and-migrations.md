@@ -66,6 +66,9 @@ Each file belongs to the home of its row; deleting a home erases its files
 **Backups by the OS**: the database and the files are excluded from iCloud and Google
 backups. A backup by the system would be a copy outside the person's control, not encrypted
 end to end; the encrypted export ([spec](../spec.md#export-and-import)) is the backup.
+*Changed in lot 4b by the maintainer (2026-11-16)*: Android backups and transfers carry the
+database and the files, and exclude only the secure store; a restored database takes a new
+device id ([threat model](../threat-model.md), "Lost or stolen phone").
 
 ## Schema 2 (lot 2a)
 
@@ -178,5 +181,6 @@ a home without sync is the purge of lot 4 (`purgeHome`), so its id is kept in `p
   `op_log` together; no screen writes SQL.
 - A phone lost without sync and without export loses the data. The app says so after the
   first ten tasks and offers the export.
-- Excluding OS backups is a choice against convenience, accepted by the maintainer: the
-  encrypted export is the backup.
+- Excluding OS backups was a choice against convenience; since lot 4b the maintainer keeps
+  Android backups of the data, without the secure store, and the encrypted export stays the
+  backup the app controls.

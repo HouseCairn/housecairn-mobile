@@ -25,6 +25,8 @@ String refusedReason(AppLocalizations l10n, String code) => switch (code) {
   'malformed' => l10n.syncRefusedMalformed,
   'too_large' => l10n.syncRefusedTooLarge,
   'wrong_device' => l10n.syncRefusedDevice,
+  'sso_required' => l10n.syncRefusedSignIn,
+  'push_conflict' => l10n.syncRefusedConflict,
   _ => l10n.syncRefusedOther(code),
 };
 

@@ -299,9 +299,25 @@ silence." So the phone forgets the push it would have sent again, then:
 An operation `rejected` in a push the server took is kept aside the same way, with its code.
 What is kept aside leaves `op_log` for a list of this phone only (`local_settings`, never
 synced): the app shows each change on its line, with the name of its row and the reason in
-words, to be sent again (back to `op_log`, as it was made) or no longer sent (the row keeps on
-the phone the value the change gave it, until a change from the server writes that field). The
-list goes when the phone leaves the server.
+words, to be sent again (back to `op_log`, as it was made) or no longer sent. A change no longer
+sent gives the row back the server's value at once (maintainer's decision, 2026-11-16): the
+fields it wrote lose their clock while it is still the change's, and the phone reads the row
+again in the server's snapshot of the home (the sync API has no route that reads one row, and
+the phone does not keep the server's earlier values) and merges it by the field rules, which the
+server's clocks then win; a row the server does not have goes from the phone as by rule 2 below.
+Out of reach, the read waits for the next sync (`server_reread` in `local_settings`); a change
+made since on the same field keeps its own clock and stays. The list goes when the phone leaves
+the server.
+
+`setAside` and the removal from `op_log` run in one transaction. A push stopped part way by `429`
+or a `5xx` still keeps aside what was refused for good before the stop, and applies the fields
+that lost; the rest waits in `op_log`.
+
+**A phone restored from a backup** finds no copy of its device id in its secure store, which no
+backup carries: it takes a new device id, the waiting changes go under it, and the push whose
+answer never came is forgotten, since its bytes name the old id; the server answers a device id
+of another connection still in use with `wrong_device`. The access to the server is not in the
+backup either: the phone signs in again before it sends anything.
 
 **Starting again after 410.** The phone keeps, per row and outside the row's fields (in its sync
 tables, never synced), a mark **seen by the server**. It sets the mark when the row arrives in

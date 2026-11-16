@@ -2635,7 +2635,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncRefusedHelp =>
-      'The server did not take these changes; they are still on this phone. Send one again once its cause is fixed, or stop sending it: it then stays on this phone only.';
+      'The server did not take these changes; they are still on this phone. Send one again once its cause is fixed, or stop sending it: the phone then takes back the value the server has.';
 
   @override
   String get syncSendAgain => 'Send again';
@@ -2671,6 +2671,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get syncRefusedDevice =>
       'The server knows this phone under another id. Sign in again on this phone.';
+
+  @override
+  String get syncRefusedSignIn =>
+      'This home asks for a sign-in with its own sign-in service. Sign in again on this phone with that service, then send it again.';
+
+  @override
+  String get syncRefusedConflict =>
+      'The server already took other changes under the number of this send. Send it again.';
 
   @override
   String syncRefusedOther(String code) {

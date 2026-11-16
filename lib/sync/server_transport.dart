@@ -192,10 +192,15 @@ class ServerStopped implements Exception {
 
 /// The server is there but cannot take the request now (`429`, or `5xx`):
 /// the phone tries again later, a push with its number and its bytes.
-class ServerBusy implements Exception {
-  const ServerBusy(this.status);
+class ServerBusy implements PushCutShort {
+  const ServerBusy(this.status, [this.partial = const PushResult()]);
 
   final int status;
+
+  /// What a push settled before the server got busy: the operations it
+  /// refused for good, and the fields that lost.
+  @override
+  final PushResult partial;
 
   @override
   String toString() => 'ServerBusy($status)';
@@ -492,10 +497,16 @@ class ServerTransport implements SyncTransport {
         return const PushResult(held: true);
       }
     }
-    for (final MapEntry(key: home, value: ops) in byHome.entries) {
-      for (final batch in batches(ops)) {
-        await _pushBatch(s, home, batch, lost, refused);
+    try {
+      for (final MapEntry(key: home, value: ops) in byHome.entries) {
+        for (final batch in batches(ops)) {
+          await _pushBatch(s, home, batch, lost, refused);
+        }
       }
+    } on ServerBusy catch (busy) {
+      // Part of a cut was settled: its refusals and its lost fields go with
+      // the stop, so that they are kept and not found again next round.
+      throw ServerBusy(busy.status, PushResult(lost: lost, refused: refused));
     }
     return PushResult(lost: lost, refused: refused);
   }
@@ -911,6 +922,24 @@ class ServerTransport implements SyncTransport {
           Op.fields: byWrite[write],
         },
     ];
+  }
+
+  /// The rows [rows] (`(t, id)`) of [home] as the server holds them now,
+  /// read in its snapshot (no route of the sync API reads one row): the
+  /// operations of those it has, and which it has. `null` when the home is
+  /// gone or no longer of this access. When the person drops a change the
+  /// server refused, the phone puts the server's value back by them.
+  Future<({List<SyncOperation> operations, Set<(String, String)> present})?>
+  serverRows(String home, Set<(String, String)> rows) async {
+    final (ops, covers, all) = await _snapshot(home);
+    if (covers == null) return null;
+    return (
+      operations: [
+        for (final op in ops)
+          if (rows.contains((op[Op.type]! as String, op[Op.id]! as String))) op,
+      ],
+      present: all.intersection(rows),
+    );
   }
 
   @override
