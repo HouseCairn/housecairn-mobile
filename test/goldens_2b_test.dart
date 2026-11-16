@@ -41,7 +41,10 @@ void main() {
           await state.choose(data.homes.main);
           await tester.pumpAndSettle();
           await open(tester, data, l);
-          await precacheImages(tester);
+          // The cairn of the header of the first golden of the file, whose
+          // image would not be decoded yet. Not on every page: the photo
+          // page never settles once its images are precached.
+          if (page == screens2b.first.$1) await precacheImages(tester);
           await expectLater(
             find.byType(MaterialApp),
             matchesGoldenFile('goldens/${page}_$name.png'),
