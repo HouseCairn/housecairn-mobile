@@ -41,10 +41,8 @@ class _BudgetScreenState extends State<BudgetScreen> {
     return HcScaffold(
       title: l10n.navBudget,
       brand: true,
-      actions: const [
-        HomeSelector(),
-        HelpButton(page: HelpPages.budget),
-      ],
+      belowTitle: const HomeSelector(),
+      actions: const [HelpButton(page: HelpPages.budget)],
       body: home == null
           ? const SizedBox.shrink()
           : DataView<budget.Ledger>(

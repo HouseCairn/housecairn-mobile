@@ -12,6 +12,7 @@ import '../design/widgets.dart';
 import '../domain/choices.dart';
 import '../domain/day.dart';
 import '../domain/warranty.dart';
+import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'budget_parts.dart';
 import 'choices.dart';
@@ -64,7 +65,7 @@ class ItemScreen extends StatelessWidget {
             item.contractUrl.isNotEmpty;
         return HcScaffold(
           title: item.name,
-          actions: [
+          actions: actionsOrHelp([
             if (writable)
               HcBarAction(
                 label: l10n.edit,
@@ -78,7 +79,7 @@ class ItemScreen extends StatelessWidget {
                   ),
                 ),
               ),
-          ],
+          ], HelpPages.item),
           body: HcScreenList(
             children: [
               const SizedBox(height: HcSpace.s2),

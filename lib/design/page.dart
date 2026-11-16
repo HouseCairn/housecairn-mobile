@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../l10n/app_localizations.dart';
 import 'brand.dart';
+import 'icons.dart';
 import 'theme.dart';
 import 'tokens.dart';
 
@@ -28,6 +29,7 @@ class HcScaffold extends StatefulWidget {
     this.bottomNavigationBar,
     this.drawsTitle = true,
     this.brand = false,
+    this.belowTitle,
   });
 
   /// The `h1` of the screen; null for a screen still loading.
@@ -44,8 +46,13 @@ class HcScaffold extends StatefulWidget {
   /// into the bar on iOS: the brand keeps the place.
   final bool brand;
 
-  /// The action of the bar: Edit on a record, the save of a form, or the
-  /// selector of the home on a section root.
+  /// What the content shows under the `h1` of a section root: the selector of
+  /// the current home, a compact line (design/patterns.md of the web,
+  /// "Header"). Drawn by [HcScreenList], never in the bar.
+  final Widget? belowTitle;
+
+  /// The action of the bar: Edit on a record, the save of a form, or the help
+  /// button of a page that has no other action.
   final List<Widget> actions;
   final Widget body;
   final Widget? floatingActionButton;
@@ -63,6 +70,18 @@ bool hcCupertino(TargetPlatform platform) =>
 class _HcScaffoldState extends State<HcScaffold> {
   bool _folded = false;
 
+  /// The back button of iOS: the chevron and the title of the previous page,
+  /// as the web's `‹ Rooms` (platform adaptation 5).
+  Widget _iosBack(BuildContext context, ModalRoute<Object?> route) {
+    final previous = HcBackTitles.previousTitle(route);
+    return HcBackButton(title: previous);
+  }
+
+  double _backWidth(BuildContext context, ModalRoute<Object?> route) {
+    final previous = HcBackTitles.previousTitle(route);
+    return HcBackButton.widthFor(context, previous);
+  }
+
   bool _onScroll(ScrollNotification n) {
     if (n.depth != 0 || n.metrics.axis != Axis.vertical) return false;
     final folded = n.metrics.pixels > HcSpace.s8;
@@ -76,6 +95,8 @@ class _HcScaffoldState extends State<HcScaffold> {
     final route = ModalRoute.of(context);
     final sheet = cupertino && route is PageRoute && route.fullscreenDialog;
     final title = widget.title;
+    if (title != null && route != null) HcBackTitles.remember(route, title);
+    final iosBack = cupertino && !sheet && route != null && route.canPop;
     return Scaffold(
       appBar: AppBar(
         // The bar shows the title only on iOS, once the h1 is scrolled away.
@@ -93,9 +114,15 @@ class _HcScaffoldState extends State<HcScaffold> {
               )
             : null,
         centerTitle: cupertino && !widget.brand,
-        automaticallyImplyLeading: !sheet,
-        leadingWidth: sheet ? HcSpace.s12 + HcSpace.s12 + HcSpace.s4 : null,
-        leading: sheet
+        automaticallyImplyLeading: !sheet && !iosBack,
+        leadingWidth: sheet
+            ? HcSpace.s12 + HcSpace.s12 + HcSpace.s4
+            : iosBack
+            ? _backWidth(context, route)
+            : null,
+        leading: iosBack
+            ? _iosBack(context, route)
+            : sheet
             ? MediaQuery.withClampedTextScaling(
                 maxScaleFactor: 1.3,
                 child: TextButton(
@@ -112,6 +139,7 @@ class _HcScaffoldState extends State<HcScaffold> {
         onNotification: _onScroll,
         child: HcPageTitle(
           title: widget.drawsTitle ? title : null,
+          belowTitle: widget.belowTitle,
           child: widget.body,
         ),
       ),
@@ -124,15 +152,134 @@ class _HcScaffoldState extends State<HcScaffold> {
 /// The title of the screen, for the list of its content ([HcLargeTitle] is
 /// drawn first by `HcScreenList`).
 class HcPageTitle extends InheritedWidget {
-  const HcPageTitle({super.key, required this.title, required super.child});
+  const HcPageTitle({
+    super.key,
+    required this.title,
+    this.belowTitle,
+    required super.child,
+  });
 
   final String? title;
+
+  /// The line under the `h1` ([HcScaffold.belowTitle]).
+  final Widget? belowTitle;
 
   static String? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<HcPageTitle>()?.title;
 
+  static Widget? belowOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<HcPageTitle>()?.belowTitle;
+
   @override
-  bool updateShouldNotify(HcPageTitle oldWidget) => title != oldWidget.title;
+  bool updateShouldNotify(HcPageTitle oldWidget) =>
+      title != oldWidget.title || belowTitle != oldWidget.belowTitle;
+}
+
+/// The titles of the pages of a navigator, for the back button of iOS, which
+/// names the page it goes back to (`‹ Rooms`, platform adaptation 5). A
+/// [NavigatorObserver] records which route lies under each pushed route; each
+/// [HcScaffold] records its title on its own route.
+class HcBackTitles extends NavigatorObserver {
+  static final _under = Expando<Route<Object?>>();
+  static final _titles = Expando<String>();
+
+  static void remember(Route<Object?> route, String title) =>
+      _titles[route] = title;
+
+  /// The title of the page under [route], null when there is none.
+  static String? previousTitle(Route<Object?> route) {
+    final under = _under[route];
+    return under == null ? null : _titles[under];
+  }
+
+  @override
+  void didPush(Route<Object?> route, Route<Object?>? previousRoute) =>
+      _under[route] = previousRoute;
+
+  @override
+  void didReplace({Route<Object?>? newRoute, Route<Object?>? oldRoute}) {
+    if (newRoute != null) {
+      _under[newRoute] = oldRoute == null ? null : _under[oldRoute];
+    }
+  }
+}
+
+/// The back button of iOS: the chevron and the title of the previous page,
+/// in the primary colour, at most two fifths of the bar wide.
+class HcBackButton extends StatelessWidget {
+  const HcBackButton({super.key, required this.title});
+
+  final String? title;
+
+  static const _gap = HcSpace.s1;
+
+  /// The width the button needs: the chevron and [title] on one line.
+  static double widthFor(BuildContext context, String? title) {
+    final icon = HcLayout.touchTargetLg;
+    if (title == null) return icon;
+    final text = TextPainter(
+      // The style the title is drawn in: the theme's text style under the
+      // role's own (the font family comes from the theme).
+      text: TextSpan(
+        text: title,
+        style: DefaultTextStyle.of(context).style.merge(HcText.rowTitle),
+      ),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    // The start padding, the chevron, the gap and the title, and a pixel
+    // for the rounding of the text.
+    final needed = HcSpace.s2 + HcComponent.iconSize + _gap + text.width + 1;
+    text.dispose();
+    final most = MediaQuery.sizeOf(context).width * 2 / 5;
+    return needed < icon ? icon : (needed > most ? most : needed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final title = this.title;
+    final ltr = Directionality.of(context) == TextDirection.ltr;
+    return Semantics(
+      button: true,
+      label: MaterialLocalizations.of(context).backButtonTooltip,
+      excludeSemantics: true,
+      child: InkWell(
+        key: const Key('ios-back'),
+        onTap: () => Navigator.of(context).maybePop(),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: HcLayout.touchTargetLg),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.only(start: HcSpace.s2),
+            child: Row(
+              children: [
+                Transform.flip(
+                  flipX: ltr,
+                  child: const HcIcon(
+                    HcIcons.chevron,
+                    size: HcComponent.iconSize,
+                    color: HcColors.primary,
+                  ),
+                ),
+                if (title != null) ...[
+                  const SizedBox(width: _gap),
+                  Flexible(
+                    child: Text(
+                      title,
+                      key: const Key('ios-back-title'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: HcText.rowTitle.copyWith(color: HcColors.primary),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// The `h1` of a screen, at the top of its content: 24/800, wrapping, a

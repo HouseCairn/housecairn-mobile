@@ -12,6 +12,7 @@ import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/day.dart';
 import '../domain/stock.dart' as stock;
+import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'autosave.dart';
 import 'item_screens.dart';
@@ -227,6 +228,7 @@ class ArticleScreen extends StatelessWidget {
         void open(Widget screen) => Navigator.of(context).push(hcRoute(screen));
         return HcScaffold(
           title: a.name,
+          actions: const [HelpButton(page: HelpPages.stockItem)],
           body: HcScreenList(
             children: [
               const SizedBox(height: HcSpace.s2),

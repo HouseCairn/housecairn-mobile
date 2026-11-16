@@ -9,6 +9,7 @@ import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/recurrence.dart' as recurrence;
+import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'messages.dart';
 import 'state.dart';
@@ -28,6 +29,7 @@ class HomesScreen extends StatelessWidget {
         Navigator.of(context).push(hcRoute(HomeScreen(homeId: home?.id)));
     return HcScaffold(
       title: l10n.homes,
+      actions: const [HelpButton(page: HelpPages.homes)],
       body: HcScreenList(
         children: [
           const SizedBox(height: HcSpace.s2),

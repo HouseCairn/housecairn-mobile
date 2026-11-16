@@ -7,9 +7,9 @@ import '../data/repository.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/choices.dart';
+import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'choices.dart';
-import 'home_selector.dart';
 import 'parts.dart';
 import 'state.dart';
 import 'task_screen.dart';
@@ -35,7 +35,7 @@ class ContractorsScreen extends StatelessWidget {
     final writable = home != null && home.archivedAt == null;
     return HcScaffold(
       title: l10n.contractors,
-      actions: const [HomeSelector()],
+      actions: const [HelpButton(page: HelpPages.contractors)],
       body: home == null
           ? const SizedBox.shrink()
           : DataView<List<ContractorRow>>(
@@ -128,7 +128,7 @@ class ContractorScreen extends StatelessWidget {
         final trade = contractorTrade(l10n, c);
         return HcScaffold(
           title: c.name,
-          actions: [
+          actions: actionsOrHelp([
             if (writable)
               HcBarAction(
                 label: l10n.edit,
@@ -141,7 +141,7 @@ class ContractorScreen extends StatelessWidget {
                   ),
                 ),
               ),
-          ],
+          ], HelpPages.contractor),
           body: HcScreenList(
             children: [
               const SizedBox(height: HcSpace.s2),

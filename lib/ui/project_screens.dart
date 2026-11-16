@@ -52,10 +52,8 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     return HcScaffold(
       title: l10n.navProjects,
       brand: true,
-      actions: const [
-        HomeSelector(),
-        HelpButton(page: HelpPages.projects),
-      ],
+      belowTitle: const HomeSelector(),
+      actions: const [HelpButton(page: HelpPages.projects)],
       body: home == null
           ? const SizedBox.shrink()
           : DataView<(List<ProjectEntry>, Map<int, Decimal>)>(
@@ -261,6 +259,7 @@ class ProjectScreen extends StatelessWidget {
         final total = budget.sumOf(data.lines.map((l) => l.amounts));
         return HcScaffold(
           title: p.title,
+          actions: const [HelpButton(page: HelpPages.project)],
           body: HcScreenList(
             children: [
               const SizedBox(height: HcSpace.s2),

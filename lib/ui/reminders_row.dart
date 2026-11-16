@@ -6,6 +6,7 @@ import '../design/adaptive.dart';
 import '../design/icons.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
+import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'state.dart';
 
@@ -54,6 +55,7 @@ class NotificationsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return HcScaffold(
       title: l10n.notifications,
+      actions: const [HelpButton(page: HelpPages.notifications)],
       body: HcScreenList(
         children: [
           const SizedBox(height: HcSpace.s2),

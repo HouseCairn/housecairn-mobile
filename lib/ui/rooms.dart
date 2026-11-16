@@ -56,10 +56,8 @@ class _RoomsScreenState extends State<RoomsScreen> {
         _ => l10n.stock,
       },
       brand: true,
-      actions: const [
-        HomeSelector(),
-        HelpButton(page: HelpPages.rooms),
-      ],
+      belowTitle: const HomeSelector(),
+      actions: const [HelpButton(page: HelpPages.rooms)],
       body: home == null
           ? const SizedBox.shrink()
           : _tab == 1
@@ -242,7 +240,7 @@ class RoomScreen extends StatelessWidget {
         ].where((m) => m.$2.isNotEmpty).toList();
         return HcScaffold(
           title: room.name,
-          actions: [
+          actions: actionsOrHelp([
             if (writable)
               HcBarAction(
                 label: l10n.edit,
@@ -250,7 +248,7 @@ class RoomScreen extends StatelessWidget {
                   context,
                 ).push(hcRoute(RoomFormScreen(homeId: homeId, roomId: roomId))),
               ),
-          ],
+          ], HelpPages.room),
           body: HcScreenList(
             children: [
               const SizedBox(height: HcSpace.s2),

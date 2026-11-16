@@ -73,11 +73,17 @@ Future<AppState> pumpApp(
 Finder destination(String label) =>
     find.descendant(of: find.byType(NavigationBar), matching: find.text(label));
 
-/// Taps the back button of the app bar (the one of material_ui, which
-/// `WidgetTester.pageBack` does not know).
+/// Taps the back button of the app bar: the one of material_ui, which
+/// `WidgetTester.pageBack` does not know, or on iOS the chevron with the
+/// title of the previous page (`HcBackButton`).
 Future<void> back(WidgetTester tester) async {
+  final ios = find.byKey(const Key('ios-back'));
   await tester.tap(
-    find.byWidgetPredicate((w) => w.runtimeType.toString() == 'BackButton'),
+    ios.evaluate().isNotEmpty
+        ? ios
+        : find.byWidgetPredicate(
+            (w) => w.runtimeType.toString() == 'BackButton',
+          ),
   );
   await tester.pumpAndSettle();
 }

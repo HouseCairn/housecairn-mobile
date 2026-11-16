@@ -8,6 +8,7 @@ import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/day.dart';
 import '../domain/templates.dart';
+import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'choices.dart';
 import 'parts.dart';
@@ -99,6 +100,7 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
     final language = Localizations.localeOf(context).languageCode;
     return HcScaffold(
       title: l10n.addFromTemplate,
+      actions: const [HelpButton(page: HelpPages.templates)],
       body: library == null
           ? const SizedBox.shrink()
           : HcScreenList(
