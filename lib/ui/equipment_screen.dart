@@ -105,15 +105,7 @@ class _EquipmentListState extends State<EquipmentList> {
                       label: l10n.addItem,
                       primary: false,
                       gap: entries.isEmpty ? HcSpace.s2 : HcSpace.s3,
-                      onPressed: () => Navigator.of(context).push(
-                        hcRoute(
-                          ItemFormScreen(
-                            homeId: home.id,
-                            roomId: _room,
-                            chooseRoom: true,
-                          ),
-                        ),
-                      ),
+                      onPressed: () => _add(context),
                     ),
                 ],
               );
@@ -121,6 +113,22 @@ class _EquipmentListState extends State<EquipmentList> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Created from the list of its own section, the new item opens (web
+  /// design guide, After a form); Back from it returns to this list, still
+  /// filtered.
+  Future<void> _add(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    final id = await navigator.push(
+      hcRouteOf<String?>(
+        ItemFormScreen(homeId: widget.home.id, roomId: _room, chooseRoom: true),
+      ),
+    );
+    if (id == null || !mounted) return;
+    await navigator.push(
+      hcRoute(ItemScreen(homeId: widget.home.id, itemId: id)),
     );
   }
 

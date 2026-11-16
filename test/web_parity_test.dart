@@ -689,8 +689,8 @@ final screens = <Screen>[
   ),
   // Not measured yet: the Equipment tab (every item of the home). The
   // reference above is taken at the pinned web release (v0.3.2), which does
-  // not have that screen; it joins this list with the follow-up lot
-  // (t_d3cbc438), once a web release (v0.4.0) has it.
+  // not have that screen; it joins this list with a later lot
+  // once a web release (v0.4.0) has it.
   (
     name: 'article',
     open: (tester, demo) => openScreen(

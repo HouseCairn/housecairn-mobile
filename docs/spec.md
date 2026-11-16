@@ -195,8 +195,10 @@ Homes and Settings shows the current home.
    and its warranty, filtered by a room and by words of the name, brand, model or serial number
    (`rooms/services.py` `item_rows`, `rooms/item_list.html`). An **Add an item** button follows
    the list (the room being filtered is the form's first choice, the form asks for the room;
-   absent in an archived home or while the home has no room). The web page has no such button
-   yet; the app takes the form of the other lists.
+   absent in an archived home or while the home has no room). Saved, the new item opens, and
+   Back from it returns to the list, still filtered (web design guide, After a form: created
+   from the list of its own section, the record opens; from the page of a room, the form
+   returns to that page).
 5. **Item**: details, the manufacturer's warranty (a duration in months or years, who gives it,
    its start, else the purchase date, and its end worked out; web ADR 0080), its state,
    contract, links, photos, tasks.
