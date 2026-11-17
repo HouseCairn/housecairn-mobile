@@ -119,9 +119,8 @@ way whose lot is not merged yet is shown, disabled. What each way guarantees, th
 them and what the screen says are in ADR 0010.
 
 In the app of lot 2c only the first way exists. The first-start screen shows the logo and its
-title centred, as the first page of the web, then the three, "Alone on
-this phone" selected, the two others disabled with "Coming later", muted with their mark (a tap
-on them opens nothing);
+title centred, as the first page of the web, then the three, "Alone on this phone" selected,
+the two others disabled with "Coming later", muted with their mark (a tap on them opens nothing);
 the third says that the server stores the homes and can read them, that everything of the phone
 is kept on it, and that a one-time purchase unlocks it, with no price. Choosing the first way
 stores `sync_mode` = `alone` in `local_settings` (never synced; absent means alone), then the
