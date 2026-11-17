@@ -49,7 +49,7 @@ class _TodayScreenState extends State<TodayScreen> {
     final current = state.current;
     final reports = current == null
         ? 0
-        : await state.repository.openReportCount([current.id]);
+        : await state.repository.reportsWaiting(current.id);
     if (mounted) {
       setState(() {
         // A task of a season that is on, without a date, is in the section In

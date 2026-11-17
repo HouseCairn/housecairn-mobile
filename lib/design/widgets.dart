@@ -422,6 +422,16 @@ class HcBarAction extends StatelessWidget {
   );
 }
 
+/// The style of a small button (`.button-small`): text at 14, padding of 8
+/// and 12, the touch target of the theme (48) kept.
+ButtonStyle hcSmallButtonStyle() => OutlinedButton.styleFrom(
+  padding: const EdgeInsets.symmetric(
+    horizontal: HcSpace.s3,
+    vertical: HcSpace.s2,
+  ),
+  textStyle: HcText.buttonSmall,
+);
+
 /// The style of the button of an action that destroys (`.button-danger`).
 ButtonStyle hcDangerStyle() => FilledButton.styleFrom(
   backgroundColor: HcColors.danger,

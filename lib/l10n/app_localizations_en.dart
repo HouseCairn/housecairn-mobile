@@ -45,15 +45,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutLicence => 'Free software under the AGPL-3.0 licence.';
 
   @override
-  String aboutSource(String address) {
-    return 'Source code and security reports: $address';
-  }
+  String get aboutSourceLink => 'Source code and security reports on GitHub.';
 
   @override
   String get aboutAi => 'Developed with an AI agent, under human review.';
 
   @override
   String get aboutLicences => 'Open source licences';
+
+  @override
+  String get aboutLinks => 'Links';
+
+  @override
+  String get linkWebsite => 'Website';
+
+  @override
+  String get linkDocs => 'Documentation';
+
+  @override
+  String get linkAppCode => 'Application code';
+
+  @override
+  String get linkAddon => 'Home Assistant app';
+
+  @override
+  String get linkIntegration => 'Home Assistant integration';
+
+  @override
+  String get linkMobile => 'Mobile application';
+
+  @override
+  String get linkAndroid => 'Android';
+
+  @override
+  String get comingSoon => 'Coming soon';
 
   @override
   String get aboutBeta => 'iPhone beta (TestFlight)';
@@ -805,6 +830,9 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return 'every $_temp0';
   }
+
+  @override
+  String get templateSourceLink => 'source';
 
   @override
   String templateMaterial(String list) {
@@ -1654,6 +1682,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetUpkeep => 'Upkeep';
 
   @override
+  String get budgetByRoom => 'Budget by room';
+
+  @override
+  String get budgetByProject => 'Budget by project';
+
+  @override
+  String get budgetOfUpkeep => 'Budget of the upkeep';
+
+  @override
   String envelopeYear(int year) {
     return 'Envelope $year';
   }
@@ -1753,7 +1790,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String roomsExplained(int year) {
-    return 'Projects counted in $year are shared evenly between their rooms; the upkeep of a task goes to its room.';
+    return 'Projects counted in $year, shared evenly between their rooms, and the upkeep of $year.';
+  }
+
+  @override
+  String upkeepExplained(int year) {
+    return 'The tasks that are in no project, with the occurrences of $year: those done, the one open, and those the repetition will still bring before the end of the year. An open task with no date counts in the current year. A task of a project counts in its project.';
   }
 
   @override

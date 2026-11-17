@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/repository.dart';
 import '../design/adaptive.dart';
+import '../design/brand.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
@@ -81,9 +82,19 @@ class _WaysScreenState extends State<WaysScreen> {
                   HcSpace.s2,
                 ),
                 children: [
+                  // The page of a first visit of the web
+                  // (`allauth/layouts/entrance.html`): the logo, then the
+                  // title, centred.
+                  const Center(child: HcBrand(key: Key('ways-brand'))),
+                  const SizedBox(height: HcSpace.s4),
                   Semantics(
                     header: true,
-                    child: Text(l10n.waysTitle, style: HcText.pageTitle),
+                    child: Text(
+                      l10n.waysTitle,
+                      key: const Key('ways-title'),
+                      textAlign: TextAlign.center,
+                      style: HcText.pageTitle,
+                    ),
                   ),
                   const SizedBox(height: HcSpace.s4),
                   for (final way in SyncMode.values) ...[
@@ -171,15 +182,31 @@ class WayCard extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _Indicator(selected: selected),
+                      _Indicator(selected: selected, enabled: enabled),
                       const SizedBox(width: HcSpace.s3),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(words.title, style: HcText.cardTitle),
+                            // Muted when it cannot be chosen, as a disabled
+                            // choice of the web.
+                            Text(
+                              words.title,
+                              style: enabled
+                                  ? HcText.cardTitle
+                                  : HcText.cardTitle.copyWith(
+                                      color: HcColors.textMuted,
+                                    ),
+                            ),
                             const SizedBox(height: HcSpace.s1),
-                            Text(words.text, style: HcText.body),
+                            Text(
+                              words.text,
+                              style: enabled
+                                  ? HcText.body
+                                  : HcText.body.copyWith(
+                                      color: HcColors.textMuted,
+                                    ),
+                            ),
                             if (!enabled) ...[
                               const SizedBox(height: HcSpace.s2),
                               HcPill(
@@ -202,21 +229,29 @@ class WayCard extends StatelessWidget {
   }
 }
 
-/// The round mark of a radio: a ring, with a dot when selected.
+/// The round mark of a radio: a ring, with a dot when selected; a ring of
+/// the light border, on the muted fill, when it cannot be chosen.
 class _Indicator extends StatelessWidget {
-  const _Indicator({required this.selected});
+  const _Indicator({required this.selected, required this.enabled});
 
   final bool selected;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
     child: Padding(
       padding: const EdgeInsets.only(top: HcSpace.s1),
       child: DecoratedBox(
+        key: enabled ? null : const Key('way-indicator-off'),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
+          color: enabled ? null : HcColors.surfaceMuted,
           border: Border.all(
-            color: selected ? HcColors.primary : HcColors.borderStrong,
+            color: selected
+                ? HcColors.primary
+                : enabled
+                ? HcColors.borderStrong
+                : HcColors.border,
             width: HcComponent.borderWidth * 2,
           ),
         ),

@@ -1213,7 +1213,18 @@ extension BudgetRepository on Repository {
     ];
   }
 
-  /// The open reports of [homeIds]: the number on Today (`open_count`).
+  /// The reports that wait for the person in [homeId]: the line of Today and
+  /// the count of Reports in More (`waiting_for` of `reports/services.py`).
+  /// The open reports of the home for whoever writes there, and none for a
+  /// read-only member of a server home, as on the web: the server sends a
+  /// reader their own reports only (web ADR 0086), and the web shows a
+  /// reader no count, not even of those.
+  Future<int> reportsWaiting(String homeId) async {
+    if (await serverRole(homeId) == 'read_only') return 0;
+    return openReportCount([homeId]);
+  }
+
+  /// The open reports of [homeIds] (`open_count`).
   Future<int> openReportCount(Iterable<String> homeIds) async {
     final ids = homeIds.toList();
     if (ids.isEmpty) return 0;

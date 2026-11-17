@@ -91,11 +91,12 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
+                          // The `h2` of the card, in small capitals as every
+                          // `h2` of the web, with its margins.
+                          HcSectionHeading(
                             l10n.envelopeOfYear(year),
-                            style: HcText.cardTitle,
+                            key: const Key('projects-envelope-heading'),
                           ),
-                          const SizedBox(height: HcSpace.s2),
                           if (envelope == null)
                             Text(l10n.envelopeNone, style: HcText.bodySmall)
                           else
@@ -142,33 +143,43 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                             : l10n.projectsNoneInTab,
                       )
                     else
-                      HcCardList(
-                        children: [
-                          for (final e in shown)
-                            HcRow(
-                              key: Key('project-${e.project.id}'),
-                              title: e.project.title,
-                              text: [
-                                if (e.amounts.planned != budget.zero ||
-                                    e.amounts.committed != budget.zero ||
-                                    e.amounts.paid != budget.zero)
-                                  l10n.plannedAmount(m(e.amounts.planned))
-                                else
-                                  l10n.noBudgetYet,
-                                if (e.project.priority == 'high')
-                                  l10n.highPriority,
-                              ].join(' · '),
-                              pills: gapPills(e.amounts, currency),
-                              onTap: () => _open(
-                                context,
-                                ProjectScreen(
-                                  homeId: home.id,
-                                  projectId: e.project.id,
-                                ),
-                              ),
-                            ),
+                      // A group per status, under its heading, in the order
+                      // of the web (`STATUS_ORDER`), as the list gives them.
+                      for (final status in budget.projectStatuses)
+                        if (shown.any((e) => e.project.status == status)) ...[
+                          HcSectionHeading(
+                            projectStatusLabel(l10n, status),
+                            key: Key('projects-group-$status'),
+                          ),
+                          HcCardList(
+                            children: [
+                              for (final e in shown)
+                                if (e.project.status == status)
+                                  HcRow(
+                                    key: Key('project-${e.project.id}'),
+                                    title: e.project.title,
+                                    text: [
+                                      if (e.amounts.planned != budget.zero ||
+                                          e.amounts.committed != budget.zero ||
+                                          e.amounts.paid != budget.zero)
+                                        l10n.plannedAmount(m(e.amounts.planned))
+                                      else
+                                        l10n.noBudgetYet,
+                                      if (e.project.priority == 'high')
+                                        l10n.highPriority,
+                                    ].join(' · '),
+                                    pills: gapPills(e.amounts, currency),
+                                    onTap: () => _open(
+                                      context,
+                                      ProjectScreen(
+                                        homeId: home.id,
+                                        projectId: e.project.id,
+                                      ),
+                                    ),
+                                  ),
+                            ],
+                          ),
                         ],
-                      ),
                     if (writable)
                       HcAddButton(
                         key: const Key('project-add'),

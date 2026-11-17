@@ -65,8 +65,11 @@ class TodayReports extends StatelessWidget {
             // (`reports/_today.html`).
             child: HcBanner(
               key: const Key('today-reports'),
+              // `.button-small`, as the web: on one line beside the count at
+              // 390, a target of 48 still.
               action: OutlinedButton(
                 key: const Key('today-reports-see'),
+                style: hcSmallButtonStyle(),
                 onPressed: () => open(ReportsScreen(homeId: homeId)),
                 child: Text(l10n.seeReports),
               ),
