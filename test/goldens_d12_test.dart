@@ -41,6 +41,19 @@ void main() {
   // Each screen, opened as the app opens it, on the data of lot 3b with a
   // planned project, so that Projects has two groups.
   final aboutRow = find.byKey(const Key('more-about'));
+
+  // About, opened from More as a person does, and checked to be About: the
+  // golden of a screen that is not it would pass in silence otherwise.
+  Future<void> openAbout(WidgetTester tester, Labels l) async {
+    await openSection(tester, l.more);
+    await tester.scrollUntilVisible(aboutRow, 100);
+    await tester.ensureVisible(aboutRow);
+    await tester.pumpAndSettle();
+    await tester.tap(aboutRow);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('about-card')), findsOneWidget);
+  }
+
   final screens = <(String, Future<void> Function(WidgetTester, Labels))>[
     (
       'budget',
@@ -59,12 +72,17 @@ void main() {
     ('projects', (tester, l) => openSection(tester, l.projects)),
     ('templates', (tester, l) => openScreen(tester, const TemplatesScreen())),
     ('more', (tester, l) => openSection(tester, l.more)),
+    ('about', (tester, l) => openAbout(tester, l)),
+    // The card of Links, scrolled to, only where it is tight.
     (
-      'about',
+      'about_links',
       (tester, l) async {
-        await openSection(tester, l.more);
-        await tester.scrollUntilVisible(aboutRow, 100);
-        await tester.tap(aboutRow);
+        await openAbout(tester, l);
+        await tester.scrollUntilVisible(
+          find.byKey(const Key('about-links')),
+          100,
+          scrollable: find.byType(Scrollable).last,
+        );
         await tester.pumpAndSettle();
       },
     ),
@@ -79,6 +97,7 @@ void main() {
         void phone() => debugDefaultTargetPlatformOverride = platform;
 
         for (final (page, open) in screens) {
+          if (page == 'about_links' && width != 320) continue;
           testWidgets('$page, $name', (tester) async {
             phone();
             addTearDown(() => debugDefaultTargetPlatformOverride = null);
