@@ -16,6 +16,7 @@ import '../domain/durations.dart' as durations;
 import '../domain/recurrence.dart' as recurrence;
 import 'help_button.dart';
 import '../l10n/app_localizations.dart';
+import 'attachments.dart';
 import 'budget_parts.dart';
 import 'contractor_screens.dart';
 import 'item_screens.dart';
@@ -35,7 +36,8 @@ export 'task_form_screen.dart' show TaskFormScreen;
 /// existing task opens on its page, to read, as on the web: its pills, its
 /// title, its place, the row of actions (Done, Postpone, Skip this time or
 /// Undo, then Edit the task), then When, How to do it, Details, Cost,
-/// Materials, the photos of its place and its History. The form opens from
+/// Materials, the photos of its place, its Photos and files and its History.
+/// The form opens from
 /// Edit the task; without [taskId], this is the form of a new task, which
 /// opens as a sheet on iOS (lot D4).
 class TaskScreen extends StatelessWidget implements HcFormScreen {
@@ -606,6 +608,11 @@ class _TaskPageState extends State<TaskPage> {
                   writable: writable,
                 ),
                 _placePhotos(l10n),
+                AttachmentSection(
+                  homeId: widget.homeId,
+                  taskId: widget.taskId,
+                  writable: writable,
+                ),
                 if (_history.isNotEmpty) _historyList(l10n, writable),
               ],
             ),

@@ -15,6 +15,7 @@ import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'budget_parts.dart';
 import 'parts.dart';
+import 'photos.dart' show MissingPhotoTile;
 import 'messages.dart';
 import 'state.dart';
 import 'item_screens.dart';
@@ -284,16 +285,24 @@ class ReportScreen extends StatelessWidget {
                           ),
                       ],
                     ),
-                    if (report.photo != null && photo.existsSync()) ...[
+                    if (report.photo != null) ...[
                       const SizedBox(height: HcSpace.s3),
-                      Semantics(
-                        image: true,
-                        label: l10n.reportPhoto,
-                        child: Image.file(
-                          photo,
-                          key: const Key('report-photo'),
-                        ),
-                      ),
+                      // Until its file has come from the server (lot 4d,
+                      // docs/adr/0013), the photo is the plain tile of a
+                      // photo, said as such.
+                      photo.existsSync()
+                          ? Semantics(
+                              image: true,
+                              label: l10n.reportPhoto,
+                              child: Image.file(
+                                photo,
+                                key: const Key('report-photo'),
+                              ),
+                            )
+                          : MissingPhotoTile(
+                              key: const Key('report-photo-missing'),
+                              label: l10n.reportPhoto,
+                            ),
                     ],
                     // The action row: one primary action at most, the others
                     // secondary, as wide as their label, on lines that wrap.

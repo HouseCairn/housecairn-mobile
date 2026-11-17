@@ -664,18 +664,22 @@ class ServerTransport implements SyncTransport {
       field == 'updated_at' ||
       // What the server reads in the file reference instead (web
       // `projects/syncing.py`, `skip`): sent, the operation is `forbidden`.
-      (type == 'projects.projectfile' &&
+      ((type == 'projects.projectfile' || type == 'tasks.attachment') &&
           (field == 'content_type' || field == 'size_bytes')) ||
       (field == 'created_at' && !_createdAtSent.contains(type)) ||
       (field == 'visible_from' && type == 'tasks.occurrence');
 
   /// The field that holds the file reference of a row, by entity type (web
-  /// `sync/files.py`, `HOLDERS`): the phone keeps it as JSON text in its
-  /// column, the server reads and writes it as an object.
+  /// `sync/files.py`, `HOLDERS`, and the label of an article and the photo of
+  /// a report, which the server gives as a reference too): the phone keeps
+  /// it as JSON text in its column, the server reads and writes it as an
+  /// object.
   static const fileFields = {
     'rooms.photo': 'image',
     'projects.projectfile': 'file',
     'tasks.attachment': 'file',
+    'reports.report': 'photo',
+    'stock.article': 'label',
   };
 
   static Object? _fileOnWire(String? type, String field, Object? value) {

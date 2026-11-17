@@ -4687,6 +4687,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} MB'**
   String sizeMegabytes(int count);
+
+  /// Heading of the photos and files attached to a task, on its page. Web catalogue (tasks): Photos and files.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos and files'**
+  String get attachmentsHeading;
+
+  /// Button under the photos and files of a task. Web catalogue (tasks): Add photos or files.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photos or files'**
+  String get addAttachments;
+
+  /// A task with no photo nor file, in an archived home. Web catalogue (tasks): No file yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No file yet.'**
+  String get attachmentsEmpty;
+
+  /// Choice of the sheet that adds to a task: a file of the Files app or of the document picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a file (PDF or photo)'**
+  String get attachmentPickFile;
+
+  /// Spoken label of a photo attached to a task. Web catalogue (tasks): Photo: %(name)s.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo: {name}'**
+  String attachmentPhotoLabel(String name);
+
+  /// Deletes a photo or a file of a task, and title of its confirmation. Web catalogue (tasks): Delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get attachmentDelete;
+
+  /// Body of the confirmation of deleting a photo or a file of a task.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} disappears from the task.'**
+  String attachmentDeleteBody(String name);
+
+  /// Message after a photo or a file of a task was deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'File deleted.'**
+  String get attachmentDeleted;
+
+  /// Refusal. Web catalogue (tasks): At most %(max)d attachments for a task.
+  ///
+  /// In en, this message translates to:
+  /// **'At most 30 attachments for a task.'**
+  String get errTooManyAttachments;
+
+  /// A file whose bytes have not come from the server yet; it comes with the next sync.
+  ///
+  /// In en, this message translates to:
+  /// **'File not on this phone'**
+  String get fileNotHere;
+
+  /// Opens a file of a task in another app of the phone (the share sheet).
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get fileOpen;
+
+  /// Message when the system could not give a file to another app.
+  ///
+  /// In en, this message translates to:
+  /// **'No app of this phone opens this file.'**
+  String get fileOpenFailed;
+
+  /// A file size in bytes, as the web writes it (filesizeformat).
+  ///
+  /// In en, this message translates to:
+  /// **'{count} bytes'**
+  String fileSizeBytes(int count);
+
+  /// A file size in kilobytes, one decimal, as the web writes it (filesizeformat).
+  ///
+  /// In en, this message translates to:
+  /// **'{count} KB'**
+  String fileSizeKb(String count);
+
+  /// A file size in megabytes, one decimal, as the web writes it (filesizeformat).
+  ///
+  /// In en, this message translates to:
+  /// **'{count} MB'**
+  String fileSizeMb(String count);
+
+  /// Spoken label of the photo of the label of a stock item. Web catalogue (stock): Label of %(name)s.
+  ///
+  /// In en, this message translates to:
+  /// **'Label of {name}'**
+  String articleLabelPhoto(String name);
 }
 
 class _AppLocalizationsDelegate

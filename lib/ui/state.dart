@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../core/document_source.dart';
@@ -54,6 +56,37 @@ Future<bool> openInSystem(Uri address) async {
   }
 }
 
+/// Gives a file of the phone to another app that opens it (a PDF viewer, the
+/// Files app, Photos), through the share sheet of the system: the only way
+/// both systems open a file of an app's own directory. [origin] is where the
+/// sheet points from on a tablet. `false` when nothing took it.
+typedef FileOpener = Future<bool> Function(
+  File file, {
+  required String name,
+  required String type,
+  Rect? origin,
+});
+
+Future<bool> shareWithSystem(
+  File file, {
+  required String name,
+  required String type,
+  Rect? origin,
+}) async {
+  try {
+    final result = await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path, name: name, mimeType: type)],
+        fileNameOverrides: [name],
+        sharePositionOrigin: origin,
+      ),
+    );
+    return result.status != ShareResultStatus.unavailable;
+  } on PlatformException {
+    return false;
+  }
+}
+
 /// Reads the library of task templates shipped with the app.
 Future<TemplateLibrary> loadBundledTemplates() async =>
     parseTemplates(await rootBundle.loadString('assets/task_templates.yaml'));
@@ -75,6 +108,7 @@ class AppState extends ChangeNotifier {
     this.thumbnailer = thumbnailInIsolate,
     this.loadTemplates = loadBundledTemplates,
     this.openUrl = openInSystem,
+    this.openFile = shareWithSystem,
     this.store,
     this.serverHttp = IoServerHttp.new,
     this.signInCallbacks,
@@ -98,6 +132,9 @@ class AppState extends ChangeNotifier {
   final Thumbnailer thumbnailer;
   final Future<TemplateLibrary> Function() loadTemplates;
   final UrlOpener openUrl;
+
+  /// Opens a file attached to a task in another app (lot 4d).
+  final FileOpener openFile;
 
   /// The secrets at rest (the Keychain or the Android Keystore): the access
   /// to a server in the third way; `null` where there is none (tests that

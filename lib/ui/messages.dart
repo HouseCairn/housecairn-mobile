@@ -54,6 +54,7 @@ String refusalMessage(
   Refusal.validityBeforeDate => l10n.errValidityBeforeDate,
   Refusal.tooManyFiles => l10n.errTooManyFiles,
   Refusal.fileTypeRefused => l10n.errFileType,
+  Refusal.tooManyAttachments => l10n.errTooManyAttachments,
   Refusal.taskInProject => l10n.errTaskInProject,
   Refusal.onePlace => l10n.errOnePlace,
   Refusal.reportNotOpen => l10n.errReportNotOpen,

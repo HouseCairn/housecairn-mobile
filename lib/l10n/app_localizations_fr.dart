@@ -2899,4 +2899,66 @@ class AppLocalizationsFr extends AppLocalizations {
   String sizeMegabytes(int count) {
     return '$count Mo';
   }
+
+  @override
+  String get attachmentsHeading => 'Photos et fichiers';
+
+  @override
+  String get addAttachments => 'Ajouter des photos ou des fichiers';
+
+  @override
+  String get attachmentsEmpty => 'Aucun fichier pour l\'instant.';
+
+  @override
+  String get attachmentPickFile => 'Choisir un fichier (PDF ou photo)';
+
+  @override
+  String attachmentPhotoLabel(String name) {
+    return 'Photo : $name';
+  }
+
+  @override
+  String get attachmentDelete => 'Supprimer';
+
+  @override
+  String attachmentDeleteBody(String name) {
+    return '$name disparaît de la tâche.';
+  }
+
+  @override
+  String get attachmentDeleted => 'Fichier supprimé.';
+
+  @override
+  String get errTooManyAttachments =>
+      '30 pièces jointes au plus pour une tâche.';
+
+  @override
+  String get fileNotHere => 'Fichier absent de ce téléphone';
+
+  @override
+  String get fileOpen => 'Ouvrir';
+
+  @override
+  String get fileOpenFailed =>
+      'Aucune app de ce téléphone n\'ouvre ce fichier.';
+
+  @override
+  String fileSizeBytes(int count) {
+    return '$count octets';
+  }
+
+  @override
+  String fileSizeKb(String count) {
+    return '$count Ko';
+  }
+
+  @override
+  String fileSizeMb(String count) {
+    return '$count Mo';
+  }
+
+  @override
+  String articleLabelPhoto(String name) {
+    return 'Étiquette de $name';
+  }
 }

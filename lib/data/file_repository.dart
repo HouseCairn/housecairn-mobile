@@ -2,8 +2,23 @@
 
 part of 'repository.dart';
 
-/// The tables whose rows hold a file, and the column of its reference.
-const fileHolders = {'photos': 'image', 'project_files': 'file'};
+/// The tables whose rows hold a file, and the column of its reference (web
+/// `sync/files.py`, `HOLDERS`): the photos of rooms and items, the files of
+/// projects and the attachments of tasks (lot 4c and 4d), the photo of a
+/// report and the label of a stock article (lot 4d,
+/// docs/adr/0013-more-files-with-a-server.md).
+const fileHolders = {
+  'photos': 'image',
+  'project_files': 'file',
+  'task_attachments': 'file',
+  'reports': 'photo',
+  'articles': 'label',
+};
+
+/// The holders whose file is a photo kept as `<id>.jpg`: an image only on
+/// both sides. The others (a file of a project, an attachment) are named by
+/// the id alone, a PDF as well as a photo.
+const _jpegHolders = {'photos', 'reports', 'articles'};
 
 /// How long a deleted photo or file stays on the phone, so that it can be
 /// restored (docs/spec.md, "Photos and files"): 30 days.
@@ -47,7 +62,7 @@ class FileJob {
   final String fileId;
   final String homeId;
 
-  /// `photos` or `project_files`.
+  /// The table of the row, a key of [fileHolders].
   final String holder;
   final String rowId;
   final FileWay way;
@@ -83,15 +98,18 @@ class FileQueue {
   int get toSend => waiting + failed;
 }
 
-/// The files of photos and of project files with a Housecairn server (lot
-/// 4c, docs/adr/0012-files-with-a-server.md): which are to send and to fetch,
+/// The files of the rows of [fileHolders] with a Housecairn server (lots 4c
+/// and 4d, docs/adr/0012-files-with-a-server.md and
+/// docs/adr/0013-more-files-with-a-server.md): which are to send and to fetch,
 /// the tries and their waits, the refusals, and the sweep of what was
 /// deleted. The network is in lib/sync/files.dart.
 extension FileSyncRepository on Repository {
-  /// Where the file of the row [id] of [holder] is on the phone: a photo is
-  /// `<id>.jpg`, a file of a project is `<id>`.
+  /// Where the file of the row [id] of [holder] is on the phone: a photo, the
+  /// photo of a report and the label of an article are `<id>.jpg`, a file of
+  /// a project and an attachment are `<id>`.
   File fileOfRow(String holder, String homeId, String id) => File(
-    '${homeDirectory(homeId).path}/${holder == 'photos' ? '$id.jpg' : id}',
+    '${homeDirectory(homeId).path}/'
+    '${_jpegHolders.contains(holder) ? '$id.jpg' : id}',
   );
 
   /// The thumbnail file of a photo.

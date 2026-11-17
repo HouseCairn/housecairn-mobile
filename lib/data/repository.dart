@@ -29,6 +29,7 @@ import '../sync/server_transport.dart';
 import '../sync/transport.dart';
 import 'database.dart';
 
+part 'attachment_repository.dart';
 part 'budget_repository.dart';
 part 'file_repository.dart';
 part 'server_repository.dart';
@@ -168,6 +169,9 @@ enum Refusal {
 
   /// A file that is neither a PDF nor a photo.
   fileTypeRefused,
+
+  /// At most 30 photos and files on a task (`MAX_ATTACHMENTS_PER_TASK`).
+  tooManyAttachments,
 
   /// The task is already in a project (`attach_task`).
   taskInProject,
@@ -478,6 +482,7 @@ const entityOf = {
   'movements': 'stock.movement',
   'task_materials': 'tasks.taskmaterial',
   'material_draws': 'tasks.materialdraw',
+  'task_attachments': 'tasks.attachment',
   'projects': 'projects.project',
   'project_rooms': 'projects.project_rooms',
   'budget_lines': 'projects.budgetline',
@@ -500,6 +505,7 @@ const homeTables = [
   'budget_lines',
   'project_rooms',
   'projects',
+  'task_attachments',
   'material_draws',
   'task_materials',
   'movements',
@@ -2036,7 +2042,8 @@ class Repository {
     );
   }
 
-  /// Soft-deletes a task with its occurrences.
+  /// Soft-deletes a task with its occurrences and its attachments, whose
+  /// files then go as those of any deleted row (docs/adr/0012).
   Future<void> deleteTask(String taskId) async {
     final current = await task(taskId);
     if (current == null) throw const Refused(Refusal.notFound);
@@ -2045,6 +2052,9 @@ class Repository {
     await db.transaction(() async {
       for (final o in await occurrencesOf(taskId)) {
         await _put('occurrences', o.id, {'deleted_at': now});
+      }
+      for (final a in await attachmentsOf(taskId)) {
+        await _put('task_attachments', a.id, {'deleted_at': now});
       }
       await _put('tasks', taskId, {'deleted_at': now});
     });

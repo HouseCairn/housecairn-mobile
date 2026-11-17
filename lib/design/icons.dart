@@ -43,6 +43,10 @@ enum HcIcons {
   /// Not in the web set: a problem reported (More, Reports).
   reports([_P('M12 4L21 20H3Z'), _P('M12 10v4'), _C(12, 17, 0.6)]),
 
+  /// Not in the web set, whose list of files is of names alone: a file
+  /// attached to a task that is not a photo (lot 4d), in the same stroke.
+  file([_P('M6 3h8l5 5v13H6Z'), _P('M14 3v5h5')]),
+
   /// Not in the web set, which writes "+" in text: the same stroke.
   add([_P('M12 5v14'), _P('M5 12h14')]),
 
