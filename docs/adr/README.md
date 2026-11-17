@@ -19,3 +19,4 @@ repository (`docs/adr/` there).
 | [0010](0010-three-ways-to-use-the-app.md) | Three ways to use the app: alone, family sync through the relay, a Housecairn server | accepted |
 | [0011](0011-design-from-the-web-app.md) | The look of the web application, adapted to the phone | proposed |
 | [0012](0012-files-with-a-server.md) | Photos and files with a Housecairn server | proposed, amends 0010 |
+| [0013](0013-more-files-with-a-server.md) | Attachments of tasks, photos of reports and labels with a server | proposed, extends 0012 |
