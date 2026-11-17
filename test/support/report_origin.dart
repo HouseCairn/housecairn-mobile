@@ -110,6 +110,23 @@ class ReportOrigin {
       home,
       const TaskInput(title: 'Service the boiler'),
     );
+    // One order on every run: the rows were made at the same instant, and
+    // the lists order them by that instant, then by their random id.
+    final order = [
+      data.withPhoto,
+      data.photoMissing,
+      data.noPhoto,
+      data.deleted,
+      data.closed,
+      data.twoReports,
+      data.plain,
+    ];
+    for (var i = 0; i < order.length; i++) {
+      await r.db.customStatement(
+        'UPDATE occurrences SET created_at = created_at + ? WHERE task_id = ?',
+        [i, uuidBytes(order[i])],
+      );
+    }
     return data;
   }
 }
