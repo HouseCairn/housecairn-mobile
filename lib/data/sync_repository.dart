@@ -631,6 +631,9 @@ extension SyncRepository on Repository {
         ],
       );
     }
+    // A field now in its column leaves `extra`: a copy kept there would come
+    // back when the column is emptied.
+    if (known.isNotEmpty) await _dropExtra(type, id, known.keys);
     if (unknown.isNotEmpty) await _mergeExtra(type, id, home, unknown);
     for (final field in won.keys) {
       await db.customInsert(
@@ -687,6 +690,38 @@ extension SyncRepository on Repository {
               .cast<String, Object?>();
   }
 
+  /// Takes the [fields] out of the `extra` of the row [id], and the line
+  /// with them when nothing else is kept.
+  Future<void> _dropExtra(
+    String type,
+    String id,
+    Iterable<String> fields,
+  ) async {
+    // A line that cannot be read, or is no object, is left as it is: the
+    // operation that brought the column must still be applied.
+    final Map<String, Object?> kept;
+    try {
+      kept = await _extraOf(type, id);
+    } on FormatException {
+      return;
+    } on TypeError {
+      return;
+    }
+    final left = {...kept}..removeWhere((k, _) => fields.contains(k));
+    if (left.length == kept.length) return;
+    if (left.isEmpty) {
+      await db.customStatement(
+        'DELETE FROM extra WHERE entity = ? AND row_id = ?',
+        [type, uuidBytes(id)],
+      );
+    } else {
+      await db.customStatement(
+        'UPDATE extra SET json = ? WHERE entity = ? AND row_id = ?',
+        [jsonEncode(left), type, uuidBytes(id)],
+      );
+    }
+  }
+
   Future<void> _mergeExtra(
     String type,
     String id,
@@ -710,6 +745,104 @@ extension SyncRepository on Repository {
   /// The fields this version keeps without knowing them, of the row [id].
   Future<Map<String, Object?>> extraFields(String entity, String id) =>
       _extraOf(entity, id);
+
+  /// Gives to its column the file reference kept in `extra` (the five fields
+  /// of [fileHolders]) and takes it out of `extra` (docs/adr/0013,
+  /// "References received by an earlier build"). A field lands in `extra` when the build
+  /// that received it could not put it in its column: before the files, a
+  /// file reference came as an object and a text column refused it. The
+  /// cursor of the home is past those operations, so nothing brings them
+  /// again.
+  ///
+  /// The reference goes in as JSON text, as [_applyOne] writes one, and a
+  /// value [FileReference.parse] or [_fromWire] refuses stays in `extra`. A
+  /// column that holds a value is left alone, it was written after the value
+  /// in `extra` or by the person, and the copy in `extra` is dropped. A line
+  /// that cannot be read is skipped. Nothing is logged: this is not a
+  /// local change, and the server has the value already. Returns the number
+  /// of fields moved.
+  Future<int> healExtra() async {
+    var moved = 0;
+    final rows = await db
+        .customSelect('SELECT entity, row_id, json FROM extra')
+        .get();
+    for (final r in rows) {
+      try {
+        final entity = r.data['entity'] as String;
+        final table = tableOfEntity[entity];
+        if (table == null) continue;
+        final id = Uuid.unparse(r.data['row_id'] as Uint8List);
+        final fields = (jsonDecode(r.data['json'] as String) as Map)
+            .cast<String, Object?>();
+        final columns = _columns(table);
+        final row =
+            (await db
+                    .customSelect(
+                      'SELECT * FROM $table WHERE id = ?',
+                      variables: [Variable<Uint8List>(uuidBytes(id))],
+                    )
+                    .getSingleOrNull())
+                ?.data;
+        if (row == null) continue;
+        final kept = {...fields};
+        for (final MapEntry(key: field, :value) in fields.entries) {
+          final column = columns[field];
+          if (column == null || fileHolders[table] != field) continue;
+          if (row[field] != null) {
+            // The column was written after, and may be emptied later: the copy
+            // in `extra` is stale and must not come back at the next scan.
+            kept.remove(field);
+            continue;
+          }
+          // Only what the reference parser accepts moves: any other value
+          // stays in `extra`, as it came.
+          final text = value is Map ? jsonEncode(value) : value;
+          if (text is! String || FileReference.parse(text, rowId: id) == null) {
+            continue;
+          }
+          final Object? held;
+          try {
+            held = _fromWire(column, text);
+          } on Object {
+            continue;
+          }
+          if (held == null) continue;
+          final clock = await _clocksOf(entity, id);
+          final written = clock[field]?.hlc;
+          await db.customUpdate(
+            'UPDATE $table SET $field = ?'
+            '${written == null ? '' : ', updated_at = MAX(updated_at, ?)'} '
+            'WHERE id = ?',
+            variables: [
+              Variable<Object>(held),
+              if (written != null) Variable<int>(Hlc.parse(written) >> 16),
+              Variable<Uint8List>(uuidBytes(id)),
+            ],
+          );
+          kept.remove(field);
+          moved++;
+        }
+        if (kept.length == fields.length) continue;
+        if (kept.isEmpty) {
+          await db.customStatement(
+            'DELETE FROM extra WHERE entity = ? AND row_id = ?',
+            [entity, uuidBytes(id)],
+          );
+        } else {
+          await db.customStatement(
+            'UPDATE extra SET json = ? WHERE entity = ? AND row_id = ?',
+            [jsonEncode(kept), entity, uuidBytes(id)],
+          );
+        }
+      } on Object {
+        // A line that cannot be read (JSON that does not parse, not an
+        // object): left as it is, the others still heal, and neither the
+        // scan nor the count of Settings throws.
+        continue;
+      }
+    }
+    return moved;
+  }
 
   /// Applies the operations kept in `pending` whose type this version now
   /// knows (after an update).

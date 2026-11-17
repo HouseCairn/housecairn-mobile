@@ -122,6 +122,10 @@ class FilesServer implements ServerHttp {
     _ => null,
   };
 
+  /// Fields of the task [id] written on the web.
+  void writeWebTask(String id, Map<String, Object?> fields) =>
+      _put('tasks.task', id, fields);
+
   /// The row deleted on the web.
   void deleteOnWeb(String type, String id) {
     final clock = _hlc();

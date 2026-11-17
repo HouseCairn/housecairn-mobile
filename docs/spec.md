@@ -322,7 +322,8 @@ all homes together, counting photos, files and the sync data.
   sent when the phone is alone. Lot 4d ([ADR 0013](adr/0013-more-files-with-a-server.md)) adds
   the files attached to a task, the photo of a report and the label photo of a stock article,
   under the same rules; a report and an article show the plain tile of a photo until their file
-  has come.
+  has come. A photo, a file or a label an earlier build received without being able to keep its
+  reference comes back with the next sync, with no action from the person.
 
 ## Export and import
 
