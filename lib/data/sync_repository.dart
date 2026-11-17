@@ -697,7 +697,16 @@ extension SyncRepository on Repository {
     String id,
     Iterable<String> fields,
   ) async {
-    final kept = await _extraOf(type, id);
+    // A line that cannot be read, or is no object, is left as it is: the
+    // operation that brought the column must still be applied.
+    final Map<String, Object?> kept;
+    try {
+      kept = await _extraOf(type, id);
+    } on FormatException {
+      return;
+    } on TypeError {
+      return;
+    }
     final left = {...kept}..removeWhere((k, _) => fields.contains(k));
     if (left.length == kept.length) return;
     if (left.isEmpty) {

@@ -341,6 +341,40 @@ void main() {
       expect(broken.data['json'], '{not json');
     });
 
+    for (final (label, line) in [
+      ('whose JSON cannot be read', '{not json'),
+      ('that is not an object', '[1, 2]'),
+    ]) {
+      test('an operation of the server on a task whose line of extra $label: '
+          'the sync goes through, the column is written, the line is left '
+          'as it is', () async {
+        await repo.db.customStatement(
+          'INSERT INTO extra (entity, row_id, home_id, json) '
+          'VALUES (?, ?, ?, ?)',
+          ['tasks.task', uuidBytes(task), uuidBytes(home), line],
+        );
+        clock.advance(const Duration(minutes: 1));
+        server.writeWebTask(task, {'title': 'Boiler, serviced'});
+
+        await sync();
+
+        final row = await repo.db
+            .customSelect(
+              'SELECT title FROM tasks WHERE id = ?',
+              variables: [Variable<Uint8List>(uuidBytes(task))],
+            )
+            .getSingle();
+        expect(row.data['title'], 'Boiler, serviced');
+        final kept = await repo.db
+            .customSelect(
+              'SELECT json FROM extra WHERE entity = ?',
+              variables: [Variable<String>('tasks.task')],
+            )
+            .getSingle();
+        expect(kept.data['json'], line);
+      });
+    }
+
     test('a line of extra that is not an object is skipped as well', () async {
       server.addWebPhoto(web, jpeg(), roomId: room);
       await sync();

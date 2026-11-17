@@ -70,7 +70,7 @@ value is left alone, since it was written after, by the feed or by the person, a
 `extra` is dropped all the same: kept, it would come back if the column were emptied later. For
 the same reason `_applyOne` takes from `extra` every field it has just written in its column, a
 file reference or not. A line of `extra` that cannot be read is skipped, and the others still
-heal. Nothing is logged: it is no local change and the server has the value.
+heal; `_applyOne` leaves such a line as it is and applies the operation all the same. Nothing is logged: it is no local change and the server has the value.
 It runs at the start of `scanFiles`, because that is what every round, and the count of Settings,
 read first, so that no migration, no schema version and no second place to remember are needed,
 and the heal costs one read of a small table. It is limited to the file fields: the other known
