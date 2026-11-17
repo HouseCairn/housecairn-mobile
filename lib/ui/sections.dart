@@ -2,6 +2,7 @@
 
 import 'package:material_ui/material_ui.dart';
 
+import '../data/repository.dart';
 import '../design/icons.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
@@ -50,22 +51,13 @@ class MoreScreen extends StatelessWidget {
           HcCardList(
             children: [
               if (AppScope.of(context).current case final home?)
-                HcRow(
-                  key: const Key('more-reports'),
-                  leading: const HcIcon(
-                    HcIcons.reports,
-                    color: HcColors.primary,
-                  ),
-                  title: l10n.reports,
-                  text: l10n.moreReportsText,
+                _ReportsRow(
+                  homeId: home.id,
                   onTap: () => open(ReportsScreen(homeId: home.id)),
                 ),
               HcRow(
                 key: const Key('more-contractors'),
-                leading: const HcIcon(
-                  HcIcons.contractors,
-                  color: HcColors.primary,
-                ),
+                leading: const HcIcon(HcIcons.hardhat, color: HcColors.primary),
                 title: l10n.contractors,
                 text: l10n.moreContractorsText,
                 onTap: () => open(const ContractorsScreen()),
@@ -109,6 +101,62 @@ class MoreScreen extends StatelessWidget {
           const WaysRows(),
         ],
       ),
+    );
+  }
+}
+
+/// Reports in More, with the number of reports that wait, as the web's
+/// "Reports (2)" (`core/more.py`, `waiting_for`); nothing after the name when
+/// none waits.
+class _ReportsRow extends StatefulWidget {
+  const _ReportsRow({required this.homeId, required this.onTap});
+
+  final String homeId;
+  final VoidCallback onTap;
+
+  @override
+  State<_ReportsRow> createState() => _ReportsRowState();
+}
+
+class _ReportsRowState extends State<_ReportsRow> {
+  Future<int>? _waiting;
+  (int, String)? _for;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reload();
+  }
+
+  @override
+  void didUpdateWidget(_ReportsRow old) {
+    super.didUpdateWidget(old);
+    _reload();
+  }
+
+  void _reload() {
+    final state = AppScope.of(context);
+    final key = (state.revision, widget.homeId);
+    if (_for == key) return;
+    _for = key;
+    _waiting = state.repository.reportsWaiting(widget.homeId);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return FutureBuilder<int>(
+      future: _waiting,
+      builder: (context, snapshot) {
+        final waiting = snapshot.data ?? 0;
+        return HcRow(
+          key: const Key('more-reports'),
+          leading: const HcIcon(HcIcons.flag, color: HcColors.primary),
+          title: waiting > 0 ? '${l10n.reports} ($waiting)' : l10n.reports,
+          text: l10n.moreReportsText,
+          onTap: widget.onTap,
+        );
+      },
     );
   }
 }

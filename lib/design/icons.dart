@@ -34,14 +34,53 @@ enum HcIcons {
   chevron([_P('M9 6l6 6-6 6')]),
   info([_C(12, 12, 9), _P('M12 11v5.5'), _C(12, 7.8, 0.6)]),
 
-  /// Not in the web set, which has no icon for these three entries of More: the
+  /// Reports in More (`flag`).
+  flag([_P('M5.5 21V4'), _P('M5.5 5h12l-2.5 4 2.5 4h-12')]),
+
+  /// Contractors in More (`hardhat`).
+  hardhat([
+    _P('M5 15.5a7 7 0 0 1 14 0'),
+    _P('M3 15.5h18V18H3z'),
+    _P('M12 8.5v3.5'),
+  ]),
+
+  /// The links of About (`core/about_links.py`): `globe`, `book`, `code`,
+  /// `puzzle`, `plug`, `phone` and `phone-download`.
+  globe([
+    _C(12, 12, 9),
+    _P('M3 12h18'),
+    _P(
+      'M12 3c2.5 2.6 3.8 5.6 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.6-3.8-9'
+      'S9.5 5.6 12 3z',
+    ),
+  ]),
+  book([
+    _P('M5 4.5h10.5a2.5 2.5 0 0 1 2.5 2.5v13H7.5A2.5 2.5 0 0 1 5 17.5z'),
+    _P('M5 17.5A2.5 2.5 0 0 1 7.5 15H18'),
+  ]),
+  code([_P('m8 8-4 4 4 4'), _P('m16 8 4 4-4 4'), _P('m13.5 5-3 14')]),
+  puzzle([
+    _P('M4 9h3.5a2 2 0 1 1 4 0H15v3.5a2 2 0 1 1 0 4V20H4z'),
+    _P('M15 9V4h5v5z'),
+  ]),
+  plug([
+    _P('M9 3v5'),
+    _P('M15 3v5'),
+    _P('M6.5 8h11v3.5a5.5 5.5 0 0 1-11 0z'),
+    _P('M12 17v4'),
+  ]),
+  phone([_R(7, 2.5, 10, 19, 2), _P('M11 18.5h2')]),
+  phoneDownload([
+    _R(7, 2.5, 10, 19, 2),
+    _P('M12 7v6'),
+    _P('m9.5 10.5 2.5 2.5 2.5-2.5'),
+    _P('M10 17.5h4'),
+  ]),
+
+  /// Not in the web set, which has no icon for these two entries of More: the
   /// same 24 px grid and 2 px stroke, in the same simple shapes.
-  contractors([_C(12, 8, 3.5), _P('M5 20l2.5-5h9L19 20Z')]),
   templates([_R(5, 4, 14, 17, 2), _P('M9 9h6'), _P('M9 13h6'), _P('M9 17h4')]),
   reminders([_P('M6 17.5V11l2.5-5h7L18 11v6.5Z'), _P('M10 21h4')]),
-
-  /// Not in the web set: a problem reported (More, Reports).
-  reports([_P('M12 4L21 20H3Z'), _P('M12 10v4'), _C(12, 17, 0.6)]),
 
   /// Not in the web set, whose list of files is of names alone: a file
   /// attached to a task that is not a photo (lot 4d), in the same stroke.
@@ -104,8 +143,8 @@ sealed class _Shape {
   const _Shape();
 }
 
-/// A path of the web icon: M, L, H, V, C, A (circular, unrotated) and Z, absolute or
-/// relative.
+/// A path of the web icon: M, L, H, V, C, S, A (circular, unrotated) and Z,
+/// absolute or relative.
 class _P extends _Shape {
   const _P(this.d);
 
@@ -113,17 +152,21 @@ class _P extends _Shape {
 
   Path toPath() {
     final path = Path();
-    final tokens = RegExp(r'[MmLlHhVvCcAaZz]|-?\d*\.?\d+')
+    final tokens = RegExp(r'[MmLlHhVvCcSsAaZz]|-?\d*\.?\d+')
         .allMatches(d)
         .map((m) => m.group(0)!)
         .toList();
     var x = 0.0, y = 0.0, startX = 0.0, startY = 0.0;
+    // The second control point of the curve just drawn, which S reflects.
+    Offset? control;
     var command = 'M';
     var i = 0;
     double next() => double.parse(tokens[i++]);
     while (i < tokens.length) {
       if (RegExp(r'[A-Za-z]').hasMatch(tokens[i])) command = tokens[i++];
       final relative = command == command.toLowerCase();
+      final previous = control;
+      control = null;
       switch (command.toUpperCase()) {
         case 'M':
           final nx = next(), ny = next();
@@ -154,6 +197,19 @@ class _P extends _Shape {
           path.cubicTo(ox + x1, oy + y1, ox + x2, oy + y2, ox + nx, oy + ny);
           x = ox + nx;
           y = oy + ny;
+          control = Offset(ox + x2, oy + y2);
+        case 'S':
+          // Its first control point is the reflection of the second one of
+          // the curve before, or the current point after another command.
+          final x2 = next(), y2 = next(), nx = next(), ny = next();
+          final ox = relative ? x : 0.0, oy = relative ? y : 0.0;
+          final first = previous == null
+              ? Offset(x, y)
+              : Offset(2 * x - previous.dx, 2 * y - previous.dy);
+          path.cubicTo(first.dx, first.dy, ox + x2, oy + y2, ox + nx, oy + ny);
+          x = ox + nx;
+          y = oy + ny;
+          control = Offset(ox + x2, oy + y2);
         case 'A':
           // rx ry rotation large-arc sweep x y; the arcs of the icons are
           // circles, so the rotation is 0 and rx equals ry.

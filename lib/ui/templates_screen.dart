@@ -93,6 +93,18 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
     }
   }
 
+  /// The public source of a template, in the browser of the phone.
+  Future<void> _openSource(String address) async {
+    final l10n = AppLocalizations.of(context);
+    final state = AppScope.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    if (!await state.openUrl(Uri.parse(address))) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.aboutBetaCannotOpen)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -126,17 +138,30 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
                               template.title.of(language),
                               style: HcText.rowTitle,
                             ),
-                            subtitle: Text(
-                              [
-                                everyLabel(
-                                  l10n,
-                                  template.interval,
-                                  template.unit,
+                            // The line of the web: the interval, the rule of
+                            // a country, and the link to the source.
+                            subtitle: Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                Text(
+                                  [
+                                    everyLabel(
+                                      l10n,
+                                      template.interval,
+                                      template.unit,
+                                    ),
+                                    if (template.region.isNotEmpty)
+                                      l10n.templateRegion(template.region),
+                                    '',
+                                  ].join(' · '),
+                                  style: HcText.rowText,
                                 ),
-                                if (template.region.isNotEmpty)
-                                  l10n.templateRegion(template.region),
-                              ].join(' · '),
-                              style: HcText.rowText,
+                                HcLink(
+                                  l10n.templateSourceLink,
+                                  key: Key('template-source-${template.id}'),
+                                  onTap: () => _openSource(template.sourceUrl),
+                                ),
+                              ],
                             ),
                           ),
                       ],

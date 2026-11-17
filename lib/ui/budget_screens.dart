@@ -39,7 +39,14 @@ class _BudgetScreenState extends State<BudgetScreen> {
     final state = AppScope.of(context);
     final home = state.current;
     return HcScaffold(
-      title: l10n.navBudget,
+      // The `h1` of each tab of the web: Budget, Budget by room, by project,
+      // of the upkeep.
+      title: switch (_tab) {
+        1 => l10n.budgetByRoom,
+        2 => l10n.budgetByProject,
+        3 => l10n.budgetOfUpkeep,
+        _ => l10n.navBudget,
+      },
       brand: true,
       belowTitle: const HomeSelector(),
       actions: const [HelpButton(page: HelpPages.budget)],
@@ -103,8 +110,12 @@ class _BudgetScreenState extends State<BudgetScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(l10n.envelopeYear(year), style: HcText.cardTitle),
-            const SizedBox(height: HcSpace.s2),
+            // The `h2` of the card, in small capitals as every `h2` of the
+            // web, with its margins.
+            HcSectionHeading(
+              l10n.envelopeYear(year),
+              key: const Key('envelope-heading'),
+            ),
             if (e.envelope == null)
               Text(l10n.envelopeNoneSummary, style: HcText.bodySmall),
             HcValueList(
@@ -132,8 +143,8 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   label: l10n.spentAgainst,
                 ),
               ),
-            const SizedBox(height: HcSpace.s2),
-            _Details(
+            // A folded section, as the forms (`details.form-section`).
+            HcFoldSection(
               key: const Key('envelope-details'),
               title: l10n.detailsOfYear,
               children: [
@@ -166,14 +177,17 @@ class _BudgetScreenState extends State<BudgetScreen> {
               ],
             ),
             if (writable)
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: OutlinedButton(
-                  key: const Key('budget-envelope-set'),
-                  onPressed: () =>
-                      Navigator.of(context)
-                          .push(hcRoute(EnvelopeFormScreen(homeId: homeId))),
-                  child: Text(l10n.envelopeSet),
+              Padding(
+                padding: const EdgeInsets.only(top: HcSpace.s3),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: OutlinedButton(
+                    key: const Key('budget-envelope-set'),
+                    onPressed: () =>
+                        Navigator.of(context)
+                            .push(hcRoute(EnvelopeFormScreen(homeId: homeId))),
+                    child: Text(l10n.envelopeSet),
+                  ),
                 ),
               ),
           ],
@@ -249,6 +263,8 @@ class _BudgetScreenState extends State<BudgetScreen> {
     final report = budget.byRoom(ledger, year);
     return [
       choice,
+      // What the tab counts, under the year, as the web.
+      smallNote(l10n.roomsExplained(year)),
       if (report.lines.isEmpty)
         HcEmpty(l10n.roomsBudgetEmpty)
       else
@@ -269,7 +285,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
             ),
           ],
         ),
-      smallNote(l10n.roomsExplained(year)),
     ];
   }
 
@@ -279,6 +294,8 @@ class _BudgetScreenState extends State<BudgetScreen> {
     final report = budget.byProject(ledger);
     final home = AppScope.of(context).current!;
     return [
+      smallNote(l10n.projectsCountedExplained),
+      smallNote(l10n.projectsPlannedExplained),
       if (report.lines.isEmpty)
         HcEmpty(l10n.projectsEmptyShort)
       else
@@ -316,8 +333,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
             ),
           ],
         ),
-      smallNote(l10n.projectsCountedExplained),
-      smallNote(l10n.projectsPlannedExplained),
     ];
   }
 
@@ -333,6 +348,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     final report = budget.byTask(ledger, year);
     return [
       choice,
+      smallNote(l10n.upkeepExplained(year)),
       if (report.lines.isEmpty)
         HcEmpty(l10n.upkeepEmpty)
       else
@@ -395,47 +411,4 @@ class _BudgetScreenState extends State<BudgetScreen> {
       smallNote(l10n.costAYearExplained),
     ];
   }
-}
-
-/// A part that unfolds, as the web's `<details>`: its title is a button
-/// that says whether it is open.
-class _Details extends StatefulWidget {
-  const _Details({super.key, required this.title, required this.children});
-
-  final String title;
-  final List<Widget> children;
-
-  @override
-  State<_Details> createState() => _DetailsState();
-}
-
-class _DetailsState extends State<_Details> {
-  bool _open = false;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Semantics(
-        button: true,
-        expanded: _open,
-        child: InkWell(
-          onTap: () => setState(() => _open = !_open),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: HcLayout.touchTargetLg,
-            ),
-            child: Row(
-              children: [
-                Icon(_open ? Icons.expand_less : Icons.expand_more),
-                const SizedBox(width: HcSpace.s2),
-                Expanded(child: Text(widget.title, style: HcText.body)),
-              ],
-            ),
-          ),
-        ),
-      ),
-      if (_open) ...widget.children,
-    ],
-  );
 }

@@ -164,11 +164,11 @@ abstract class AppLocalizations {
   /// **'Free software under the AGPL-3.0 licence.'**
   String get aboutLicence;
 
-  /// Where the source code is, followed by its web address (not a link: the app opens nothing by itself).
+  /// Link to the source code of the app on the About screen. Web catalogue (core): (same).
   ///
   /// In en, this message translates to:
-  /// **'Source code and security reports: {address}'**
-  String aboutSource(String address);
+  /// **'Source code and security reports on GitHub.'**
+  String get aboutSourceLink;
 
   /// How the app is made. Web catalogue: Développé avec un agent IA, sous revue humaine.
   ///
@@ -181,6 +181,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open source licences'**
   String get aboutLicences;
+
+  /// Heading of the links of the About screen. Web catalogue (core): Liens.
+  ///
+  /// In en, this message translates to:
+  /// **'Links'**
+  String get aboutLinks;
+
+  /// Link of the About screen. Web catalogue (core): Site web.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get linkWebsite;
+
+  /// Link of the About screen. Web catalogue (core): Documentation.
+  ///
+  /// In en, this message translates to:
+  /// **'Documentation'**
+  String get linkDocs;
+
+  /// Link of the About screen. Web catalogue (core): Code de l'application.
+  ///
+  /// In en, this message translates to:
+  /// **'Application code'**
+  String get linkAppCode;
+
+  /// Link of the About screen. Web catalogue (core): Module Home Assistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Assistant app'**
+  String get linkAddon;
+
+  /// Link of the About screen. Web catalogue (core): Intégration Home Assistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Assistant integration'**
+  String get linkIntegration;
+
+  /// Link of the About screen. Web catalogue (core): Application mobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile application'**
+  String get linkMobile;
+
+  /// The Android store on the About screen; the web writes it untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'Android'**
+  String get linkAndroid;
+
+  /// Pill of a link of the About screen without an address yet. Web catalogue (core): Bientôt.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get comingSoon;
 
   /// Row of the About screen that gives the address of the public iPhone beta, to invite someone.
   ///
@@ -1490,29 +1544,35 @@ abstract class AppLocalizations {
   /// **'rule of {region}'**
   String templateRegion(String region);
 
-  /// Interval of a template.
+  /// Interval of a template. Web catalogue (tasks): tous les jours, tous les %(count)s jours.
   ///
   /// In en, this message translates to:
   /// **'every {count, plural, one{day} other{{count} days}}'**
   String templateEveryDays(int count);
 
-  /// Interval of a template.
+  /// Interval of a template. Web catalogue (tasks): toutes les semaines, toutes les %(count)s semaines.
   ///
   /// In en, this message translates to:
   /// **'every {count, plural, one{week} other{{count} weeks}}'**
   String templateEveryWeeks(int count);
 
-  /// Interval of a template.
+  /// Interval of a template. Web catalogue (tasks): tous les mois, tous les %(count)s mois.
   ///
   /// In en, this message translates to:
   /// **'every {count, plural, one{month} other{{count} months}}'**
   String templateEveryMonths(int count);
 
-  /// Interval of a template.
+  /// Interval of a template. Web catalogue (tasks): tous les ans, tous les %(count)s ans.
   ///
   /// In en, this message translates to:
   /// **'every {count, plural, one{year} other{{count} years}}'**
   String templateEveryYears(int count);
+
+  /// Link to the source of the interval of a template. Web catalogue (tasks): source.
+  ///
+  /// In en, this message translates to:
+  /// **'source'**
+  String get templateSourceLink;
 
   /// Line of the notes of a task made from a template. Web catalogue: Matériel.
   ///
@@ -2906,6 +2966,24 @@ abstract class AppLocalizations {
   /// **'Upkeep'**
   String get budgetUpkeep;
 
+  /// Title of the tab Rooms of Budget. Web catalogue (budget): Budget par pièce.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget by room'**
+  String get budgetByRoom;
+
+  /// Title of the tab Projects of Budget. Web catalogue (budget): Budget par projet.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget by project'**
+  String get budgetByProject;
+
+  /// Title of the tab Upkeep of Budget. Web catalogue (budget): Budget de l'entretien.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget of the upkeep'**
+  String get budgetOfUpkeep;
+
   /// Web catalogue (projects, budget or reports): Enveloppe %(year)s.
   ///
   /// In en, this message translates to:
@@ -3044,11 +3122,17 @@ abstract class AppLocalizations {
   /// **'No room'**
   String get noRoom;
 
-  /// Note of the budget by room (web budget/rooms.html, shortened).
+  /// Note at the top of the tab Rooms of Budget. Web catalogue (budget): (same).
   ///
   /// In en, this message translates to:
-  /// **'Projects counted in {year} are shared evenly between their rooms; the upkeep of a task goes to its room.'**
+  /// **'Projects counted in {year}, shared evenly between their rooms, and the upkeep of {year}.'**
   String roomsExplained(int year);
+
+  /// Note at the top of the tab Upkeep of Budget. Web catalogue (budget): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'The tasks that are in no project, with the occurrences of {year}: those done, the one open, and those the repetition will still bring before the end of the year. An open task with no date counts in the current year. A task of a project counts in its project.'**
+  String upkeepExplained(int year);
 
   /// Web catalogue (projects, budget or reports): Aucun projet pour l'instant.
   ///

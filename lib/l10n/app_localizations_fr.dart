@@ -45,15 +45,41 @@ class AppLocalizationsFr extends AppLocalizations {
   String get aboutLicence => 'Logiciel libre sous licence AGPL-3.0.';
 
   @override
-  String aboutSource(String address) {
-    return 'Code source et signalement de sécurité : $address';
-  }
+  String get aboutSourceLink =>
+      'Code source et signalement de sécurité sur GitHub.';
 
   @override
   String get aboutAi => 'Développé avec un agent IA, sous revue humaine.';
 
   @override
   String get aboutLicences => 'Licences open source';
+
+  @override
+  String get aboutLinks => 'Liens';
+
+  @override
+  String get linkWebsite => 'Site web';
+
+  @override
+  String get linkDocs => 'Documentation';
+
+  @override
+  String get linkAppCode => 'Code de l\'application';
+
+  @override
+  String get linkAddon => 'Module Home Assistant';
+
+  @override
+  String get linkIntegration => 'Intégration Home Assistant';
+
+  @override
+  String get linkMobile => 'Application mobile';
+
+  @override
+  String get linkAndroid => 'Android';
+
+  @override
+  String get comingSoon => 'Bientôt';
 
   @override
   String get aboutBeta => 'Bêta iPhone (TestFlight)';
@@ -774,10 +800,10 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count jours',
-      one: 'jours',
+      other: 'tous les $count jours',
+      one: 'tous les jours',
     );
-    return 'tous les $_temp0';
+    return '$_temp0';
   }
 
   @override
@@ -786,7 +812,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: 'toutes les $count semaines',
-      one: 'chaque semaine',
+      one: 'toutes les semaines',
     );
     return '$_temp0';
   }
@@ -797,7 +823,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: 'tous les $count mois',
-      one: 'chaque mois',
+      one: 'tous les mois',
     );
     return '$_temp0';
   }
@@ -808,10 +834,13 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: 'tous les $count ans',
-      one: 'chaque année',
+      one: 'tous les ans',
     );
     return '$_temp0';
   }
+
+  @override
+  String get templateSourceLink => 'source';
 
   @override
   String templateMaterial(String list) {
@@ -1669,6 +1698,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get budgetUpkeep => 'Entretien';
 
   @override
+  String get budgetByRoom => 'Budget par pièce';
+
+  @override
+  String get budgetByProject => 'Budget par projet';
+
+  @override
+  String get budgetOfUpkeep => 'Budget de l\'entretien';
+
+  @override
   String envelopeYear(int year) {
     return 'Enveloppe $year';
   }
@@ -1768,7 +1806,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String roomsExplained(int year) {
-    return 'Les projets comptés en $year sont répartis à parts égales entre leurs pièces ; l\'entretien d\'une tâche va à sa pièce.';
+    return 'Projets comptés en $year, répartis également entre leurs pièces, et entretien de $year.';
+  }
+
+  @override
+  String upkeepExplained(int year) {
+    return 'Les tâches qui ne sont dans aucun projet, avec les occurrences de $year : celles qui sont faites, celle qui est ouverte et celles que la répétition amènera encore avant la fin de l\'année. Une tâche ouverte sans date compte dans l\'année en cours. Une tâche de projet compte dans son projet.';
   }
 
   @override

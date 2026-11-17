@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/design/icons.dart';
 import 'package:housecairn_mobile/design/widgets.dart';
-import 'package:housecairn_mobile/version.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -84,9 +83,10 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.text('Source code and security reports: $sourceAddress'),
+        find.text('Source code and security reports on GitHub.'),
         findsOneWidget,
       );
+      await tester.ensureVisible(find.text('Open source licences'));
       await tester.tap(find.text('Open source licences'));
       await tester.pumpAndSettle();
       expect(find.byType(LicensePage), findsOneWidget);

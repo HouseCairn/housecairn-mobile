@@ -243,6 +243,9 @@ abstract final class HcComponent {
   static const headingTracking = -0.01;
   static const navLabelGap = 3.0;
 
+  /// `.about-logo`: the cairn of About, 4.5rem.
+  static const aboutLogo = 72.0;
+
   static const Map<String, double> byName = {
     'border-width': borderWidth,
     'focus-ring': focusRing,
