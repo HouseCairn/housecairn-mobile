@@ -59,7 +59,6 @@ void main() {
     ('projects', (tester, l) => openSection(tester, l.projects)),
     ('templates', (tester, l) => openScreen(tester, const TemplatesScreen())),
     ('more', (tester, l) => openSection(tester, l.more)),
-    ('today', (tester, l) async {}),
     (
       'about',
       (tester, l) async {
@@ -106,6 +105,27 @@ void main() {
             );
           });
         }
+
+        // One home with one open report and no task: the line of the
+        // reports alone, with no date that moves with the day of the run.
+        testWidgets('today, $name', (tester) async {
+          phone();
+          addTearDown(() => debugDefaultTargetPlatformOverride = null);
+          await onPhone(tester, textScale: scale, width: width, height: 844);
+          await pumpApp(
+            tester,
+            locale: locale,
+            seed: (r) async {
+              final home = await r.createHome(name: 'Main home');
+              await r.createReport(home, title: 'The tap drips');
+            },
+          );
+          expect(tester.takeException(), isNull);
+          await expectLater(
+            find.byType(MaterialApp),
+            matchesGoldenFile('goldens/d12_today_$name.png'),
+          );
+        });
 
         testWidgets('first start, $name', (tester) async {
           phone();
