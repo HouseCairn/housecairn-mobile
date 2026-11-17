@@ -394,13 +394,16 @@ void main() {
         matching: find.text('Family sync'),
       );
       expect(tester.widget<Text>(title).style!.color, HcColors.textMuted);
-      expect(
-        find.descendant(
-          of: family,
-          matching: find.byKey(const Key('way-indicator-off')),
-        ),
-        findsOneWidget,
+      final mark = find.descendant(
+        of: family,
+        matching: find.byKey(const Key('way-indicator-off')),
       );
+      expect(mark, findsOneWidget);
+      // The mark is muted as well: the muted fill and the plain border.
+      final decoration =
+          tester.widget<DecoratedBox>(mark).decoration as BoxDecoration;
+      expect(decoration.color, HcColors.surfaceMuted);
+      expect(decoration.border!.top.color, HcColors.border);
       // The way that can be chosen keeps the colour of the text.
       final alone = find.descendant(
         of: find.byKey(const Key('way-alone')),
