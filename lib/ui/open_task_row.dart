@@ -50,6 +50,16 @@ class OpenTaskRow extends StatelessWidget {
         today,
         postponed: entry.occurrence.status == 'postponed',
       ),
+      // After the date, a ghost pill when the task comes from a report with
+      // a photo (`tasks/_occurrence_row.html`).
+      extraPills: [
+        if (entry.hasReportPhoto)
+          HcPill(
+            l10n.reportPhotoPill,
+            key: Key('today-photo-${entry.occurrence.id}'),
+            tone: HcPillTone.ghost,
+          ),
+      ],
       overdue: due != null && due < today,
       doneLabel: l10n.actionDone,
       onDone: () => markDone(context, entry.occurrence.id, entry.task.title),

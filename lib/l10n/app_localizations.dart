@@ -3236,6 +3236,30 @@ abstract class AppLocalizations {
   /// **'Photo of the problem'**
   String get reportPhoto;
 
+  /// Heading of the reports a task was made from, on the page of a task. Web catalogue (tasks, task page): Problème signalé.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported problem'**
+  String get taskReportedProblem;
+
+  /// Line over the title of a report on the page of a task. The web adds the reporter, which the app does not hold. Web catalogue (tasks): Signalé le %(day)s par %(person)s.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported on {day}'**
+  String taskReportedOn(String day);
+
+  /// Spoken label of the photo of a report. Web catalogue (tasks and reports): Photo du problème : %(title)s.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo of the problem: {title}'**
+  String reportPhotoOf(String title);
+
+  /// Pill of a row of a list of tasks that were made from a report with a photo. Web catalogue (tasks, context reported problem): Photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get reportPhotoPill;
+
   /// Web catalogue (projects, budget or reports): En faire une tâche.
   ///
   /// In en, this message translates to:

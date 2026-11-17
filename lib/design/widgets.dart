@@ -205,6 +205,7 @@ class HcTaskRow extends StatelessWidget {
     required this.title,
     this.text,
     this.pill,
+    this.extraPills = const [],
     this.overdue = false,
     required this.doneLabel,
     this.onDone,
@@ -215,6 +216,9 @@ class HcTaskRow extends StatelessWidget {
   final String title;
   final String? text;
   final Widget? pill;
+
+  /// Pills after [pill], on the same line when they fit.
+  final List<Widget> extraPills;
   final bool overdue;
   final String doneLabel;
   final VoidCallback? onDone;
@@ -242,7 +246,11 @@ class HcTaskRow extends StatelessWidget {
                   HcSpace.s2,
                   HcSpace.s3,
                 ),
-                child: _RowBody(title: title, text: text, pills: [?pill]),
+                child: _RowBody(
+                  title: title,
+                  text: text,
+                  pills: [?pill, ...extraPills],
+                ),
               ),
             ),
           ),

@@ -1898,6 +1898,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reportPhoto => 'Photo du problème';
 
   @override
+  String get taskReportedProblem => 'Problème signalé';
+
+  @override
+  String taskReportedOn(String day) {
+    return 'Signalé le $day';
+  }
+
+  @override
+  String reportPhotoOf(String title) {
+    return 'Photo du problème : $title';
+  }
+
+  @override
+  String get reportPhotoPill => 'Photo';
+
+  @override
   String get makeItATask => 'En faire une tâche';
 
   @override

@@ -15,7 +15,7 @@ import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'budget_parts.dart';
 import 'parts.dart';
-import 'photos.dart' show MissingPhotoTile;
+import 'photos.dart' show ReportPhoto;
 import 'messages.dart';
 import 'state.dart';
 import 'item_screens.dart';
@@ -213,10 +213,8 @@ class ReportScreen extends StatelessWidget {
         final report = data.report;
         final task = data.task;
         final where = data.where;
-        final repository = AppScope.of(context).repository;
         final writable = data.home.archivedAt == null;
         final closed = reportClosedStatuses.contains(report.status);
-        final photo = repository.reportPhoto(report);
         void open(Widget screen) => Navigator.of(context).push(hcRoute(screen));
         Future<void> change(Future<void> Function(Repository) action) async {
           await runChange(context, action);
@@ -290,19 +288,7 @@ class ReportScreen extends StatelessWidget {
                       // Until its file has come from the server (lot 4d,
                       // docs/adr/0013), the photo is the plain tile of a
                       // photo, said as such.
-                      photo.existsSync()
-                          ? Semantics(
-                              image: true,
-                              label: l10n.reportPhoto,
-                              child: Image.file(
-                                photo,
-                                key: const Key('report-photo'),
-                              ),
-                            )
-                          : MissingPhotoTile(
-                              key: const Key('report-photo-missing'),
-                              label: l10n.reportPhoto,
-                            ),
+                      ReportPhoto(report: report),
                     ],
                     // The action row: one primary action at most, the others
                     // secondary, as wide as their label, on lines that wrap.

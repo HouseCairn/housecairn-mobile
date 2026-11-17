@@ -204,12 +204,16 @@ extension TaskListsRepository on Repository {
       OrderingTerm.asc(db.occurrences.createdAt),
       OrderingTerm.asc(db.occurrences.id),
     ];
+    // The page of rows is read first, then the tasks that come from a
+    // report with a photo, in one query for the page.
+    var photos = <String>{};
     TodayEntry entry(TypedResult row) => TodayEntry(
       occurrence: row.readTable(db.occurrences),
       task: row.readTable(db.tasks),
       home: home,
       roomName: rooms[row.readTable(db.tasks).roomId],
       itemName: items[row.readTable(db.tasks).itemId],
+      hasReportPhoto: photos.contains(row.readTable(db.tasks).id),
     );
 
     if (needle.isNotEmpty) {
@@ -233,12 +237,15 @@ extension TaskListsRepository on Repository {
           ? 1
           : (found.length + taskPageSize - 1) ~/ taskPageSize;
       final shownPage = page.clamp(1, pages);
+      final shown = found
+          .skip((shownPage - 1) * taskPageSize)
+          .take(taskPageSize)
+          .toList();
+      photos = await tasksWithReportPhoto([
+        for (final row in shown) row.readTable(db.tasks).id,
+      ]);
       return TaskListPage(
-        rows: [
-          for (final row
-              in found.skip((shownPage - 1) * taskPageSize).take(taskPageSize))
-            entry(row),
-        ],
+        rows: [for (final row in shown) entry(row)],
         total: found.length,
         hidden: hidden,
         page: shownPage,
@@ -254,6 +261,9 @@ extension TaskListsRepository on Repository {
               ..orderBy(order)
               ..limit(taskPageSize, offset: (shownPage - 1) * taskPageSize))
             .get();
+    photos = await tasksWithReportPhoto([
+      for (final row in rows) row.readTable(db.tasks).id,
+    ]);
     return TaskListPage(
       rows: [for (final row in rows) entry(row)],
       total: total,
@@ -302,6 +312,9 @@ extension TaskListsRepository on Repository {
             .get();
     final rooms = await _roomNames(homes.keys);
     final items = await _itemNames(homes.keys);
+    final photos = await tasksWithReportPhoto([
+      for (final row in rows) row.readTable(db.tasks).id,
+    ]);
     return [
       for (final row in rows)
         if (homes[row.readTable(db.tasks).homeId] != null &&
@@ -315,6 +328,7 @@ extension TaskListsRepository on Repository {
             home: homes[row.readTable(db.tasks).homeId]!,
             roomName: rooms[row.readTable(db.tasks).roomId],
             itemName: items[row.readTable(db.tasks).itemId],
+            hasReportPhoto: photos.contains(row.readTable(db.tasks).id),
           ),
     ].take(seasonRowLimit).toList();
   }

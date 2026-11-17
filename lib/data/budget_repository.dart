@@ -1228,6 +1228,57 @@ extension BudgetRepository on Repository {
     return (await query.getSingle()).read(count) ?? 0;
   }
 
+  /// The reports a task was made from, the latest first
+  /// (`reports_of_task` of `reports/services.py`): the ones not deleted, of
+  /// the home of the task, whatever their status. The app has no read-only
+  /// role, so every report of the home is visible.
+  Future<List<ReportRow>> reportsOfTask(String taskId) async {
+    final owner = await task(taskId);
+    if (owner == null) return [];
+    return (db.select(db.reports)
+          ..where(
+            (r) =>
+                r.taskId.equalsValue(taskId) &
+                r.homeId.equalsValue(owner.homeId) &
+                r.deletedAt.isNull(),
+          )
+          ..orderBy([
+            (r) => OrderingTerm.desc(r.createdAt),
+            (r) => OrderingTerm.desc(r.id),
+          ]))
+        .get();
+  }
+
+  /// The tasks among [taskIds] that a report with a photo was made from
+  /// (`mark_photo_reports` of `reports/services.py`), in one query for a
+  /// whole page of a list: the same reports as [reportsOfTask] (not deleted,
+  /// whatever their status).
+  Future<Set<String>> tasksWithReportPhoto(Iterable<String> taskIds) async {
+    final ids = taskIds.toSet().toList();
+    if (ids.isEmpty) return {};
+    final rows =
+        await (db.select(db.reports)..where(
+              (r) =>
+                  r.taskId.isInValues(ids) &
+                  r.deletedAt.isNull() &
+                  r.photo.isNotNull() &
+                  r.photo.equals('').not(),
+            ))
+            .get();
+    // A report counts for the task of its own home only (the web reads the
+    // reports of the home).
+    final homes = {
+      for (final t in await (db.select(
+        db.tasks,
+      )..where((t) => t.id.isInValues(ids))).get())
+        t.id: t.homeId,
+    };
+    return {
+      for (final r in rows)
+        if (homes[r.taskId] == r.homeId) r.taskId!,
+    };
+  }
+
   /// The photo of a report, named by its id.
   File reportPhoto(ReportRow row) =>
       File('${homeDirectory(row.homeId).path}/${row.id}.jpg');

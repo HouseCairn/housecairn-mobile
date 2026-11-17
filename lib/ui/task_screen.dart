@@ -25,6 +25,7 @@ import 'occurrence_actions.dart';
 import 'occurrence_screen.dart';
 import 'parts.dart';
 import 'photos.dart';
+import 'report_screens.dart' show ReportScreen;
 import 'rooms.dart';
 import 'state.dart';
 import 'stock_screens.dart';
@@ -153,6 +154,7 @@ class _TaskPageState extends State<TaskPage> {
   OccurrenceRow? _current;
   OccurrenceRow? _lastClosed;
   List<OccurrenceRow> _history = const [];
+  List<ReportRow> _reports = const [];
   budget.TaskBudget? _cost;
   bool _loaded = false;
   int _revision = -1;
@@ -190,6 +192,7 @@ class _TaskPageState extends State<TaskPage> {
     final open = await repository.openOccurrencesOf(widget.taskId);
     final all = await repository.occurrencesOf(widget.taskId);
     final ledger = await repository.ledger(widget.homeId);
+    final reports = await repository.reportsOfTask(widget.taskId);
     if (!mounted) return;
     final closed = all.where((o) => closedStatuses.contains(o.status)).toList()
       ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
@@ -202,6 +205,7 @@ class _TaskPageState extends State<TaskPage> {
       _current = open.isEmpty ? null : open.first;
       _lastClosed = closed.isEmpty ? null : closed.first;
       _history = all.where((o) => closedStatuses.contains(o.status)).toList();
+      _reports = reports;
       // A task of a project has its money in the lines of the project.
       _cost = ledger.tasks
           .where((budget.TaskBudget t) => t.task.id == task.id)
@@ -337,6 +341,62 @@ class _TaskPageState extends State<TaskPage> {
                 ),
               ],
             ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// The report or reports the task was made from, under the head
+  /// (`tasks/task_detail.html`): when it was reported, its title, which opens
+  /// it, and its photo, which opens full width. The web adds who reported
+  /// it; the app does not hold that.
+  Widget? _reported(AppLocalizations l10n) {
+    if (_reports.isEmpty) return null;
+    return _section(
+      l10n.taskReportedProblem,
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final report in _reports) ...[
+            HcCard(
+              key: Key('task-report-${report.id}'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.taskReportedOn(
+                      formatDay(
+                        context,
+                        Day.of(
+                          DateTime.fromMillisecondsSinceEpoch(report.createdAt)
+                              .toLocal(),
+                        ),
+                      ),
+                    ),
+                    style: HcText.bodySmall,
+                  ),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: HcLink(
+                      report.title,
+                      key: Key('task-report-link-${report.id}'),
+                      onTap: () => _open(
+                        ReportScreen(
+                          homeId: widget.homeId,
+                          reportId: report.id,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (report.photo != null && report.photo!.isNotEmpty) ...[
+                    const SizedBox(height: HcSpace.s2),
+                    ReportPhoto(report: report, keySuffix: '-${report.id}'),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: HcSpace.s2),
           ],
         ],
       ),
@@ -588,6 +648,7 @@ class _TaskPageState extends State<TaskPage> {
           : HcScreenList(
               children: [
                 _head(l10n, writable),
+                ?_reported(l10n),
                 _when(l10n),
                 if (task.procedure.trim().isNotEmpty)
                   _section(

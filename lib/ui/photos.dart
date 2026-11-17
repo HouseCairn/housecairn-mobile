@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../core/photo_source.dart';
 import '../data/database.dart';
+import '../data/repository.dart';
 import '../design/icons.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
@@ -186,6 +187,105 @@ class MissingPhotoTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The photo of a report, as the pages of a report and of a task show it: the
+/// picture, which opens full width, or the tile of a photo not on this phone
+/// yet (lot 4c), which opens on the same message. [keySuffix] tells apart the
+/// photos of several reports on one page.
+class ReportPhoto extends StatelessWidget {
+  const ReportPhoto({super.key, required this.report, this.keySuffix = ''});
+
+  final ReportRow report;
+  final String keySuffix;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final file = AppScope.of(context).repository.reportPhoto(report);
+    final label = l10n.reportPhotoOf(report.title);
+    final here = file.existsSync();
+    return InkWell(
+      key: Key('report-photo-open$keySuffix'),
+      borderRadius: BorderRadius.circular(HcRadius.sm),
+      onTap: () => Navigator.of(context).push(
+        hcRoute(ReportPhotoScreen(homeId: report.homeId, reportId: report.id)),
+      ),
+      child: here
+          ? Semantics(
+              button: true,
+              image: true,
+              label: label,
+              excludeSemantics: true,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(HcRadius.sm),
+                child: Image.file(
+                  file,
+                  key: Key('report-photo$keySuffix'),
+                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                ),
+              ),
+            )
+          : Semantics(
+              button: true,
+              label: '$label, ${l10n.photoNotHere}',
+              excludeSemantics: true,
+              child: MissingPhotoTile(
+                key: Key('report-photo-missing$keySuffix'),
+                label: label,
+              ),
+            ),
+    );
+  }
+}
+
+/// The photo of a report, full width, or the message that its file is not on
+/// this phone yet.
+class ReportPhotoScreen extends StatelessWidget {
+  const ReportPhotoScreen({
+    super.key,
+    required this.homeId,
+    required this.reportId,
+  });
+
+  final String homeId;
+  final String reportId;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return DataView<ReportRow?>(
+      load: (r) => r.report(reportId),
+      builder: (context, report) {
+        if (report == null) return HcScaffold();
+        final file = AppScope.of(context).repository.reportPhoto(report);
+        return HcScaffold(
+          title: l10n.reportPhoto,
+          body: HcScreenList(
+            children: [
+              const SizedBox(height: HcSpace.s2),
+              if (file.existsSync())
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(HcRadius.lg),
+                  child: Image.file(
+                    file,
+                    key: const Key('report-photo-full'),
+                    fit: BoxFit.contain,
+                    semanticLabel: l10n.reportPhotoOf(report.title),
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                  ),
+                )
+              else
+                HcEmpty(
+                  l10n.photoNotHere,
+                  key: const Key('report-photo-full-missing'),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
