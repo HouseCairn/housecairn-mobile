@@ -179,6 +179,20 @@ void main() {
       expect(find.byKey(const Key('report-photo-missing')), findsNothing);
     });
 
+    testWidgets('in an archived home the section still shows', (tester) async {
+      final d = await openTask(
+        tester,
+        (d) => d.withPhoto,
+        alter: (r, d) async {
+          await r.createHome(name: 'Other');
+          await r.archiveHome(d.home);
+        },
+      );
+      expect(find.text(en.taskReportedProblem.toUpperCase()), findsOne);
+      expect(find.byKey(Key('task-report-${d.reportWithPhoto}')), findsOne);
+      expect(find.byType(ReportPhoto), findsOne);
+    });
+
     testWidgets('a deleted report does not show, nor the heading', (
       tester,
     ) async {
