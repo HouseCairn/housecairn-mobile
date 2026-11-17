@@ -47,6 +47,7 @@ Future<AppState> pumpApp(
   DocumentSource? documentSource,
   Notifier? notifier,
   UrlOpener? openUrl,
+  FileOpener? openFile,
   bool firstStart = false,
 }) async {
   final repository = await openRepository();
@@ -64,6 +65,8 @@ Future<AppState> pumpApp(
     loadTemplates: () async =>
         parseTemplates(File('assets/task_templates.yaml').readAsStringSync()),
     openUrl: openUrl ?? (_) async => true,
+    openFile:
+        openFile ?? (_, {required name, required type, origin}) async => true,
   );
   await tester.pumpWidget(HousecairnApp(state: state, locale: Locale(locale)));
   await tester.pumpAndSettle();

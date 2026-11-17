@@ -9,6 +9,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:housecairn_mobile/domain/file_reference.dart';
 import 'package:housecairn_mobile/domain/photos.dart';
 import 'package:image/image.dart' as img;
 
@@ -118,16 +119,24 @@ void main() {
     });
   });
 
-  group('the file reference of protocol section 2.9', () {
-    test('size, type and dimensions; no blob and no key before the upload', () {
+  group('the file reference of protocol section 2.10', () {
+    test('an id of its own, the digest, size, type and dimensions', () {
       final stored = processPhoto(jpegWithGps(orientation: 1));
-      final reference = jsonDecode(stored.reference) as Map<String, dynamic>;
-      expect(reference, {
-        'size': stored.image.length,
-        'type': 'image/jpeg',
-        'width': 64,
-        'height': 32,
-      });
+      final reference =
+          jsonDecode(stored.fileReference().encode()) as Map<String, dynamic>;
+      expect(reference['file'], isA<String>());
+      expect(reference['sha256'], sha256Hex(stored.image));
+      expect(
+        reference
+          ..remove('file')
+          ..remove('sha256'),
+        {
+          'size': stored.image.length,
+          'type': 'image/jpeg',
+          'width': 64,
+          'height': 32,
+        },
+      );
     });
   });
 

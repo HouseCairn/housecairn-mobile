@@ -1278,7 +1278,9 @@ extension BudgetRepository on Repository {
             'place': Repository._text(place, 250),
             'task_id': null,
             'closed_at': null,
-            'photo': photo?.reference,
+            // The reference of a server (an id of its own and the digest),
+            // so that the photo goes to the server with the report (lot 4d).
+            'photo': photo?.fileReference().encode(),
             'deleted_at': null,
           },
           homeId: homeId,

@@ -930,5 +930,21 @@
   "removeMaterialLine": "Retirer cette ligne",
   "materialsLimit": "Une tâche liste {max} articles au plus.",
   "reportPhotoHelpSize": "La photo est facultative : une image JPEG, PNG ou WebP, {max} au plus. Sa localisation et ses autres métadonnées sont supprimées.",
-  "sizeMegabytes": "{count} Mo"
+  "sizeMegabytes": "{count} Mo",
+  "attachmentsHeading": "Photos et fichiers",
+  "addAttachments": "Ajouter des photos ou des fichiers",
+  "attachmentsEmpty": "Aucun fichier pour l'instant.",
+  "attachmentPickFile": "Choisir un fichier (PDF ou photo)",
+  "attachmentPhotoLabel": "Photo : {name}",
+  "attachmentDelete": "Supprimer",
+  "attachmentDeleteBody": "{name} disparaît de la tâche.",
+  "attachmentDeleted": "Fichier supprimé.",
+  "errTooManyAttachments": "30 pièces jointes au plus pour une tâche.",
+  "fileNotHere": "Fichier absent de ce téléphone",
+  "fileOpen": "Ouvrir",
+  "fileOpenFailed": "Aucune app de ce téléphone n'ouvre ce fichier.",
+  "fileSizeBytes": "{count} octets",
+  "fileSizeKb": "{count} Ko",
+  "fileSizeMb": "{count} Mo",
+  "articleLabelPhoto": "Étiquette de {name}"
 }

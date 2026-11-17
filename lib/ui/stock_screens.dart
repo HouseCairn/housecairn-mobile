@@ -19,6 +19,7 @@ import 'autosave.dart';
 import 'item_screens.dart';
 import 'messages.dart';
 import 'parts.dart';
+import 'photos.dart' show MissingPhotoTile;
 import 'rooms.dart';
 import 'state.dart';
 import 'budget_parts.dart';
@@ -206,9 +207,44 @@ class _ArticleData {
   final List<TaskRow> tasks;
 }
 
-/// An article (`stock/article_detail.html`): its stock and facts, the form
-/// that records a movement, the items it fits, its rooms, the tasks that
-/// need it, its suppliers and its ledger.
+/// The photo of the label of an article, or its tile while the file is not
+/// on this phone.
+class _ArticleLabel extends StatelessWidget {
+  const _ArticleLabel({required this.article});
+
+  final ArticleRow article;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final file = AppScope.of(context).repository
+        .fileOfRow('articles', article.homeId, article.id);
+    final label = l10n.articleLabelPhoto(article.name);
+    if (!file.existsSync()) {
+      return MissingPhotoTile(
+        key: const Key('article-label-missing'),
+        label: label,
+      );
+    }
+    return Semantics(
+      image: true,
+      label: label,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(HcRadius.sm),
+        child: Image.file(
+          file,
+          key: const Key('article-label'),
+          excludeFromSemantics: true,
+          errorBuilder: (_, _, _) => const SizedBox.shrink(),
+        ),
+      ),
+    );
+  }
+}
+
+/// An article (`stock/article_detail.html`): its stock and facts, the photo
+/// of its label, the form that records a movement, the items it fits, its
+/// rooms, the tasks that need it, its suppliers and its ledger.
 class ArticleScreen extends StatelessWidget {
   const ArticleScreen({
     super.key,
@@ -307,6 +343,14 @@ class ArticleScreen extends StatelessWidget {
                     ),
                     if (a.notes.isNotEmpty)
                       HcFact(l10n.fieldNotes, factText(a.notes)),
+                    // The photo of its label, under the facts as on the web
+                    // (`stock/article_detail.html`); the tile of a photo
+                    // until its file has come from the server (lot 4d).
+                    if (a.label != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: HcSpace.s3),
+                        child: _ArticleLabel(article: a),
+                      ),
                     // The action row (`stock/article_detail.html`): Edit,
                     // then Report a problem (`labels/_tools.html`).
                     RecordActions(

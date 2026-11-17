@@ -26,6 +26,7 @@ part 'database.g.dart';
 /// `op_log`, `extra`, `pending`, `purged_homes` and `other_versions`. Schema 7
 /// (lot 4b) adds `server_seen`, the mark of the rows a server has seen.
 /// Schema 8 (lot 4c) adds `file_sync`, the files to send and to fetch.
+/// Schema 9 (lot 4d) adds `task_attachments`, the photos and files of tasks.
 /// Migrations are drift's
 /// guided migrations: `dart run drift_dev make-migrations` keeps one schema
 /// file per version in `drift_schemas/` and generates the step-by-step code
@@ -65,6 +66,7 @@ part 'database.g.dart';
     OtherVersions,
     ServerSeen,
     FileSync,
+    TaskAttachments,
   ],
 )
 class AppDatabase extends _$AppDatabase implements Db {
@@ -76,7 +78,7 @@ class AppDatabase extends _$AppDatabase implements Db {
       AppDatabase(driftDatabase(name: 'housecairn'));
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -221,6 +223,13 @@ class AppDatabase extends _$AppDatabase implements Db {
             // The files of a server (lot 4c), a new empty table: no row
             // moves.
             await m.createTable(schema.fileSync);
+          },
+          from8To9: (m, schema) async {
+            // The attachments of tasks (lot 4d), a new empty table and its
+            // index: no row moves. The operations of attachments a server
+            // sent before are in `pending`, applied at the next sync.
+            await m.createTable(schema.taskAttachments);
+            await m.create(schema.attachmentTask);
           },
         ),
       );

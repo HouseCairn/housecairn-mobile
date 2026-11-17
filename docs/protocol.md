@@ -267,6 +267,14 @@ sections 1 and 2.2 holds; the differences are these.
   A refusal is final for the file; `408`, `429` and `5xx` are tried again after a wait that
   doubles, six hours at most. The reference is an object on the wire and JSON text in the
   phone's column.
+  **The fields that hold a file** with a server (lots 4c and 4d,
+  [ADR 0013](adr/0013-more-files-with-a-server.md)): `rooms.photo` `image`,
+  `projects.projectfile` `file`, `tasks.attachment` `file` (an image or a document), and,
+  images only, `reports.report` `photo` and `stock.article` `label`. A reference the server
+  gives for a file it made is named by the id of its row, has no `sha256`, and may have no
+  `size` (the label of an article): the phone fetches it all the same. `content_type` and
+  `size_bytes` of a file of a project or of an attachment are not sent (the server reads them
+  in the reference).
 - **`archived_at`**: owners only (section 2.2).
 - **Tombstones are kept 400 days**, not forever as on the relay ([ADR 0003](adr/0003-sync-protocol.md)),
   and the changes of the feed as long. A cursor older than that gets 410 `cursor_expired`,

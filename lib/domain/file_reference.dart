@@ -86,11 +86,20 @@ class FileReference {
   }) {
     final file = json['file'];
     final digest = json['sha256'];
-    final type = json['type'] ?? json['content_type'];
-    final size = json['size'];
+    var type = json['type'] ?? json['content_type'];
+    var size = json['size'];
+    final named = file is String && file.isNotEmpty;
+    if (named) {
+      // A server's reference of a file it keeps by its stored name (the
+      // label of an article, the photo of a report) may have no size or no
+      // type (web `sync/reading.py`, `file_reference`): the file is still
+      // named, and fetched.
+      size = size is int ? size : 0;
+      type = type is String ? type : '';
+    }
     if (type is! String || size is! int) return null;
     return FileReference(
-      file: file is String && file.isNotEmpty ? file : legacyFile(rowId),
+      file: named ? file : legacyFile(rowId),
       sha256: digest is String && _digest.hasMatch(digest) ? digest : null,
       size: size,
       type: type,

@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../core/photo_source.dart';
 import '../data/database.dart';
 import '../design/icons.dart';
+import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/choices.dart';
@@ -147,6 +148,44 @@ class PhotoSection extends StatelessWidget {
                 ],
               ],
             ),
+    );
+  }
+}
+
+/// The tile of a photo whose file is not on this phone yet (it comes with
+/// the next sync, docs/adr/0012 and 0013): the plain tile of the grid of
+/// photos, as wide as the column, said with [label] and "Photo not on this
+/// phone".
+class MissingPhotoTile extends StatelessWidget {
+  const MissingPhotoTile({super.key, required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Semantics(
+      label: '$label, ${l10n.photoNotHere}',
+      excludeSemantics: true,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(HcRadius.sm),
+        child: ColoredBox(
+          color: HcColors.sageSoft,
+          child: AspectRatio(
+            aspectRatio: 4 / 3,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(HcSpace.s3),
+                child: Text(
+                  l10n.photoNotHere,
+                  textAlign: TextAlign.center,
+                  style: HcText.bodySmall,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -81,7 +81,7 @@ does nothing. On the phone the file stays 30 days after the deletion, so that it
 its entry, whichever phone deleted the row, in the homes of the server only: the files of a
 home that is not of the server are left as they are.
 
-**Not in this lot.** The label photo of a stock article and the photo of a report, whose
+**Not in this lot** (the first three came with [ADR 0013](0013-more-files-with-a-server.md)). The label photo of a stock article and the photo of a report, whose
 reference the server keeps in `extra` until a lot of its own; the files attached to a task, which
 the app does not show yet; a Wi-Fi only option; the space used on the server.
 

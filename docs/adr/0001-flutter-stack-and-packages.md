@@ -108,6 +108,13 @@ latest versions of its platform packages are younger than the seven days of the 
 (`flutter pub downgrade` of those five). `tool/check_licenses.dart` accepts all of them (MIT,
 BSD-3-Clause).
 
+**Lot 4d, changes to the table.** `share_plus` of the row "PDF picking, export file" is added
+now, to open a file attached to a task in another app of the phone through the share sheet
+([ADR 0013](0013-more-files-with-a-server.md)). It is pinned at 13.3.1 (2026-10-01) with
+`share_plus_platform_interface` 7.2.0 (2026-07-23), both older than the seven days of the rule
+below; its other dependencies were already in `pubspec.lock`. `tool/check_licenses.dart`
+accepts both (BSD-3-Clause).
+
 ## Consequences
 
 - Every dependency is pinned in `pubspec.lock`, updated by Renovate or Dependabot with the

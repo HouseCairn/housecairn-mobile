@@ -18663,7 +18663,7 @@ class FileSyncRow extends DataClass implements Insertable<FileSyncRow> {
   final String fileId;
   final String homeId;
 
-  /// The table of the row that holds the file: `photos` or `project_files`.
+  /// The table of the row that holds the file, a key of `fileHolders`.
   final String holder;
   final String rowId;
   final String direction;
@@ -18982,6 +18982,719 @@ class FileSyncCompanion extends UpdateCompanion<FileSyncRow> {
   }
 }
 
+class $TaskAttachmentsTable extends TaskAttachments
+    with TableInfo<$TaskAttachmentsTable, TaskAttachmentRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TaskAttachmentsTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> id =
+      GeneratedColumn<Uint8List>(
+        'id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($TaskAttachmentsTable.$converterid);
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($TaskAttachmentsTable.$converterhomeId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> taskId =
+      GeneratedColumn<Uint8List>(
+        'task_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($TaskAttachmentsTable.$convertertaskId);
+  @override
+  late final GeneratedColumnWithTypeConverter<String?, Uint8List> occurrenceId =
+      GeneratedColumn<Uint8List>(
+        'occurrence_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: false,
+      ).withConverter<String?>($TaskAttachmentsTable.$converteroccurrenceIdn);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fileMeta = const VerificationMeta('file');
+  @override
+  late final GeneratedColumn<String> file = GeneratedColumn<String>(
+    'file',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _contentTypeMeta = const VerificationMeta(
+    'contentType',
+  );
+  @override
+  late final GeneratedColumn<String> contentType = GeneratedColumn<String>(
+    'content_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _isImageMeta = const VerificationMeta(
+    'isImage',
+  );
+  @override
+  late final GeneratedColumn<bool> isImage = GeneratedColumn<bool>(
+    'is_image',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_image" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _sizeBytesMeta = const VerificationMeta(
+    'sizeBytes',
+  );
+  @override
+  late final GeneratedColumn<int> sizeBytes = GeneratedColumn<int>(
+    'size_bytes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    taskId,
+    occurrenceId,
+    name,
+    file,
+    contentType,
+    isImage,
+    sizeBytes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'task_attachments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TaskAttachmentRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('file')) {
+      context.handle(
+        _fileMeta,
+        file.isAcceptableOrUnknown(data['file']!, _fileMeta),
+      );
+    }
+    if (data.containsKey('content_type')) {
+      context.handle(
+        _contentTypeMeta,
+        contentType.isAcceptableOrUnknown(
+          data['content_type']!,
+          _contentTypeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_image')) {
+      context.handle(
+        _isImageMeta,
+        isImage.isAcceptableOrUnknown(data['is_image']!, _isImageMeta),
+      );
+    }
+    if (data.containsKey('size_bytes')) {
+      context.handle(
+        _sizeBytesMeta,
+        sizeBytes.isAcceptableOrUnknown(data['size_bytes']!, _sizeBytesMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TaskAttachmentRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TaskAttachmentRow(
+      id: $TaskAttachmentsTable.$converterid.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}id'],
+        )!,
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      homeId: $TaskAttachmentsTable.$converterhomeId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        )!,
+      ),
+      taskId: $TaskAttachmentsTable.$convertertaskId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}task_id'],
+        )!,
+      ),
+      occurrenceId: $TaskAttachmentsTable.$converteroccurrenceIdn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}occurrence_id'],
+        ),
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      file: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file'],
+      ),
+      contentType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content_type'],
+      )!,
+      isImage: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_image'],
+      )!,
+      sizeBytes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}size_bytes'],
+      )!,
+    );
+  }
+
+  @override
+  $TaskAttachmentsTable createAlias(String alias) {
+    return $TaskAttachmentsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterid = const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $convertertaskId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converteroccurrenceId =
+      const UuidConverter();
+  static TypeConverter<String?, Uint8List?> $converteroccurrenceIdn =
+      NullAwareTypeConverter.wrap($converteroccurrenceId);
+}
+
+class TaskAttachmentRow extends DataClass
+    implements Insertable<TaskAttachmentRow> {
+  final String id;
+  final int createdAt;
+  final int updatedAt;
+  final int? deletedAt;
+  final String homeId;
+  final String taskId;
+  final String? occurrenceId;
+  final String name;
+  final String? file;
+  final String contentType;
+  final bool isImage;
+  final int sizeBytes;
+  const TaskAttachmentRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.homeId,
+    required this.taskId,
+    this.occurrenceId,
+    required this.name,
+    this.file,
+    required this.contentType,
+    required this.isImage,
+    required this.sizeBytes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['id'] = Variable<Uint8List>(
+        $TaskAttachmentsTable.$converterid.toSql(id),
+      );
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    {
+      map['home_id'] = Variable<Uint8List>(
+        $TaskAttachmentsTable.$converterhomeId.toSql(homeId),
+      );
+    }
+    {
+      map['task_id'] = Variable<Uint8List>(
+        $TaskAttachmentsTable.$convertertaskId.toSql(taskId),
+      );
+    }
+    if (!nullToAbsent || occurrenceId != null) {
+      map['occurrence_id'] = Variable<Uint8List>(
+        $TaskAttachmentsTable.$converteroccurrenceIdn.toSql(occurrenceId),
+      );
+    }
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || file != null) {
+      map['file'] = Variable<String>(file);
+    }
+    map['content_type'] = Variable<String>(contentType);
+    map['is_image'] = Variable<bool>(isImage);
+    map['size_bytes'] = Variable<int>(sizeBytes);
+    return map;
+  }
+
+  TaskAttachmentsCompanion toCompanion(bool nullToAbsent) {
+    return TaskAttachmentsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      homeId: Value(homeId),
+      taskId: Value(taskId),
+      occurrenceId: occurrenceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(occurrenceId),
+      name: Value(name),
+      file: file == null && nullToAbsent ? const Value.absent() : Value(file),
+      contentType: Value(contentType),
+      isImage: Value(isImage),
+      sizeBytes: Value(sizeBytes),
+    );
+  }
+
+  factory TaskAttachmentRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TaskAttachmentRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      homeId: serializer.fromJson<String>(json['homeId']),
+      taskId: serializer.fromJson<String>(json['taskId']),
+      occurrenceId: serializer.fromJson<String?>(json['occurrenceId']),
+      name: serializer.fromJson<String>(json['name']),
+      file: serializer.fromJson<String?>(json['file']),
+      contentType: serializer.fromJson<String>(json['contentType']),
+      isImage: serializer.fromJson<bool>(json['isImage']),
+      sizeBytes: serializer.fromJson<int>(json['sizeBytes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'homeId': serializer.toJson<String>(homeId),
+      'taskId': serializer.toJson<String>(taskId),
+      'occurrenceId': serializer.toJson<String?>(occurrenceId),
+      'name': serializer.toJson<String>(name),
+      'file': serializer.toJson<String?>(file),
+      'contentType': serializer.toJson<String>(contentType),
+      'isImage': serializer.toJson<bool>(isImage),
+      'sizeBytes': serializer.toJson<int>(sizeBytes),
+    };
+  }
+
+  TaskAttachmentRow copyWith({
+    String? id,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? homeId,
+    String? taskId,
+    Value<String?> occurrenceId = const Value.absent(),
+    String? name,
+    Value<String?> file = const Value.absent(),
+    String? contentType,
+    bool? isImage,
+    int? sizeBytes,
+  }) => TaskAttachmentRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    homeId: homeId ?? this.homeId,
+    taskId: taskId ?? this.taskId,
+    occurrenceId: occurrenceId.present ? occurrenceId.value : this.occurrenceId,
+    name: name ?? this.name,
+    file: file.present ? file.value : this.file,
+    contentType: contentType ?? this.contentType,
+    isImage: isImage ?? this.isImage,
+    sizeBytes: sizeBytes ?? this.sizeBytes,
+  );
+  TaskAttachmentRow copyWithCompanion(TaskAttachmentsCompanion data) {
+    return TaskAttachmentRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      taskId: data.taskId.present ? data.taskId.value : this.taskId,
+      occurrenceId: data.occurrenceId.present
+          ? data.occurrenceId.value
+          : this.occurrenceId,
+      name: data.name.present ? data.name.value : this.name,
+      file: data.file.present ? data.file.value : this.file,
+      contentType: data.contentType.present
+          ? data.contentType.value
+          : this.contentType,
+      isImage: data.isImage.present ? data.isImage.value : this.isImage,
+      sizeBytes: data.sizeBytes.present ? data.sizeBytes.value : this.sizeBytes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TaskAttachmentRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('taskId: $taskId, ')
+          ..write('occurrenceId: $occurrenceId, ')
+          ..write('name: $name, ')
+          ..write('file: $file, ')
+          ..write('contentType: $contentType, ')
+          ..write('isImage: $isImage, ')
+          ..write('sizeBytes: $sizeBytes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    taskId,
+    occurrenceId,
+    name,
+    file,
+    contentType,
+    isImage,
+    sizeBytes,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TaskAttachmentRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.homeId == this.homeId &&
+          other.taskId == this.taskId &&
+          other.occurrenceId == this.occurrenceId &&
+          other.name == this.name &&
+          other.file == this.file &&
+          other.contentType == this.contentType &&
+          other.isImage == this.isImage &&
+          other.sizeBytes == this.sizeBytes);
+}
+
+class TaskAttachmentsCompanion extends UpdateCompanion<TaskAttachmentRow> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> homeId;
+  final Value<String> taskId;
+  final Value<String?> occurrenceId;
+  final Value<String> name;
+  final Value<String?> file;
+  final Value<String> contentType;
+  final Value<bool> isImage;
+  final Value<int> sizeBytes;
+  final Value<int> rowid;
+  const TaskAttachmentsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.taskId = const Value.absent(),
+    this.occurrenceId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.file = const Value.absent(),
+    this.contentType = const Value.absent(),
+    this.isImage = const Value.absent(),
+    this.sizeBytes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TaskAttachmentsCompanion.insert({
+    required String id,
+    required int createdAt,
+    required int updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String homeId,
+    required String taskId,
+    this.occurrenceId = const Value.absent(),
+    required String name,
+    this.file = const Value.absent(),
+    this.contentType = const Value.absent(),
+    this.isImage = const Value.absent(),
+    this.sizeBytes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       homeId = Value(homeId),
+       taskId = Value(taskId),
+       name = Value(name);
+  static Insertable<TaskAttachmentRow> custom({
+    Expression<Uint8List>? id,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<Uint8List>? homeId,
+    Expression<Uint8List>? taskId,
+    Expression<Uint8List>? occurrenceId,
+    Expression<String>? name,
+    Expression<String>? file,
+    Expression<String>? contentType,
+    Expression<bool>? isImage,
+    Expression<int>? sizeBytes,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (homeId != null) 'home_id': homeId,
+      if (taskId != null) 'task_id': taskId,
+      if (occurrenceId != null) 'occurrence_id': occurrenceId,
+      if (name != null) 'name': name,
+      if (file != null) 'file': file,
+      if (contentType != null) 'content_type': contentType,
+      if (isImage != null) 'is_image': isImage,
+      if (sizeBytes != null) 'size_bytes': sizeBytes,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TaskAttachmentsCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? homeId,
+    Value<String>? taskId,
+    Value<String?>? occurrenceId,
+    Value<String>? name,
+    Value<String?>? file,
+    Value<String>? contentType,
+    Value<bool>? isImage,
+    Value<int>? sizeBytes,
+    Value<int>? rowid,
+  }) {
+    return TaskAttachmentsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      homeId: homeId ?? this.homeId,
+      taskId: taskId ?? this.taskId,
+      occurrenceId: occurrenceId ?? this.occurrenceId,
+      name: name ?? this.name,
+      file: file ?? this.file,
+      contentType: contentType ?? this.contentType,
+      isImage: isImage ?? this.isImage,
+      sizeBytes: sizeBytes ?? this.sizeBytes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<Uint8List>(
+        $TaskAttachmentsTable.$converterid.toSql(id.value),
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $TaskAttachmentsTable.$converterhomeId.toSql(homeId.value),
+      );
+    }
+    if (taskId.present) {
+      map['task_id'] = Variable<Uint8List>(
+        $TaskAttachmentsTable.$convertertaskId.toSql(taskId.value),
+      );
+    }
+    if (occurrenceId.present) {
+      map['occurrence_id'] = Variable<Uint8List>(
+        $TaskAttachmentsTable.$converteroccurrenceIdn.toSql(occurrenceId.value),
+      );
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (file.present) {
+      map['file'] = Variable<String>(file.value);
+    }
+    if (contentType.present) {
+      map['content_type'] = Variable<String>(contentType.value);
+    }
+    if (isImage.present) {
+      map['is_image'] = Variable<bool>(isImage.value);
+    }
+    if (sizeBytes.present) {
+      map['size_bytes'] = Variable<int>(sizeBytes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TaskAttachmentsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('taskId: $taskId, ')
+          ..write('occurrenceId: $occurrenceId, ')
+          ..write('name: $name, ')
+          ..write('file: $file, ')
+          ..write('contentType: $contentType, ')
+          ..write('isImage: $isImage, ')
+          ..write('sizeBytes: $sizeBytes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -19019,6 +19732,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $OtherVersionsTable otherVersions = $OtherVersionsTable(this);
   late final $ServerSeenTable serverSeen = $ServerSeenTable(this);
   late final $FileSyncTable fileSync = $FileSyncTable(this);
+  late final $TaskAttachmentsTable taskAttachments = $TaskAttachmentsTable(
+    this,
+  );
   late final Index roomHomePosition = Index(
     'room_home_position',
     'CREATE INDEX room_home_position ON rooms (home_id, position)',
@@ -19067,6 +19783,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'report_home_status',
     'CREATE INDEX report_home_status ON reports (home_id, status)',
   );
+  late final Index attachmentTask = Index(
+    'attachment_task',
+    'CREATE INDEX attachment_task ON task_attachments (task_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -19104,6 +19824,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     otherVersions,
     serverSeen,
     fileSync,
+    taskAttachments,
     roomHomePosition,
     taskHomeCreated,
     occHomeStatusDue,
@@ -19116,6 +19837,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     lineProject,
     quoteProject,
     reportHomeStatus,
+    attachmentTask,
   ];
 }
 
@@ -28696,6 +29418,363 @@ typedef $$FileSyncTableProcessedTableManager =
       FileSyncRow,
       PrefetchHooks Function()
     >;
+typedef $$TaskAttachmentsTableCreateCompanionBuilder =
+    TaskAttachmentsCompanion Function({
+      required String id,
+      required int createdAt,
+      required int updatedAt,
+      Value<int?> deletedAt,
+      required String homeId,
+      required String taskId,
+      Value<String?> occurrenceId,
+      required String name,
+      Value<String?> file,
+      Value<String> contentType,
+      Value<bool> isImage,
+      Value<int> sizeBytes,
+      Value<int> rowid,
+    });
+typedef $$TaskAttachmentsTableUpdateCompanionBuilder =
+    TaskAttachmentsCompanion Function({
+      Value<String> id,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int?> deletedAt,
+      Value<String> homeId,
+      Value<String> taskId,
+      Value<String?> occurrenceId,
+      Value<String> name,
+      Value<String?> file,
+      Value<String> contentType,
+      Value<bool> isImage,
+      Value<int> sizeBytes,
+      Value<int> rowid,
+    });
+
+class $$TaskAttachmentsTableFilterComposer
+    extends Composer<_$AppDatabase, $TaskAttachmentsTable> {
+  $$TaskAttachmentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get id =>
+      $composableBuilder(
+        column: $table.id,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get taskId =>
+      $composableBuilder(
+        column: $table.taskId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String?, String, Uint8List> get occurrenceId =>
+      $composableBuilder(
+        column: $table.occurrenceId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get file => $composableBuilder(
+    column: $table.file,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contentType => $composableBuilder(
+    column: $table.contentType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isImage => $composableBuilder(
+    column: $table.isImage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sizeBytes => $composableBuilder(
+    column: $table.sizeBytes,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TaskAttachmentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $TaskAttachmentsTable> {
+  $$TaskAttachmentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<Uint8List> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get taskId => $composableBuilder(
+    column: $table.taskId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get occurrenceId => $composableBuilder(
+    column: $table.occurrenceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get file => $composableBuilder(
+    column: $table.file,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contentType => $composableBuilder(
+    column: $table.contentType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isImage => $composableBuilder(
+    column: $table.isImage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sizeBytes => $composableBuilder(
+    column: $table.sizeBytes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TaskAttachmentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TaskAttachmentsTable> {
+  $$TaskAttachmentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<String, Uint8List> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get taskId =>
+      $composableBuilder(column: $table.taskId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String?, Uint8List> get occurrenceId =>
+      $composableBuilder(
+        column: $table.occurrenceId,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get file =>
+      $composableBuilder(column: $table.file, builder: (column) => column);
+
+  GeneratedColumn<String> get contentType => $composableBuilder(
+    column: $table.contentType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isImage =>
+      $composableBuilder(column: $table.isImage, builder: (column) => column);
+
+  GeneratedColumn<int> get sizeBytes =>
+      $composableBuilder(column: $table.sizeBytes, builder: (column) => column);
+}
+
+class $$TaskAttachmentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TaskAttachmentsTable,
+          TaskAttachmentRow,
+          $$TaskAttachmentsTableFilterComposer,
+          $$TaskAttachmentsTableOrderingComposer,
+          $$TaskAttachmentsTableAnnotationComposer,
+          $$TaskAttachmentsTableCreateCompanionBuilder,
+          $$TaskAttachmentsTableUpdateCompanionBuilder,
+          (
+            TaskAttachmentRow,
+            BaseReferences<
+              _$AppDatabase,
+              $TaskAttachmentsTable,
+              TaskAttachmentRow
+            >,
+          ),
+          TaskAttachmentRow,
+          PrefetchHooks Function()
+        > {
+  $$TaskAttachmentsTableTableManager(
+    _$AppDatabase db,
+    $TaskAttachmentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TaskAttachmentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TaskAttachmentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TaskAttachmentsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> homeId = const Value.absent(),
+                Value<String> taskId = const Value.absent(),
+                Value<String?> occurrenceId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> file = const Value.absent(),
+                Value<String> contentType = const Value.absent(),
+                Value<bool> isImage = const Value.absent(),
+                Value<int> sizeBytes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TaskAttachmentsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                taskId: taskId,
+                occurrenceId: occurrenceId,
+                name: name,
+                file: file,
+                contentType: contentType,
+                isImage: isImage,
+                sizeBytes: sizeBytes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String homeId,
+                required String taskId,
+                Value<String?> occurrenceId = const Value.absent(),
+                required String name,
+                Value<String?> file = const Value.absent(),
+                Value<String> contentType = const Value.absent(),
+                Value<bool> isImage = const Value.absent(),
+                Value<int> sizeBytes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TaskAttachmentsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                taskId: taskId,
+                occurrenceId: occurrenceId,
+                name: name,
+                file: file,
+                contentType: contentType,
+                isImage: isImage,
+                sizeBytes: sizeBytes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$TaskAttachmentsTable, TaskAttachmentRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $TaskAttachmentsTable,
+                    TaskAttachmentRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TaskAttachmentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TaskAttachmentsTable,
+      TaskAttachmentRow,
+      $$TaskAttachmentsTableFilterComposer,
+      $$TaskAttachmentsTableOrderingComposer,
+      $$TaskAttachmentsTableAnnotationComposer,
+      $$TaskAttachmentsTableCreateCompanionBuilder,
+      $$TaskAttachmentsTableUpdateCompanionBuilder,
+      (
+        TaskAttachmentRow,
+        BaseReferences<_$AppDatabase, $TaskAttachmentsTable, TaskAttachmentRow>,
+      ),
+      TaskAttachmentRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -28764,4 +29843,6 @@ class $AppDatabaseManager {
       $$ServerSeenTableTableManager(_db, _db.serverSeen);
   $$FileSyncTableTableManager get fileSync =>
       $$FileSyncTableTableManager(_db, _db.fileSync);
+  $$TaskAttachmentsTableTableManager get taskAttachments =>
+      $$TaskAttachmentsTableTableManager(_db, _db.taskAttachments);
 }

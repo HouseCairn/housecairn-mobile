@@ -197,15 +197,19 @@ Homes and Settings shows the current home.
    Postpone, Skip this time, or Undo, then Edit the task), then When (repetition, due date,
    first date of a postponed one, masking, the next three dates), How to do it, Details
    (duration, budgets, contractor, notes), Cost (estimate, part from the stock, a year, paid so
-   far), materials, photos of the item or the room, history of occurrences, each done one
+   far), materials, photos of the item or the room, Photos and files (lot 4d: the photos as a
+   grid of tiles with their name, then the other files with an icon, their name and size, then
+   Add photos or files: take a photo, choose from the gallery or choose a PDF or a photo; a
+   photo opens full width, a file in another app through the share sheet, Delete is on its
+   screen with a confirmation; in an archived home, No file yet. when there is none), history
+   of occurrences, each done one
    opening its details (day, real cost, note). Edit the task opens the form, in the order and
    the folded sections of the web (`tasks/task_form.html`): title, room, item and due date, then
    Repeat (with a preview of the next five dates, `tasks/recurrence.py:341-351`), Who, Time and
    budget, Materials (one line per stock item and quantity, one empty line offered, up to 50,
    saved with the task; the stock items themselves are added in Rooms, Stock, not in the form),
    How to do it; only the title is required; a room, an item or a contractor can be
-   added with the task; Save and Cancel end it, deletion is under them. The files attached to a
-   task (web: Photos and files) are not in the app yet.
+   added with the task; Save and Cancel end it, deletion is under them.
 3. **Add from a template**: the bundled library, filtered by the equipment ticked.
 4. **Rooms**: list in the household's order; a room shows its type, then **Report a problem**
    (Where starts with the room), its memory (the short values as lines of label and value, with
@@ -315,8 +319,10 @@ all homes together, counting photos, files and the sync data.
   match) stays on the phone, is not sent again by itself, and Settings says why in plain words.
   Settings shows how many files wait and "Send now". A deleted photo's file leaves the phone 30
   days after the deletion; the server removes the files no row refers to by itself. Nothing is
-  sent when the phone is alone. The label photo of a stock article and the photo of a report are
-  not synced as files yet, nor are the files of a task, which the app does not show.
+  sent when the phone is alone. Lot 4d ([ADR 0013](adr/0013-more-files-with-a-server.md)) adds
+  the files attached to a task, the photo of a report and the label photo of a stock article,
+  under the same rules; a report and an article show the plain tile of a photo until their file
+  has come.
 
 ## Export and import
 

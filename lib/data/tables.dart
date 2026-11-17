@@ -338,6 +338,24 @@ class ProjectFiles extends Table with ModelColumns, HomeOwned {
   IntColumn get sizeBytes => integer().withDefault(const Constant(0))();
 }
 
+/// `tasks.attachment` (`tasks/models.py:466-497`, web ADR 0034): a photo or a
+/// file attached to a task, or to one of its occurrences (schema 9, lot 4d).
+/// [file] is the file reference of docs/protocol.md, section 2.10; the file
+/// is in the home's directory, named by the row's id. [contentType] and
+/// [sizeBytes] are what the phone stored; a server sends them in the
+/// reference only.
+@DataClassName('TaskAttachmentRow')
+@TableIndex(name: 'attachment_task', columns: {#taskId})
+class TaskAttachments extends Table with ModelColumns, HomeOwned {
+  BlobColumn get taskId => blob().map(const UuidConverter())();
+  BlobColumn get occurrenceId => blob().map(const UuidConverter()).nullable()();
+  TextColumn get name => text()();
+  TextColumn get file => text().nullable()();
+  TextColumn get contentType => text().withDefault(const Constant(''))();
+  BoolColumn get isImage => boolean().withDefault(const Constant(false))();
+  IntColumn get sizeBytes => integer().withDefault(const Constant(0))();
+}
+
 /// `projects.projectlink` (`projects/models.py:303-337`): a link of
 /// inspiration. The app never reads the page: no title nor picture is
 /// fetched, the link opens in the browser of the phone.
@@ -517,10 +535,12 @@ class OtherVersions extends Table {
   Set<Column<Object>> get primaryKey => {entity, rowId, field, hlc, device};
 }
 
-/// The files of photos and of project files, as this phone sends and fetches
-/// them with a Housecairn server (docs/adr/0012-files-with-a-server.md): one
-/// row per file reference, named by `file` of the reference. Never synced,
-/// never in an export; emptied when the phone leaves the server.
+/// The files of the rows that hold one (`fileHolders`: photos, project
+/// files, task attachments, the photo of a report, the label of an article),
+/// as this phone sends and fetches them with a Housecairn server
+/// (docs/adr/0012-files-with-a-server.md): one row per file reference, named
+/// by `file` of the reference. Never synced, never in an export; emptied when
+/// the phone leaves the server.
 ///
 /// [direction] is `up` for a file this phone made and has to send, `down`
 /// for one it has to fetch. [state] is `waiting` (to try, not before
@@ -533,7 +553,7 @@ class FileSync extends Table {
   TextColumn get fileId => text()();
   BlobColumn get homeId => blob().map(const UuidConverter())();
 
-  /// The table of the row that holds the file: `photos` or `project_files`.
+  /// The table of the row that holds the file, a key of `fileHolders`.
   TextColumn get holder => text()();
   BlobColumn get rowId => blob().map(const UuidConverter())();
   TextColumn get direction => text()();

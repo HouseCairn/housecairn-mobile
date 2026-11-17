@@ -88,6 +88,40 @@ class FilesServer implements ServerHttp {
     });
   }
 
+  /// A row made on the web that holds a file (lot 4d): an attachment of a
+  /// task, the photo of a report, the label of an article. The reference is
+  /// named by the id of the row and has no `sha256`; the label of an article
+  /// has no size either (web `sync/reading.py`, `file_reference`).
+  void addWebFileRow(
+    String type,
+    String id,
+    Uint8List bytes,
+    Map<String, Object?> fields, {
+    String contentType = 'image/jpeg',
+  }) {
+    files[id] = bytes;
+    final field = fileFieldOf(type)!;
+    _put(type, id, {
+      ...fields,
+      field: {
+        'file': id,
+        'size': type == 'stock.article' ? null : bytes.length,
+        'type': contentType,
+        'width': null,
+        'height': null,
+      },
+    });
+  }
+
+  /// The field of the file reference of [type], as the web reads it.
+  static String? fileFieldOf(Object? type) => switch (type) {
+    'rooms.photo' => 'image',
+    'projects.projectfile' || 'tasks.attachment' => 'file',
+    'reports.report' => 'photo',
+    'stock.article' => 'label',
+    _ => null,
+  };
+
   /// The row deleted on the web.
   void deleteOnWeb(String type, String id) {
     final clock = _hlc();
@@ -235,13 +269,12 @@ class FilesServer implements ServerHttp {
     final ops = ((jsonDecode(utf8.decode(body)) as Map)['ops'] as List)
         .cast<Map<String, dynamic>>();
     for (final (index, op) in ops.indexed) {
-      final field = switch (op['t']) {
-        'rooms.photo' => 'image',
-        'projects.projectfile' => 'file',
-        _ => null,
-      };
+      final field = fileFieldOf(op['t']);
       final fields = op['f'] as Map?;
-      if (field == null || fields == null || !fields.containsKey(field)) {
+      if (field == null ||
+          fields == null ||
+          !fields.containsKey(field) ||
+          fields[field] == null) {
         continue;
       }
       final ref = fields[field];

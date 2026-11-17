@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:image/image.dart' as img;
@@ -71,23 +70,14 @@ class ProcessedPhoto {
 
   /// The file reference of a new photo in the form of a Housecairn server
   /// (web ADR 0077, need 10): an id made now, the SHA-256 of [image], its
-  /// size, type and dimensions. It is the JSON of the column `photos.image`.
+  /// size, type and dimensions. It is the JSON of the column `photos.image`
+  /// and `reports.photo`.
   FileReference fileReference() => FileReference.fresh(
     image,
     type: 'image/jpeg',
     width: width,
     height: height,
   );
-
-  /// The reference of docs/protocol.md section 2.9 without a file id nor a
-  /// digest, as the column of a stock article's label and of a report's
-  /// photo hold it until a lot of their own.
-  String get reference => jsonEncode({
-    'size': image.length,
-    'type': 'image/jpeg',
-    'width': width,
-    'height': height,
-  });
 }
 
 /// Re-encodes [bytes] (what the camera or the gallery gave) as a stored

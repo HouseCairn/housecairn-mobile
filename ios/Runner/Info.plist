@@ -17,6 +17,8 @@
 	<string>Housecairn uses the camera to photograph a room or an item. The photo stays on this phone.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Housecairn lets you pick a photo of a room or an item. The photo stays on this phone.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Housecairn saves a photo attached to a task to your photos when you ask it to.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
