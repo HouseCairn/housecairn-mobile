@@ -312,7 +312,8 @@ void main() {
       );
       await tester.runAsync(() async {
         await repo.open();
-        await ReportOrigin.seed(repo);
+        final data = await ReportOrigin.seed(repo);
+        await data.seedSeason(repo, month: testNow.month);
         final home = (await repo.activeHomes()).single.id;
         counter.count = 0;
         await repo.todayEntries(homeId: home);
@@ -321,8 +322,13 @@ void main() {
         await repo.openTasks(home);
         expect(counter.count, 1, reason: 'All');
         counter.count = 0;
-        await repo.seasonEntries(homeId: home);
-        expect(counter.count, lessThanOrEqualTo(1), reason: 'In season');
+        final season = await repo.seasonEntries(homeId: home);
+        expect(
+          season.map((e) => e.task.id),
+          unorderedEquals([data.seasonal, data.seasonalOther]),
+        );
+        expect(season.every((e) => e.hasReportPhoto), isTrue);
+        expect(counter.count, 1, reason: 'In season');
       });
     });
   });

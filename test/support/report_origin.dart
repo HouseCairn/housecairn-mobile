@@ -27,6 +27,8 @@ class ReportOrigin {
   late String reportClosed;
   late String reportOlder;
   late String reportNewer;
+  late String seasonal;
+  late String seasonalOther;
 
   static Future<String> _made(
     Repository r,
@@ -42,6 +44,34 @@ class ReportOrigin {
     );
     into(report);
     return r.makeTask(report);
+  }
+
+  /// Two more tasks made from a report with a photo, limited to the season
+  /// that is on and without a date, so that they are in the section In
+  /// season of Today. Apart from [seed]: the lists of the goldens stay as
+  /// they are.
+  Future<void> seedSeason(Repository r, {required int month}) async {
+    seasonal = await _made(
+      r,
+      home,
+      'Clear the gutters',
+      photo: true,
+      into: (_) {},
+    );
+    seasonalOther = await _made(
+      r,
+      home,
+      'Cover the pool',
+      photo: true,
+      into: (_) {},
+    );
+    for (final id in [seasonal, seasonalOther]) {
+      await r.db.customStatement(
+        'UPDATE tasks SET season_start_month = ?, season_end_month = ? '
+        'WHERE id = ?',
+        [month, month, uuidBytes(id)],
+      );
+    }
   }
 
   static Future<ReportOrigin> seed(Repository r) async {
