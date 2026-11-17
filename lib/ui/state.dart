@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -61,14 +60,14 @@ Future<bool> openInSystem(Uri address) async {
 /// both systems open a file of an app's own directory. [origin] is where the
 /// sheet points from on a tablet. `false` when nothing took it.
 typedef FileOpener = Future<bool> Function(
-  File file, {
+  String path, {
   required String name,
   required String type,
   Rect? origin,
 });
 
 Future<bool> shareWithSystem(
-  File file, {
+  String path, {
   required String name,
   required String type,
   Rect? origin,
@@ -76,7 +75,7 @@ Future<bool> shareWithSystem(
   try {
     final result = await SharePlus.instance.share(
       ShareParams(
-        files: [XFile(file.path, name: name, mimeType: type)],
+        files: [XFile(path, name: name, mimeType: type)],
         fileNameOverrides: [name],
         sharePositionOrigin: origin,
       ),

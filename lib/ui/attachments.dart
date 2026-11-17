@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
@@ -301,7 +299,7 @@ class _AttachmentScreenState extends State<AttachmentScreen> {
     });
   }
 
-  Future<void> _open(File file, TaskAttachmentRow attachment) async {
+  Future<void> _open(String path, TaskAttachmentRow attachment) async {
     final l10n = AppLocalizations.of(context);
     final state = AppScope.of(context);
     final messenger = ScaffoldMessenger.of(context);
@@ -310,7 +308,7 @@ class _AttachmentScreenState extends State<AttachmentScreen> {
         ? null
         : box.localToGlobal(Offset.zero) & box.size;
     final opened = await state.openFile(
-      file,
+      path,
       name: attachment.name,
       type: AppScope.of(context).repository.attachmentIsImage(attachment)
           ? 'image/jpeg'
@@ -408,7 +406,7 @@ class _AttachmentScreenState extends State<AttachmentScreen> {
                   const SizedBox(height: HcSpace.s3),
                   OutlinedButton(
                     key: const Key('attachment-open'),
-                    onPressed: () => _open(file, attachment),
+                    onPressed: () => _open(file.path, attachment),
                     child: Text(l10n.fileOpen),
                   ),
                 ],

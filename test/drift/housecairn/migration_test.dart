@@ -2,13 +2,14 @@
 
 // Migration tests of drift's guided migrations
 // (docs/adr/0002-local-storage-and-migrations.md): from every schema version
-// in drift_schemas/housecairn/ to the current one (schema 8). Each step runs
+// in drift_schemas/housecairn/ to the current one (schema 9). Each step runs
 // in turn: 1 to 2 (lot 2a), 2 to 3 (stock), 3 to 4 (lot 3b: projects, budget,
 // reports), 4 to 5 (the manufacturer's warranty, six columns of `items`) and
 // 5 to 6 (the tables of sync of lot 4, new and empty) and 6 to 7
 // (`server_seen` of lot 4b, new and empty) and 7 to 8 (`file_sync` of lot 4c, new
-// and empty); 8 to 8 checks that the schema of AppDatabase is the one of
-// drift_schema_v8.json. The steps from
+// and empty) and 8 to 9 (`task_attachments` of lot 4d, new and empty); 9 to 9
+// checks that the schema of AppDatabase is the one of drift_schema_v9.json.
+// The steps from
 // schemas 2, 3, 4 and 5 also run on a file with data: every row is there
 // after them, every column it had unchanged, the new columns empty or at
 // their default and the new tables empty. Regenerate `generated/` with:
@@ -42,7 +43,7 @@ void main() {
   }
 
   for (final from in [2, 3]) {
-    test('migrates a schema $from file with data to schema 8, keeping every '
+    test('migrates a schema $from file with data to schema 9, keeping every '
         'row', () async {
       final schema = await verifier.schemaAt(from);
       final raw = schema.rawDatabase;
@@ -103,7 +104,7 @@ void main() {
       expect(dumped, contains('Second gutters'));
 
       final db = AppDatabase(schema.newConnection());
-      await verifier.migrateAndValidate(db, 8);
+      await verifier.migrateAndValidate(db, 9);
       expect(dump(), dumped);
       for (final (table, column) in [
         ('rooms', 'paint_article_id'),
@@ -142,7 +143,7 @@ void main() {
     });
   }
 
-  test('migrates a schema 4 file with items to schema 8: the end of a '
+  test('migrates a schema 4 file with items to schema 9: the end of a '
       'warranty typed before stays, the new columns are empty', () async {
     final schema = await verifier.schemaAt(4);
     final raw = schema.rawDatabase;
@@ -199,7 +200,7 @@ void main() {
     expect(dumped, contains('2027-03-01'));
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 8);
+    await verifier.migrateAndValidate(db, 9);
     expect(dump(), dumped);
     final rows = raw.select(
       'SELECT purchased_on, warranty_duration, warranty_duration_unit, '
@@ -214,7 +215,7 @@ void main() {
     await db.close();
   });
 
-  test('migrates a schema 5 file with data to schema 8: every row and clock '
+  test('migrates a schema 5 file with data to schema 9: every row and clock '
       'stays, the tables of sync are new and empty', () async {
     final schema = await verifier.schemaAt(5);
     final raw = schema.rawDatabase;
@@ -311,7 +312,7 @@ void main() {
     expect(dumped, contains('0193a1b2c3d40002'));
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 8);
+    await verifier.migrateAndValidate(db, 9);
     expect(dump(), dumped);
     for (final table in [
       'op_log',
@@ -353,7 +354,7 @@ void main() {
     await db.close();
   });
 
-  test('migrates a schema 7 file with a photo to schema 8: the row and its '
+  test('migrates a schema 7 file with a photo to schema 9: the row and its '
       'mark stay, the list of files is new and empty', () async {
     final schema = await verifier.schemaAt(7);
     final raw = schema.rawDatabase;
@@ -373,13 +374,51 @@ void main() {
       [id(2), id(1)],
     );
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 8);
+    await verifier.migrateAndValidate(db, 9);
     expect(
       raw.select('SELECT image FROM photos').single['image'],
       '{"size":3,"type":"image/jpeg"}',
     );
     expect(raw.select('SELECT * FROM server_seen'), hasLength(1));
     expect(raw.select('SELECT COUNT(*) AS n FROM file_sync').first['n'], 0);
+    expect(await db.integrityCheck(), 'ok');
+    await db.close();
+  });
+
+  test('migrates a schema 8 file with a task and an attachment kept aside to '
+      'schema 9: the table of attachments is new and empty, the operation '
+      'stays in pending to be applied', () async {
+    final schema = await verifier.schemaAt(8);
+    final raw = schema.rawDatabase;
+    Uint8List id(int n) => Uint8List.fromList(List.filled(16, n));
+    raw.execute(
+      'INSERT INTO homes (id, created_at, updated_at, name, currency, '
+      'hemisphere) VALUES (?, 1, 1, ?, ?, ?)',
+      [id(1), 'Main home', 'EUR', 'north'],
+    );
+    raw.execute(
+      'INSERT INTO tasks (id, created_at, updated_at, home_id, title) '
+      'VALUES (?, 2, 2, ?, ?)',
+      [id(3), id(1), 'Main gutters'],
+    );
+    raw.execute(
+      'INSERT INTO pending (key, entity, home_id, body) VALUES (?, ?, ?, ?)',
+      ['k', 'tasks.attachment', id(1), '{"t":"tasks.attachment"}'],
+    );
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 9);
+    expect(
+      raw.select('SELECT title FROM tasks').single['title'],
+      'Main gutters',
+    );
+    expect(
+      raw.select('SELECT COUNT(*) AS n FROM task_attachments').first['n'],
+      0,
+    );
+    expect(
+      raw.select('SELECT entity FROM pending').single['entity'],
+      'tasks.attachment',
+    );
     expect(await db.integrityCheck(), 'ok');
     await db.close();
   });
