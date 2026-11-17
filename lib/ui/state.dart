@@ -698,6 +698,7 @@ class ServerSyncStatus {
   static const shown = {
     SyncNoticeKind.undoReverted,
     SyncNoticeKind.droppedAfterRestart,
+    SyncNoticeKind.viewChanged,
   };
 
   bool running = false;

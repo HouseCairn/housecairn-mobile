@@ -2780,6 +2780,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Something deleted on the server was removed from this phone.';
 
   @override
+  String get syncNoticeViewChanged =>
+      'What you can see in this home changed. This phone was updated.';
+
+  @override
   String get syncNoticesRead => 'Mark as read';
 
   @override

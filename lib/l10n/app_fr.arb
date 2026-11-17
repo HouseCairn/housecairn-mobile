@@ -896,6 +896,7 @@
   "syncNoticesCount": "{count, plural, one{1 information sur la synchronisation} other{{count} informations sur la synchronisation}}",
   "syncNoticeUndoReverted": "Une annulation a été reprise : la prochaine échéance de cette tâche a été modifiée entre-temps sur un autre appareil.",
   "syncNoticeDropped": "Un élément supprimé sur le serveur a été retiré de ce téléphone.",
+  "syncNoticeViewChanged": "Ce que vous pouvez voir dans ce logement a changé. Ce téléphone a été mis à jour.",
   "syncNoticesRead": "Marquer comme lu",
   "settingsFilesTitle": "Photos et fichiers à envoyer",
   "@settingsFilesTitle": {"description": "Row of Settings on a server: the photos and files of this phone the server does not have yet."},

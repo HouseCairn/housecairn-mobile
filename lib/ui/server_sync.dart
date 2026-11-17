@@ -41,6 +41,7 @@ String refusedName(AppLocalizations l10n, RefusedChange change) {
 String _notice(AppLocalizations l10n, SyncNotice notice) =>
     switch (notice.kind) {
       SyncNoticeKind.droppedAfterRestart => l10n.syncNoticeDropped,
+      SyncNoticeKind.viewChanged => l10n.syncNoticeViewChanged,
       _ => l10n.syncNoticeUndoReverted,
     };
 

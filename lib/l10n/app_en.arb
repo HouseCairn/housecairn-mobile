@@ -1482,6 +1482,8 @@
   "@syncNoticeUndoReverted": {"description": "Notice: an undo of this phone was reverted (ADR 0003)."},
   "syncNoticeDropped": "Something deleted on the server was removed from this phone.",
   "@syncNoticeDropped": {"description": "Notice: a row seen by the server and gone from its snapshot was deleted here (protocol 2.10, rule 2)."},
+  "syncNoticeViewChanged": "What you can see in this home changed. This phone was updated.",
+  "@syncNoticeViewChanged": {"description": "Notice: after starting again from the server's snapshot, reports this member no longer sees (or was not given) were removed from this phone (protocol 2.10, rule 2)."},
   "syncNoticesRead": "Mark as read",
   "@syncNoticesRead": {"description": "Button: the notices of the sync were read."},
   "settingsFilesTitle": "Photos and files to send",
