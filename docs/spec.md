@@ -190,11 +190,19 @@ Homes and Settings shows the current home.
    or accents; the sheet holds the room and, under Done, the item, the contractor, the outcome
    and the dates, n being the criteria that apply. What was chosen stays while a task is opened
    and closed again, and starts from nothing on coming back to the list from elsewhere. A list
-   that a search or a filter emptied offers to clear the filters.
+   that a search or a filter emptied offers to clear the filters. A row of an open task made
+   from a report with a photo carries the ghost pill **Photo** after its date, in Today and in
+   All (`mark_photo_reports`, `tasks/_occurrence_row.html`); a page of rows reads the reports
+   once, not once a row.
 2. **Task**: opens on its page, to read, in the order of the web (`tasks/task_detail.html`;
    web `design/patterns.md`, Record page): the pills of state, priority and repetition, the
    title, the place (room and item as links), the row of actions (Done as the primary one,
-   Postpone, Skip this time, or Undo, then Edit the task), then When (repetition, due date,
+   Postpone, Skip this time, or Undo, then Edit the task), then, when the task was made from a
+   report, Reported problem (one card a report, the latest first: Reported on and the day, the
+   title of the report, which opens it, and its photo, which opens full width, or the plain
+   tile Photo not on this phone until its file has come; the reports are those of the task's
+   home that are not deleted, whatever their status, as the web's `reports_of_task`; the web
+   adds who reported it, which the app does not hold), then When (repetition, due date,
    first date of a postponed one, masking, the next three dates), How to do it, Details
    (duration, budgets, contractor, notes), Cost (estimate, part from the stock, a year, paid so
    far), materials, photos of the item or the room, Photos and files (lot 4d: the photos as a
@@ -294,6 +302,9 @@ all homes together, counting photos, files and the sync data.
   label photo of a stock article (`stock/models.py:119`), the photo of a report
   (`reports/models.py:71-84`), and photos or PDF attached to a task, a
   project or a quote (`tasks/models.py:463-494`, `projects/models.py:273-300`).
+- **The photo of a report that became a task** stays on the report and shows on the page of the
+  task as well, in Reported problem, and the rows of the task carry the pill Photo; it is the
+  same file, opened full width from either page.
 - **Taken** with the camera or picked from the gallery; PDF from the Files app or the document
   picker. At most 20 MiB a file.
 - **Re-encoded on the phone before anything is stored**, as the web does

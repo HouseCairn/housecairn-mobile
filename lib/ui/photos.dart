@@ -224,6 +224,8 @@ class ReportPhoto extends StatelessWidget {
                 child: Image.file(
                   file,
                   key: Key('report-photo$keySuffix'),
+                  // Decoded at the width of a phone, not at the size of the file.
+                  cacheWidth: 1080,
                   errorBuilder: (_, _, _) => const SizedBox.shrink(),
                 ),
               ),
