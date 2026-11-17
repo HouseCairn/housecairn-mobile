@@ -118,8 +118,10 @@ the phone, which then also appear in its web pages; unlocked by a single in-app 
 way whose lot is not merged yet is shown, disabled. What each way guarantees, the moves between
 them and what the screen says are in ADR 0010.
 
-In the app of lot 2c only the first way exists. The first-start screen shows the three, "Alone on
-this phone" selected, the two others disabled with "Coming later" (a tap on them opens nothing);
+In the app of lot 2c only the first way exists. The first-start screen shows the logo and its
+title centred, as the first page of the web, then the three, "Alone on
+this phone" selected, the two others disabled with "Coming later", muted with their mark (a tap
+on them opens nothing);
 the third says that the server stores the homes and can read them, that everything of the phone
 is kept on it, and that a one-time purchase unlocks it, with no price. Choosing the first way
 stores `sync_mode` = `alone` in `local_settings` (never synced; absent means alone), then the
@@ -222,7 +224,9 @@ Homes and Settings shows the current home.
    saved with the task; the stock items themselves are added in Rooms, Stock, not in the form),
    How to do it; only the title is required; a room, an item or a contractor can be
    added with the task; Save and Cancel end it, deletion is under them.
-3. **Add from a template**: the bundled library, filtered by the equipment ticked.
+3. **Add from a template**: the bundled library, filtered by the equipment ticked. Each template
+   says its interval in the words of the web ("every month · source") and links its source,
+   which opens in the browser of the phone.
 4. **Rooms**: list in the household's order; a room shows its type, then **Report a problem**
    (Where starts with the room), its memory (the short values as lines of label and value, with
    **Edit the memory**, its own form as on the web), its photos, its items and its tasks, in the
@@ -252,7 +256,9 @@ contractor with it.
    movements and suppliers, add an entry, an exit or an inventory. **Edit the stock item** and
    **Report a problem** (Where starts with the article) are the action row of its page. Saved,
    a new article opens, and Back from it returns to the list (web design guide, After a form).
-7. **Projects**: list by status (`projects/models.py:61-67`); a project with its pills (state,
+7. **Projects**: list by status (`projects/models.py:61-67`), under the card of the envelope of
+   the year, in groups by status with their heading (In progress, Planned, Idea, Finished,
+   Abandoned, the order of the web); a project with its pills (state,
    priority, what is left of the budget), its goal, its rooms as links, then its tasks, its
    budget lines (Planned, Committed, Paid, Gap; a line opens its form), quotes, links and
    photos, in the order of the web (`projects/project_detail.html`). Its form is the web's:
@@ -263,7 +269,9 @@ contractor with it.
    returns to the list.
 8. **Budget**: the year of the current home against its envelope, by room, by project, upkeep
    (read only). Each home has its own currency and envelopes (`homes/models.py:33-39`,
-   `projects/models.py:355-377`), so homes are never added together.
+   `projects/models.py:355-377`), so homes are never added together. Each tab has the title and
+   the note of its web page (Budget, Budget by room, Budget by project, Budget of the upkeep);
+   the details of the year are a folded section, as in the forms.
 9. **Report a problem**: title, place (a room, an item or a stock item), photo; the list, make a
    task from a report, close it. A report page is a record page: its state pill, its title, then
    Where (a link to the place), Reported on, Closed on and Task as lines of label and value, and
@@ -274,7 +282,13 @@ contractor with it.
 12. **Settings**: language, reminders, export and import, the way the app is used and the move
     to another ([Ways to use the app](#ways-to-use-the-app)), family sync (subscribe, invite a
     phone, phones, recovery code, relay address, space used against the quota), licences and
-    the attribution of `NOTICE`.
+    the attribution of `NOTICE`. More counts the reports that wait, as the web ("Reports (1)"):
+    the open reports of the home, none for a read-only member of a server home (the web's
+    `waiting_for`; the server sends a reader their own reports only, web ADR 0086). About is
+    the card of the web: the cairn, the name, the version, the attribution, the licence and the
+    link to the source code, then the links of the project (site, documentation, code, Home
+    Assistant app and integration, mobile application, Android coming soon) and the iPhone
+    beta, which can be opened or copied.
 
 ## Reminders
 

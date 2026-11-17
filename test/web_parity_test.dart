@@ -794,8 +794,6 @@ const absences = <String, String>{
   'item.row_text_font': 'the card of the item writes its room and kind in the style of a row text, the web as `.small` (same size and weight)',
   'item.row_text_weight': 'the card of the item writes its room and kind in the style of a row text, the web as `.small` (same size and weight)',
   'item.row_text_line': 'the card of the item writes its room and kind in the style of a row text, the web as `.small` (same size and weight)',
-  'projects.h2_font': 'the web groups the projects of a tab under their status and heads its envelope card; the app lists them in the tab, the envelope in its own card',
-  'projects.h2_weight': 'the web groups the projects of a tab under their status and heads its envelope card; the app lists them in the tab, the envelope in its own card',
   'projects.label_font': 'the web has a search field and filters above the projects; the app has the tabs only',
   'projects.field_height': 'the web has a search field and filters above the projects; the app has the tabs only',
   'project.label_font': 'the web adds a line, a quote or a task by forms on the page; the app opens a form',
