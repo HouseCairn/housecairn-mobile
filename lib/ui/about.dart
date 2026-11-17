@@ -227,21 +227,27 @@ class _LinkTile extends StatelessWidget {
             horizontal: HcSpace.s3,
             vertical: HcSpace.s2,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+          // The pill goes under the label when the line is too narrow, as
+          // the beta row of iPhone does: a word is never cut.
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: HcSpace.s2,
+            runSpacing: HcSpace.s1,
             children: [
-              HcIcon(icon, color: colour),
-              const SizedBox(width: HcSpace.s2),
-              Flexible(
-                child: Text(
-                  label,
-                  style: HcText.buttonSmall.copyWith(color: colour),
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  HcIcon(icon, color: colour),
+                  const SizedBox(width: HcSpace.s2),
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: HcText.buttonSmall.copyWith(color: colour),
+                    ),
+                  ),
+                ],
               ),
-              if (soon != null) ...[
-                const SizedBox(width: HcSpace.s2),
-                HcPill(soon!, tone: HcPillTone.ghost),
-              ],
+              if (soon != null) HcPill(soon!, tone: HcPillTone.ghost),
             ],
           ),
         ),

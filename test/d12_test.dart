@@ -3,6 +3,7 @@
 // Budget, projects, templates, More, the first start and About as the web
 // draws them (design lot D12): one group of tests per gap closed.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/design/brand.dart';
@@ -407,6 +408,58 @@ void main() {
       );
       expect(tester.widget<Text>(alone).style!.color, HcColors.text);
     });
+  });
+
+  group('About, the tile of Android at 320 with text at twice the size', () {
+    for (final (locale, label, soon, more) in [
+      ('en', 'Android', 'Coming soon', 'More'),
+      ('fr', 'Android', 'Bientôt', 'Plus'),
+    ]) {
+      testWidgets('keeps its word whole, the pill under it ($locale)', (
+        tester,
+      ) async {
+        await onPhone(tester, width: 320, height: 844, textScale: 2);
+        late Lot3b data;
+        final state = await pumpApp(
+          tester,
+          locale: locale,
+          seed: (r) async => data = await Lot3b.seed(r),
+        );
+        await state.choose(data.main);
+        await tester.pumpAndSettle();
+        await openSection(tester, more);
+        final row = find.byKey(const Key('more-about'));
+        await tester.scrollUntilVisible(row, 100);
+        await tester.ensureVisible(row);
+        await tester.pumpAndSettle();
+        await tester.tap(row);
+        await tester.pumpAndSettle();
+        final tile = find.byKey(const Key('about-link-android'));
+        await tester.scrollUntilVisible(
+          tile,
+          100,
+          scrollable: find.byType(Scrollable).last,
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        final word = find.descendant(of: tile, matching: find.text(label));
+        // One line: the height of the word is the height it has unbound.
+        final paragraph = tester.renderObject<RenderParagraph>(word);
+        expect(
+          paragraph.size.height,
+          paragraph.getMinIntrinsicHeight(double.infinity),
+          reason: 'the word is cut',
+        );
+        final pill = find.descendant(of: tile, matching: find.text(soon));
+        expect(
+          tester.getRect(pill).top,
+          greaterThanOrEqualTo(tester.getRect(word).bottom),
+          reason: 'the pill is under the label',
+        );
+        expect(tester.getRect(tile).height, lessThan(160));
+        expect(tester.getRect(pill).right, lessThanOrEqualTo(320));
+      });
+    }
   });
 
   group('N23: About is the card of the web', () {
