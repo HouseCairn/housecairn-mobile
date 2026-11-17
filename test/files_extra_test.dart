@@ -226,6 +226,35 @@ void main() {
       expect(gets(), isNot(contains('GET $web')));
     });
 
+    test('a column that held a newer value and is then emptied stays empty: '
+        'the old reference does not come back', () async {
+      server.addWebPhoto(web, jpeg(), roomId: room);
+      await sync();
+      await earlierBuild('rooms.photo', 'photos', 'image', web);
+      final newer = FileReference(
+        file: other,
+        size: 3,
+        type: 'image/jpeg',
+        sha256: sha256Hex(Uint8List(3)),
+      ).encode();
+      await repo.db.customStatement(
+        'UPDATE photos SET image = ? WHERE id = ?',
+        [newer, uuidBytes(web)],
+      );
+      await sync();
+      expect(await repo.extraFields('rooms.photo', web), isEmpty);
+      await repo.db.customStatement(
+        'UPDATE photos SET image = NULL WHERE id = ?',
+        [uuidBytes(web)],
+      );
+      server.log.clear();
+
+      await sync();
+
+      expect(await columnOf('photos', 'image', web), isNull);
+      expect(gets(), isNot(contains('GET $web')));
+    });
+
     test('the other fields kept in extra stay, only the reference leaves '
         'it', () async {
       server.addWebPhoto(web, jpeg(), roomId: room);

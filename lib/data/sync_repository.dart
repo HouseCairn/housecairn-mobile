@@ -751,7 +751,12 @@ extension SyncRepository on Repository {
       for (final MapEntry(key: field, :value) in fields.entries) {
         final column = columns[field];
         if (column == null || fileHolders[table] != field) continue;
-        if (row[field] != null) continue;
+        if (row[field] != null) {
+          // The column was written after, and may be emptied later: the copy
+          // in `extra` is stale and must not come back at the next scan.
+          kept.remove(field);
+          continue;
+        }
         final Object? held;
         try {
           held = _fromWire(column, value is Map ? jsonEncode(value) : value);
