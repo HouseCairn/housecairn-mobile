@@ -757,71 +757,78 @@ extension SyncRepository on Repository {
         .customSelect('SELECT entity, row_id, json FROM extra')
         .get();
     for (final r in rows) {
-      final entity = r.data['entity'] as String;
-      final table = tableOfEntity[entity];
-      if (table == null) continue;
-      final id = Uuid.unparse(r.data['row_id'] as Uint8List);
-      final fields = (jsonDecode(r.data['json'] as String) as Map)
-          .cast<String, Object?>();
-      final columns = _columns(table);
-      final row =
-          (await db
-                  .customSelect(
-                    'SELECT * FROM $table WHERE id = ?',
-                    variables: [Variable<Uint8List>(uuidBytes(id))],
-                  )
-                  .getSingleOrNull())
-              ?.data;
-      if (row == null) continue;
-      final kept = {...fields};
-      for (final MapEntry(key: field, :value) in fields.entries) {
-        final column = columns[field];
-        if (column == null || fileHolders[table] != field) continue;
-        if (row[field] != null) {
-          // The column was written after, and may be emptied later: the copy
-          // in `extra` is stale and must not come back at the next scan.
+      try {
+        final entity = r.data['entity'] as String;
+        final table = tableOfEntity[entity];
+        if (table == null) continue;
+        final id = Uuid.unparse(r.data['row_id'] as Uint8List);
+        final fields = (jsonDecode(r.data['json'] as String) as Map)
+            .cast<String, Object?>();
+        final columns = _columns(table);
+        final row =
+            (await db
+                    .customSelect(
+                      'SELECT * FROM $table WHERE id = ?',
+                      variables: [Variable<Uint8List>(uuidBytes(id))],
+                    )
+                    .getSingleOrNull())
+                ?.data;
+        if (row == null) continue;
+        final kept = {...fields};
+        for (final MapEntry(key: field, :value) in fields.entries) {
+          final column = columns[field];
+          if (column == null || fileHolders[table] != field) continue;
+          if (row[field] != null) {
+            // The column was written after, and may be emptied later: the copy
+            // in `extra` is stale and must not come back at the next scan.
+            kept.remove(field);
+            continue;
+          }
+          // Only what the reference parser accepts moves: any other value
+          // stays in `extra`, as it came.
+          final text = value is Map ? jsonEncode(value) : value;
+          if (text is! String || FileReference.parse(text, rowId: id) == null) {
+            continue;
+          }
+          final Object? held;
+          try {
+            held = _fromWire(column, text);
+          } on Object {
+            continue;
+          }
+          if (held == null) continue;
+          final clock = await _clocksOf(entity, id);
+          final written = clock[field]?.hlc;
+          await db.customUpdate(
+            'UPDATE $table SET $field = ?'
+            '${written == null ? '' : ', updated_at = MAX(updated_at, ?)'} '
+            'WHERE id = ?',
+            variables: [
+              Variable<Object>(held),
+              if (written != null) Variable<int>(Hlc.parse(written) >> 16),
+              Variable<Uint8List>(uuidBytes(id)),
+            ],
+          );
           kept.remove(field);
-          continue;
+          moved++;
         }
-        // Only what the reference parser accepts moves: any other value
-        // stays in `extra`, as it came.
-        final text = value is Map ? jsonEncode(value) : value;
-        if (text is! String || FileReference.parse(text, rowId: id) == null) {
-          continue;
+        if (kept.length == fields.length) continue;
+        if (kept.isEmpty) {
+          await db.customStatement(
+            'DELETE FROM extra WHERE entity = ? AND row_id = ?',
+            [entity, uuidBytes(id)],
+          );
+        } else {
+          await db.customStatement(
+            'UPDATE extra SET json = ? WHERE entity = ? AND row_id = ?',
+            [jsonEncode(kept), entity, uuidBytes(id)],
+          );
         }
-        final Object? held;
-        try {
-          held = _fromWire(column, text);
-        } on Object {
-          continue;
-        }
-        if (held == null) continue;
-        final clock = await _clocksOf(entity, id);
-        final written = clock[field]?.hlc;
-        await db.customUpdate(
-          'UPDATE $table SET $field = ?'
-          '${written == null ? '' : ', updated_at = MAX(updated_at, ?)'} '
-          'WHERE id = ?',
-          variables: [
-            Variable<Object>(held),
-            if (written != null) Variable<int>(Hlc.parse(written) >> 16),
-            Variable<Uint8List>(uuidBytes(id)),
-          ],
-        );
-        kept.remove(field);
-        moved++;
-      }
-      if (kept.length == fields.length) continue;
-      if (kept.isEmpty) {
-        await db.customStatement(
-          'DELETE FROM extra WHERE entity = ? AND row_id = ?',
-          [entity, uuidBytes(id)],
-        );
-      } else {
-        await db.customStatement(
-          'UPDATE extra SET json = ? WHERE entity = ? AND row_id = ?',
-          [jsonEncode(kept), entity, uuidBytes(id)],
-        );
+      } on Object {
+        // A line that cannot be read (JSON that does not parse, not an
+        // object): left as it is, the others still heal, and neither the
+        // scan nor the count of Settings throws.
+        continue;
       }
     }
     return moved;

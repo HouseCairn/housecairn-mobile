@@ -316,6 +316,47 @@ void main() {
       });
     }
 
+    test('a line of extra whose JSON cannot be read is skipped: the others '
+        'heal and neither the sync nor the count of Settings throws', () async {
+      server.addWebPhoto(web, jpeg(), roomId: room);
+      await sync();
+      await earlierBuild('rooms.photo', 'photos', 'image', web);
+      await repo.db.customStatement(
+        'INSERT INTO extra (entity, row_id, home_id, json) '
+        'VALUES (?, ?, ?, ?)',
+        ['tasks.task', uuidBytes(task), uuidBytes(home), '{not json'],
+      );
+
+      await sync();
+      await repo.fileQueue();
+
+      expect(await columnOf('photos', 'image', web), isNotNull);
+      expect(await repo.extraFields('rooms.photo', web), isEmpty);
+      final broken = await repo.db
+          .customSelect(
+            'SELECT json FROM extra WHERE entity = ?',
+            variables: [Variable<String>('tasks.task')],
+          )
+          .getSingle();
+      expect(broken.data['json'], '{not json');
+    });
+
+    test('a line of extra that is not an object is skipped as well', () async {
+      server.addWebPhoto(web, jpeg(), roomId: room);
+      await sync();
+      await earlierBuild('rooms.photo', 'photos', 'image', web);
+      await repo.db.customStatement(
+        'INSERT INTO extra (entity, row_id, home_id, json) '
+        'VALUES (?, ?, ?, ?)',
+        ['tasks.task', uuidBytes(task), uuidBytes(home), '[1, 2]'],
+      );
+
+      await sync();
+      await repo.fileQueue();
+
+      expect(await columnOf('photos', 'image', web), isNotNull);
+    });
+
     test('the other fields kept in extra stay, only the reference leaves '
         'it', () async {
       server.addWebPhoto(web, jpeg(), roomId: room);
