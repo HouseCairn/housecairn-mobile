@@ -631,6 +631,9 @@ extension SyncRepository on Repository {
         ],
       );
     }
+    // A field now in its column leaves `extra`: a copy kept there would come
+    // back when the column is emptied.
+    if (known.isNotEmpty) await _dropExtra(type, id, known.keys);
     if (unknown.isNotEmpty) await _mergeExtra(type, id, home, unknown);
     for (final field in won.keys) {
       await db.customInsert(
@@ -685,6 +688,29 @@ extension SyncRepository on Repository {
         ? <String, Object?>{}
         : (jsonDecode(row.data['json'] as String) as Map)
               .cast<String, Object?>();
+  }
+
+  /// Takes the [fields] out of the `extra` of the row [id], and the line
+  /// with them when nothing else is kept.
+  Future<void> _dropExtra(
+    String type,
+    String id,
+    Iterable<String> fields,
+  ) async {
+    final kept = await _extraOf(type, id);
+    final left = {...kept}..removeWhere((k, _) => fields.contains(k));
+    if (left.length == kept.length) return;
+    if (left.isEmpty) {
+      await db.customStatement(
+        'DELETE FROM extra WHERE entity = ? AND row_id = ?',
+        [type, uuidBytes(id)],
+      );
+    } else {
+      await db.customStatement(
+        'UPDATE extra SET json = ? WHERE entity = ? AND row_id = ?',
+        [jsonEncode(left), type, uuidBytes(id)],
+      );
+    }
   }
 
   Future<void> _mergeExtra(

@@ -255,6 +255,36 @@ void main() {
       expect(gets(), isNot(contains('GET $web')));
     });
 
+    test('a field the feed writes in its column leaves extra, a file reference '
+        'or any other known field', () async {
+      server.addWebPhoto(web, jpeg(48), roomId: room);
+      await sync();
+      await earlierBuild('rooms.photo', 'photos', 'image', web);
+      final extra = await repo.extraFields('rooms.photo', web);
+      await repo.db.customStatement(
+        'UPDATE extra SET json = ? WHERE row_id = ?',
+        [
+          jsonEncode({...extra, 'caption': 'stale', 'colour': 'teal'}),
+          uuidBytes(web),
+        ],
+      );
+      // The server writes the photo again, later than the first time.
+      final bytes = jpeg(32);
+      server.addWebPhoto(web, bytes, roomId: room);
+
+      await sync();
+
+      expect(await repo.extraFields('rooms.photo', web), {'colour': 'teal'});
+      expect((await repo.photo(web))!.caption, 'From the web');
+      // An erasure that comes later leaves no copy to bring back.
+      await repo.db.customStatement(
+        'UPDATE photos SET image = NULL WHERE id = ?',
+        [uuidBytes(web)],
+      );
+      await sync();
+      expect(await columnOf('photos', 'image', web), isNull);
+    });
+
     test('the other fields kept in extra stay, only the reference leaves '
         'it', () async {
       server.addWebPhoto(web, jpeg(), roomId: room);
