@@ -1882,6 +1882,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportPhoto => 'Photo of the problem';
 
   @override
+  String get taskReportedProblem => 'Reported problem';
+
+  @override
+  String taskReportedOn(String day) {
+    return 'Reported on $day';
+  }
+
+  @override
+  String reportPhotoOf(String title) {
+    return 'Photo of the problem: $title';
+  }
+
+  @override
+  String get reportPhotoPill => 'Photo';
+
+  @override
   String get makeItATask => 'Make it a task';
 
   @override

@@ -442,6 +442,7 @@ class TodayEntry {
     required this.home,
     this.roomName,
     this.itemName,
+    this.hasReportPhoto = false,
   });
 
   final OccurrenceRow occurrence;
@@ -452,6 +453,10 @@ class TodayEntry {
   /// them under the title (`tasks/_occurrence_row.html`).
   final String? roomName;
   final String? itemName;
+
+  /// A report with a photo, still there, is what the task was made from: the
+  /// row says so with a pill (`mark_photo_reports`, `has_report_photo`).
+  final bool hasReportPhoto;
 
   Day? get dueOn =>
       occurrence.dueOn == null ? null : Day.parse(occurrence.dueOn!);
@@ -2263,6 +2268,9 @@ class Repository {
               .get())
         i.id: i.name,
     };
+    final photos = await tasksWithReportPhoto([
+      for (final row in rows) row.readTable(db.tasks).id,
+    ]);
     return [
       for (final row in rows)
         if (homes[row.readTable(db.tasks).homeId] != null)
@@ -2272,6 +2280,7 @@ class Repository {
             home: homes[row.readTable(db.tasks).homeId]!,
             roomName: rooms[row.readTable(db.tasks).roomId],
             itemName: items[row.readTable(db.tasks).itemId],
+            hasReportPhoto: photos.contains(row.readTable(db.tasks).id),
           ),
     ];
   }
