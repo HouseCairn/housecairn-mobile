@@ -297,6 +297,83 @@ void main() {
         expect(state.serverSync.notices, isEmpty);
       });
 
+      /// Three reports of the home the server has seen, and none in its
+      /// snapshot from now on: what a changed view of a member does.
+      Future<AppState> startWithReports(WidgetTester tester) async {
+        final state = await start(tester, locale);
+        for (final title in ['Leak', 'Crack', 'Draught']) {
+          await state.repository.createReport(home, title: title);
+        }
+        // The round after the changes sends them; the server has seen them.
+        await afterDelay(tester);
+        expect(await state.repository.outgoing(), isEmpty);
+        await state.repository.markServerSeen([
+          for (final e in await state.repository.reportsOf(home))
+            ('reports.report', home, e.report.id),
+        ]);
+        return state;
+      }
+
+      testWidgets('reports gone from the snapshot after a 410 (the view of '
+          'the member changed) make one notice that deleted nothing', (
+        tester,
+      ) async {
+        final state = await startWithReports(tester);
+        server.expired = true;
+        await state.syncWithServer();
+        await tester.pumpAndSettle();
+        expect(await state.repository.reportsOf(home), isEmpty);
+        expect(state.serverSync.notices.map((n) => n.kind), [
+          SyncNoticeKind.viewChanged,
+        ]);
+        expect(inBanner(l10n.syncNoticesCount(1)), findsOneWidget);
+        await tester.tap(find.byKey(const Key('sync-banner')));
+        await tester.pumpAndSettle();
+        expect(find.text(l10n.syncNoticeViewChanged), findsOneWidget);
+        expect(find.text(l10n.syncNoticeDropped), findsNothing);
+        expect(
+          l10n.syncNoticeViewChanged,
+          locale == 'en'
+              ? 'What you can see in this home changed. This phone was '
+                    'updated.'
+              : 'Ce que vous pouvez voir dans ce logement a changé. Ce '
+                    'téléphone a été mis à jour.',
+        );
+      });
+
+      testWidgets('a 410 that removes nothing says nothing', (tester) async {
+        final state = await startWithReports(tester);
+        server
+          ..expired = true
+          ..reportsInSnapshot = [
+            for (final e in await state.repository.reportsOf(home))
+              (e.report.id, e.report.title),
+          ];
+        await state.syncWithServer();
+        await tester.pumpAndSettle();
+        expect(await state.repository.reportsOf(home), hasLength(3));
+        expect(state.serverSync.notices, isEmpty);
+        expect(find.byKey(const Key('sync-banner')), findsNothing);
+      });
+
+      testWidgets('a row purged on the server keeps its own notice, next to '
+          'the one of the reports', (tester) async {
+        final state = await startWithReports(tester);
+        server
+          ..expired = true
+          ..withKitchen = false;
+        await state.syncWithServer();
+        await tester.pumpAndSettle();
+        expect(state.serverSync.notices.map((n) => n.kind).toSet(), {
+          SyncNoticeKind.droppedAfterRestart,
+          SyncNoticeKind.viewChanged,
+        });
+        await tester.tap(find.byKey(const Key('sync-banner')));
+        await tester.pumpAndSettle();
+        expect(find.text(l10n.syncNoticeDropped), findsOneWidget);
+        expect(find.text(l10n.syncNoticeViewChanged), findsOneWidget);
+      });
+
       testWidgets('the server out of reach: the banner says the changes stay '
           'and go later', (tester) async {
         final state = await start(tester, locale);
@@ -395,6 +472,7 @@ class _Server implements ServerHttp {
   bool offline = false;
   bool expired = false;
   bool withKitchen = true;
+  List<(String, String)> reportsInSnapshot = const [];
   bool _revoked = false;
   String? rejectNamed;
   Completer<void>? gate;
@@ -463,6 +541,15 @@ class _Server implements ServerHttp {
           [
             row('homes.home', home, 'House'),
             if (withKitchen) row('rooms.room', kitchen, 'Kitchen'),
+            for (final (id, title) in reportsInSnapshot)
+              {
+                't': 'reports.report',
+                'h': home,
+                'id': id,
+                'f': {
+                  'title': [title, '0193a1b2c3d40001', device],
+                },
+              },
             {'covers': 5},
           ].map((l) => '${jsonEncode(l)}\n').join(),
         ),
@@ -486,7 +573,7 @@ class _Server implements ServerHttp {
         'head': 6,
         'results': [
           for (var i = 0; i < ops.length; i++)
-            names[i] == rejectNamed
+            rejectNamed != null && names[i] == rejectNamed
                 ? {'i': i, 'status': 'rejected', 'code': 'forbidden'}
                 : {'i': i, 'status': 'applied'},
         ],

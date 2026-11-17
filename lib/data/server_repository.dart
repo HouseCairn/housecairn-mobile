@@ -99,7 +99,9 @@ extension ServerSettings on Repository {
   /// 2. a row absent from the snapshot with the mark was deleted, then
   ///    purged, on the server: it is deleted here with its clocks and what
   ///    `extra` keeps of it, its waiting changes are dropped (a long text of
-  ///    them goes to the other versions), and it is listed;
+  ///    them goes to the other versions), and it is listed (one notice a
+  ///    row; the reports of a home, which a changed view takes from a
+  ///    member, make one notice for the home);
   /// 3. a row absent without the mark never reached the server: it is kept
   ///    and sent again as a `put` of every field with its clock;
   /// 4. the changes still waiting for the rows of 1 and 3 are pushed as
@@ -113,6 +115,7 @@ extension ServerSettings on Repository {
     final seen = await serverSeenIn(homeId);
     final key = uuidBytes(homeId);
     final resend = <(String, String)>{};
+    var reportsDropped = false;
     final now = _now();
     await db.transaction(() async {
       for (final table in homeTables) {
@@ -132,6 +135,13 @@ extension ServerSettings on Repository {
             continue;
           }
           await _dropRow(table, type, id, homeId, now);
+          if (type == entityOf['reports']) {
+            // A report gone from the snapshot is most often one the server
+            // no longer gives this member (a changed view): one notice for
+            // all of them, below, that does not say it was deleted.
+            reportsDropped = true;
+            continue;
+          }
           notices.add(
             SyncNotice(
               SyncNoticeKind.droppedAfterRestart,
@@ -140,6 +150,11 @@ extension ServerSettings on Repository {
             ),
           );
         }
+      }
+      if (reportsDropped) {
+        notices.add(
+          SyncNotice(SyncNoticeKind.viewChanged, entity: entityOf['reports']),
+        );
       }
       await markServerSeen([
         for (final (type, id) in present) (type, homeId, id),

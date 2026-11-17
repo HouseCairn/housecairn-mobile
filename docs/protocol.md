@@ -347,7 +347,10 @@ sets it then). After 410 the phone reads the snapshot, then for every row of the
 2. a row absent from the snapshot that has the mark was deleted, then purged, on the server: the
    phone deletes it and its local files, and drops the operations of it still waiting to be
    sent, a `restore` included; a long text so dropped goes to the "other version" list, and the
-   app lists what it dropped. Its children are not deleted with it: each follows its own rule.
+   app lists what it dropped, one line a row, except the reports: the server stops sending a
+   member the reports they may not see when their view changes (it then answers 410), so the
+   reports dropped in one restart make a single line, "What you can see in this home changed.
+   This phone was updated.", whatever their number and their homes. Its children are not deleted with it: each follows its own rule.
    A child the server had seen is gone from the snapshot too, and goes by this rule; a child
    made on the phone and never sent goes by rule 3, and the server refuses it
    (`invalid_reference`, its parent being gone), so the phone keeps it aside with that reason,

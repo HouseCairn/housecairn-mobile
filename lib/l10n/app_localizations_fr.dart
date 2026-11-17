@@ -2801,6 +2801,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Un élément supprimé sur le serveur a été retiré de ce téléphone.';
 
   @override
+  String get syncNoticeViewChanged =>
+      'Ce que vous pouvez voir dans ce logement a changé. Ce téléphone a été mis à jour.';
+
+  @override
   String get syncNoticesRead => 'Marquer comme lu';
 
   @override

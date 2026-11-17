@@ -21,6 +21,12 @@ enum SyncNoticeKind {
   /// snapshot (deleted, then purged, there): the phone deleted it and
   /// dropped its waiting changes (docs/protocol.md section 2.10, rule 2).
   droppedAfterRestart,
+
+  /// After a server answered 410, reports the phone had were no longer in
+  /// its snapshot: the view of this member changed (read only, or writing
+  /// again, or a new membership), and the server gives them the reports they
+  /// may see. One notice for all of them, not one a report.
+  viewChanged,
 }
 
 class SyncNotice {

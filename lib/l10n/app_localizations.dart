@@ -4544,6 +4544,12 @@ abstract class AppLocalizations {
   /// **'Something deleted on the server was removed from this phone.'**
   String get syncNoticeDropped;
 
+  /// Notice: after starting again from the server's snapshot, reports this member no longer sees (or was not given) were removed from this phone (protocol 2.10, rule 2).
+  ///
+  /// In en, this message translates to:
+  /// **'What you can see in this home changed. This phone was updated.'**
+  String get syncNoticeViewChanged;
+
   /// Button: the notices of the sync were read.
   ///
   /// In en, this message translates to:

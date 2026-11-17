@@ -64,6 +64,7 @@ class SyncEngine {
     var received = 0;
     var cursor = await repository.syncCursor();
     var restarted = false;
+    var viewNoticed = false;
     while (true) {
       final page = await transport.pull(after: cursor);
       if (page.restart) {
@@ -81,7 +82,14 @@ class SyncEngine {
         // Rows the phone holds that the snapshot does not have: deleted and
         // purged there, or never sent (docs/protocol.md section 2.10).
         for (final MapEntry(key: home, value: rows) in page.complete.entries) {
-          notices.addAll(await repository.reconcileAfterRestart(home, rows));
+          for (final n in await repository.reconcileAfterRestart(home, rows)) {
+            // One notice for the whole restart, whatever the homes.
+            if (n.kind == SyncNoticeKind.viewChanged) {
+              if (viewNoticed) continue;
+              viewNoticed = true;
+            }
+            notices.add(n);
+          }
         }
       }
       received += page.operations.length;
