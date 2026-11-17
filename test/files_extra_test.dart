@@ -357,6 +357,48 @@ void main() {
       expect(await columnOf('photos', 'image', web), isNotNull);
     });
 
+    test('the row is dated as the value was written: updated_at is raised '
+        'to the clock of the field and never lowered', () async {
+      server.addWebPhoto(web, jpeg(), roomId: room);
+      await sync();
+      Future<int> updatedAt() async =>
+          (await repo.db
+                      .customSelect(
+                        'SELECT updated_at AS v FROM photos WHERE id = ?',
+                        variables: [Variable<Uint8List>(uuidBytes(web))],
+                      )
+                      .getSingle())
+                  .data['v']
+              as int;
+      final written =
+          (await repo.db
+                      .customSelect(
+                        'SELECT hlc FROM field_clock WHERE row_id = ? AND '
+                        "field = 'image'",
+                        variables: [Variable<Uint8List>(uuidBytes(web))],
+                      )
+                      .getSingle())
+                  .data['hlc']
+              as String;
+      final at = Hlc.parse(written) >> 16;
+
+      await earlierBuild('rooms.photo', 'photos', 'image', web);
+      await repo.db.customStatement(
+        'UPDATE photos SET updated_at = 0 WHERE id = ?',
+        [uuidBytes(web)],
+      );
+      expect(await repo.healExtra(), 1);
+      expect(await updatedAt(), at);
+
+      await earlierBuild('rooms.photo', 'photos', 'image', web);
+      await repo.db.customStatement(
+        'UPDATE photos SET updated_at = ? WHERE id = ?',
+        [at + 5000, uuidBytes(web)],
+      );
+      expect(await repo.healExtra(), 1);
+      expect(await updatedAt(), at + 5000);
+    });
+
     test('the other fields kept in extra stay, only the reference leaves '
         'it', () async {
       server.addWebPhoto(web, jpeg(), roomId: room);
