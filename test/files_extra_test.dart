@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:drift/drift.dart' show Variable;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/core/clock.dart';
+import 'package:housecairn_mobile/core/hlc.dart';
 import 'package:housecairn_mobile/data/database.dart' show uuidBytes;
 import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/domain/file_reference.dart';
@@ -284,6 +285,36 @@ void main() {
       await sync();
       expect(await columnOf('photos', 'image', web), isNull);
     });
+
+    for (final (label, value) in <(String, Object?)>[
+      ('a text that is no reference', 'garbage'),
+      ('an empty object', <String, Object?>{}),
+      ('an object without a type', {'size': 3}),
+    ]) {
+      test('a value the reference parser refuses stays in extra, '
+          'whatever the column: $label', () async {
+        server.addWebPhoto(web, jpeg(), roomId: room);
+        await sync();
+        await earlierBuild('rooms.photo', 'photos', 'image', web);
+        await repo.db.customStatement(
+          'UPDATE extra SET json = ? WHERE row_id = ?',
+          [
+            jsonEncode({'image': value, 'colour': 'teal'}),
+            uuidBytes(web),
+          ],
+        );
+        server.log.clear();
+
+        await sync();
+
+        expect(await columnOf('photos', 'image', web), isNull);
+        expect(await repo.extraFields('rooms.photo', web), {
+          'image': value,
+          'colour': 'teal',
+        });
+        expect(gets(), isEmpty);
+      });
+    }
 
     test('the other fields kept in extra stay, only the reference leaves '
         'it', () async {

@@ -783,9 +783,15 @@ extension SyncRepository on Repository {
           kept.remove(field);
           continue;
         }
+        // Only what the reference parser accepts moves: any other value
+        // stays in `extra`, as it came.
+        final text = value is Map ? jsonEncode(value) : value;
+        if (text is! String || FileReference.parse(text, rowId: id) == null) {
+          continue;
+        }
         final Object? held;
         try {
-          held = _fromWire(column, value is Map ? jsonEncode(value) : value);
+          held = _fromWire(column, text);
         } on Object {
           continue;
         }
