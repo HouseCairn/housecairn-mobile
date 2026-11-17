@@ -1230,8 +1230,10 @@ extension BudgetRepository on Repository {
 
   /// The reports a task was made from, the latest first
   /// (`reports_of_task` of `reports/services.py`): the ones not deleted, of
-  /// the home of the task, whatever their status. The app has no read-only
-  /// role, so every report of the home is visible.
+  /// the home of the task, whatever their status. Gap with the web: there a
+  /// read-only member sees only the reports they made (`visible_reports`);
+  /// sync sends every report of the home to the phone, and the app does not
+  /// hold the author, so it shows them all and flags the photo for all.
   Future<List<ReportRow>> reportsOfTask(String taskId) async {
     final owner = await task(taskId);
     if (owner == null) return [];

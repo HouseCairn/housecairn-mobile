@@ -202,7 +202,9 @@ Homes and Settings shows the current home.
    title of the report, which opens it, and its photo, which opens full width, or the plain
    tile Photo not on this phone until its file has come; the reports are those of the task's
    home that are not deleted, whatever their status, as the web's `reports_of_task`; the web
-   adds who reported it, which the app does not hold), then When (repetition, due date,
+   adds who reported it, which the app does not hold; and there a read-only member sees only the
+   reports they made (`visible_reports`), while sync sends every report of the home to the phone
+   and the app, which does not hold the author, shows them all and flags the photo for all), then When (repetition, due date,
    first date of a postponed one, masking, the next three dates), How to do it, Details
    (duration, budgets, contractor, notes), Cost (estimate, part from the stock, a year, paid so
    far), materials, photos of the item or the room, Photos and files (lot 4d: the photos as a
