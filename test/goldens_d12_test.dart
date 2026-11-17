@@ -32,7 +32,7 @@ void main() {
     PackageInfo.setMockInitialValues(
       appName: 'Housecairn',
       packageName: 'app.example',
-      version: '0.5.0',
+      version: '0.5.1',
       buildNumber: '1',
       buildSignature: '',
     );

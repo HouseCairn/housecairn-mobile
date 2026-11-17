@@ -1,7 +1,7 @@
 name: housecairn_mobile
 description: "Housecairn for iOS and Android: home upkeep and works, on the phone."
 publish_to: 'none'
-version: 0.5.0+1
+version: 0.5.1+1
 
 environment:
   sdk: ^3.14.0
