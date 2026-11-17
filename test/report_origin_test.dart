@@ -54,13 +54,17 @@ void main() {
     String locale = 'en',
     double width = 360,
     double textScale = 1,
+    Future<void> Function(Repository, ReportOrigin)? alter,
   }) async {
     await onPhone(tester, width: width, height: 1600, textScale: textScale);
     late ReportOrigin data;
     await pumpApp(
       tester,
       locale: locale,
-      seed: (r) async => data = await ReportOrigin.seed(r),
+      seed: (r) async {
+        data = await ReportOrigin.seed(r);
+        await alter?.call(r, data);
+      },
     );
     await openScreen(tester, TaskScreen(homeId: data.home, taskId: task(data)));
     return data;
@@ -158,6 +162,21 @@ void main() {
       final d = await openTask(tester, (d) => d.noPhoto);
       expect(find.byKey(Key('task-report-${d.reportNoPhoto}')), findsOne);
       expect(find.byType(ReportPhoto), findsNothing);
+    });
+
+    testWidgets('a photo empty in the database shows neither the photo nor '
+        'the tile', (tester) async {
+      final d = await openTask(
+        tester,
+        (d) => d.withPhoto,
+        alter: (r, d) => r.db.customStatement(
+          "UPDATE reports SET photo = '' WHERE id = ?",
+          [uuidBytes(d.reportWithPhoto)],
+        ),
+      );
+      expect(find.byKey(Key('task-report-${d.reportWithPhoto}')), findsOne);
+      expect(find.byType(ReportPhoto), findsNothing);
+      expect(find.byKey(const Key('report-photo-missing')), findsNothing);
     });
 
     testWidgets('a deleted report does not show, nor the heading', (
