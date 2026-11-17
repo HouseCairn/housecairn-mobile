@@ -399,6 +399,26 @@ void main() {
       expect(await updatedAt(), at + 5000);
     });
 
+    test('a limit, kept as it is: an erasure received before this fix, '
+        'with the object left in extra, is not told from a value never '
+        'written, and the reference comes back', () async {
+      server.addWebPhoto(web, jpeg(), roomId: room);
+      await sync();
+      await earlierBuild('rooms.photo', 'photos', 'image', web);
+      // The erasure an earlier build applied: its clock is the newer one.
+      await repo.db.customStatement(
+        "UPDATE field_clock SET hlc = ? WHERE row_id = ? AND field = 'image'",
+        [
+          Hlc.format((clock.now().millisecondsSinceEpoch + 1000) << 16),
+          uuidBytes(web),
+        ],
+      );
+
+      await sync();
+
+      expect(await columnOf('photos', 'image', web), isNotNull);
+    });
+
     test('the other fields kept in extra stay, only the reference leaves '
         'it', () async {
       server.addWebPhoto(web, jpeg(), roomId: room);

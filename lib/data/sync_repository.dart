@@ -746,9 +746,10 @@ extension SyncRepository on Repository {
   /// again.
   ///
   /// The reference goes in as JSON text, as [_applyOne] writes one, and a
-  /// value [_fromWire] refuses stays in `extra`. A column that holds a value
-  /// is left alone: it was written after the value in `extra`, or by the
-  /// person. Nothing is logged: this is not a
+  /// value [FileReference.parse] or [_fromWire] refuses stays in `extra`. A
+  /// column that holds a value is left alone, it was written after the value
+  /// in `extra` or by the person, and the copy in `extra` is dropped. A line
+  /// that cannot be read is skipped. Nothing is logged: this is not a
   /// local change, and the server has the value already. Returns the number
   /// of fields moved.
   Future<int> healExtra() async {

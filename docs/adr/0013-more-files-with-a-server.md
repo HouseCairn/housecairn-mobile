@@ -64,9 +64,13 @@ never came back, and the scan of the files, which reads `WHERE <column> IS NOT N
 fetched nothing: a phone updated from such a build showed no photo. `healExtra`
 (`lib/data/sync_repository.dart`) gives to their column, for the five fields of `fileHolders`,
 the reference kept in `extra` (an object, written as JSON text as `_applyOne` writes it) and
-takes it out of `extra`; the other fields of `extra` stay. A column that holds a value is left
-alone: it was written after, by the feed or by the person, so the value in `extra` never
-overwrites a newer one. Nothing is logged: it is no local change and the server has the value.
+takes it out of `extra`; the other fields of `extra` stay. Only a value that
+`FileReference.parse` accepts moves; any other stays in `extra` as it came. A column that holds a
+value is left alone, since it was written after, by the feed or by the person, and the copy in
+`extra` is dropped all the same: kept, it would come back if the column were emptied later. For
+the same reason `_applyOne` takes from `extra` every field it has just written in its column, a
+file reference or not. A line of `extra` that cannot be read is skipped, and the others still
+heal. Nothing is logged: it is no local change and the server has the value.
 It runs at the start of `scanFiles`, because that is what every round, and the count of Settings,
 read first, so that no migration, no schema version and no second place to remember are needed,
 and the heal costs one read of a small table. It is limited to the file fields: the other known
@@ -74,6 +78,14 @@ fields are left as they are, since an empty column there may be a value cleared 
 phone cannot tell it from a value never written (`extra` keeps no clock of its own). A local
 operation still waiting with the first form of a reference (no `file`, no `sha256`) is completed
 before it goes, as in ADR 0012, and is tested with it.
+
+**Known limit.** A phone that stayed on a build of lot 4c or 4d, kept the object in `extra`, and
+then received an erasure from the server (column `NULL`, a newer clock) before this fix, gets the
+erased reference back: `extra` keeps no clock of its own, and the heal cannot tell that column from
+a value never written. The snapshot of the server is not read again for this case, which only
+concerns test builds a few hours old. A phone that updates from such a build to this one and
+receives the erasure afterwards leaves no copy in `extra`. A named test keeps this behaviour
+(`test/files_extra_test.dart`, "a limit, kept as it is").
 
 ## Consequences
 
