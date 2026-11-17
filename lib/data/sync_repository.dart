@@ -711,6 +711,85 @@ extension SyncRepository on Repository {
   Future<Map<String, Object?>> extraFields(String entity, String id) =>
       _extraOf(entity, id);
 
+  /// Gives to its column the file reference kept in `extra` (the five fields
+  /// of [fileHolders]) and takes it out of `extra` (docs/adr/0013,
+  /// "References received by an earlier build"). A field lands in `extra` when the build
+  /// that received it could not put it in its column: before the files, a
+  /// file reference came as an object and a text column refused it. The
+  /// cursor of the home is past those operations, so nothing brings them
+  /// again.
+  ///
+  /// The reference goes in as JSON text, as [_applyOne] writes one, and a
+  /// value [_fromWire] refuses stays in `extra`. A column that holds a value
+  /// is left alone: it was written after the value in `extra`, or by the
+  /// person. Nothing is logged: this is not a
+  /// local change, and the server has the value already. Returns the number
+  /// of fields moved.
+  Future<int> healExtra() async {
+    var moved = 0;
+    final rows = await db
+        .customSelect('SELECT entity, row_id, json FROM extra')
+        .get();
+    for (final r in rows) {
+      final entity = r.data['entity'] as String;
+      final table = tableOfEntity[entity];
+      if (table == null) continue;
+      final id = Uuid.unparse(r.data['row_id'] as Uint8List);
+      final fields = (jsonDecode(r.data['json'] as String) as Map)
+          .cast<String, Object?>();
+      final columns = _columns(table);
+      final row =
+          (await db
+                  .customSelect(
+                    'SELECT * FROM $table WHERE id = ?',
+                    variables: [Variable<Uint8List>(uuidBytes(id))],
+                  )
+                  .getSingleOrNull())
+              ?.data;
+      if (row == null) continue;
+      final kept = {...fields};
+      for (final MapEntry(key: field, :value) in fields.entries) {
+        final column = columns[field];
+        if (column == null || fileHolders[table] != field) continue;
+        if (row[field] != null) continue;
+        final Object? held;
+        try {
+          held = _fromWire(column, value is Map ? jsonEncode(value) : value);
+        } on Object {
+          continue;
+        }
+        if (held == null) continue;
+        final clock = await _clocksOf(entity, id);
+        final written = clock[field]?.hlc;
+        await db.customUpdate(
+          'UPDATE $table SET $field = ?'
+          '${written == null ? '' : ', updated_at = MAX(updated_at, ?)'} '
+          'WHERE id = ?',
+          variables: [
+            Variable<Object>(held),
+            if (written != null) Variable<int>(Hlc.parse(written) >> 16),
+            Variable<Uint8List>(uuidBytes(id)),
+          ],
+        );
+        kept.remove(field);
+        moved++;
+      }
+      if (kept.length == fields.length) continue;
+      if (kept.isEmpty) {
+        await db.customStatement(
+          'DELETE FROM extra WHERE entity = ? AND row_id = ?',
+          [entity, uuidBytes(id)],
+        );
+      } else {
+        await db.customStatement(
+          'UPDATE extra SET json = ? WHERE entity = ? AND row_id = ?',
+          [jsonEncode(kept), entity, uuidBytes(id)],
+        );
+      }
+    }
+    return moved;
+  }
+
   /// Applies the operations kept in `pending` whose type this version now
   /// knows (after an update).
   Future<void> retryPending() async {

@@ -164,9 +164,13 @@ extension FileSyncRepository on Repository {
   /// Makes the list of files agree with the rows: a file of a row of a home
   /// of the server gets its entry (to send when the phone holds it, to fetch
   /// when it does not), a reference of the first builds is completed, and an
-  /// entry of a row that is gone is dropped. Reads the rows and `stat`s the
-  /// files, writes only the entries that change.
+  /// entry of a row that is gone is dropped. Gives first to their column the
+  /// references an earlier build kept in `extra` ([healExtra]). Reads the
+  /// rows and `stat`s the files, writes only the entries that change.
   Future<void> scanFiles() async {
+    // A reference an earlier build kept in `extra` is read first: its row
+    // has no file for the scan below until it is in its column.
+    await healExtra();
     final entries = {
       for (final r in await db.customSelect('SELECT * FROM file_sync').get())
         r.data['file_id'] as String: r.data,

@@ -173,35 +173,21 @@ void main() {
       });
       const report = '9c3f1a4c-9d61-4eaf-9a3c-4d5e6f7a8b93';
       const label = 'ad40b25d-ae72-4fb0-8b4d-5e6f7a8b9ca4';
-      server.addWebFileRow('reports.report', report, bytes, {
-        'title': 'Leak',
-      });
+      server.addWebFileRow('reports.report', report, bytes, {'title': 'Leak'});
       server.addWebFileRow('stock.article', label, bytes, {'name': 'Filter'});
       await sync();
-      await earlierBuild(
-        'projects.projectfile',
-        'project_files',
-        'file',
-        web,
-      );
-      await earlierBuild(
-        'tasks.attachment',
-        'task_attachments',
-        'file',
-        other,
-      );
+      await earlierBuild('projects.projectfile', 'project_files', 'file', web);
+      await earlierBuild('tasks.attachment', 'task_attachments', 'file', other);
       await earlierBuild('reports.report', 'reports', 'photo', report);
       await earlierBuild('stock.article', 'articles', 'label', label);
       server.log.clear();
 
       await sync();
 
-      expect(gets()..sort(), [
-        'GET $web',
-        'GET $other',
-        'GET $report',
-        'GET $label',
-      ]..sort());
+      expect(
+        gets()..sort(),
+        ['GET $web', 'GET $other', 'GET $report', 'GET $label']..sort(),
+      );
       for (final (table, column, id) in [
         ('project_files', 'file', web),
         ('task_attachments', 'file', other),
@@ -248,7 +234,10 @@ void main() {
       final extra = await repo.extraFields('rooms.photo', web);
       await repo.db.customStatement(
         'UPDATE extra SET json = ? WHERE row_id = ?',
-        [jsonEncode({...extra, 'colour': 'teal'}), uuidBytes(web)],
+        [
+          jsonEncode({...extra, 'colour': 'teal'}),
+          uuidBytes(web),
+        ],
       );
 
       await sync();
@@ -262,6 +251,7 @@ void main() {
       await sync();
       await earlierBuild('rooms.photo', 'photos', 'image', web);
       server.pushed.clear();
+      server.log.clear();
 
       await sync();
       await sync();

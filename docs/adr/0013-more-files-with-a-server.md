@@ -57,6 +57,24 @@ missing, so that the file is fetched all the same.
 a home does not exist in the app yet (docs/spec.md, "Export and import"); the erasure of a home
 removes its directory, the three new kinds of files with it.
 
+**References received by an earlier build.** A build before the files received the reference of
+a file as an object; its text column refused it and the value went to `extra` as an unknown
+field, the column staying `NULL`. The cursor of the home was past those operations, so the row
+never came back, and the scan of the files, which reads `WHERE <column> IS NOT NULL`, counted and
+fetched nothing: a phone updated from such a build showed no photo. `healExtra`
+(`lib/data/sync_repository.dart`) gives to their column, for the five fields of `fileHolders`,
+the reference kept in `extra` (an object, written as JSON text as `_applyOne` writes it) and
+takes it out of `extra`; the other fields of `extra` stay. A column that holds a value is left
+alone: it was written after, by the feed or by the person, so the value in `extra` never
+overwrites a newer one. Nothing is logged: it is no local change and the server has the value.
+It runs at the start of `scanFiles`, because that is what every round, and the count of Settings,
+read first, so that no migration, no schema version and no second place to remember are needed,
+and the heal costs one read of a small table. It is limited to the file fields: the other known
+fields are left as they are, since an empty column there may be a value cleared later and the
+phone cannot tell it from a value never written (`extra` keeps no clock of its own). A local
+operation still waiting with the first form of a reference (no `file`, no `sha256`) is completed
+before it goes, as in ADR 0012, and is tested with it.
+
 ## Consequences
 
 - The photos of reports, the labels and the attachments made on the site come to the phone, and
@@ -65,4 +83,4 @@ removes its directory, the three new kinds of files with it.
   label of an article yet: it keeps their reference in `extra` and no row claims the file sent,
   which its nightly purge removes after 7 days. The e2e job checks neither.
 - The tests of these three kinds are `test/files_more_sync_test.dart`, against the scripted
-  server.
+  server; those of the references kept in `extra` are `test/files_extra_test.dart`.
