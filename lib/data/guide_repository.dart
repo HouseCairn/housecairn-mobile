@@ -156,10 +156,19 @@ extension GuideRepository on Repository {
       t.stepId,
   };
 
-  Future<void> _storeTicks(String homeId, Iterable<String> stepIds) async {
+  /// Stores the ticks of [stepIds] and returns the ids this call really
+  /// inserted. A tick that is there already is left as it is (`INSERT OR
+  /// IGNORE`, so that the time of the first one stays): two calls at once
+  /// each find the same steps unticked, and only the call that wrote a tick
+  /// reports it.
+  Future<List<String>> _storeTicks(
+    String homeId,
+    Iterable<String> stepIds,
+  ) async {
     final now = _now();
+    final inserted = <String>[];
     for (final id in stepIds) {
-      await db.customInsert(
+      final rows = await db.customUpdate(
         'INSERT OR IGNORE INTO step_ticks (home_id, step_id, ticked_at) '
         'VALUES (?, ?, ?)',
         variables: [
@@ -168,11 +177,14 @@ extension GuideRepository on Repository {
           Variable<int>(now),
         ],
       );
+      if (rows > 0) inserted.add(id);
     }
+    return inserted;
   }
 
   /// Stores a tick for each step whose state is true now and that has none;
-  /// the ids ticked (`states.tick`). Only the example home has ticks. A tick
+  /// the ids this call ticked (`states.tick`; a step another call at once ticked
+  /// first is not among them). Only the example home has ticks. A tick
   /// is never removed: a step done stays done, even if its state goes away
   /// afterwards (a room deleted, a task marked done and then undone).
   Future<List<String>> tickGuide(Guide guide, String homeId) async {
@@ -182,13 +194,13 @@ extension GuideRepository on Repository {
       for (final id in trueSteps(guide, await guideRows(guide, homeId)))
         if (!already.contains(id)) id,
     ];
-    await _storeTicks(homeId, made);
-    return made;
+    return _storeTicks(homeId, made);
   }
 
   /// Ticks [stepId], a step of [guide] that has no state of its own
   /// (`manual`), on the example home (`guide.services.tick_by_hand`).
-  /// Whether a tick was made (`false` when it was there already).
+  /// Whether this call made the tick (`false` when it was there already,
+  /// also when another call at once made it first).
   Future<bool> tickByHand(Guide guide, String homeId, String stepId) async {
     if (!await isExampleHome(homeId)) {
       throw ArgumentError.value(homeId, 'homeId', 'Only the example home.');
@@ -202,8 +214,7 @@ extension GuideRepository on Repository {
       throw ArgumentError.value(stepId, 'stepId', 'Not a step ticked by hand.');
     }
     if ((await guideTicks(homeId)).contains(stepId)) return false;
-    await _storeTicks(homeId, [stepId]);
-    return true;
+    return (await _storeTicks(homeId, [stepId])).isNotEmpty;
   }
 
   // ---------- catching up ----------
