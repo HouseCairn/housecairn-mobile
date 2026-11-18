@@ -70,3 +70,8 @@ flutter:
     # The cairn of the bar of the app (design/brand/housecairn-icon.svg of the
     # web, drawn at 1x, 2x and 3x by tool/generate_icons.py).
     - assets/brand/housecairn-icon.png
+    # The interactive guide and the glossary its sentences cite, copies of the
+    # web files (tool/web_alignment.json; web ADR 0084). Read from design/,
+    # where the web keeps them, so that the bytes are the web's.
+    - design/guide.json
+    - design/glossary.json

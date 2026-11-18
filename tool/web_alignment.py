@@ -15,6 +15,12 @@ the app carries: the recurrence vectors and the task templates byte for byte, th
 tokens value by value (every web token is in `design/tokens.json` with the same value;
 the app may add its own). It fails on any difference. CI runs it on every pull request.
 
+Three more elements are copies of web files, compared byte for byte like the task templates:
+the interactive guide (`design/guide.json`), the glossary its sentences cite
+(`design/glossary.json`) and the vectors of the states that tick its steps
+(`tests/fixtures/guide_states.json` of the web, `test/fixtures/guide_states.json` here). Web
+ADR 0084 makes the web the only source of the three.
+
 The fifth element, `budget`, is the budget the web computes from the neutral rows of
 `test/fixtures/budget_fixture.json` (tool/budget_figures.py, run like the vector generator,
 in the web environment of the pinned commit); `test/budget_web_test.dart` loads the same rows
@@ -38,6 +44,13 @@ would differ does it write them, move the pin of every element to the release an
 source header of the vectors, which names the commit, is not a difference by itself. It never
 changes Dart code: when a rule of the web changed, the regenerated vectors make `flutter test`
 fail, and that is the signal.
+
+    python3 tool/web_alignment.py update --web <clone> --release vX.Y.Z --only guide [--only ...]
+
+`--only` limits `update` to the elements named: the others are neither regenerated nor moved,
+and keep their own pin. It is also how an element enters the pin: `update --only` adds an
+element that `tool/web_alignment.json` does not have yet (its files and how it is compared are
+in NEW_ELEMENTS below) at the release given, whereas `check` refuses a missing pin.
 
     python3 tool/web_alignment.py verify-patch <file>   # a patch limited to ALLOWED_PATHS
     python3 tool/web_alignment.py allowed-paths
@@ -69,7 +82,31 @@ BUDGET_GENERATOR = ROOT / "tool" / "budget_figures.py"
 BUDGET_FIXTURE = ROOT / "test" / "fixtures" / "budget_fixture.json"
 SPEC = ROOT / "docs" / "spec.md"
 WEB_REPOSITORY = "HouseCairn/housecairn"
-ELEMENTS = ("recurrence", "task_templates", "design_tokens", "web_parity", "budget")
+ELEMENTS = (
+    "recurrence", "task_templates", "design_tokens", "web_parity", "budget",
+    "guide", "glossary", "guide_states",
+)
+# Copies of a web file, compared byte for byte.
+COPIES = ("task_templates", "guide", "glossary", "guide_states")
+# What `update --only` writes for an element the pin does not have yet (with the release and
+# commit given). Once in tool/web_alignment.json, the element is read from there.
+NEW_ELEMENTS = {
+    "guide": {
+        "web": ["design/guide.json"],
+        "mobile": ["design/guide.json"],
+        "how": "copy of the web file (web ADR 0084); compared byte for byte",
+    },
+    "glossary": {
+        "web": ["design/glossary.json"],
+        "mobile": ["design/glossary.json"],
+        "how": "copy of the web file, the terms the guide cites (web ADR 0084); compared byte for byte",
+    },
+    "guide_states": {
+        "web": ["tests/fixtures/guide_states.json"],
+        "mobile": ["test/fixtures/guide_states.json"],
+        "how": "copy of the vectors the web writes from guide.states (web ADR 0084); compared byte for byte",
+    },
+}
 UNIT = {"recurrence": "vector lines", "budget": "lines of figures"}
 RELEASE = re.compile(r"^v\d+\.\d+\.\d+$")
 COMMIT = re.compile(r"^[0-9a-f]{40}$")
@@ -97,7 +134,8 @@ def show(web: Path, commit: str, path: str) -> bytes:
     return git(web, "show", f"{commit}:{path}")
 
 
-def load_reference() -> dict:
+def load_reference(new: tuple[str, ...] = ()) -> dict:
+    """The pin file, checked. `new` names elements that may still be missing (`update --only` adds them)."""
     if not REFERENCE.exists():
         raise AlignmentError(f"{REFERENCE.relative_to(ROOT)} is missing: the pin of the web release is required")
     reference = json.loads(REFERENCE.read_text(encoding="utf-8"))
@@ -106,15 +144,19 @@ def load_reference() -> dict:
     for name in ELEMENTS:
         element = reference["elements"].get(name)
         if element is None:
+            if name in new and name in NEW_ELEMENTS:
+                continue
             raise AlignmentError(f"{REFERENCE.name}: no pin for {name}")
         if not RELEASE.match(element.get("release", "")) or not COMMIT.match(element.get("commit", "")):
             raise AlignmentError(f"{REFERENCE.name}: {name} needs a release vX.Y.Z and a full commit")
-    if set(reference["elements"]) != set(ELEMENTS):
+    if not set(reference["elements"]) <= set(ELEMENTS):
         raise AlignmentError(f"{REFERENCE.name}: the elements are exactly {', '.join(ELEMENTS)}")
     return reference
 
 
 def write_reference(reference: dict) -> None:
+    # The elements in the order of ELEMENTS, so that an added one always lands at the same place.
+    reference["elements"] = {n: reference["elements"][n] for n in ELEMENTS if n in reference["elements"]}
     REFERENCE.write_text(json.dumps(reference, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
@@ -251,11 +293,14 @@ def check(web: Path) -> int:
                     f"{name}: {element['mobile'][0]} is not the file generated at {element['release']} "
                     f"({what}); regenerate it, never edit it"
                 )
-        elif name == "task_templates":
+        elif name in COPIES:
             expected = show(web, commit, element["web"][0])
             carried_file = ROOT / element["mobile"][0]
             if not carried_file.exists() or expected != carried_file.read_bytes():
-                failures.append(f"task_templates: {element['mobile'][0]} is not {element['web'][0]} of {element['release']}")
+                failures.append(
+                    f"{name}: {element['mobile'][0]} is not {element['web'][0]} of {element['release']} "
+                    "byte for byte; copy it with `update`, never edit it"
+                )
         elif name == "web_parity":
             parity_file = ROOT / element["mobile"][0]
             if not parity_file.exists():
@@ -287,15 +332,21 @@ def check(web: Path) -> int:
     return 0
 
 
-def update(web: Path, release: str, report_path: Path | None) -> int:
-    reference = load_reference()
+def update(web: Path, release: str, report_path: Path | None, only: tuple[str, ...] = ()) -> int:
+    reference = load_reference(new=only)
     commit = resolve(web, release)
+    names = [name for name in ELEMENTS if not only or name in only]
     results = []
-    for name in ELEMENTS:
-        element = reference["elements"][name]
+    for name in names:
+        element = reference["elements"].get(name)
+        added = element is None
+        if added:
+            # An element the pin does not have yet enters it at this release.
+            element = {"release": release, "commit": commit, **json.loads(json.dumps(NEW_ELEMENTS[name]))}
+            reference["elements"][name] = element
         old = element["commit"]
-        web_changed = changed_files(web, old, commit, element["web"])
-        notes: list[str] = []
+        web_changed = [] if added else changed_files(web, old, commit, element["web"])
+        notes: list[str] = ["new element, pinned at this release"] if added else []
         mobile_file = ROOT / element["mobile"][0]
         before = mobile_file.read_bytes() if mobile_file.exists() else b""
         header_only = False
@@ -306,7 +357,7 @@ def update(web: Path, release: str, report_path: Path | None) -> int:
                 count = vectors_changed(before, after)
                 header_only = count == 0
                 notes.append(f"{count} {UNIT[name]} changed" if count else "source header only, every line unchanged")
-        elif name == "task_templates":
+        elif name in COPIES:
             after = show(web, commit, element["web"][0])
         elif name == "web_parity":
             # Measured in a browser: never regenerated here. A change of the files that draw the
@@ -323,34 +374,38 @@ def update(web: Path, release: str, report_path: Path | None) -> int:
                 json.loads(show(web, old, element["web"][0])),
             )
             after = dump_tokens(merged)
-        results.append((name, element, old, web_changed, notes, mobile_file, before, after, header_only))
+        results.append((name, element, old, web_changed, notes, mobile_file, before, after, header_only, added))
 
     # The app differs only when a file it carries would change. A new commit of the web whose
     # vectors, templates and tokens are the same is not a gap: nothing is written, no pull request
     # is opened, and the pin stays where it is (`check` compares each element with its own pinned
     # commit, so the app stays consistent). The source header of the vectors, which names the
-    # commit, does not count by itself.
-    changed = any(after != before and not header_only for *_, before, after, header_only in results) or any(
-        name == "web_parity" and web_changed for name, _, _, web_changed, *_ in results
-    )
+    # commit, does not count by itself. An element added to the pin is a change.
+    changed = any(
+        (after != before and not header_only) or added for *_, before, after, header_only, added in results
+    ) or any(name == "web_parity" and web_changed for name, _, _, web_changed, *_ in results)
     if changed:
         lines = [f"Web release: [{release}](https://github.com/{WEB_REPOSITORY}/releases/tag/{release}) (`{commit}`).", ""]
     else:
-        pins = ", ".join(sorted({e["release"] for e in reference["elements"].values()}))
+        pins = ", ".join(sorted({reference["elements"][n]["release"] for n in names}))
         lines = [
             f"Web release {release} (`{commit}`) checked, nothing to port: no file the app carries differs.",
             f"The pin stays at {pins}; it moves with the next release that changes a ported file.",
             "",
         ]
-    for name, element, old, web_changed, notes, mobile_file, before, after, header_only in results:
+    for name, element, old, web_changed, notes, mobile_file, before, after, header_only, added in results:
         if changed:
             moved = f"{element['release']} → {release}" if old != commit else f"{release}, unchanged"
+            if added:
+                moved = f"new, {release}"
             if name == "web_parity" and not web_changed:
                 moved = f"pinned {element['release']}, no drawing file changed"
             if after != before:
                 mobile_file.parent.mkdir(parents=True, exist_ok=True)
                 mobile_file.write_bytes(after)
-            if name == "web_parity":
+            if added:
+                state = "copied, identical" if after == before else "copied"
+            elif name == "web_parity":
                 state = "not regenerated (measured in a browser); " + (
                     "stale until it is measured again" if web_changed else "still valid"
                 )
@@ -369,6 +424,9 @@ def update(web: Path, release: str, report_path: Path | None) -> int:
             lines.append(f"  - web file changed: `{path}`")
         for note in notes:
             lines.append(f"  - {note}")
+    for name in ELEMENTS:
+        if name not in names:
+            lines.append(f"- **{name}** (pinned {reference['elements'][name]['release']}): not examined (`--only`).")
     if changed:
         write_reference(reference)
     since = spec_commit()
@@ -392,6 +450,9 @@ ALLOWED_PATHS = (
     "test/fixtures/budget_web_figures.json",
     "assets/task_templates.yaml",
     "design/tokens.json",
+    "design/guide.json",
+    "design/glossary.json",
+    "test/fixtures/guide_states.json",
     "tool/web_alignment.json",
 )
 HEADER_REFUSED = ("old mode", "new mode", "deleted file mode", "rename ", "copy ", "similarity ", "dissimilarity ")
@@ -443,6 +504,9 @@ def main() -> int:
         if command == "update":
             p.add_argument("--release", required=True, help="release tag of the web application, vX.Y.Z")
             p.add_argument("--report", type=Path, help="write the Markdown report there")
+            p.add_argument("--only", action="append", choices=ELEMENTS, default=[], metavar="ELEMENT",
+                           help="update only this element (repeatable); the others keep their pin. "
+                                "An element the pin does not have yet enters it this way")
     verify = sub.add_parser("verify-patch", help="refuse a patch that touches a file outside ALLOWED_PATHS")
     verify.add_argument("patch", type=Path)
     sub.add_parser("allowed-paths", help="print the files the update may change, one per line")
@@ -455,7 +519,7 @@ def main() -> int:
             return 0
         if args.command == "check":
             return check(args.web)
-        return update(args.web, args.release, args.report)
+        return update(args.web, args.release, args.report, tuple(dict.fromkeys(args.only)))
     except AlignmentError as error:
         print(f"web_alignment: {error}", file=sys.stderr)
         return 2
