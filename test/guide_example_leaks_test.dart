@@ -9,7 +9,6 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter_test/flutter_test.dart';
@@ -52,15 +51,17 @@ void main() {
           .getSingle();
       expect(count.data['n'], 1);
       expect((await repo.exampleHome())!.id, made.single);
+      final logged = await repo.db
+          .customSelect('SELECT COUNT(*) AS n FROM op_log')
+          .getSingle();
+      expect(logged.data['n'], 0);
     });
 
-    test('on a repository whose first read of the examples is still going: '
-        'the id of the example is not lost, nothing of it is logged', () async {
+    test('the example has no operation, whichever call came first', () async {
       final real = repo.createHome(name: 'Main home');
       final example = repo.createExampleHome(guide);
       final id = await example;
       await real;
-      expect(await repo.isExampleHome(id), isTrue);
       await repo.createRoom(id, name: 'Kitchen');
       final logged = await repo.db
           .customSelect(
@@ -70,6 +71,27 @@ void main() {
           .getSingle();
       expect(logged.data['n'], 0);
     });
+  });
+
+  test('a repository opened on a database that holds an example knows it, and '
+      'writes nothing of it', () async {
+    final dir = Directory.systemTemp.createTempSync('housecairn-db-');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final file = File('${dir.path}/phone.sqlite');
+    final first = await openRepository(file: file);
+    final id = await first.createExampleHome(guide);
+    await first.db.close();
+    final again = await openRepository(file: file);
+    addTearDown(again.db.close);
+    expect(await again.isExampleHome(id), isTrue);
+    await again.createRoom(id, name: 'Kitchen');
+    final logged = await again.db
+        .customSelect(
+          'SELECT COUNT(*) AS n FROM op_log WHERE home_id = ?',
+          variables: [Variable<Uint8List>(uuidBytes(id))],
+        )
+        .getSingle();
+    expect(logged.data['n'], 0);
   });
 
   group('a stray row of the example, planted straight in the tables, is left '

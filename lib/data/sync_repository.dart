@@ -957,9 +957,8 @@ extension SyncRepository on Repository {
         await _setSetting('current_home', null);
       }
     });
-    // Read again at the next write: the erasure may be part of a larger
-    // transaction.
-    _examples = null;
+    // Read again: the erasure may be part of a larger transaction.
+    await _readExampleHomes();
     final directory = homeDirectory(homeId);
     if (directory.existsSync()) directory.deleteSync(recursive: true);
   }
@@ -975,7 +974,6 @@ extension SyncRepository on Repository {
   /// relay, nor an export made from it, nor a resend after a restart ever
   /// carries it (web ADR 0084).
   Future<SyncSnapshot> snapshot() async {
-    final examples = await _exampleHomes();
     final rows = <String, SnapshotRow>{};
     final clockRows = await db
         .customSelect(
@@ -1029,7 +1027,7 @@ extension SyncRepository on Repository {
           : row != null
           ? Uuid.unparse(row['home_id'] as Uint8List)
           : extra?.$1;
-      if (examples.contains(home)) continue;
+      if (_examples.contains(home)) continue;
       final entry = rows[key] ??= SnapshotRow(
         type: type,
         home: home,

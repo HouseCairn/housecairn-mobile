@@ -61,7 +61,7 @@ extension GuideRepository on Repository {
         }
         // Known as the example before its first write, so that the row of
         // the home itself has no clock and no operation either.
-        (await _exampleHomes()).add(id);
+        _examples.add(id);
         known = true;
         await _put('homes', id, {
           'name': clean,
@@ -73,7 +73,7 @@ extension GuideRepository on Repository {
         }, create: true);
       });
     } catch (_) {
-      if (known) _examples = null;
+      if (known) _examples.remove(id);
       rethrow;
     }
     return id;

@@ -570,34 +570,24 @@ class Repository {
   bool get _inSyncApply => Zone.current[_syncApply] == true;
 
   /// The ids of the example homes of this phone (one at most, web ADR
-  /// 0084), read once and kept up to date by `createExampleHome` and the
-  /// erasure of a home; `null` until read. The read itself is kept, not its
-  /// result: callers that come first at the same time wait for the same
-  /// read and share one set, which is never replaced while it is in use.
-  Future<Set<String>>? _examples;
+  /// 0084), read in [open] and kept up to date by `createExampleHome` and
+  /// the erasure of a home. One set for the life of the repository, changed
+  /// in place: nobody holds a copy that a later read could replace.
+  final Set<String> _examples = {};
 
-  Future<Set<String>> _readExampleHomes() async => {
-    for (final r
-        in await db
-            .customSelect('SELECT id FROM homes WHERE is_example = 1')
-            .get())
-      Uuid.unparse(r.data['id'] as Uint8List),
-  };
-
-  Future<Set<String>> _exampleHomes() async {
-    final load = _examples ??= _readExampleHomes();
-    try {
-      return await load;
-    } catch (_) {
-      if (identical(_examples, load)) _examples = null;
-      rethrow;
-    }
+  Future<void> _readExampleHomes() async {
+    final rows = await db
+        .customSelect('SELECT id FROM homes WHERE is_example = 1')
+        .get();
+    _examples
+      ..clear()
+      ..addAll([for (final r in rows) Uuid.unparse(r.data['id'] as Uint8List)]);
   }
 
   /// Whether [homeId] is the example home of the guide: none of its rows
   /// leaves the phone, in any way of the app (web ADR 0084).
   Future<bool> isExampleHome(String? homeId) async =>
-      homeId != null && (await _exampleHomes()).contains(homeId);
+      homeId != null && _examples.contains(homeId);
 
   final _localWrites = StreamController<void>.broadcast();
 
@@ -655,6 +645,7 @@ class Repository {
         .getSingle();
     final seen = others.data['last'] as String?;
     if (seen != null) _hlc.receive(Hlc.parse(seen));
+    await _readExampleHomes();
   }
 
   Future<void> _checkRestored(Store secrets, {required bool created}) async {
