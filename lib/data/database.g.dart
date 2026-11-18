@@ -94,6 +94,21 @@ class $HomesTable extends Homes with TableInfo<$HomesTable, HomeRow> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _isExampleMeta = const VerificationMeta(
+    'isExample',
+  );
+  @override
+  late final GeneratedColumn<bool> isExample = GeneratedColumn<bool>(
+    'is_example',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_example" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -104,6 +119,7 @@ class $HomesTable extends Homes with TableInfo<$HomesTable, HomeRow> {
     currency,
     hemisphere,
     archivedAt,
+    isExample,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -165,6 +181,12 @@ class $HomesTable extends Homes with TableInfo<$HomesTable, HomeRow> {
         archivedAt.isAcceptableOrUnknown(data['archived_at']!, _archivedAtMeta),
       );
     }
+    if (data.containsKey('is_example')) {
+      context.handle(
+        _isExampleMeta,
+        isExample.isAcceptableOrUnknown(data['is_example']!, _isExampleMeta),
+      );
+    }
     return context;
   }
 
@@ -208,6 +230,10 @@ class $HomesTable extends Homes with TableInfo<$HomesTable, HomeRow> {
         DriftSqlType.int,
         data['${effectivePrefix}archived_at'],
       ),
+      isExample: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_example'],
+      )!,
     );
   }
 
@@ -228,6 +254,7 @@ class HomeRow extends DataClass implements Insertable<HomeRow> {
   final String currency;
   final String hemisphere;
   final int? archivedAt;
+  final bool isExample;
   const HomeRow({
     required this.id,
     required this.createdAt,
@@ -237,6 +264,7 @@ class HomeRow extends DataClass implements Insertable<HomeRow> {
     required this.currency,
     required this.hemisphere,
     this.archivedAt,
+    required this.isExample,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -255,6 +283,7 @@ class HomeRow extends DataClass implements Insertable<HomeRow> {
     if (!nullToAbsent || archivedAt != null) {
       map['archived_at'] = Variable<int>(archivedAt);
     }
+    map['is_example'] = Variable<bool>(isExample);
     return map;
   }
 
@@ -272,6 +301,7 @@ class HomeRow extends DataClass implements Insertable<HomeRow> {
       archivedAt: archivedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(archivedAt),
+      isExample: Value(isExample),
     );
   }
 
@@ -289,6 +319,7 @@ class HomeRow extends DataClass implements Insertable<HomeRow> {
       currency: serializer.fromJson<String>(json['currency']),
       hemisphere: serializer.fromJson<String>(json['hemisphere']),
       archivedAt: serializer.fromJson<int?>(json['archivedAt']),
+      isExample: serializer.fromJson<bool>(json['isExample']),
     );
   }
   @override
@@ -303,6 +334,7 @@ class HomeRow extends DataClass implements Insertable<HomeRow> {
       'currency': serializer.toJson<String>(currency),
       'hemisphere': serializer.toJson<String>(hemisphere),
       'archivedAt': serializer.toJson<int?>(archivedAt),
+      'isExample': serializer.toJson<bool>(isExample),
     };
   }
 
@@ -315,6 +347,7 @@ class HomeRow extends DataClass implements Insertable<HomeRow> {
     String? currency,
     String? hemisphere,
     Value<int?> archivedAt = const Value.absent(),
+    bool? isExample,
   }) => HomeRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -324,6 +357,7 @@ class HomeRow extends DataClass implements Insertable<HomeRow> {
     currency: currency ?? this.currency,
     hemisphere: hemisphere ?? this.hemisphere,
     archivedAt: archivedAt.present ? archivedAt.value : this.archivedAt,
+    isExample: isExample ?? this.isExample,
   );
   HomeRow copyWithCompanion(HomesCompanion data) {
     return HomeRow(
@@ -339,6 +373,7 @@ class HomeRow extends DataClass implements Insertable<HomeRow> {
       archivedAt: data.archivedAt.present
           ? data.archivedAt.value
           : this.archivedAt,
+      isExample: data.isExample.present ? data.isExample.value : this.isExample,
     );
   }
 
@@ -352,7 +387,8 @@ class HomeRow extends DataClass implements Insertable<HomeRow> {
           ..write('name: $name, ')
           ..write('currency: $currency, ')
           ..write('hemisphere: $hemisphere, ')
-          ..write('archivedAt: $archivedAt')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('isExample: $isExample')
           ..write(')'))
         .toString();
   }
@@ -367,6 +403,7 @@ class HomeRow extends DataClass implements Insertable<HomeRow> {
     currency,
     hemisphere,
     archivedAt,
+    isExample,
   );
   @override
   bool operator ==(Object other) =>
@@ -379,7 +416,8 @@ class HomeRow extends DataClass implements Insertable<HomeRow> {
           other.name == this.name &&
           other.currency == this.currency &&
           other.hemisphere == this.hemisphere &&
-          other.archivedAt == this.archivedAt);
+          other.archivedAt == this.archivedAt &&
+          other.isExample == this.isExample);
 }
 
 class HomesCompanion extends UpdateCompanion<HomeRow> {
@@ -391,6 +429,7 @@ class HomesCompanion extends UpdateCompanion<HomeRow> {
   final Value<String> currency;
   final Value<String> hemisphere;
   final Value<int?> archivedAt;
+  final Value<bool> isExample;
   final Value<int> rowid;
   const HomesCompanion({
     this.id = const Value.absent(),
@@ -401,6 +440,7 @@ class HomesCompanion extends UpdateCompanion<HomeRow> {
     this.currency = const Value.absent(),
     this.hemisphere = const Value.absent(),
     this.archivedAt = const Value.absent(),
+    this.isExample = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   HomesCompanion.insert({
@@ -412,6 +452,7 @@ class HomesCompanion extends UpdateCompanion<HomeRow> {
     this.currency = const Value.absent(),
     this.hemisphere = const Value.absent(),
     this.archivedAt = const Value.absent(),
+    this.isExample = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -426,6 +467,7 @@ class HomesCompanion extends UpdateCompanion<HomeRow> {
     Expression<String>? currency,
     Expression<String>? hemisphere,
     Expression<int>? archivedAt,
+    Expression<bool>? isExample,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -437,6 +479,7 @@ class HomesCompanion extends UpdateCompanion<HomeRow> {
       if (currency != null) 'currency': currency,
       if (hemisphere != null) 'hemisphere': hemisphere,
       if (archivedAt != null) 'archived_at': archivedAt,
+      if (isExample != null) 'is_example': isExample,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -450,6 +493,7 @@ class HomesCompanion extends UpdateCompanion<HomeRow> {
     Value<String>? currency,
     Value<String>? hemisphere,
     Value<int?>? archivedAt,
+    Value<bool>? isExample,
     Value<int>? rowid,
   }) {
     return HomesCompanion(
@@ -461,6 +505,7 @@ class HomesCompanion extends UpdateCompanion<HomeRow> {
       currency: currency ?? this.currency,
       hemisphere: hemisphere ?? this.hemisphere,
       archivedAt: archivedAt ?? this.archivedAt,
+      isExample: isExample ?? this.isExample,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -492,6 +537,9 @@ class HomesCompanion extends UpdateCompanion<HomeRow> {
     if (archivedAt.present) {
       map['archived_at'] = Variable<int>(archivedAt.value);
     }
+    if (isExample.present) {
+      map['is_example'] = Variable<bool>(isExample.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -509,6 +557,7 @@ class HomesCompanion extends UpdateCompanion<HomeRow> {
           ..write('currency: $currency, ')
           ..write('hemisphere: $hemisphere, ')
           ..write('archivedAt: $archivedAt, ')
+          ..write('isExample: $isExample, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -19695,6 +19744,271 @@ class TaskAttachmentsCompanion extends UpdateCompanion<TaskAttachmentRow> {
   }
 }
 
+class $StepTicksTable extends StepTicks
+    with TableInfo<$StepTicksTable, StepTickRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StepTicksTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($StepTicksTable.$converterhomeId);
+  static const VerificationMeta _stepIdMeta = const VerificationMeta('stepId');
+  @override
+  late final GeneratedColumn<String> stepId = GeneratedColumn<String>(
+    'step_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _tickedAtMeta = const VerificationMeta(
+    'tickedAt',
+  );
+  @override
+  late final GeneratedColumn<int> tickedAt = GeneratedColumn<int>(
+    'ticked_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [homeId, stepId, tickedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'step_ticks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StepTickRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('step_id')) {
+      context.handle(
+        _stepIdMeta,
+        stepId.isAcceptableOrUnknown(data['step_id']!, _stepIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stepIdMeta);
+    }
+    if (data.containsKey('ticked_at')) {
+      context.handle(
+        _tickedAtMeta,
+        tickedAt.isAcceptableOrUnknown(data['ticked_at']!, _tickedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tickedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {homeId, stepId};
+  @override
+  StepTickRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StepTickRow(
+      homeId: $StepTicksTable.$converterhomeId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        )!,
+      ),
+      stepId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}step_id'],
+      )!,
+      tickedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ticked_at'],
+      )!,
+    );
+  }
+
+  @override
+  $StepTicksTable createAlias(String alias) {
+    return $StepTicksTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+}
+
+class StepTickRow extends DataClass implements Insertable<StepTickRow> {
+  final String homeId;
+  final String stepId;
+  final int tickedAt;
+  const StepTickRow({
+    required this.homeId,
+    required this.stepId,
+    required this.tickedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['home_id'] = Variable<Uint8List>(
+        $StepTicksTable.$converterhomeId.toSql(homeId),
+      );
+    }
+    map['step_id'] = Variable<String>(stepId);
+    map['ticked_at'] = Variable<int>(tickedAt);
+    return map;
+  }
+
+  StepTicksCompanion toCompanion(bool nullToAbsent) {
+    return StepTicksCompanion(
+      homeId: Value(homeId),
+      stepId: Value(stepId),
+      tickedAt: Value(tickedAt),
+    );
+  }
+
+  factory StepTickRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StepTickRow(
+      homeId: serializer.fromJson<String>(json['homeId']),
+      stepId: serializer.fromJson<String>(json['stepId']),
+      tickedAt: serializer.fromJson<int>(json['tickedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'homeId': serializer.toJson<String>(homeId),
+      'stepId': serializer.toJson<String>(stepId),
+      'tickedAt': serializer.toJson<int>(tickedAt),
+    };
+  }
+
+  StepTickRow copyWith({String? homeId, String? stepId, int? tickedAt}) =>
+      StepTickRow(
+        homeId: homeId ?? this.homeId,
+        stepId: stepId ?? this.stepId,
+        tickedAt: tickedAt ?? this.tickedAt,
+      );
+  StepTickRow copyWithCompanion(StepTicksCompanion data) {
+    return StepTickRow(
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      stepId: data.stepId.present ? data.stepId.value : this.stepId,
+      tickedAt: data.tickedAt.present ? data.tickedAt.value : this.tickedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StepTickRow(')
+          ..write('homeId: $homeId, ')
+          ..write('stepId: $stepId, ')
+          ..write('tickedAt: $tickedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(homeId, stepId, tickedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StepTickRow &&
+          other.homeId == this.homeId &&
+          other.stepId == this.stepId &&
+          other.tickedAt == this.tickedAt);
+}
+
+class StepTicksCompanion extends UpdateCompanion<StepTickRow> {
+  final Value<String> homeId;
+  final Value<String> stepId;
+  final Value<int> tickedAt;
+  final Value<int> rowid;
+  const StepTicksCompanion({
+    this.homeId = const Value.absent(),
+    this.stepId = const Value.absent(),
+    this.tickedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StepTicksCompanion.insert({
+    required String homeId,
+    required String stepId,
+    required int tickedAt,
+    this.rowid = const Value.absent(),
+  }) : homeId = Value(homeId),
+       stepId = Value(stepId),
+       tickedAt = Value(tickedAt);
+  static Insertable<StepTickRow> custom({
+    Expression<Uint8List>? homeId,
+    Expression<String>? stepId,
+    Expression<int>? tickedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (homeId != null) 'home_id': homeId,
+      if (stepId != null) 'step_id': stepId,
+      if (tickedAt != null) 'ticked_at': tickedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StepTicksCompanion copyWith({
+    Value<String>? homeId,
+    Value<String>? stepId,
+    Value<int>? tickedAt,
+    Value<int>? rowid,
+  }) {
+    return StepTicksCompanion(
+      homeId: homeId ?? this.homeId,
+      stepId: stepId ?? this.stepId,
+      tickedAt: tickedAt ?? this.tickedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $StepTicksTable.$converterhomeId.toSql(homeId.value),
+      );
+    }
+    if (stepId.present) {
+      map['step_id'] = Variable<String>(stepId.value);
+    }
+    if (tickedAt.present) {
+      map['ticked_at'] = Variable<int>(tickedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StepTicksCompanion(')
+          ..write('homeId: $homeId, ')
+          ..write('stepId: $stepId, ')
+          ..write('tickedAt: $tickedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -19735,6 +20049,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TaskAttachmentsTable taskAttachments = $TaskAttachmentsTable(
     this,
   );
+  late final $StepTicksTable stepTicks = $StepTicksTable(this);
   late final Index roomHomePosition = Index(
     'room_home_position',
     'CREATE INDEX room_home_position ON rooms (home_id, position)',
@@ -19825,6 +20140,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     serverSeen,
     fileSync,
     taskAttachments,
+    stepTicks,
     roomHomePosition,
     taskHomeCreated,
     occHomeStatusDue,
@@ -19850,6 +20166,7 @@ typedef $$HomesTableCreateCompanionBuilder = HomesCompanion Function({
   Value<String> currency,
   Value<String> hemisphere,
   Value<int?> archivedAt,
+  Value<bool> isExample,
   Value<int> rowid,
 });
 typedef $$HomesTableUpdateCompanionBuilder = HomesCompanion Function({
@@ -19861,6 +20178,7 @@ typedef $$HomesTableUpdateCompanionBuilder = HomesCompanion Function({
   Value<String> currency,
   Value<String> hemisphere,
   Value<int?> archivedAt,
+  Value<bool> isExample,
   Value<int> rowid,
 });
 
@@ -19910,6 +20228,11 @@ class $$HomesTableFilterComposer extends Composer<_$AppDatabase, $HomesTable> {
 
   ColumnFilters<int> get archivedAt => $composableBuilder(
     column: $table.archivedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isExample => $composableBuilder(
+    column: $table.isExample,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -19962,6 +20285,11 @@ class $$HomesTableOrderingComposer
     column: $table.archivedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isExample => $composableBuilder(
+    column: $table.isExample,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$HomesTableAnnotationComposer
@@ -20000,6 +20328,9 @@ class $$HomesTableAnnotationComposer
     column: $table.archivedAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get isExample =>
+      $composableBuilder(column: $table.isExample, builder: (column) => column);
 }
 
 class $$HomesTableTableManager
@@ -20038,6 +20369,7 @@ class $$HomesTableTableManager
                 Value<String> currency = const Value.absent(),
                 Value<String> hemisphere = const Value.absent(),
                 Value<int?> archivedAt = const Value.absent(),
+                Value<bool> isExample = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => HomesCompanion(
                 id: id,
@@ -20048,6 +20380,7 @@ class $$HomesTableTableManager
                 currency: currency,
                 hemisphere: hemisphere,
                 archivedAt: archivedAt,
+                isExample: isExample,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -20060,6 +20393,7 @@ class $$HomesTableTableManager
                 Value<String> currency = const Value.absent(),
                 Value<String> hemisphere = const Value.absent(),
                 Value<int?> archivedAt = const Value.absent(),
+                Value<bool> isExample = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => HomesCompanion.insert(
                 id: id,
@@ -20070,6 +20404,7 @@ class $$HomesTableTableManager
                 currency: currency,
                 hemisphere: hemisphere,
                 archivedAt: archivedAt,
+                isExample: isExample,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -29775,6 +30110,176 @@ typedef $$TaskAttachmentsTableProcessedTableManager =
       TaskAttachmentRow,
       PrefetchHooks Function()
     >;
+typedef $$StepTicksTableCreateCompanionBuilder = StepTicksCompanion Function({
+  required String homeId,
+  required String stepId,
+  required int tickedAt,
+  Value<int> rowid,
+});
+typedef $$StepTicksTableUpdateCompanionBuilder = StepTicksCompanion Function({
+  Value<String> homeId,
+  Value<String> stepId,
+  Value<int> tickedAt,
+  Value<int> rowid,
+});
+
+class $$StepTicksTableFilterComposer
+    extends Composer<_$AppDatabase, $StepTicksTable> {
+  $$StepTicksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get stepId => $composableBuilder(
+    column: $table.stepId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tickedAt => $composableBuilder(
+    column: $table.tickedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$StepTicksTableOrderingComposer
+    extends Composer<_$AppDatabase, $StepTicksTable> {
+  $$StepTicksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stepId => $composableBuilder(
+    column: $table.stepId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tickedAt => $composableBuilder(
+    column: $table.tickedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$StepTicksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StepTicksTable> {
+  $$StepTicksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<String, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumn<String> get stepId =>
+      $composableBuilder(column: $table.stepId, builder: (column) => column);
+
+  GeneratedColumn<int> get tickedAt =>
+      $composableBuilder(column: $table.tickedAt, builder: (column) => column);
+}
+
+class $$StepTicksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StepTicksTable,
+          StepTickRow,
+          $$StepTicksTableFilterComposer,
+          $$StepTicksTableOrderingComposer,
+          $$StepTicksTableAnnotationComposer,
+          $$StepTicksTableCreateCompanionBuilder,
+          $$StepTicksTableUpdateCompanionBuilder,
+          (
+            StepTickRow,
+            BaseReferences<_$AppDatabase, $StepTicksTable, StepTickRow>,
+          ),
+          StepTickRow,
+          PrefetchHooks Function()
+        > {
+  $$StepTicksTableTableManager(_$AppDatabase db, $StepTicksTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StepTicksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StepTicksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StepTicksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> homeId = const Value.absent(),
+                Value<String> stepId = const Value.absent(),
+                Value<int> tickedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StepTicksCompanion(
+                homeId: homeId,
+                stepId: stepId,
+                tickedAt: tickedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String homeId,
+                required String stepId,
+                required int tickedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => StepTicksCompanion.insert(
+                homeId: homeId,
+                stepId: stepId,
+                tickedAt: tickedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$StepTicksTable, StepTickRow>(table),
+                  BaseReferences<_$AppDatabase, $StepTicksTable, StepTickRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$StepTicksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StepTicksTable,
+      StepTickRow,
+      $$StepTicksTableFilterComposer,
+      $$StepTicksTableOrderingComposer,
+      $$StepTicksTableAnnotationComposer,
+      $$StepTicksTableCreateCompanionBuilder,
+      $$StepTicksTableUpdateCompanionBuilder,
+      (
+        StepTickRow,
+        BaseReferences<_$AppDatabase, $StepTicksTable, StepTickRow>,
+      ),
+      StepTickRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -29845,4 +30350,6 @@ class $AppDatabaseManager {
       $$FileSyncTableTableManager(_db, _db.fileSync);
   $$TaskAttachmentsTableTableManager get taskAttachments =>
       $$TaskAttachmentsTableTableManager(_db, _db.taskAttachments);
+  $$StepTicksTableTableManager get stepTicks =>
+      $$StepTicksTableTableManager(_db, _db.stepTicks);
 }

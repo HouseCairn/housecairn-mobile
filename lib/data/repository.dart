@@ -16,6 +16,7 @@ import '../domain/choices.dart';
 import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
 import '../domain/file_reference.dart';
+import '../domain/guide.dart';
 import '../domain/photos.dart';
 import '../domain/recurrence.dart' as recurrence;
 import '../domain/reminders.dart';
@@ -32,6 +33,7 @@ import 'database.dart';
 part 'attachment_repository.dart';
 part 'budget_repository.dart';
 part 'file_repository.dart';
+part 'guide_repository.dart';
 part 'server_repository.dart';
 part 'stock_repository.dart';
 part 'sync_repository.dart';
@@ -196,6 +198,10 @@ enum Refusal {
   /// A home of a server is deleted on the server's web page, not on the
   /// phone (web ADR 0077: the push never erases a home).
   deleteOnServer,
+
+  /// One example home per phone: a second is refused until the first is
+  /// deleted (web ADR 0084, `guide.services.create_example_home`).
+  exampleExists,
 }
 
 class Refused implements Exception {
@@ -563,6 +569,24 @@ class Repository {
 
   bool get _inSyncApply => Zone.current[_syncApply] == true;
 
+  /// The ids of the example homes of this phone (one at most, web ADR
+  /// 0084), read once and kept up to date by `createExampleHome` and the
+  /// erasure of a home; `null` until read.
+  Set<String>? _examples;
+
+  Future<Set<String>> _exampleHomes() async => _examples ??= {
+    for (final r
+        in await db
+            .customSelect('SELECT id FROM homes WHERE is_example = 1')
+            .get())
+      Uuid.unparse(r.data['id'] as Uint8List),
+  };
+
+  /// Whether [homeId] is the example home of the guide: none of its rows
+  /// leaves the phone, in any way of the app (web ADR 0084).
+  Future<bool> isExampleHome(String? homeId) async =>
+      homeId != null && (await _exampleHomes()).contains(homeId);
+
   final _localWrites = StreamController<void>.broadcast();
 
   /// An event after each change made on this phone (not those a sync
@@ -706,6 +730,12 @@ class Repository {
   /// (lot 4). Runs inside the caller's transaction. `updated_at` is the
   /// time of the newest clock of the row, so that every phone that merged
   /// the same operations holds the same value.
+  ///
+  /// A row of the example home of the guide is written alone: no clock in
+  /// `field_clock`, no operation in `op_log`, whoever calls (a screen, a
+  /// repair, the guide), in every way of the app (web ADR 0084, "the
+  /// example never leaves its device"). The mark `is_example` is written
+  /// only when the example home is made.
   Future<void> _put(
     String table,
     String id,
@@ -713,8 +743,13 @@ class Repository {
     String? homeId,
     bool create = false,
   }) async {
-    if (!_inSyncApply) {
-      final home = table == 'homes' ? id : homeId ?? await _homeOf(table, id);
+    final home = table == 'homes' ? id : homeId ?? await _homeOf(table, id);
+    final example = await isExampleHome(home);
+    if (fields.containsKey('is_example') &&
+        !(example && create && table == 'homes')) {
+      throw StateError('Only the example home is made with its mark.');
+    }
+    if (!_inSyncApply && !example) {
       if (home != null) await _checkServerRole(home, table, fields);
       _localWrites.add(null);
     }
@@ -751,6 +786,7 @@ class Repository {
         ],
       );
     }
+    if (example) return;
     for (final field in clocked.keys) {
       await db.customInsert(
         'INSERT INTO field_clock (entity, row_id, field, hlc, device) '
@@ -816,10 +852,20 @@ class Repository {
   // ---------- homes ----------
 
   /// Every home, active then archived each by name (`homes/current.py:73`).
-  Future<List<HomeRow>> homes() async {
+  ///
+  /// The example home of the guide is left out unless [includeExample]
+  /// (`homes_for` of the web, ADR 0084): the selector, Today of every home,
+  /// the reminders, the count of active homes and the moves to a server do
+  /// not see it; only the guide and the screens of the example home itself
+  /// ask for it.
+  Future<List<HomeRow>> homes({bool includeExample = false}) async {
     final rows =
         await (db.select(db.homes)
-              ..where((h) => h.deletedAt.isNull())
+              ..where(
+                (h) => includeExample
+                    ? h.deletedAt.isNull()
+                    : h.deletedAt.isNull() & h.isExample.equals(false),
+              )
               ..orderBy([
                 (h) => OrderingTerm.asc(h.name),
                 (h) => OrderingTerm.asc(h.id),
@@ -831,8 +877,13 @@ class Repository {
     ];
   }
 
-  Future<List<HomeRow>> activeHomes() async =>
-      (await homes()).where((h) => h.archivedAt == null).toList();
+  /// The homes that are not archived; the example home only with
+  /// [includeExample]. The rule "the last active home cannot be archived
+  /// nor deleted" counts these, so the example home is not one.
+  Future<List<HomeRow>> activeHomes({bool includeExample = false}) async =>
+      (await homes(includeExample: includeExample))
+          .where((h) => h.archivedAt == null)
+          .toList();
 
   Future<HomeRow?> home(String id) =>
       (db.select(db.homes)
@@ -923,10 +974,10 @@ class Repository {
   }
 
   /// Archives a home: out of the selector and of Today, read only; refused
-  /// for the last active home.
+  /// for the last active home, which the example home of the guide never is.
   Future<void> archiveHome(String id) async {
-    await _writableHome(id);
-    if ((await activeHomes()).length <= 1) {
+    final found = await _writableHome(id);
+    if (!found.isExample && (await activeHomes()).length <= 1) {
       throw const Refused(Refusal.lastActiveHome);
     }
     await db.transaction(() => _put('homes', id, {'archived_at': _now()}));
@@ -948,9 +999,14 @@ class Repository {
   /// (`homes/services.py:239-252`): every row of it, their clocks and its
   /// files are erased. Refused for the last active home. Without sync, a
   /// purge is this; with sync, lot 5 adds the `purge` record of the log.
+  ///
+  /// The example home of the guide is handed to `removeExample`, which
+  /// waives the typed name and nothing else (web ADR 0084): it is never the
+  /// last active home and never a home of a server.
   Future<void> deleteHome(String id, {required String typedName}) async {
     final found = await home(id);
     if (found == null) throw const Refused(Refusal.notFound);
+    if (found.isExample) return removeExample(id);
     // A home of a server is erased there, on the web, by an owner; the phone
     // then erases it as a purge (docs/protocol.md section 2.10).
     if (await serverRole(id) != null) {
@@ -2193,8 +2249,9 @@ class Repository {
     }
     await db.transaction(() async {
       // Kept on this phone, so that sync can take the undo back if the next
-      // occurrence was worked on elsewhere (docs/adr/0003, lot 4).
-      await _rememberUndo(found);
+      // occurrence was worked on elsewhere (docs/adr/0003, lot 4); the
+      // example home of the guide is never synced, so it keeps nothing.
+      if (!await isExampleHome(found.homeId)) await _rememberUndo(found);
       // What the closing took goes back to the stock, by entries
       // (`tasks/services.py:635`).
       await _returnDraws(found);
@@ -2220,9 +2277,13 @@ class Repository {
   /// The open occurrences to show on Today, of [homeId] or of every active
   /// home when it is `null`: overdue, due within [todayHorizonDays], and
   /// without a date, the oldest first and no date last
-  /// (`tasks/services.py:158-197`). Hidden ones are left out.
+  /// (`tasks/services.py:158-197`). Hidden ones are left out. Every home
+  /// leaves out the example home of the guide; its own Today shows it.
   Future<List<TodayEntry>> todayEntries({String? homeId}) async {
-    final homes = {for (final h in await activeHomes()) h.id: h};
+    final homes = {
+      for (final h in await activeHomes(includeExample: homeId != null))
+        h.id: h,
+    };
     if (homeId != null) homes.removeWhere((id, _) => id != homeId);
     if (homes.isEmpty) return [];
     final today = this.today();

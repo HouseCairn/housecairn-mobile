@@ -186,6 +186,9 @@ extension FileSyncRepository on Repository {
       for (final row in rows) {
         final rowId = Uuid.unparse(row.data['id'] as Uint8List);
         final homeId = Uuid.unparse(row.data['home_id'] as Uint8List);
+        // Only a home of the server sends its files; never the example home
+        // of the guide, whatever the state of the transport says.
+        if (await isExampleHome(homeId)) continue;
         if (await serverRole(homeId) == null) continue;
         final text = row.data['ref'] as String;
         var ref = FileReference.parse(text, rowId: rowId);
@@ -303,6 +306,7 @@ extension FileSyncRepository on Repository {
       final holder = e.data['holder'] as String;
       final column = fileHolders[holder]!;
       final home = Uuid.unparse(e.data['home_id'] as Uint8List);
+      if (await isExampleHome(home)) continue;
       final rowId = Uuid.unparse(e.data['row_id'] as Uint8List);
       final row = await db
           .customSelect(

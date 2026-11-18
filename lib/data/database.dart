@@ -27,6 +27,8 @@ part 'database.g.dart';
 /// (lot 4b) adds `server_seen`, the mark of the rows a server has seen.
 /// Schema 8 (lot 4c) adds `file_sync`, the files to send and to fetch.
 /// Schema 9 (lot 4d) adds `task_attachments`, the photos and files of tasks.
+/// Schema 10 (web ADR 0084) adds the mark `homes.is_example` of the example
+/// home of the guide and `step_ticks`, the steps of the guide done.
 /// Migrations are drift's
 /// guided migrations: `dart run drift_dev make-migrations` keeps one schema
 /// file per version in `drift_schemas/` and generates the step-by-step code
@@ -67,6 +69,7 @@ part 'database.g.dart';
     ServerSeen,
     FileSync,
     TaskAttachments,
+    StepTicks,
   ],
 )
 class AppDatabase extends _$AppDatabase implements Db {
@@ -78,7 +81,7 @@ class AppDatabase extends _$AppDatabase implements Db {
       AppDatabase(driftDatabase(name: 'housecairn'));
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -230,6 +233,13 @@ class AppDatabase extends _$AppDatabase implements Db {
             // sent before are in `pending`, applied at the next sync.
             await m.createTable(schema.taskAttachments);
             await m.create(schema.attachmentTask);
+          },
+          from9To10: (m, schema) async {
+            // The example home of the guide (web ADR 0084): one column with
+            // a default, so that every home already there reads as a real
+            // one, and the ticks of its steps, a new empty table.
+            await m.addColumn(schema.homes, schema.homes.isExample);
+            await m.createTable(schema.stepTicks);
           },
         ),
       );

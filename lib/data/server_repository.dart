@@ -112,6 +112,9 @@ extension ServerSettings on Repository {
     Set<(String, String)> present,
   ) async {
     final notices = <SyncNotice>[];
+    // The example home of the guide is never a home of the server: nothing
+    // of it is dropped, marked or sent again (web ADR 0084).
+    if (await isExampleHome(homeId)) return notices;
     final seen = await serverSeenIn(homeId);
     final key = uuidBytes(homeId);
     final resend = <(String, String)>{};

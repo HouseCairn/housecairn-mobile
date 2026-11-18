@@ -51,12 +51,18 @@ mixin HomeOwned on Table {
 
 /// `homes.home` (`homes/models.py:31-52`), with the app field `archived_at`
 /// (docs/adr/0008-several-homes-one-family-space.md). Its home is itself.
+///
+/// [isExample] marks the example home of the interactive guide (schema 10,
+/// web ADR 0084): set only by `createExampleHome`, never by a form nor by a
+/// sync operation, and never synced. A row of an example home writes no
+/// `op_log` and no `field_clock`, in every way of the app.
 @DataClassName('HomeRow')
 class Homes extends Table with ModelColumns {
   TextColumn get name => text()();
   TextColumn get currency => text().withDefault(const Constant('EUR'))();
   TextColumn get hemisphere => text().withDefault(const Constant('north'))();
   IntColumn get archivedAt => integer().nullable()();
+  BoolColumn get isExample => boolean().withDefault(const Constant(false))();
 }
 
 /// `rooms.room` (`rooms/models.py:67-91`). [paintArticleId] is the stock
@@ -418,6 +424,25 @@ class FieldClock extends Table {
 
   @override
   Set<Column<Object>> get primaryKey => {entity, rowId, field};
+}
+
+/// A step of the interactive guide that is done, on the example home
+/// (`guide.StepTick` of the web, ADR 0084; schema 10): stored as soon as its
+/// state is true, or by hand for a step marked `manual`, and it stays. Never
+/// synced, never in an export; erased with its home. [stepId] is the id of a
+/// step of `design/guide.json` (`create-home.1`); [tickedAt] is in UTC
+/// milliseconds.
+@DataClassName('StepTickRow')
+class StepTicks extends Table {
+  BlobColumn get homeId => blob().map(const UuidConverter())();
+  TextColumn get stepId => text()();
+  IntColumn get tickedAt => integer()();
+
+  @override
+  String get tableName => 'step_ticks';
+
+  @override
+  Set<Column<Object>> get primaryKey => {homeId, stepId};
 }
 
 /// Settings of this phone, never synced: the device id, the current home,

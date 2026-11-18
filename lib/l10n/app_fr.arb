@@ -868,6 +868,7 @@
   "errReadOnlyHome": "Vous êtes membre en lecture seule de ce logement sur votre serveur : rien ne peut y être modifié depuis ce téléphone.",
   "errOwnersOnly": "Seul un propriétaire de ce logement sur votre serveur peut l'archiver ou le rétablir.",
   "errDeleteOnServer": "Un logement de votre serveur se supprime sur la page web du serveur, par un propriétaire. Il disparaît alors aussi de ce téléphone.",
+  "errExampleExists": "Vous avez déjà un logement d'exemple. Supprimez-le pour en créer un autre.",
   "wayMoveToServerLater": "Garder les logements de ce téléphone sur un serveur Housecairn viendra avec une prochaine version de l'application. Rien n'a changé sur ce téléphone.",
   "wayLeaveServerTitle": "Arrêter la synchronisation avec le serveur ?",
   "wayLeaveServerText": "Ce téléphone garde une copie de ses logements tels qu'ils étaient à la dernière synchronisation. Ils ne se synchroniseront plus, et l'accès de ce téléphone est révoqué sur le serveur.",

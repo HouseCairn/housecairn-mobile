@@ -276,7 +276,10 @@ extension TaskListsRepository on Repository {
   /// to a season that is on, due beyond the horizon of Today or without a
   /// date (`today_sections` of `tasks/agenda.py`).
   Future<List<TodayEntry>> seasonEntries({String? homeId}) async {
-    final homes = {for (final h in await activeHomes()) h.id: h};
+    final homes = {
+      for (final h in await activeHomes(includeExample: homeId != null))
+        h.id: h,
+    };
     if (homeId != null) homes.removeWhere((id, _) => id != homeId);
     if (homes.isEmpty) return [];
     final today = this.today();
