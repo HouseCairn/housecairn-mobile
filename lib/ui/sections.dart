@@ -11,6 +11,7 @@ import 'about.dart';
 import 'budget_screens.dart';
 import 'contractor_screens.dart';
 import 'homes_screen.dart';
+import 'label_screens.dart';
 import 'project_screens.dart';
 import 'report_screens.dart';
 import 'reminders_row.dart';
@@ -62,6 +63,23 @@ class MoreScreen extends StatelessWidget {
                 text: l10n.moreContractorsText,
                 onTap: () => open(const ContractorsScreen()),
               ),
+              if (AppScope.of(context).current case final home?
+                  when !home.isExample) ...[
+                HcRow(
+                  key: const Key('more-labels'),
+                  leading: const HcIcon(HcIcons.qr, color: HcColors.primary),
+                  title: l10n.qrLabels,
+                  text: l10n.moreLabelsText,
+                  onTap: () => open(LabelsScreen(homeId: home.id)),
+                ),
+                HcRow(
+                  key: const Key('more-scan'),
+                  leading: const HcIcon(HcIcons.qr, color: HcColors.primary),
+                  title: l10n.scanLabel,
+                  text: l10n.moreScanText,
+                  onTap: () => scanLabel(context),
+                ),
+              ],
               HcRow(
                 key: const Key('more-homes'),
                 leading: const HcIcon(HcIcons.homes, color: HcColors.primary),

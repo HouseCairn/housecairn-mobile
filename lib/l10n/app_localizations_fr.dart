@@ -3028,4 +3028,169 @@ class AppLocalizationsFr extends AppLocalizations {
   String articleLabelPhoto(String name) {
     return 'Étiquette de $name';
   }
+
+  @override
+  String get qrLabels => 'Étiquettes QR';
+
+  @override
+  String get qrLabel => 'Étiquette QR';
+
+  @override
+  String get moreLabelsText =>
+      'Des autocollants qui ouvrent une pièce, un élément ou un article';
+
+  @override
+  String get scanLabel => 'Scanner une étiquette';
+
+  @override
+  String get moreScanText =>
+      'Ouvrir ce qu\'un autocollant désigne, avec l\'appareil photo';
+
+  @override
+  String get makeQrLabel => 'Créer une étiquette QR';
+
+  @override
+  String labelOf(String name) {
+    return 'Étiquette QR de $name';
+  }
+
+  @override
+  String labelQrOf(String name) {
+    return 'Code QR de $name';
+  }
+
+  @override
+  String get labelHolds =>
+      'Le code QR contient ce code et rien d\'autre, aucune adresse :';
+
+  @override
+  String get labelOpenPage => 'Ouvrir la page';
+
+  @override
+  String get labelPrint => 'Imprimer';
+
+  @override
+  String get labelLayout => 'Mise en page';
+
+  @override
+  String get labelLayoutA4 =>
+      'Planche A4, 3 par 8 étiquettes (63,5 par 33,9 mm)';
+
+  @override
+  String get labelLayoutRoll =>
+      'Rouleau de 62 mm, une étiquette par page (imprimante d\'étiquettes)';
+
+  @override
+  String get labelPrintThis => 'Imprimer cette étiquette';
+
+  @override
+  String get labelLostTitle => 'Si l\'autocollant est perdu ou partagé';
+
+  @override
+  String get labelLostText =>
+      'Une nouvelle étiquette a un nouveau code ; l\'ancien autocollant n\'ouvre plus rien.';
+
+  @override
+  String get labelRegenerate => 'Créer une nouvelle étiquette';
+
+  @override
+  String get labelRevoke => 'Révoquer l\'étiquette';
+
+  @override
+  String get labelRevokeTitle => 'Révoquer l\'étiquette ?';
+
+  @override
+  String get labelRevokeBody =>
+      'L\'autocollant n\'ouvrira plus rien. Une étiquette révoquée ne peut pas être rétablie.';
+
+  @override
+  String get labelRevoked =>
+      'Étiquette QR révoquée : l\'autocollant n\'ouvre plus rien.';
+
+  @override
+  String get labelRegenerated =>
+      'L\'ancien autocollant n\'ouvre plus rien. Imprimez la nouvelle étiquette.';
+
+  @override
+  String get labelsIntro =>
+      'Cochez ce qu\'il faut étiqueter, choisissez une mise en page et imprimez la planche. Scanner un autocollant avec ce téléphone ouvre la page de l\'objet.';
+
+  @override
+  String get labelNoneYet => 'Pas encore d\'étiquette';
+
+  @override
+  String get labelNone => 'Pas d\'étiquette';
+
+  @override
+  String labelsMax(int max) {
+    return '$max étiquettes au plus à la fois.';
+  }
+
+  @override
+  String get labelsMadeForTicked =>
+      'Une étiquette est créée pour chaque objet coché qui n\'en a pas.';
+
+  @override
+  String get labelsReadOnly =>
+      'Vous pouvez imprimer les étiquettes qui existent ; les membres qui peuvent modifier en créent de nouvelles.';
+
+  @override
+  String get labelsPrint => 'Imprimer les étiquettes';
+
+  @override
+  String get labelsEmpty =>
+      'Rien à étiqueter pour l\'instant : ajoutez d\'abord des pièces, des éléments ou des articles.';
+
+  @override
+  String get labelsChoose => 'Choisissez les objets dans la liste.';
+
+  @override
+  String get labelSectionRooms => 'Pièces';
+
+  @override
+  String get labelSectionItems => 'Éléments';
+
+  @override
+  String get labelSectionArticles => 'Articles';
+
+  @override
+  String get labelKindRoom => 'Pièce';
+
+  @override
+  String get labelKindItem => 'Élément';
+
+  @override
+  String get labelKindArticle => 'Article';
+
+  @override
+  String get scanHint =>
+      'Pointez l\'appareil photo vers le code QR d\'une étiquette.';
+
+  @override
+  String get scanCamera => 'Appareil photo';
+
+  @override
+  String get scanDenied =>
+      'Housecairn a besoin de l\'appareil photo pour lire un code. Autorisez-le dans les réglages du téléphone, puis réessayez.';
+
+  @override
+  String get scanUnavailable =>
+      'Ce téléphone n\'a pas d\'appareil photo pour lire un code.';
+
+  @override
+  String get scanNotLabel => 'Ce code QR n\'est pas une étiquette Housecairn.';
+
+  @override
+  String get scanUnknown =>
+      'Cette étiquette n\'est pas connue de ce téléphone. Elle a été créée sur un autre téléphone ou sur le web, ou son logement n\'est pas sur ce téléphone.';
+
+  @override
+  String get scanRevoked =>
+      'Cette étiquette a été révoquée : elle n\'ouvre plus rien.';
+
+  @override
+  String get scanGone => 'Ce que cette étiquette ouvrait a été supprimé.';
+
+  @override
+  String get errTooManyLabels => 'Choisissez entre 1 et 200 étiquettes.';
 }

@@ -3003,4 +3003,165 @@ class AppLocalizationsEn extends AppLocalizations {
   String articleLabelPhoto(String name) {
     return 'Label of $name';
   }
+
+  @override
+  String get qrLabels => 'QR labels';
+
+  @override
+  String get qrLabel => 'QR label';
+
+  @override
+  String get moreLabelsText =>
+      'Stickers that open a room, an item or an article';
+
+  @override
+  String get scanLabel => 'Scan a label';
+
+  @override
+  String get moreScanText => 'Open what a sticker names, with the camera';
+
+  @override
+  String get makeQrLabel => 'Make a QR label';
+
+  @override
+  String labelOf(String name) {
+    return 'QR label of $name';
+  }
+
+  @override
+  String labelQrOf(String name) {
+    return 'QR code of $name';
+  }
+
+  @override
+  String get labelHolds =>
+      'The QR code holds this code and nothing else, no address:';
+
+  @override
+  String get labelOpenPage => 'Open the page';
+
+  @override
+  String get labelPrint => 'Print';
+
+  @override
+  String get labelLayout => 'Layout';
+
+  @override
+  String get labelLayoutA4 => 'A4 sheet, 3 by 8 labels (63.5 by 33.9 mm)';
+
+  @override
+  String get labelLayoutRoll =>
+      '62 mm roll, one label per page (label printer)';
+
+  @override
+  String get labelPrintThis => 'Print this label';
+
+  @override
+  String get labelLostTitle => 'If the sticker is lost or shared';
+
+  @override
+  String get labelLostText =>
+      'A new label has a new code; the old sticker stops opening anything.';
+
+  @override
+  String get labelRegenerate => 'Make a new label';
+
+  @override
+  String get labelRevoke => 'Revoke the label';
+
+  @override
+  String get labelRevokeTitle => 'Revoke the label?';
+
+  @override
+  String get labelRevokeBody =>
+      'The sticker will no longer open anything. A revoked label cannot be brought back.';
+
+  @override
+  String get labelRevoked =>
+      'QR label revoked: the sticker no longer opens anything.';
+
+  @override
+  String get labelRegenerated =>
+      'The old sticker no longer opens anything. Print the new label.';
+
+  @override
+  String get labelsIntro =>
+      'Tick what to label, choose a layout and print the sheet. Scanning a sticker with this phone opens the page of the object.';
+
+  @override
+  String get labelNoneYet => 'No label yet';
+
+  @override
+  String get labelNone => 'No label';
+
+  @override
+  String labelsMax(int max) {
+    return 'Up to $max labels at a time.';
+  }
+
+  @override
+  String get labelsMadeForTicked =>
+      'A label is made for each object ticked that has none.';
+
+  @override
+  String get labelsReadOnly =>
+      'You can print the labels that exist; members who can edit make new ones.';
+
+  @override
+  String get labelsPrint => 'Print the labels';
+
+  @override
+  String get labelsEmpty =>
+      'Nothing to label yet: add rooms, items or stock items first.';
+
+  @override
+  String get labelsChoose => 'Choose the objects from the list.';
+
+  @override
+  String get labelSectionRooms => 'Rooms';
+
+  @override
+  String get labelSectionItems => 'Items';
+
+  @override
+  String get labelSectionArticles => 'Stock items';
+
+  @override
+  String get labelKindRoom => 'Room';
+
+  @override
+  String get labelKindItem => 'Item';
+
+  @override
+  String get labelKindArticle => 'Stock item';
+
+  @override
+  String get scanHint => 'Point the camera at the QR code of a label.';
+
+  @override
+  String get scanCamera => 'Camera';
+
+  @override
+  String get scanDenied =>
+      'Housecairn needs the camera to read a code. Allow it in the settings of the phone, then try again.';
+
+  @override
+  String get scanUnavailable => 'This phone has no camera to read a code.';
+
+  @override
+  String get scanNotLabel => 'This QR code is not a Housecairn label.';
+
+  @override
+  String get scanUnknown =>
+      'This label is not known on this phone. It was made on another phone or on the web, or its home is not on this phone.';
+
+  @override
+  String get scanRevoked =>
+      'This label was revoked: it no longer opens anything.';
+
+  @override
+  String get scanGone => 'What this label opened was deleted.';
+
+  @override
+  String get errTooManyLabels => 'Choose between 1 and 200 labels.';
 }

@@ -14,7 +14,7 @@
 		</dict>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Housecairn uses the camera to photograph a room or an item. The photo stays on this phone.</string>
+	<string>Housecairn uses the camera to photograph a room or an item, and to read the QR code of a label. The photo stays on this phone.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Housecairn lets you pick a photo of a room or an item. The photo stays on this phone.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

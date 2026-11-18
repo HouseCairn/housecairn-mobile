@@ -341,6 +341,42 @@ procedure, contractor, masking).
 
 **Depends on**: lot 3b.
 
+## Lot 3f. QR labels in the app
+
+**Decision of the maintainer (2026-11-15)**: "the QR labels enter v1, in the app, and work
+offline." The spec had left them out ([ADR 0014](adr/0014-qr-labels.md)).
+
+**Scope**: what the app had before was read first: no QR label; the labels that sync with a
+server since lot 4d are the label *photo* of a stock article, untouched. Schema 11, the table
+`labels` with the fields of the web's `labels.label`, kept on the phone in every way (no
+`field_clock`, no `op_log`) until a server carries the type; the web's code (16 random bytes,
+22 URL-safe characters), make, regenerate and revoke with the web's rules; the QR code holds
+the code alone, no address; the sheet of the web as a PDF made on the phone (A4, 3 by 8, and the
+62 mm roll), handed to the share sheet; the scanner (`CodeScannerScreen`, `readCode`), written
+for the QR code of a label and the EAN-8, EAN-13 and UPC-A of products, which a later lot reads
+with it; the camera asked for at the scan only. Packages: `camera`, `zxing_lib`, `qr`, `pdf`
+([ADR 0001](adr/0001-flutter-stack-and-packages.md), ADR 0014).
+
+**Acceptance** (`test/labels_test.dart`, `test/goldens_labels_test.dart`):
+- The code is the web's shape; the QR code of a label holds it and nothing else; the reader
+  reads back the QR code of a label, and EAN-8, EAN-13 and UPC-A bars made by ZXing's writers,
+  only of the kinds asked for.
+- The sheet: the web's pages and numbers, Helvetica not embedded, no link, 1 to 200 labels.
+- One active label per object; regenerate and revoke keep the old code dead; refused in an
+  archived home and for an object of another home; no clock and no operation written; erased
+  with its home. The migration from schema 10 keeps every row.
+- The scan opens a code of this phone, the code of a web sticker that this phone has, and says
+  unknown, revoked or not a label; the camera is started by the scan only, and a refusal is said.
+- Goldens of the page of a label, the list and the refused scanner at 360 px, in English and
+  French, at text scale 1 and 2; the accessibility guidelines on the list.
+
+**Device**: print a sheet from the app (A4 on a printer, or the PDF saved to Files), stick a
+label, then scan it with Scan a label in More, on an Android phone and an iPhone: the page of the
+object opens; regenerate the label and scan the old sticker: "revoked"; refuse the camera once:
+the scanner says so; scan a sticker printed by the web: "not known on this phone".
+
+**Depends on**: lot 3. The scan of products (EAN) waits for it.
+
 ## Lot 4. Sync engine (without network, without crypto)
 
 **Scope**: operations, HLC, apply and merge rules, deterministic ids, repair rules, schema

@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- Reminders (lot 2b): the notification permission is asked at the moment
          the person turns reminders on (Android 13 and later). No exact-alarm
          permission: a day-level reminder is scheduled inexactly
@@ -6,6 +7,14 @@
          system's own camera app, which needs none. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- The scanner of QR labels (docs/adr/0014-qr-labels.md): the camera,
+         asked when the scanner opens, never at start. The camera plugin also
+         declares the microphone and the old storage permission, for videos
+         the app never records: both are removed from the merged manifest. -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera.any" android:required="false"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove"/>
     <!-- Backups and transfers to a new phone carry the app's data but never
          the secure store (lot 4b, maintainer's decision of 2026-11-16): the
          access to a server and the copy of the device id stay on this

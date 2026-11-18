@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../core/document_source.dart';
 import '../core/notifier.dart';
+import '../core/code_camera.dart';
 import '../core/photo_source.dart';
 import '../core/store.dart';
 import '../data/database.dart';
@@ -101,6 +102,7 @@ class AppState extends ChangeNotifier {
   AppState(
     this.repository, {
     this.photoSource,
+    this.codeCamera,
     this.documentSource,
     this.notifier,
     this.photoProcessor = processInIsolate,
@@ -118,6 +120,10 @@ class AppState extends ChangeNotifier {
 
   /// The camera and the gallery; `null` where there are none (tests).
   final PhotoSource? photoSource;
+
+  /// The camera of the scanner of labels, made when the scanner opens;
+  /// `null` where there is none (tests that do not scan).
+  final CodeCamera Function()? codeCamera;
 
   /// The Files app (iOS) or the document picker (Android), for the file of a
   /// quote; `null` where there are none (tests).

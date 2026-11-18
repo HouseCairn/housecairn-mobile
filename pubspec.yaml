@@ -37,6 +37,13 @@ dependencies:
   flutter_secure_storage: 11.2.0
   package_info_plus: 10.2.2
   share_plus: 13.3.1
+  # QR labels (docs/adr/0014-qr-labels.md): the camera's frames, read by a
+  # pure Dart port of ZXing; the code drawn from the matrix of `qr`; the
+  # sheet of labels made by `pdf`.
+  camera: 0.12.2
+  zxing_lib: 1.1.4
+  qr: 3.0.3
+  pdf: 3.13.1
 
 dev_dependencies:
   flutter_test:

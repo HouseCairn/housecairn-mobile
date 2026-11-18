@@ -52,6 +52,7 @@ and each operation names its home ([ADR 0008](adr/0008-several-homes-one-family-
 | Annual envelope (one per year) | `projects/models.py:355-377` | |
 | Report: what is wrong, where (room, item or article, at most one), photo, status, task made from it | `reports/models.py:26-30`, `:43-103` | |
 | Task templates (bundled library, EN and FR, with sources) | `tasks/task_templates.yaml`, web ADR 0049 | Shipped with the app, read only: `assets/task_templates.yaml`, a copy at the web release pinned in `tool/web_alignment.json` ([plan](plan.md#alignment-with-the-web-application)). |
+| QR label of a room, an item or a stock article: kind, the one object, code, revoked | `labels/models.py:33-53`, web ADR 0047 | In v1, in the app and offline (maintainer's decision of 2026-11-15). The web's code (16 random bytes, 22 URL-safe characters, unique, revoked rows kept); the QR code holds the code alone, no address. Kept on the phone, never synced, until a server carries the type ([ADR 0014](adr/0014-qr-labels.md)). |
 
 **Rules taken as they are** (ported to Dart, checked against the Python code by shared test
 vectors, [ADR 0001](adr/0001-flutter-stack-and-packages.md)):
@@ -102,7 +103,6 @@ vectors, [ADR 0001](adr/0001-flutter-stack-and-packages.md)):
 | Events received from Home Assistant | `events/models.py:10-16` | Home Assistant is not in v1. |
 | Notification channels (Apprise) and web push devices | `notifications/models.py:30-50`, `:153-192` | Replaced by local notifications. |
 | Calendar feeds (secret ICS address) | `calendar/models.py:10-26` | Needs a server. A one-shot `.ics` export is possible later. |
-| QR labels of rooms, items, articles | `labels/models.py:33-53` | Labels printed by the web point to web addresses; app links are a later lot. |
 | Paperless-ngx fields of a quote | `projects/models.py:236-240` | Connectors are not in v1. Kept if they come from a later import (unknown fields are preserved, [ADR 0003](adr/0003-sync-protocol.md)). |
 | CSV import and export, export jobs, archive of a home in format 3 | `homes/models.py:172-226`, web ADR 0048 | Replaced by the encrypted export below. Reading a web archive in the app comes after v1 (maintainer's decision). |
 | Invitations to one home by e-mail, with a role | `homes/models.py:90-145` | A phone joins the family, hence every home ([ADR 0008](adr/0008-several-homes-one-family-space.md)); a home shared outside the family is after v1. |
@@ -299,6 +299,17 @@ contractor with it.
    Where (a link to the place), Reported on, Closed on and Task as lines of label and value, and
    the action row.
 10. **Contractors**: list and card, call and e-mail from the card.
+    **QR labels** (maintainer's decision of 2026-11-15, [ADR 0014](adr/0014-qr-labels.md)): on
+    the record of a room, an item and a stock article, QR label (its page) or Make a QR label,
+    before Report a problem, as the web; the page of a label shows its QR code, the code it holds
+    and nothing else, Open the page, the print of that label, and for a home that is written
+    Make a new label and Revoke the label (confirmed); in More, QR labels (every room, item and
+    stock article to tick, the layout, Print the labels) and Scan a label. The sheet is the web's:
+    an A4 sheet of 3 by 8 labels of 63.5 by 33.9 mm or a 62 mm roll, in Helvetica, at most 200
+    labels, a PDF handed to the share sheet of the phone and not kept. The scan asks for the
+    camera then, never before; it opens the page of a code this phone knows and says in words
+    when a code is unknown here, revoked, of an object deleted, or not a label. It reads the code
+    alone and the address `…/l/<code>/` of a sticker of the web, of which only the code is kept.
 11. **Homes**: the list of homes, active then archived; create, rename, change currency or
     hemisphere, archive, unarchive, delete ([Homes](#homes)).
 12. **Settings**: language, reminders, export and import, the way the app is used and the move
@@ -399,7 +410,7 @@ application, so that both say the same words.
 
 ## Not in v1
 
-Home Assistant, Paperless-ngx, Sure, Apprise, calendar feeds, QR labels, widgets, a watch
+Home Assistant, Paperless-ngx, Sure, Apprise, calendar feeds, widgets, a watch
 app, a tablet layout, a web or desktop build, roles other than admin, a home shared with
 someone outside the family, reading a web archive, a build without Google services (after
 1.0).
