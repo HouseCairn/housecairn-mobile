@@ -738,15 +738,66 @@ class _TaskFormScreenState extends State<TaskFormScreen>
         _labour,
         key: const Key('task-labour-budget'),
       ),
-      hcAmount(
-        context,
-        l10n.materialBudget,
-        _material,
-        key: const Key('task-material-budget'),
+      ListenableBuilder(
+        listenable: Listenable.merge([for (final l in _materials) l.quantity]),
+        builder: (context, _) => _materialBudget(l10n),
       ),
       fieldHelp(l10n.taskBudgetHelp(_currency)),
     ],
   );
+
+  /// What the stock items of the lines plan each time, at their unit prices
+  /// (`stock_plan`, web ADR 0062): a line without a stock item or with a
+  /// quantity that is not one counts for nothing.
+  budget.StockPlan get _stockPlan {
+    final byId = {for (final a in _articles) a.article.id: a.article};
+    return budget.stockPlan([
+      for (final line in _materials)
+        if (byId[line.article] case final article?)
+          if (stock.parseQuantity(line.quantity.text) case final quantity?
+              when quantity > stock.zero)
+            (
+              quantity,
+              article.unitPrice == null
+                  ? null
+                  : stock.readQuantity(article.unitPrice!),
+            ),
+    ]);
+  }
+
+  /// The material budget: typed, or calculated from the priced stock items
+  /// of the task (`tasks/_material_budget.html`, web ADR 0081). Calculated,
+  /// the field is not shown and the amount typed stays as it is, sent back
+  /// unchanged when the task is saved: it counts again if the priced items
+  /// go.
+  Widget _materialBudget(AppLocalizations l10n) {
+    final plan = _stockPlan;
+    if (plan.priced == 0) {
+      return hcAmount(
+        context,
+        l10n.materialBudget,
+        _material,
+        key: const Key('task-material-budget'),
+      );
+    }
+    return Padding(
+      key: const Key('task-material-from-stock'),
+      padding: const EdgeInsets.only(bottom: HcSpace.s4),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(text: '${l10n.materialBudget} ', style: HcText.fieldLabel),
+            TextSpan(
+              text: l10n.taskMaterialFromStockField(
+                moneyIn(context, _currency, plan.amount),
+              ),
+            ),
+          ],
+        ),
+        style: HcText.body,
+      ),
+    );
+  }
 
   /// Materials: the stock items the task needs, a line each (the stock item
   /// and the quantity), as the web's section; one empty line is offered, `+`

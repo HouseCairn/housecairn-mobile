@@ -141,6 +141,26 @@ abstract final class HcText {
     height: HcFont.lineHeightTight,
   );
 
+  /// `th` of a table: the heads of the columns and of the rows, 13/700, in
+  /// the muted colour (`components.css`, `th`).
+  static const tableHead = TextStyle(
+    fontFamily: HcFont.family,
+    fontSize: HcFont.sizeXs,
+    fontWeight: HcFont.bold,
+    height: HcFont.lineHeight,
+    color: HcColors.textMuted,
+  );
+
+  /// `td` of a table: 14/400 (`components.css`, `table`).
+  static const tableCell = TextStyle(
+    fontFamily: HcFont.family,
+    fontSize: HcFont.sizeSm,
+    fontWeight: HcFont.regular,
+    height: HcFont.lineHeight,
+    color: HcColors.text,
+    fontFeatures: [FontFeature.tabularFigures()],
+  );
+
   /// A line of the wheel pickers of iOS (design lot D5): the size the wheels
   /// of iOS give their text, in the font of Housecairn.
   static const picker = TextStyle(

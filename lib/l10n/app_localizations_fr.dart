@@ -1843,7 +1843,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get estimateEachTime => 'Estimation par fois';
 
   @override
-  String get ofWhichStock => 'dont articles en stock';
+  String get materialsFromStock => 'matériel depuis le stock';
 
   @override
   String get costAYear => 'Coût par an';
@@ -2268,7 +2268,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get taskCost => 'Coût';
 
   @override
-  String get taskOfWhichStock => 'Dont articles en stock';
+  String get taskCostPlanned => 'Prévu';
+
+  @override
+  String get taskCostReal => 'Réel';
+
+  @override
+  String get taskMaterialsFromStock => 'Matériel, depuis le stock';
+
+  @override
+  String get taskMaterialsFromStockHelp =>
+      'Le matériel est calculé à partir des articles de la tâche : quantité fois prix unitaire.';
+
+  @override
+  String taskMaterialFromStockField(String amount) {
+    return '$amount à chaque fois, calculé à partir des articles de la tâche.';
+  }
 
   @override
   String get taskPaidSoFar => 'Payé jusqu\'ici';
@@ -3189,4 +3204,29 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get errTooManyLabels => 'Choisissez entre 1 et 200 étiquettes.';
+
+  @override
+  String get compareProjects => 'Comparer les projets';
+
+  @override
+  String get compareTicked => 'Comparer les projets cochés';
+
+  @override
+  String get compareTickTwo =>
+      'Cochez au moins deux projets dans la liste pour les comparer.';
+
+  @override
+  String get compareCaption => 'Les projets côte à côte';
+
+  @override
+  String get compareProject => 'Projet';
+
+  @override
+  String get comparePlannedCost => 'Coût prévu';
+
+  @override
+  String get compareDuration => 'Durée';
+
+  @override
+  String get selectRows => 'Sélectionner';
 }

@@ -93,7 +93,11 @@ that pin and `check` fails until the measure is taken again (`tool/web_parity.py
 and `flutter test test/web_parity_test.dart` passes. The figures of the budget, a project and a
 stock item are measured the same way, by `tool/web_parity_values.py` into
 `test/parity/web_values_fr_390.json`, read by `test/web_parity_values_test.dart`, which fails
-when that file was not measured at the pin `web_parity`.
+when that file was not measured at the pin `web_parity`. A screen a later web release added can
+be measured alone, `tool/web_parity.py --only <screen>` (the screens it knows are in
+`ONLY_SCREENS`): the pin moves, and the reference says in `carried` which screens keep the
+measure of the earlier release, and which release that is; the measures of the pills and of the
+figures may name that release too. A full measure removes `carried`.
 
 Every string shown to people goes in `lib/l10n/app_en.arb` (with a description) and
 `lib/l10n/app_fr.arb`; a test fails when a screen shows a string that is in neither. A new

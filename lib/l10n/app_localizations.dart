@@ -3176,11 +3176,11 @@ abstract class AppLocalizations {
   /// **'Estimate each time'**
   String get estimateEachTime;
 
-  /// Web catalogue (projects, budget or reports): dont articles en stock : %(amount)s.
+  /// Under the estimate of a task of the upkeep whose materials come from the stock (web ADR 0081). Web catalogue (projects, budget or reports): matériel depuis le stock : %(amount)s.
   ///
   /// In en, this message translates to:
-  /// **'of which stock'**
-  String get ofWhichStock;
+  /// **'materials from the stock'**
+  String get materialsFromStock;
 
   /// Web catalogue (projects, budget or reports): Coût par an.
   ///
@@ -3878,11 +3878,35 @@ abstract class AppLocalizations {
   /// **'Cost'**
   String get taskCost;
 
-  /// Part of the estimate that comes from the stock. Web catalogue: Dont articles en stock.
+  /// Pill above what a task is planned to cost, apart from what was paid (web ADR 0081). Web catalogue, context amount: Prévu.
   ///
   /// In en, this message translates to:
-  /// **'Of which stock'**
-  String get taskOfWhichStock;
+  /// **'Planned'**
+  String get taskCostPlanned;
+
+  /// Pill above what the times done of a task really cost (web ADR 0081). Web catalogue: Réel.
+  ///
+  /// In en, this message translates to:
+  /// **'Real'**
+  String get taskCostReal;
+
+  /// The materials of one time of a task, calculated from its priced stock items (web ADR 0081). Web catalogue: Matériel, depuis le stock.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials, from the stock'**
+  String get taskMaterialsFromStock;
+
+  /// Under the planned cost of a task whose materials come from the stock. Web catalogue: Le matériel est calculé à partir des articles de la tâche : quantité fois prix unitaire.
+  ///
+  /// In en, this message translates to:
+  /// **'The materials are calculated from the stock items of the task: quantity times unit price.'**
+  String get taskMaterialsFromStockHelp;
+
+  /// In the task form, in place of the material budget field when the task has a priced stock item (web ADR 0081). Web catalogue: %(amount)s à chaque fois, calculé à partir des articles de la tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} each time, calculated from the stock items of the task.'**
+  String taskMaterialFromStockField(String amount);
 
   /// What the times done of a task cost. Web catalogue: Payé jusqu'ici.
   ///
@@ -5179,6 +5203,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose between 1 and 200 labels.'**
   String get errTooManyLabels;
+
+  /// Button of the list of projects and title of the comparison. Web catalogue (projects): Comparer les projets.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare projects'**
+  String get compareProjects;
+
+  /// Primary button of the list in its mode of comparison. Web catalogue (projects): Comparer les projets cochés.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare the ticked projects'**
+  String get compareTicked;
+
+  /// Comparison with fewer than two projects. Web catalogue (projects): Cochez au moins deux projets dans la liste pour les comparer.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick at least two projects in the list to compare them.'**
+  String get compareTickTwo;
+
+  /// Spoken name of the table of the comparison (its caption on the web). Web catalogue (projects): Les projets côte à côte.
+  ///
+  /// In en, this message translates to:
+  /// **'The projects side by side'**
+  String get compareCaption;
+
+  /// Head of the column of the titles in the comparison. Web catalogue (projects): Projet.
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get compareProject;
+
+  /// Head of a column of the comparison. Web catalogue (projects): Coût prévu.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned cost'**
+  String get comparePlannedCost;
+
+  /// Head of a column of the comparison. Web catalogue (projects): Durée.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get compareDuration;
+
+  /// Action of the bar of iOS that starts a selection of rows (web design/patterns.md, Platform adaptations, row 12); not a web string. iOS says Sélectionner.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get selectRows;
 }
 
 class _AppLocalizationsDelegate
