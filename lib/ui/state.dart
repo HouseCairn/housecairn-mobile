@@ -16,6 +16,7 @@ import '../core/store.dart';
 import '../data/database.dart';
 import '../data/repository.dart';
 import '../domain/day.dart';
+import '../domain/guide.dart';
 import '../domain/photos.dart';
 import '../domain/reminders.dart';
 import '../domain/templates.dart';
@@ -90,6 +91,21 @@ Future<bool> shareWithSystem(
 Future<TemplateLibrary> loadBundledTemplates() async =>
     parseTemplates(await rootBundle.loadString('assets/task_templates.yaml'));
 
+/// The interactive guide and the glossary its sentences cite (web ADR 0084):
+/// byte-for-byte copies of the web files, read from `design/`.
+class GuideContent {
+  const GuideContent(this.guide, this.glossary);
+
+  final Guide guide;
+  final GuideGlossary glossary;
+}
+
+/// Reads the guide and the glossary shipped with the app.
+Future<GuideContent> loadBundledGuide() async => GuideContent(
+  parseGuide(await rootBundle.loadString('design/guide.json')),
+  parseGlossary(await rootBundle.loadString('design/glossary.json')),
+);
+
 /// The homes of the phone as the screens see them: every home, the active
 /// ones, the current one, and whether Today shows all of them
 /// (docs/spec.md, "Homes"). Screens read it through [AppScope] and write
@@ -106,6 +122,7 @@ class AppState extends ChangeNotifier {
     this.photoProcessor = processInIsolate,
     this.thumbnailer = thumbnailInIsolate,
     this.loadTemplates = loadBundledTemplates,
+    this.loadGuide = loadBundledGuide,
     this.openUrl = openInSystem,
     this.openFile = shareWithSystem,
     this.store,
@@ -130,6 +147,13 @@ class AppState extends ChangeNotifier {
   /// Makes the thumbnail of a photo fetched from the server.
   final Thumbnailer thumbnailer;
   final Future<TemplateLibrary> Function() loadTemplates;
+
+  /// Reads the guide and its glossary, once ([guideContent]).
+  final Future<GuideContent> Function() loadGuide;
+  Future<GuideContent>? _guide;
+
+  /// The guide and its glossary, read at the first call.
+  Future<GuideContent> guideContent() => _guide ??= loadGuide();
   final UrlOpener openUrl;
 
   /// Opens a file attached to a task in another app (lot 4d).
@@ -160,6 +184,14 @@ class AppState extends ChangeNotifier {
 
   List<HomeRow> homes = const [];
   HomeRow? current;
+
+  /// The example home of the guide, if the phone has one (web ADR 0084): it
+  /// is not in [homes], nor ever [current]; only the guide and its own
+  /// screens show it.
+  HomeRow? exampleHome;
+
+  /// Whether [homeId] is the example home of the guide.
+  bool isExample(String? homeId) => homeId != null && exampleHome?.id == homeId;
   bool todayAllHomes = false;
 
   /// Whether the person turned reminders on, and the phone still allows them.
@@ -196,6 +228,13 @@ class AppState extends ChangeNotifier {
     loaded = true;
     homes = await repository.homes();
     current = await repository.currentHome();
+    exampleHome = await repository.exampleHome();
+    // A step whose state is true is ticked at once, whichever screen made
+    // the row (web ADR 0084, "How a step ticks by itself"): every change of
+    // the screens ends here.
+    if (exampleHome case final example?) {
+      await repository.tickGuide((await guideContent()).guide, example.id);
+    }
     todayAllHomes = await repository.todayShowsAllHomes();
     serverSync.refused = await repository.refusedChanges();
     _watchLocalWrites();

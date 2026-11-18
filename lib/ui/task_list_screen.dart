@@ -16,6 +16,7 @@ import 'budget_parts.dart';
 import 'messages.dart';
 import 'open_task_row.dart';
 import 'parts.dart';
+import 'guide_screens.dart';
 import 'state.dart';
 import 'task_screen.dart';
 import 'templates_screen.dart';
@@ -391,6 +392,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     final past = _past;
     final writable = _home != null && _home!.archivedAt == null;
     return HcScaffold(
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       title: l10n.tasksTitle,
       actions: const [HelpButton(page: HelpPages.tasks)],
       body: (list == null && past == null)

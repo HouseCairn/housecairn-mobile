@@ -27,6 +27,7 @@ import 'parts.dart';
 import 'photos.dart';
 import 'report_screens.dart' show ReportScreen;
 import 'rooms.dart';
+import 'guide_screens.dart';
 import 'state.dart';
 import 'stock_screens.dart';
 import 'task_form_screen.dart';
@@ -640,6 +641,7 @@ class _TaskPageState extends State<TaskPage> {
     // The h1 is drawn under the pills of the head (lot D2); on iOS it still
     // folds into the bar once scrolled away (lot D4).
     return HcScaffold(
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       title: task?.title,
       drawsTitle: false,
       actions: const [HelpButton(page: HelpPages.task)],

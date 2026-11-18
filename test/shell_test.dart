@@ -74,6 +74,10 @@ void main() {
       await pumpApp(tester);
       await tester.tap(destination('More'));
       await tester.pumpAndSettle();
+      // About after Guide in Help (web ADR 0084): shown whole first.
+      await tester.scrollUntilVisible(find.byKey(const Key('more-about')), 100);
+      await tester.ensureVisible(find.byKey(const Key('more-about')));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('About'));
       await tester.pumpAndSettle();
       expect(find.text('Housecairn, by Robvred'), findsOneWidget);
@@ -101,6 +105,10 @@ void main() {
     await pumpApp(tester);
     await tester.tap(destination('More'));
     await tester.pumpAndSettle();
+    // About after Guide in Help (web ADR 0084): shown whole first.
+    await tester.scrollUntilVisible(find.byKey(const Key('more-about')), 100);
+    await tester.ensureVisible(find.byKey(const Key('more-about')));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('About'));
     await tester.pumpAndSettle();
     await tester.tap(destination('Today'));
@@ -110,6 +118,9 @@ void main() {
     expect(find.widgetWithText(HcLargeTitle, 'About'), findsOneWidget);
     // A second tap on the current section goes back to its root.
     await tester.tap(destination('More'));
+    await tester.pumpAndSettle();
+    // The root keeps where its list was scrolled to: its top first.
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, 2000));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(HcLargeTitle, 'More'), findsOneWidget);
   });
@@ -128,6 +139,9 @@ void main() {
         await tester.tap(destination(locale == 'en' ? 'More' : 'Plus'));
         await tester.pumpAndSettle();
         await tester.scrollUntilVisible(hcIcon(HcIcons.info), 100);
+        // Shown whole: Guide comes before About in Help (web ADR 0084).
+        await tester.ensureVisible(hcIcon(HcIcons.info));
+        await tester.pumpAndSettle();
         await tester.tap(hcIcon(HcIcons.info));
         await tester.pumpAndSettle();
         final version = find.byKey(const Key('about-version'));

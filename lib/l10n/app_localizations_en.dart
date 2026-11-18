@@ -3003,4 +3003,113 @@ class AppLocalizationsEn extends AppLocalizations {
   String articleLabelPhoto(String name) {
     return 'Label of $name';
   }
+
+  @override
+  String get guide => 'Guide';
+
+  @override
+  String get moreGuideText => 'Five scenarios to try on an example home';
+
+  @override
+  String get guideLead =>
+      'Five short scenarios, done for real on an example home with fictional values. You delete the example home in one press when you are done.';
+
+  @override
+  String guideNumbered(int number, String title) {
+    return '$number. $title';
+  }
+
+  @override
+  String guideStepNumbered(int scenario, String step, String title) {
+    return '$scenario.$step $title';
+  }
+
+  @override
+  String guideProgress(int done, int total) {
+    return '$done of $total';
+  }
+
+  @override
+  String get guideScenarioDone => 'Done';
+
+  @override
+  String get guideStepDone => 'Done';
+
+  @override
+  String get guideOptional => 'Optional';
+
+  @override
+  String get guideFill => 'Fill in for me';
+
+  @override
+  String get guideOpen => 'Open';
+
+  @override
+  String get guideMarkDone => 'Mark as done';
+
+  @override
+  String get guideNeedsHome =>
+      'Add the example home first, in the first scenario.';
+
+  @override
+  String get guideCatchUpText =>
+      'The earlier scenarios are not all done. The guide can add what they make to the example home, so that you can start here.';
+
+  @override
+  String get guideCatchUpNoHome =>
+      'There is no example home yet. The guide can make it, with what the earlier scenarios add, so that you can start here.';
+
+  @override
+  String get guideCatchUp => 'Add what the earlier scenarios make';
+
+  @override
+  String get guideCaughtUp =>
+      'The earlier scenarios are done in the example home.';
+
+  @override
+  String get guideBack => 'Back to the guide';
+
+  @override
+  String get exampleHome => 'Example home';
+
+  @override
+  String get exampleBannerText =>
+      'Fictional values, to try Housecairn for real. It stays on this phone.';
+
+  @override
+  String get exampleDelete => 'Delete the example home';
+
+  @override
+  String get exampleDeleteTitle => 'Delete the example home?';
+
+  @override
+  String get exampleDeleteBody =>
+      'Everything in it goes, for good. Your other homes do not change.';
+
+  @override
+  String get exampleDeleted => 'The example home was deleted.';
+
+  @override
+  String get exampleMark => 'Example';
+
+  @override
+  String get exampleNewHomeNotice =>
+      'This is the example home of the guide: its values are fictional, and you delete it in one press when you are done.';
+
+  @override
+  String get todayGuideText =>
+      'Not sure where to start? Try Housecairn on an example home, in five short scenarios.';
+
+  @override
+  String get todayGuideOpen => 'Open the guide';
+
+  @override
+  String guidePrevious(String title) {
+    return '‹ $title';
+  }
+
+  @override
+  String guideNext(String title) {
+    return '$title ›';
+  }
 }

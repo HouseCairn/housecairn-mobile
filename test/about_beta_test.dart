@@ -49,6 +49,9 @@ Future<void> _toAbout(
   await tester.tap(destination(locale == 'en' ? 'More' : 'Plus'));
   await tester.pumpAndSettle();
   await tester.scrollUntilVisible(hcIcon(HcIcons.info), 100);
+  // Shown whole: Guide comes before About in Help (web ADR 0084).
+  await tester.ensureVisible(hcIcon(HcIcons.info));
+  await tester.pumpAndSettle();
   await tester.tap(hcIcon(HcIcons.info));
   await tester.pumpAndSettle();
   await tester.scrollUntilVisible(

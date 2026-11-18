@@ -20,6 +20,7 @@ import 'stock_format.dart';
 import 'home_selector.dart';
 import 'messages.dart';
 import 'parts.dart';
+import 'guide_screens.dart';
 import 'state.dart';
 import 'rooms.dart';
 import 'task_screen.dart';
@@ -283,6 +284,7 @@ class ProjectScreen extends StatelessWidget {
         String m(Decimal v) => moneyIn(context, currency, v);
         final total = budget.sumOf(data.lines.map((l) => l.amounts));
         return HcScaffold(
+          belowTitle: ExampleHomeBanner(homeId: homeId),
           title: p.title,
           // The title is drawn under the pills, as on the web.
           drawsTitle: false,
@@ -705,10 +707,19 @@ class ProjectFormScreen extends StatefulWidget implements HcFormScreen {
   @override
   bool get opensAsSheet => true;
 
-  const ProjectFormScreen({super.key, required this.homeId, this.projectId});
+  const ProjectFormScreen({
+    super.key,
+    required this.homeId,
+    this.projectId,
+    this.fill = const {},
+  });
 
   final String homeId;
   final String? projectId;
+
+  /// The values of **Fill in for me** of the guide: the title, the goal, the
+  /// status and the rooms, on the example home only.
+  final GuideFill fill;
 
   @override
   State<ProjectFormScreen> createState() => _ProjectFormScreenState();
@@ -770,8 +781,32 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
         _seasonStart = p.seasonStartMonth;
         _seasonEnd = p.seasonEndMonth;
       }
+      _applyFill(rooms);
       _ready = true;
     });
+  }
+
+  /// The values of the guide that this form takes, each checked as input: a
+  /// status of the list, rooms of this home.
+  void _applyFill(List<RoomRow> rooms) {
+    final fill = widget.fill;
+    if (!fillsHere(context, widget.homeId, fill)) return;
+    for (final (name, controller) in [('title', _title), ('goal', _goal)]) {
+      if (fill[name] case final String value when value.trim().isNotEmpty) {
+        controller.text = value;
+      }
+    }
+    if (fill['status'] case final String status
+        when budget.projectStatuses.contains(status)) {
+      _status = status;
+    }
+    if (fill['rooms'] case final List<Object?> chosen) {
+      final ids = {for (final r in rooms) r.id};
+      _rooms.addAll([
+        for (final id in chosen)
+          if (id is String && ids.contains(id)) id,
+      ]);
+    }
   }
 
   @override
@@ -819,6 +854,7 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return HcScaffold(
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       title: widget.projectId == null ? l10n.addProject : l10n.editProject,
       actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
@@ -983,11 +1019,16 @@ class LineFormScreen extends StatefulWidget implements HcFormScreen {
     required this.homeId,
     required this.projectId,
     this.lineId,
+    this.fill = const {},
   });
 
   final String homeId;
   final String projectId;
   final String? lineId;
+
+  /// The values of **Fill in for me** of the guide: the label, the nature and
+  /// the amounts planned and paid, on the example home only.
+  final GuideFill fill;
 
   @override
   State<LineFormScreen> createState() => _LineFormScreenState();
@@ -1030,7 +1071,29 @@ class _LineFormScreenState extends State<LineFormScreen> {
           budget.readMoney(line.paid),
         );
       }
+      _applyFill();
     });
+  }
+
+  /// The values of the guide that this form takes, each checked as input: a
+  /// nature of the list, amounts that are decimal numbers.
+  void _applyFill() {
+    final fill = widget.fill;
+    if (!fillsHere(context, widget.homeId, fill)) return;
+    if (fill['label'] case final String label when label.trim().isNotEmpty) {
+      _label.text = label;
+    }
+    if (fill['nature'] case final String nature
+        when budget.natures.contains(nature)) {
+      _nature = nature;
+    }
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    for (final (name, controller) in [('planned', _planned), ('paid', _paid)]) {
+      if (Decimal.tryParse('${fill[name]}') case final amount?
+          when amount >= Decimal.zero) {
+        controller.text = moneyFieldText(locale, amount);
+      }
+    }
   }
 
   @override
@@ -1079,6 +1142,7 @@ class _LineFormScreenState extends State<LineFormScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return HcScaffold(
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       title: widget.lineId == null ? l10n.addLine : l10n.editLine,
       actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
@@ -1147,11 +1211,17 @@ class QuoteFormScreen extends StatefulWidget implements HcFormScreen {
     required this.homeId,
     required this.projectId,
     this.quoteId,
+    this.fill = const {},
   });
 
   final String homeId;
   final String projectId;
   final String? quoteId;
+
+  /// The values of **Fill in for me** of the guide: the contractor by name,
+  /// the line, the status, the amount and the dates, on the example home
+  /// only.
+  final GuideFill fill;
 
   @override
   State<QuoteFormScreen> createState() => _QuoteFormScreenState();
@@ -1164,6 +1234,12 @@ class _QuoteFormScreenState extends State<QuoteFormScreen> {
   String _status = 'requested';
   String? _line;
   String? _contractor;
+
+  /// A contractor of the guide that the home does not have yet: chosen in
+  /// the form under its name, and added to the contractors of the home with
+  /// the quote, as the web's field `contractor_name` does.
+  String? _newContractor;
+  static const _newChoice = '+';
   Day? _issued;
   Day? _validUntil;
   List<LineEntry> _lines = const [];
@@ -1210,7 +1286,43 @@ class _QuoteFormScreenState extends State<QuoteFormScreen> {
         _issued = input.issuedOn;
         _validUntil = input.validUntil;
       }
+      _applyFill();
     });
+  }
+
+  /// The values of the guide that this form takes, each checked as input: a
+  /// status of the list, a line of this project, an amount that is a
+  /// decimal number; the contractor is the one of that name, or a new one.
+  void _applyFill() {
+    final fill = widget.fill;
+    if (!fillsHere(context, widget.homeId, fill)) return;
+    if (fill['contractor_name'] case final String name
+        when name.trim().isNotEmpty) {
+      final known = _contractors.where((c) => c.name == name.trim());
+      if (known.isNotEmpty) {
+        _contractor = known.first.id;
+      } else {
+        _newContractor = name.trim();
+        _contractor = _newChoice;
+      }
+    }
+    if (fill['status'] case final String status
+        when budget.quoteStatuses.contains(status)) {
+      _status = status;
+    }
+    if (fill['budget_line'] case final String line
+        when _lines.any((l) => l.line.id == line)) {
+      _line = line;
+    }
+    if (Decimal.tryParse('${fill['amount']}') case final amount?
+        when amount >= Decimal.zero) {
+      _amount.text = moneyFieldText(
+        Localizations.localeOf(context).toLanguageTag(),
+        amount,
+      );
+    }
+    if (fill['issued_on'] case final Day issued) _issued = issued;
+    if (fill['valid_until'] case final Day valid) _validUntil = valid;
   }
 
   @override
@@ -1220,8 +1332,9 @@ class _QuoteFormScreenState extends State<QuoteFormScreen> {
     super.dispose();
   }
 
-  QuoteInput _input() => QuoteInput(
-    contractorId: _contractor,
+  QuoteInput _input([String? contractor]) => QuoteInput(
+    contractorId:
+        contractor ?? (_contractor == _newChoice ? null : _contractor),
     amount: fieldAmount(context, _amount),
     issuedOn: _issued,
     validUntil: _validUntil,
@@ -1233,12 +1346,23 @@ class _QuoteFormScreenState extends State<QuoteFormScreen> {
   Future<void> _save() async {
     if (!_form.currentState!.validate()) return;
     final navigator = Navigator.of(context);
-    final saved = await runChange(
-      context,
-      (r) => widget.quoteId == null
-          ? r.createQuote(widget.projectId, _input())
-          : r.updateQuote(widget.quoteId!, _input()),
-    );
+    final saved = await runChange(context, (r) async {
+      // The contractor of the guide joins the home with the quote, both or
+      // neither.
+      await r.atomic(() async {
+        final added = _contractor == _newChoice && _newContractor != null
+            ? await r.addContractor(
+                widget.homeId,
+                ContractorInput(name: _newContractor!),
+              )
+            : null;
+        if (widget.quoteId == null) {
+          await r.createQuote(widget.projectId, _input(added));
+        } else {
+          await r.updateQuote(widget.quoteId!, _input(added));
+        }
+      });
+    });
     if (saved) navigator.pop();
   }
 
@@ -1280,6 +1404,7 @@ class _QuoteFormScreenState extends State<QuoteFormScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return HcScaffold(
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       title: widget.quoteId == null ? l10n.addQuote : l10n.editQuote,
       actions: [if (_writable) HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
@@ -1294,7 +1419,11 @@ class _QuoteFormScreenState extends State<QuoteFormScreen> {
                   hcChoice<String?>(
                     l10n.contractor,
                     _contractor,
-                    [(null, '—'), for (final c in _contractors) (c.id, c.name)],
+                    [
+                      (null, '—'),
+                      for (final c in _contractors) (c.id, c.name),
+                      if (_newContractor case final name?) (_newChoice, name),
+                    ],
                     (v) => setState(() => _contractor = v),
                     key: const Key('quote-contractor'),
                   ),
@@ -1389,9 +1518,17 @@ class EnvelopeFormScreen extends StatefulWidget implements HcFormScreen {
   @override
   bool get opensAsSheet => true;
 
-  const EnvelopeFormScreen({super.key, required this.homeId});
+  const EnvelopeFormScreen({
+    super.key,
+    required this.homeId,
+    this.fill = const {},
+  });
 
   final String homeId;
+
+  /// The values of **Fill in for me** of the guide: the year and the amount,
+  /// on the example home only.
+  final GuideFill fill;
 
   @override
   State<EnvelopeFormScreen> createState() => _EnvelopeFormScreenState();
@@ -1423,7 +1560,25 @@ class _EnvelopeFormScreenState extends State<EnvelopeFormScreen> {
       _currency = home?.currency ?? '';
       _envelopes = envelopes;
       _fill();
+      _applyFill();
     });
+  }
+
+  /// The values of the guide that this form takes: a year the form offers,
+  /// an amount that is a decimal number.
+  void _applyFill() {
+    final fill = widget.fill;
+    if (!fillsHere(context, widget.homeId, fill)) return;
+    if (fill['year'] case final int year when (year - _year!).abs() <= 1) {
+      _year = year;
+    }
+    if (Decimal.tryParse('${fill['amount']}') case final amount?
+        when amount >= Decimal.zero) {
+      _amount.text = moneyFieldText(
+        Localizations.localeOf(context).toLanguageTag(),
+        amount,
+      );
+    }
   }
 
   void _fill() {
@@ -1458,6 +1613,7 @@ class _EnvelopeFormScreenState extends State<EnvelopeFormScreen> {
     final l10n = AppLocalizations.of(context);
     final now = AppScope.of(context).repository.today().year;
     return HcScaffold(
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       title: l10n.annualEnvelope,
       actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(

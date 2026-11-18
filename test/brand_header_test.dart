@@ -100,6 +100,10 @@ void main() {
     await pumpApp(tester);
     await tester.tap(destination('More'));
     await tester.pumpAndSettle();
+    // About after Guide in Help (web ADR 0084): shown whole first.
+    await tester.scrollUntilVisible(find.byKey(const Key('more-about')), 100);
+    await tester.ensureVisible(find.byKey(const Key('more-about')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('more-about')));
     await tester.pumpAndSettle();
     expect(find.byType(HcBrand), findsNothing);

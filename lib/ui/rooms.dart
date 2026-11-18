@@ -20,6 +20,7 @@ import 'messages.dart';
 import 'parts.dart';
 import 'photos.dart';
 import 'report_screens.dart';
+import 'guide_screens.dart';
 import 'state.dart';
 import 'stock_format.dart';
 import 'stock_screens.dart';
@@ -247,6 +248,7 @@ class RoomScreen extends StatelessWidget {
         ].where((m) => m.$2.isNotEmpty).toList();
         void open(Widget screen) => Navigator.of(context).push(hcRoute(screen));
         return HcScaffold(
+          belowTitle: ExampleHomeBanner(homeId: homeId),
           title: room.name,
           actions: actionsOrHelp([
             if (writable)
@@ -435,9 +437,14 @@ class RoomFormScreen extends StatefulWidget implements HcFormScreen {
     required this.homeId,
     this.roomId,
     this.memory = false,
+    this.fill = const {},
   });
 
   final String homeId;
+
+  /// The values of **Fill in for me** of the guide: `name` and `kind`, shown
+  /// on the example home only.
+  final GuideFill fill;
 
   /// `null` for a new room.
   final String? roomId;
@@ -491,7 +498,10 @@ class _RoomFormScreenState extends State<RoomFormScreen>
     repository.articles(widget.homeId).then((articles) {
       if (mounted) setState(() => _articles = articles);
     });
-    if (widget.roomId == null) return;
+    if (widget.roomId == null) {
+      _applyFill();
+      return;
+    }
     repository.room(widget.roomId!).then((room) {
       if (room == null || !mounted) return;
       final input = RoomInput.of(room);
@@ -507,6 +517,7 @@ class _RoomFormScreenState extends State<RoomFormScreen>
         _floor.text = input.floorCovering;
         _wall.text = input.wallCovering;
         _memoryNotes.text = input.memoryNotes;
+        _applyFill();
       });
       sheetLoaded();
     });
@@ -528,6 +539,19 @@ class _RoomFormScreenState extends State<RoomFormScreen>
       c.dispose();
     }
     super.dispose();
+  }
+
+  /// The values of the guide that this form takes (`prefill_fields` of the
+  /// web's room form): a type the list has, a name that is not empty.
+  void _applyFill() {
+    final fill = widget.fill;
+    if (!fillsHere(context, widget.homeId, fill)) return;
+    if (fill['kind'] case final String kind when roomKinds.contains(kind)) {
+      _kind = kind;
+    }
+    if (fill['name'] case final String name when name.trim().isNotEmpty) {
+      _name.text = name;
+    }
   }
 
   /// Choosing a type fills the name in with the label of the type, as the web
@@ -603,6 +627,7 @@ class _RoomFormScreenState extends State<RoomFormScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return HcScaffold(
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       title: widget.memory
           ? l10n.roomMemory
           : widget.roomId == null

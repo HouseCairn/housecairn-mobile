@@ -10,6 +10,7 @@ import '../l10n/app_localizations.dart';
 import 'about.dart';
 import 'budget_screens.dart';
 import 'contractor_screens.dart';
+import 'guide_screens.dart';
 import 'homes_screen.dart';
 import 'project_screens.dart';
 import 'report_screens.dart';
@@ -89,6 +90,15 @@ class MoreScreen extends StatelessWidget {
           HcSectionHeading(l10n.moreHelpGroup),
           HcCardList(
             children: [
+              // The interactive guide, before About as on the web
+              // (`core/more.py`, Help).
+              HcRow(
+                key: const Key('more-guide'),
+                leading: const HcIcon(HcIcons.book, color: HcColors.primary),
+                title: l10n.guide,
+                text: l10n.moreGuideText,
+                onTap: () => openGuide(context),
+              ),
               HcRow(
                 key: const Key('more-about'),
                 leading: const HcIcon(HcIcons.info, color: HcColors.primary),

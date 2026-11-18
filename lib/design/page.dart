@@ -314,15 +314,19 @@ abstract interface class HcFormScreen {
 
 /// The route of [page]: a page, or a modal sheet for a form on iOS
 /// (design/patterns.md, Platform adaptations 7). On Android a form stays a
-/// page, its back button being Cancel.
-Route<void> hcRoute(Widget page) => hcRouteOf<void>(page);
+/// page, its back button being Cancel. [settings] names the route, for a
+/// screen that goes back to it (the guide, after its example home is gone).
+Route<void> hcRoute(Widget page, {RouteSettings? settings}) =>
+    hcRouteOf<void>(page, settings: settings);
 
 /// [hcRoute] for a screen that gives back a [T] when it closes (the form of
 /// a task says whether the task is kept).
-Route<T> hcRouteOf<T>(Widget page) => MaterialPageRoute<T>(
-  builder: (_) => page,
-  fullscreenDialog:
-      (page as Object) is HcFormScreen &&
-      (page as HcFormScreen).opensAsSheet &&
-      hcCupertino(defaultTargetPlatform),
-);
+Route<T> hcRouteOf<T>(Widget page, {RouteSettings? settings}) =>
+    MaterialPageRoute<T>(
+      settings: settings,
+      builder: (_) => page,
+      fullscreenDialog:
+          (page as Object) is HcFormScreen &&
+          (page as HcFormScreen).opensAsSheet &&
+          hcCupertino(defaultTargetPlatform),
+    );

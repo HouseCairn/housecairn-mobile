@@ -22,6 +22,7 @@ import 'stock_format.dart';
 import 'choices.dart';
 import 'messages.dart';
 import 'parts.dart';
+import 'guide_screens.dart';
 import 'state.dart';
 
 /// The choice that adds a room, an item or a contractor with the task: the
@@ -46,6 +47,7 @@ class TaskFormScreen extends StatefulWidget implements HcFormScreen {
     this.taskId,
     this.roomId,
     this.itemId,
+    this.fill = const {},
   });
 
   final String homeId;
@@ -57,6 +59,12 @@ class TaskFormScreen extends StatefulWidget implements HcFormScreen {
 
   /// `null` for a new task.
   final String? taskId;
+
+  /// The values of **Fill in for me** of the guide: the title, the procedure,
+  /// the repetition, the first date and the duration, shown on the example
+  /// home only (`prefill_fields` of the web's task form, which leaves the
+  /// room and the item to the person).
+  final GuideFill fill;
 
   @override
   bool get opensAsSheet => true;
@@ -170,9 +178,43 @@ class _TaskFormScreenState extends State<TaskFormScreen>
       if (widget.taskId != null) {
         _load();
       } else {
+        _applyFill();
         _ready = true;
         _loadPlaces();
       }
+    }
+  }
+
+  /// The values of the guide that this form takes, each checked as input: a
+  /// repetition and a unit the form offers, an interval and a duration that
+  /// are numbers.
+  void _applyFill() {
+    final fill = widget.fill;
+    if (!fillsHere(context, widget.homeId, fill)) return;
+    for (final (name, controller) in [
+      ('title', _title),
+      ('procedure', _procedure),
+    ]) {
+      if (fill[name] case final String value when value.trim().isNotEmpty) {
+        controller.text = value;
+      }
+    }
+    if (fill['repeat_mode'] case final String mode
+        when recurrence.modes.contains(mode)) {
+      _mode = mode;
+    }
+    if (fill['repeat_unit'] case final String unit
+        when recurrence.units.contains(unit)) {
+      _unit = unit;
+    }
+    if (fill['repeat_interval'] case final int interval when interval > 0) {
+      _interval.text = '$interval';
+    }
+    if (fill['due_on'] case final Day due) _due = due;
+    if (fill['estimated_minutes'] case final int minutes when minutes > 0) {
+      final (value, unit) = durations.split(minutes);
+      _duration.text = '$value';
+      _durationUnit = unit;
     }
   }
 
@@ -257,6 +299,7 @@ class _TaskFormScreenState extends State<TaskFormScreen>
       _contractorId = task.contractorId;
       final due = open.isEmpty ? null : open.first.dueOn;
       _due = due == null ? null : Day.parse(due);
+      _applyFill();
       _ready = true;
     });
     await _loadPlaces();
@@ -894,6 +937,7 @@ class _TaskFormScreenState extends State<TaskFormScreen>
     final wide = MediaQuery.textScalerOf(context).scale(1) > 1.3;
     final title = widget.taskId == null ? l10n.taskAddTitle : l10n.taskEditTask;
     return HcScaffold(
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       title: title,
       actions: [Center(child: savedStatus())],
       body: Form(
