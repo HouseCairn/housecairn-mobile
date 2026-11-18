@@ -57,7 +57,7 @@ void main() {
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull, reason: label);
         }
-        await tester.scrollUntilVisible(hcIcon(HcIcons.info), 100);
+        await scrollMoreTo(tester, hcIcon(HcIcons.info));
         await tester.ensureVisible(hcIcon(HcIcons.info));
         await tester.pumpAndSettle();
         await tester.tap(hcIcon(HcIcons.info));
@@ -74,6 +74,8 @@ void main() {
       await pumpApp(tester);
       await tester.tap(destination('More'));
       await tester.pumpAndSettle();
+      await scrollMoreTo(tester, find.text('About'));
+      await scrollMoreTo(tester, find.text('About'));
       await tester.tap(find.text('About'));
       await tester.pumpAndSettle();
       expect(find.text('Housecairn, by Robvred'), findsOneWidget);
@@ -101,6 +103,7 @@ void main() {
     await pumpApp(tester);
     await tester.tap(destination('More'));
     await tester.pumpAndSettle();
+    await scrollMoreTo(tester, find.text('About'));
     await tester.tap(find.text('About'));
     await tester.pumpAndSettle();
     await tester.tap(destination('Today'));
@@ -108,10 +111,12 @@ void main() {
     await tester.tap(destination('More'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(HcLargeTitle, 'About'), findsOneWidget);
-    // A second tap on the current section goes back to its root.
+    // A second tap on the current section goes back to its root, scrolled
+    // where it was (More is longer than the phone).
     await tester.tap(destination('More'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(HcLargeTitle, 'More'), findsOneWidget);
+    expect(find.widgetWithText(HcLargeTitle, 'About'), findsNothing);
+    expect(find.byKey(const Key('more-about')), findsOneWidget);
   });
 
   for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
@@ -127,7 +132,7 @@ void main() {
         await pumpApp(tester, locale: locale);
         await tester.tap(destination(locale == 'en' ? 'More' : 'Plus'));
         await tester.pumpAndSettle();
-        await tester.scrollUntilVisible(hcIcon(HcIcons.info), 100);
+        await scrollMoreTo(tester, hcIcon(HcIcons.info));
         await tester.tap(hcIcon(HcIcons.info));
         await tester.pumpAndSettle();
         final version = find.byKey(const Key('about-version'));

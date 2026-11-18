@@ -14,6 +14,7 @@ import 'package:housecairn_mobile/design/widgets.dart';
 import 'package:housecairn_mobile/domain/photos.dart';
 import 'package:housecairn_mobile/domain/templates.dart';
 import 'package:housecairn_mobile/sync/mode.dart';
+import 'package:housecairn_mobile/ui/sections.dart';
 import 'package:housecairn_mobile/ui/state.dart';
 import 'package:housecairn_mobile/ui/task_screen.dart';
 import 'package:material_ui/material_ui.dart';
@@ -155,5 +156,22 @@ Future<void> saveTask(WidgetTester tester) async {
   final button = find.byKey(const Key('task-save'));
   await seeInTaskForm(tester, button);
   await tester.tap(button);
+  await tester.pumpAndSettle();
+}
+
+/// Scrolls the list of More until [target] is built and on screen: More is
+/// longer than a phone since it has the web's QR labels.
+Future<void> scrollMoreTo(WidgetTester tester, Finder target) async {
+  final list = find
+      .descendant(
+        of: find.byType(MoreScreen),
+        matching: find.byType(Scrollable),
+      )
+      .first;
+  for (var i = 0; i < 20 && target.evaluate().isEmpty; i++) {
+    await tester.drag(list, const Offset(0, -150));
+    await tester.pumpAndSettle();
+  }
+  await tester.ensureVisible(target.first);
   await tester.pumpAndSettle();
 }

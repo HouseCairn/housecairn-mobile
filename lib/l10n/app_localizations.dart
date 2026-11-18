@@ -4922,17 +4922,11 @@ abstract class AppLocalizations {
   /// **'Stickers that open a room, an item or an article'**
   String get moreLabelsText;
 
-  /// Title of the scanner of QR labels, and its row in More.
+  /// Title of the scanner of QR labels, and its button on QR labels.
   ///
   /// In en, this message translates to:
   /// **'Scan a label'**
   String get scanLabel;
-
-  /// Subtitle of Scan a label in More.
-  ///
-  /// In en, this message translates to:
-  /// **'Open what a sticker names, with the camera'**
-  String get moreScanText;
 
   /// Web catalogue (labels): Make a QR label.
   ///

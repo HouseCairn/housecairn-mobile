@@ -105,13 +105,13 @@ void main() {
       'en',
       'More',
       ['Home', 'Me', 'Help', 'How you use Housecairn'],
-      ['Reports', 'Contractors', 'My homes'],
+      ['Reports', 'Contractors', 'QR labels', 'My homes'],
     ),
     (
       'fr',
       'Plus',
       ['Logement', 'Moi', 'Aide', 'Utilisation de Housecairn'],
-      ['Signalements', 'Intervenants', 'Mes logements'],
+      ['Signalements', 'Intervenants', 'Étiquettes QR', 'Mes logements'],
     ),
   ]) {
     testWidgets('More has the groups of the web, in its order ($locale)', (

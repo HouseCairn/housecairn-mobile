@@ -971,7 +971,6 @@
   "qrLabel": "Étiquette QR",
   "moreLabelsText": "Des autocollants qui ouvrent une pièce, un élément ou un article",
   "scanLabel": "Scanner une étiquette",
-  "moreScanText": "Ouvrir ce qu'un autocollant désigne, avec l'appareil photo",
   "makeQrLabel": "Créer une étiquette QR",
   "labelOf": "Étiquette QR de {name}",
   "labelQrOf": "Code QR de {name}",

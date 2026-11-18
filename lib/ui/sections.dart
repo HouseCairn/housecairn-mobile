@@ -72,13 +72,6 @@ class MoreScreen extends StatelessWidget {
                   text: l10n.moreLabelsText,
                   onTap: () => open(LabelsScreen(homeId: home.id)),
                 ),
-                HcRow(
-                  key: const Key('more-scan'),
-                  leading: const HcIcon(HcIcons.qr, color: HcColors.primary),
-                  title: l10n.scanLabel,
-                  text: l10n.moreScanText,
-                  onTap: () => scanLabel(context),
-                ),
               ],
               HcRow(
                 key: const Key('more-homes'),

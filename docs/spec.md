@@ -303,8 +303,9 @@ contractor with it.
     the record of a room, an item and a stock article, QR label (its page) or Make a QR label,
     before Report a problem, as the web; the page of a label shows its QR code, the code it holds
     and nothing else, Open the page, the print of that label, and for a home that is written
-    Make a new label and Revoke the label (confirmed); in More, QR labels (every room, item and
-    stock article to tick, the layout, Print the labels) and Scan a label. The sheet is the web's:
+    Make a new label and Revoke the label (confirmed); in More, QR labels, where the web has it
+    (Scan a label first, then every room, item and stock article to tick, the layout, Print the
+    labels). The sheet is the web's:
     an A4 sheet of 3 by 8 labels of 63.5 by 33.9 mm or a 62 mm roll, in Helvetica, at most 200
     labels, a PDF handed to the share sheet of the phone and not kept. The scan asks for the
     camera then, never before; it opens the page of a code this phone knows and says in words

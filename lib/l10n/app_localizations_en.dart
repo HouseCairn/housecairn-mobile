@@ -3018,9 +3018,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanLabel => 'Scan a label';
 
   @override
-  String get moreScanText => 'Open what a sticker names, with the camera';
-
-  @override
   String get makeQrLabel => 'Make a QR label';
 
   @override

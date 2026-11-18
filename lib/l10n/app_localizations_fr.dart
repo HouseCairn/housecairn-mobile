@@ -3043,10 +3043,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scanLabel => 'Scanner une étiquette';
 
   @override
-  String get moreScanText =>
-      'Ouvrir ce qu\'un autocollant désigne, avec l\'appareil photo';
-
-  @override
   String get makeQrLabel => 'Créer une étiquette QR';
 
   @override

@@ -388,6 +388,14 @@ class _LabelsScreenState extends State<LabelsScreen> {
             children: [
               Text(l10n.labelsIntro, style: HcText.bodySmall),
               const SizedBox(height: HcSpace.s3),
+              // The scan, the one entry the web does not have (its stickers
+              // are opened by the camera of the phone): first on the page.
+              OutlinedButton(
+                key: const Key('labels-scan'),
+                onPressed: () => scanLabel(context),
+                child: Text(l10n.scanLabel),
+              ),
+              const SizedBox(height: HcSpace.s3),
               if (entries.isEmpty)
                 HcEmpty(l10n.labelsEmpty)
               else ...[

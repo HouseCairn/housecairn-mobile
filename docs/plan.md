@@ -371,7 +371,7 @@ with it; the camera asked for at the scan only. Packages: `camera`, `zxing_lib`,
   French, at text scale 1 and 2; the accessibility guidelines on the list.
 
 **Device**: print a sheet from the app (A4 on a printer, or the PDF saved to Files), stick a
-label, then scan it with Scan a label in More, on an Android phone and an iPhone: the page of the
+label, then scan it with Scan a label (More, QR labels), on an Android phone and an iPhone: the page of the
 object opens; regenerate the label and scan the old sticker: "revoked"; refuse the camera once:
 the scanner says so; scan a sticker printed by the web: "not known on this phone".
 

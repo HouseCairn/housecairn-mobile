@@ -527,8 +527,11 @@ void main() {
             .last,
       );
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.byKey(const Key('more-scan')));
-      await tester.tap(find.byKey(const Key('more-scan')));
+      await tester.ensureVisible(find.byKey(const Key('more-labels')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('more-labels')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('labels-scan')));
       await tester.pumpAndSettle();
       return camera;
     }
