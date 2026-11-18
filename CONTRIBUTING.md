@@ -64,7 +64,9 @@ dart run drift_dev schema generate drift_schemas/housecairn/ test/drift/housecai
 ```
 
 The recurrence vectors (`test/fixtures/recurrence_vectors.json`), the task templates
-(`assets/task_templates.yaml`) and the web values of `design/tokens.json` come from a release of
+(`assets/task_templates.yaml`), the guide (`design/guide.json`), the glossary
+(`design/glossary.json`), the guide's vectors (`test/fixtures/guide_states.json`) and the web
+values of `design/tokens.json` come from a release of
 the web application, pinned in `tool/web_alignment.json`
 ([plan](docs/plan.md#alignment-with-the-web-application)); CI fails when they are not what that
 release gives. Never edit them by hand: move the pin, which regenerates them. This needs git, a
@@ -75,6 +77,7 @@ clone of the web repository and [uv](https://docs.astral.sh/uv/) 0.13.7 (the ver
 git clone https://github.com/HouseCairn/housecairn ../housecairn
 python3 tool/web_alignment.py check --web ../housecairn                    # what CI runs
 python3 tool/web_alignment.py update --web ../housecairn --release vX.Y.Z  # move the pin
+python3 tool/web_alignment.py update --web ../housecairn --release vX.Y.Z --only guide  # one element only
 flutter test                                                               # a red test: port the rule in Dart
 ```
 

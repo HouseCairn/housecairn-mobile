@@ -71,6 +71,39 @@
         "test/fixtures/budget_web_figures.json"
       ],
       "how": "tool/budget_figures.py loads test/fixtures/budget_fixture.json into the web of the commit (uv sync --frozen --no-dev, this Python, a temporary SQLite database) and writes every budget figure; compared byte for byte, and test/budget_web_test.dart compares the app with it"
+    },
+    "guide": {
+      "release": "v0.5.1",
+      "commit": "274246909fcc010cc101b95b79dbffdd0f5a49cd",
+      "web": [
+        "design/guide.json"
+      ],
+      "mobile": [
+        "design/guide.json"
+      ],
+      "how": "copy of the web file (web ADR 0084); compared byte for byte"
+    },
+    "glossary": {
+      "release": "v0.5.1",
+      "commit": "274246909fcc010cc101b95b79dbffdd0f5a49cd",
+      "web": [
+        "design/glossary.json"
+      ],
+      "mobile": [
+        "design/glossary.json"
+      ],
+      "how": "copy of the web file, the terms the guide cites (web ADR 0084); compared byte for byte"
+    },
+    "guide_states": {
+      "release": "v0.5.1",
+      "commit": "274246909fcc010cc101b95b79dbffdd0f5a49cd",
+      "web": [
+        "tests/fixtures/guide_states.json"
+      ],
+      "mobile": [
+        "test/fixtures/guide_states.json"
+      ],
+      "how": "copy of the vectors the web writes from guide.states (web ADR 0084); compared byte for byte"
     }
   }
 }
