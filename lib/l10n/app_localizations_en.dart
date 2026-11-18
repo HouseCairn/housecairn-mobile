@@ -2653,6 +2653,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'A home of your server is deleted on the server\'s web page, by an owner. It then goes from this phone too.';
 
   @override
+  String get errExampleExists =>
+      'You already have an example home. Delete it to make another.';
+
+  @override
   String get wayMoveToServerLater =>
       'Keeping this phone\'s homes on a Housecairn server comes with a later version of the app. Nothing on this phone has changed.';
 

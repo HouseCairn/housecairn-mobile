@@ -62,6 +62,7 @@ String refusalMessage(
   Refusal.readOnlyHome => l10n.errReadOnlyHome,
   Refusal.ownersOnly => l10n.errOwnersOnly,
   Refusal.deleteOnServer => l10n.errDeleteOnServer,
+  Refusal.exampleExists => l10n.errExampleExists,
 };
 
 /// Shows a refusal in a bar at the bottom of the screen.

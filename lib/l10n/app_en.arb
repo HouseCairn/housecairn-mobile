@@ -1426,6 +1426,8 @@
   "@errOwnersOnly": {"description": "Error: archiving a home of a server is for its owners (web ADR 0077)."},
   "errDeleteOnServer": "A home of your server is deleted on the server's web page, by an owner. It then goes from this phone too.",
   "@errDeleteOnServer": {"description": "Error: a home of a server cannot be deleted from the phone."},
+  "errExampleExists": "You already have an example home. Delete it to make another.",
+  "@errExampleExists": {"description": "Error: one example home of the guide per phone (web ADR 0084); the web's message."},
   "wayMoveToServerLater": "Keeping this phone's homes on a Housecairn server comes with a later version of the app. Nothing on this phone has changed.",
   "@wayMoveToServerLater": {"description": "Shown when the person picks My Housecairn server while the phone has homes of its own (docs/plan.md, lot 4c)."},
   "wayLeaveServerTitle": "Stop syncing with the server?",

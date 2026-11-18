@@ -2,15 +2,16 @@
 
 // Migration tests of drift's guided migrations
 // (docs/adr/0002-local-storage-and-migrations.md): from every schema version
-// in drift_schemas/housecairn/ to the current one (schema 9). Each step runs
+// in drift_schemas/housecairn/ to the current one (schema 10). Each step runs
 // in turn: 1 to 2 (lot 2a), 2 to 3 (stock), 3 to 4 (lot 3b: projects, budget,
 // reports), 4 to 5 (the manufacturer's warranty, six columns of `items`) and
 // 5 to 6 (the tables of sync of lot 4, new and empty) and 6 to 7
 // (`server_seen` of lot 4b, new and empty) and 7 to 8 (`file_sync` of lot 4c, new
-// and empty) and 8 to 9 (`task_attachments` of lot 4d, new and empty); 9 to 9
-// checks that the schema of AppDatabase is the one of drift_schema_v9.json.
+// and empty) and 8 to 9 (`task_attachments` of lot 4d, new and empty) and 9 to
+// 10 (`homes.is_example` and `step_ticks` of the guide, web ADR 0084); 10 to
+// 10 checks that the schema of AppDatabase is the one of drift_schema_v10.json.
 // The steps from
-// schemas 2, 3, 4 and 5 also run on a file with data: every row is there
+// schemas 2, 3, 4, 5, 7, 8 and 9 also run on a file with data: every row is there
 // after them, every column it had unchanged, the new columns empty or at
 // their default and the new tables empty. Regenerate `generated/` with:
 //   dart run drift_dev make-migrations
@@ -43,7 +44,7 @@ void main() {
   }
 
   for (final from in [2, 3]) {
-    test('migrates a schema $from file with data to schema 9, keeping every '
+    test('migrates a schema $from file with data to schema 10, keeping every '
         'row', () async {
       final schema = await verifier.schemaAt(from);
       final raw = schema.rawDatabase;
@@ -104,7 +105,7 @@ void main() {
       expect(dumped, contains('Second gutters'));
 
       final db = AppDatabase(schema.newConnection());
-      await verifier.migrateAndValidate(db, 9);
+      await verifier.migrateAndValidate(db, 10);
       expect(dump(), dumped);
       for (final (table, column) in [
         ('rooms', 'paint_article_id'),
@@ -143,7 +144,7 @@ void main() {
     });
   }
 
-  test('migrates a schema 4 file with items to schema 9: the end of a '
+  test('migrates a schema 4 file with items to schema 10: the end of a '
       'warranty typed before stays, the new columns are empty', () async {
     final schema = await verifier.schemaAt(4);
     final raw = schema.rawDatabase;
@@ -187,9 +188,20 @@ void main() {
       for (final c in raw.select('PRAGMA table_info(items)'))
         c['name'] as String,
     ];
+    // The columns the file has now: a column a later schema adds is not
+    // part of the comparison.
+    final had = {
+      for (final table in ['homes', 'rooms'])
+        table: [
+          for (final c in raw.select('PRAGMA table_info($table)'))
+            c['name'] as String,
+        ].join(', '),
+    };
     String dump() => [
       for (final table in ['homes', 'rooms'])
-        for (final row in raw.select('SELECT * FROM $table ORDER BY id'))
+        for (final row in raw.select(
+          'SELECT ${had[table]} FROM $table ORDER BY id',
+        ))
           '$table $row',
       for (final row in raw.select(
         'SELECT ${columns.join(', ')} FROM items ORDER BY id',
@@ -200,7 +212,7 @@ void main() {
     expect(dumped, contains('2027-03-01'));
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 9);
+    await verifier.migrateAndValidate(db, 10);
     expect(dump(), dumped);
     final rows = raw.select(
       'SELECT purchased_on, warranty_duration, warranty_duration_unit, '
@@ -215,7 +227,7 @@ void main() {
     await db.close();
   });
 
-  test('migrates a schema 5 file with data to schema 9: every row and clock '
+  test('migrates a schema 5 file with data to schema 10: every row and clock '
       'stays, the tables of sync are new and empty', () async {
     final schema = await verifier.schemaAt(5);
     final raw = schema.rawDatabase;
@@ -298,10 +310,19 @@ void main() {
       'field_clock',
       'local_settings',
     ];
+    // The columns the file has now: a column a later schema adds is not
+    // part of the comparison.
+    final had = {
+      for (final table in before)
+        table: [
+          for (final c in raw.select('PRAGMA table_info($table)'))
+            c['name'] as String,
+        ].join(', '),
+    };
     String dump() => [
       for (final table in before)
         for (final row in raw.select(
-          'SELECT * FROM $table '
+          'SELECT ${had[table]} FROM $table '
           '${table == 'field_clock' ? "WHERE entity != 'projects.annualenvelope' " : ''}'
           'ORDER BY 1, 2',
         ))
@@ -312,7 +333,7 @@ void main() {
     expect(dumped, contains('0193a1b2c3d40002'));
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 9);
+    await verifier.migrateAndValidate(db, 10);
     expect(dump(), dumped);
     for (final table in [
       'op_log',
@@ -354,7 +375,7 @@ void main() {
     await db.close();
   });
 
-  test('migrates a schema 7 file with a photo to schema 9: the row and its '
+  test('migrates a schema 7 file with a photo to schema 10: the row and its '
       'mark stay, the list of files is new and empty', () async {
     final schema = await verifier.schemaAt(7);
     final raw = schema.rawDatabase;
@@ -374,7 +395,7 @@ void main() {
       [id(2), id(1)],
     );
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 9);
+    await verifier.migrateAndValidate(db, 10);
     expect(
       raw.select('SELECT image FROM photos').single['image'],
       '{"size":3,"type":"image/jpeg"}',
@@ -386,7 +407,7 @@ void main() {
   });
 
   test('migrates a schema 8 file with a task and an attachment kept aside to '
-      'schema 9: the table of attachments is new and empty, the operation '
+      'schema 10: the table of attachments is new and empty, the operation '
       'stays in pending to be applied', () async {
     final schema = await verifier.schemaAt(8);
     final raw = schema.rawDatabase;
@@ -406,7 +427,7 @@ void main() {
       ['k', 'tasks.attachment', id(1), '{"t":"tasks.attachment"}'],
     );
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 9);
+    await verifier.migrateAndValidate(db, 10);
     expect(
       raw.select('SELECT title FROM tasks').single['title'],
       'Main gutters',
@@ -419,6 +440,58 @@ void main() {
       raw.select('SELECT entity FROM pending').single['entity'],
       'tasks.attachment',
     );
+    expect(await db.integrityCheck(), 'ok');
+    await db.close();
+  });
+
+  test('migrates a schema 9 file with two homes to schema 10: every home '
+      'stays as it was and reads as a real one, the table of ticks is new '
+      'and empty', () async {
+    final schema = await verifier.schemaAt(9);
+    final raw = schema.rawDatabase;
+    Uint8List id(int n) => Uint8List.fromList(List.filled(16, n));
+    raw.execute(
+      'INSERT INTO homes (id, created_at, updated_at, name, currency, '
+      'hemisphere, archived_at) VALUES (?, 1, 1, ?, ?, ?, NULL), '
+      '(?, 1, 1, ?, ?, ?, 9)',
+      [
+        id(1),
+        'Main home',
+        'EUR',
+        'north',
+        id(2),
+        'Second home',
+        'CHF',
+        'south',
+      ],
+    );
+    raw.execute(
+      'INSERT INTO field_clock (entity, row_id, field, hlc, device) '
+      "VALUES ('homes.home', ?, 'name', '0193a1b2c3d40001', ?)",
+      [id(1), id(9)],
+    );
+    const columns =
+        'id, created_at, updated_at, deleted_at, name, currency, '
+        'hemisphere, archived_at';
+    String dump() => [
+      for (final row in raw.select('SELECT $columns FROM homes ORDER BY id'))
+        'homes $row',
+      for (final row in raw.select('SELECT * FROM field_clock'))
+        'field_clock $row',
+    ].join('\n');
+    final dumped = dump();
+    expect(dumped, contains('Second home'));
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 10);
+    expect(dump(), dumped);
+    expect(
+      raw
+          .select('SELECT is_example FROM homes ORDER BY id')
+          .map((r) => r['is_example']),
+      [0, 0],
+    );
+    expect(raw.select('SELECT COUNT(*) AS n FROM step_ticks').first['n'], 0);
     expect(await db.integrityCheck(), 'ok');
     await db.close();
   });

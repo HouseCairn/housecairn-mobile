@@ -127,6 +127,9 @@ class SyncEngine {
 
   Future<void> _purgeGone() async {
     for (final home in await transport.homesGone()) {
+      // The example home of the guide stays on the phone beside the homes of
+      // the other side, which never had it (web ADR 0084).
+      if (await repository.isExampleHome(home)) continue;
       if (!await repository.isPurged(home)) await repository.purgeHome(home);
     }
   }

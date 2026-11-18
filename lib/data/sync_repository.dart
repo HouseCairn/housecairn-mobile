@@ -192,7 +192,8 @@ extension SyncRepository on Repository {
       id != null && await _homeOf(table, id) == homeId ? id : null;
 
   /// Writes the operation of a local change in `op_log`, inside the
-  /// transaction of [Repository._put].
+  /// transaction of [Repository._put], which returns before it for a row of
+  /// the example home of the guide (web ADR 0084).
   Future<void> _logOperation(
     String table,
     String id,
@@ -228,10 +229,14 @@ extension SyncRepository on Repository {
   // ---------- out ----------
 
   /// The operations written on this phone and not yet taken by the other
-  /// side, oldest first.
+  /// side, oldest first. None of the example home of the guide: it writes
+  /// none, and one found there anyway is not sent (web ADR 0084).
   Future<List<OutgoingOperation>> outgoing() async {
     final rows = await db
-        .customSelect('SELECT seq, body FROM op_log ORDER BY seq')
+        .customSelect(
+          'SELECT seq, body FROM op_log WHERE home_id IS NULL OR home_id NOT '
+          'IN (SELECT id FROM homes WHERE is_example = 1) ORDER BY seq',
+        )
         .get();
     final out = [
       for (final row in rows)
@@ -511,6 +516,9 @@ extension SyncRepository on Repository {
     final hlc = op[Op.clock] as String;
     final device = unb64(op[Op.device] as String);
     if (home != null && await isPurged(home)) return;
+    // The example home of the guide is of this phone only: an operation
+    // that names it is of no other side (web ADR 0084).
+    if (await isExampleHome(home)) return;
     _hlc.receive(Hlc.parse(hlc));
     final table = tableOfEntity[type];
     if (table == null && !type.startsWith('family.')) {
@@ -552,6 +560,9 @@ extension SyncRepository on Repository {
     final now = _now();
     for (final MapEntry(key: field, :value) in fieldsOf(op).entries) {
       if (_keyFields.contains(field)) continue;
+      // The mark of the example home is written by the guide alone: no
+      // operation makes a home an example, nor an example a real home.
+      if (type == 'homes.home' && field == 'is_example') continue;
       final stored = clocks[field];
       final order = stored == null
           ? 1
@@ -897,7 +908,13 @@ extension SyncRepository on Repository {
   /// row of it, their clocks, what is kept of it in `extra`, `pending`,
   /// `op_log` and `other_versions`, and its files; then keeps its id, so
   /// that every later operation of it is dropped, whatever its clock.
-  Future<void> purgeHome(String homeId) async {
+  Future<void> purgeHome(String homeId) => _eraseHome(homeId, remember: true);
+
+  /// The erasure of [purgeHome], and of `removeExample` without [remember]:
+  /// the example home of the guide was never synced, so its id is not kept
+  /// among the purged homes, which only stop the operations of other phones.
+  /// The ticks of the guide go with the home.
+  Future<void> _eraseHome(String homeId, {required bool remember}) async {
     final key = uuidBytes(homeId);
     await db.transaction(() async {
       for (final table in homeTables) {
@@ -926,17 +943,22 @@ extension SyncRepository on Repository {
         'other_versions',
         'server_seen',
         'file_sync',
+        'step_ticks',
       ]) {
         await db.customStatement('DELETE FROM $table WHERE home_id = ?', [key]);
       }
-      await db.customStatement(
-        'INSERT OR IGNORE INTO purged_homes (home_id) VALUES (?)',
-        [key],
-      );
+      if (remember) {
+        await db.customStatement(
+          'INSERT OR IGNORE INTO purged_homes (home_id) VALUES (?)',
+          [key],
+        );
+      }
       if (await _setting('current_home') == homeId) {
         await _setSetting('current_home', null);
       }
     });
+    // Read again: the erasure may be part of a larger transaction.
+    await _readExampleHomes();
     final directory = homeDirectory(homeId);
     if (directory.existsSync()) directory.deleteSync(recursive: true);
   }
@@ -946,6 +968,11 @@ extension SyncRepository on Repository {
   /// The merged state of this phone (docs/protocol.md section 2.4): every
   /// row with each field's value, clock and writer, tombstones included,
   /// the fields kept in `extra`, and the operations kept in `pending`.
+  ///
+  /// Nothing of the example home of the guide: it has no clock, and a row of
+  /// it found here anyway is left out, so that neither the snapshot of the
+  /// relay, nor an export made from it, nor a resend after a restart ever
+  /// carries it (web ADR 0084).
   Future<SyncSnapshot> snapshot() async {
     final rows = <String, SnapshotRow>{};
     final clockRows = await db
@@ -1000,6 +1027,7 @@ extension SyncRepository on Repository {
           : row != null
           ? Uuid.unparse(row['home_id'] as Uint8List)
           : extra?.$1;
+      if (_examples.contains(home)) continue;
       final entry = rows[key] ??= SnapshotRow(
         type: type,
         home: home,
@@ -1013,7 +1041,10 @@ extension SyncRepository on Repository {
       ];
     }
     final pending = await db
-        .customSelect('SELECT body FROM pending ORDER BY key')
+        .customSelect(
+          'SELECT body FROM pending WHERE home_id IS NULL OR home_id NOT IN '
+          '(SELECT id FROM homes WHERE is_example = 1) ORDER BY key',
+        )
         .get();
     return SyncSnapshot(
       schemaVersion: schemaVersion,

@@ -2671,6 +2671,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Un logement de votre serveur se supprime sur la page web du serveur, par un propriétaire. Il disparaît alors aussi de ce téléphone.';
 
   @override
+  String get errExampleExists =>
+      'Vous avez déjà un logement d\'exemple. Supprimez-le pour en créer un autre.';
+
+  @override
   String get wayMoveToServerLater =>
       'Garder les logements de ce téléphone sur un serveur Housecairn viendra avec une prochaine version de l\'application. Rien n\'a changé sur ce téléphone.';
 

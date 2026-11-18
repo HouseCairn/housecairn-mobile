@@ -155,6 +155,29 @@ more (`homes/current.py:3-6`).
   filled in the danger colour and the width of the column, at the end of the form or page, as
   the web's `.button-danger`. Not an outlined button.
 - The last active home can be neither archived nor deleted: the app always has a home to open.
+  The example home of the guide (below) is not counted.
+
+**The example home of the guide** (web ADR 0084): a disposable home with the fictional values of
+`design/guide.json`, made by the person at step 1 of the guide, filled scenario after scenario
+("Add what the earlier scenarios make" adds the rows of the earlier scenarios that are missing,
+never one of the scenario opened or a later one), and deleted in one gesture: one confirmation,
+no name to type, no export offered. Its rows, its files and the ticks of its steps go; nothing
+is kept of it.
+
+- **One per phone**, marked `homes.is_example`. Only the guide sets the mark; no form and no
+  sync operation writes it (a pushed or pulled `is_example` is ignored), so a real home never
+  becomes an example and the other way round.
+- **It never leaves the phone, in every way of the app** (alone, family sync through the relay,
+  "My Housecairn server"): the repository writes its rows without `op_log` and without
+  `field_clock`, so it is never an operation, never in the relay's snapshot, never in an export
+  and never in the homes of the phone sent to a server; an operation that names it is not
+  applied. A phone on a server keeps it beside the server's homes, as its one local home.
+- **Left out of the counts**: not a home for the rule of the last active home, not in the
+  selector, not in **All homes** of Today, no reminder; its own screens show it.
+- **The ticks of the steps**: a step whose state (`done_when` of the file) is true is ticked,
+  and stays ticked even if the state goes away afterwards; four steps are ticked by hand. The
+  evaluator is the web's (`guide.states`), checked on the web's vectors
+  (`test/fixtures/guide_states.json`). The ticks are a table of the phone, never synced.
 
 **Current home**, as the web defines it (`homes/current.py:1-13`, `:106-118`): the home last
 chosen in the selector, or of the last screen of a home opened, **kept on the phone, not
@@ -357,8 +380,8 @@ all homes together, counting photos, files and the sync data.
 
 - **Export**: one file, `.hcbackup`, with every row (deleted ones included, so that an import
   cannot resurrect them), every photo and file of **every home** of the phone, archived ones
-  included, and the members, encrypted with a passphrase (Argon2id,
-  then XChaCha20-Poly1305 secretstream; format in [protocol.md](protocol.md#5-backup-file)).
+  included (never the example home of the guide), and the members, encrypted with a
+  passphrase (Argon2id, then XChaCha20-Poly1305 secretstream; format in [protocol.md](protocol.md#5-backup-file)).
   The app proposes a generated passphrase of six words and says that a lost passphrase loses
   the file. Shared through the system share sheet; the app never uploads it.
 - **Import**: into an empty app (everything back as it was), or **as a copy** of the homes

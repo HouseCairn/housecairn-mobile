@@ -59,7 +59,8 @@ without depending on anyone's memory:
   the vectors of the states that tick its steps, `tests/fixtures/guide_states.json` of the web,
   carried as `test/fixtures/guide_states.json`. `check` fails on one byte of difference. They
   entered the pin with `update --only guide --only glossary --only guide_states`, which moves
-  only the elements named: the other elements keep their own pin.
+  only the elements named: the other elements keep their own pin. The app reads them in lot A2
+  below.
 - **A pull request when the web moves, and only then.** The daily `Web alignment` workflow
   compares with the latest web release. It opens, or updates, a pull request only when a file the
   app carries would differ: a recurrence vector, a task template or a design token (the source
@@ -509,6 +510,30 @@ after an export is offered; the files of photos and attachments in server mode (
 export and a typed confirmation, the files), against the web release that brings M5c and M6.
 
 **Depends on**: lot 4b, and that web release.
+
+## Lot A2. The example home of the guide on the phone
+
+**Scope** (web ADR 0084, lot A2; the screens are A3): schema 10, the mark `homes.is_example` and
+the table `step_ticks`; `createExampleHome`, `fillExample` ("Add what the earlier scenarios
+make", as the web's `guide.services.fill_example`) and `removeExample` (one gesture: rows, files
+and ticks erased, no name typed, no export, no purged home kept), in `lib/data/guide_repository.dart`;
+the evaluator of the steps in Dart (`lib/domain/guide.dart`), driven by `design/guide.json`; the
+rule that the example never leaves the phone ([spec](spec.md#homes)), in every way.
+
+**Acceptance**:
+- The evaluator gives the web's result on every vector of `test/fixtures/guide_states.json`.
+- One example home per phone; a real home is never made an example, by a form or by sync.
+- `fillExample` up to scenario *n* makes no row of stage *n* or later and ticks nothing ahead;
+  twice is once.
+- No write of the example home, a repair of a sync included, writes `op_log` or `field_clock`;
+  the snapshot, `outgoing`, the relay and a server hold nothing of it; an operation that names it
+  is not applied; a phone on a server keeps it when the server's homes go. A property test runs
+  random changes on an example home and a real one, through a relay and a server, and checks
+  this after each.
+- The example home is not counted as the last active home, nor in Today of every home, nor in
+  the reminders.
+
+**Depends on**: the guide's files carried from the web ([alignment](#alignment-with-the-web-application)), at the web release v0.5.1.
 
 ## Lot 5. Encryption and family
 

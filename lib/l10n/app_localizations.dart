@@ -4376,6 +4376,12 @@ abstract class AppLocalizations {
   /// **'A home of your server is deleted on the server\'s web page, by an owner. It then goes from this phone too.'**
   String get errDeleteOnServer;
 
+  /// Error: one example home of the guide per phone (web ADR 0084); the web's message.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have an example home. Delete it to make another.'**
+  String get errExampleExists;
+
   /// Shown when the person picks My Housecairn server while the phone has homes of its own (docs/plan.md, lot 4c).
   ///
   /// In en, this message translates to:
