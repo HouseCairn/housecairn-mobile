@@ -3028,4 +3028,29 @@ class AppLocalizationsFr extends AppLocalizations {
   String articleLabelPhoto(String name) {
     return 'Étiquette de $name';
   }
+
+  @override
+  String get compareProjects => 'Comparer les projets';
+
+  @override
+  String get compareTicked => 'Comparer les projets cochés';
+
+  @override
+  String get compareTickTwo =>
+      'Cochez au moins deux projets dans la liste pour les comparer.';
+
+  @override
+  String get compareCaption => 'Les projets côte à côte';
+
+  @override
+  String get compareProject => 'Projet';
+
+  @override
+  String get comparePlannedCost => 'Coût prévu';
+
+  @override
+  String get compareDuration => 'Durée';
+
+  @override
+  String get selectRows => 'Sélectionner';
 }

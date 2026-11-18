@@ -1601,5 +1601,21 @@
   "fileSizeMb": "{count} MB",
   "@fileSizeMb": {"description": "A file size in megabytes, one decimal, as the web writes it (filesizeformat).", "placeholders": {"count": {"type": "String", "example": "1.2"}}},
   "articleLabelPhoto": "Label of {name}",
-  "@articleLabelPhoto": {"description": "Spoken label of the photo of the label of a stock item. Web catalogue (stock): Label of %(name)s.", "placeholders": {"name": {"type": "String", "example": "Filter"}}}
+  "@articleLabelPhoto": {"description": "Spoken label of the photo of the label of a stock item. Web catalogue (stock): Label of %(name)s.", "placeholders": {"name": {"type": "String", "example": "Filter"}}},
+  "compareProjects": "Compare projects",
+  "@compareProjects": {"description": "Button of the list of projects and title of the comparison. Web catalogue (projects): Comparer les projets."},
+  "compareTicked": "Compare the ticked projects",
+  "@compareTicked": {"description": "Primary button of the list in its mode of comparison. Web catalogue (projects): Comparer les projets cochés."},
+  "compareTickTwo": "Tick at least two projects in the list to compare them.",
+  "@compareTickTwo": {"description": "Comparison with fewer than two projects. Web catalogue (projects): Cochez au moins deux projets dans la liste pour les comparer."},
+  "compareCaption": "The projects side by side",
+  "@compareCaption": {"description": "Spoken name of the table of the comparison (its caption on the web). Web catalogue (projects): Les projets côte à côte."},
+  "compareProject": "Project",
+  "@compareProject": {"description": "Head of the column of the titles in the comparison. Web catalogue (projects): Projet."},
+  "comparePlannedCost": "Planned cost",
+  "@comparePlannedCost": {"description": "Head of a column of the comparison. Web catalogue (projects): Coût prévu."},
+  "compareDuration": "Duration",
+  "@compareDuration": {"description": "Head of a column of the comparison. Web catalogue (projects): Durée."},
+  "selectRows": "Select",
+  "@selectRows": {"description": "Action of the bar of iOS that starts a selection of rows (web design/patterns.md, Platform adaptations, row 12); not a web string. iOS says Sélectionner."}
 }

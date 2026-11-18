@@ -48,152 +48,281 @@ class ProjectsScreen extends StatefulWidget {
 class _ProjectsScreenState extends State<ProjectsScreen> {
   int _tab = 0;
 
+  /// The mode of comparison (`?compare=1`): the rows are ticked instead of
+  /// opened (web `design/patterns.md`, Platform adaptations, row 12).
+  bool _comparing = false;
+  final _ticked = <String>{};
+
+  void _leaveComparison() => setState(() {
+    _comparing = false;
+    _ticked.clear();
+  });
+
+  void _tick(String id) => setState(() {
+    if (!_ticked.remove(id)) _ticked.add(id);
+  });
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final home = AppScope.of(context).current;
-    return HcScaffold(
-      title: l10n.navProjects,
-      brand: true,
-      belowTitle: const HomeSelector(),
-      actions: const [HelpButton(page: HelpPages.projects)],
-      body: home == null
-          ? const SizedBox.shrink()
-          : DataView<(List<ProjectEntry>, Map<int, Decimal>)>(
-              key: ValueKey('${home.id}|$_tab'),
-              load: (r) async =>
-                  (await r.projects(home.id), await r.envelopesOf(home.id)),
-              builder: (context, data) {
-                final (all, envelopes) = data;
-                final year = AppScope.of(context).repository.today().year;
-                final envelope = envelopes[year];
-                final active = _activeTotal(all);
-                final shown = [
-                  for (final e in all)
-                    if (projectTabs[_tab].contains(e.project.status)) e,
-                ];
-                final writable = home.archivedAt == null;
-                final currency = home.currency;
-                String m(Decimal v) => moneyIn(context, currency, v);
-                return HcScreenList(
+    if (home == null) {
+      return HcScaffold(
+        title: l10n.navProjects,
+        brand: true,
+        belowTitle: const HomeSelector(),
+        actions: const [HelpButton(page: HelpPages.projects)],
+      );
+    }
+    final ios = hcCupertino(Theme.of(context).platform);
+    return DataView<(List<ProjectEntry>, Map<int, Decimal>)>(
+      key: ValueKey('${home.id}|$_tab'),
+      load: (r) async =>
+          (await r.projects(home.id), await r.envelopesOf(home.id)),
+      builder: (context, data) {
+        final (all, envelopes) = data;
+        final year = AppScope.of(context).repository.today().year;
+        final envelope = envelopes[year];
+        final active = _activeTotal(all);
+        final shown = [
+          for (final e in all)
+            if (projectTabs[_tab].contains(e.project.status)) e,
+        ];
+        final writable = home.archivedAt == null;
+        final currency = home.currency;
+        String m(Decimal v) => moneyIn(context, currency, v);
+        // As on the web, the comparison is offered from two projects in the
+        // tab on (`len(projects) > 1`).
+        final canCompare = shown.length > 1;
+        final comparing = _comparing && canCompare;
+        return HcScaffold(
+          title: l10n.navProjects,
+          brand: true,
+          belowTitle: const HomeSelector(),
+          actions: [
+            // iPhone: Select in the bar starts the selection (row 12).
+            if (ios && canCompare && !comparing)
+              HcBarAction(
+                key: const Key('projects-select'),
+                label: l10n.selectRows,
+                besideBrand: true,
+                onPressed: () => setState(() => _comparing = true),
+              ),
+            const HelpButton(page: HelpPages.projects),
+          ],
+          body: HcScreenList(
+            children: [
+              HcTabs(
+                key: const Key('projects-tabs'),
+                labels: [
+                  l10n.projectsInProgress,
+                  l10n.projectsIdeas,
+                  l10n.projectsFinished,
+                ],
+                current: _tab,
+                onSelect: (i) => setState(() {
+                  _tab = i;
+                  _comparing = false;
+                  _ticked.clear();
+                }),
+              ),
+              HcCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    HcTabs(
-                      key: const Key('projects-tabs'),
-                      labels: [
-                        l10n.projectsInProgress,
-                        l10n.projectsIdeas,
-                        l10n.projectsFinished,
-                      ],
-                      current: _tab,
-                      onSelect: (i) => setState(() => _tab = i),
+                    // The `h2` of the card, in small capitals as every
+                    // `h2` of the web, with its margins.
+                    HcSectionHeading(
+                      l10n.envelopeOfYear(year),
+                      key: const Key('projects-envelope-heading'),
                     ),
-                    HcCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                    if (envelope == null)
+                      Text(l10n.envelopeNone, style: HcText.bodySmall)
+                    else
+                      HcValueList(
                         children: [
-                          // The `h2` of the card, in small capitals as every
-                          // `h2` of the web, with its margins.
-                          HcSectionHeading(
-                            l10n.envelopeOfYear(year),
-                            key: const Key('projects-envelope-heading'),
+                          HcValueRow(l10n.envelope, m(envelope)),
+                          HcValueRow(
+                            l10n.envelopePlannedActive,
+                            m(active.planned),
                           ),
-                          if (envelope == null)
-                            Text(l10n.envelopeNone, style: HcText.bodySmall)
-                          else
-                            HcValueList(
-                              children: [
-                                HcValueRow(l10n.envelope, m(envelope)),
-                                HcValueRow(
-                                  l10n.envelopePlannedActive,
-                                  m(active.planned),
-                                ),
-                                HcValueRow(
-                                  l10n.envelopePaidSoFar,
-                                  m(active.paid),
-                                ),
-                                HcValueRow(
-                                  l10n.envelopeLeft,
-                                  envelope - active.planned < budget.zero
-                                      ? l10n.overTheEnvelope(
-                                          m(envelope - active.planned),
-                                        )
-                                      : m(envelope - active.planned),
-                                ),
-                              ],
-                            ),
-                          if (writable)
-                            Align(
-                              alignment: AlignmentDirectional.centerStart,
-                              child: OutlinedButton(
-                                key: const Key('envelope-set'),
-                                onPressed: () => _open(
-                                  context,
-                                  EnvelopeFormScreen(homeId: home.id),
-                                ),
-                                child: Text(l10n.envelopeSet),
-                              ),
-                            ),
+                          HcValueRow(l10n.envelopePaidSoFar, m(active.paid)),
+                          HcValueRow(
+                            l10n.envelopeLeft,
+                            envelope - active.planned < budget.zero
+                                ? l10n.overTheEnvelope(
+                                    m(envelope - active.planned),
+                                  )
+                                : m(envelope - active.planned),
+                          ),
                         ],
                       ),
-                    ),
-                    if (shown.isEmpty)
-                      HcEmpty(
-                        all.isEmpty
-                            ? l10n.projectsEmpty
-                            : l10n.projectsNoneInTab,
-                      )
-                    else
-                      // A group per status, under its heading, in the order
-                      // of the web (`STATUS_ORDER`), as the list gives them.
-                      for (final status in budget.projectStatuses)
-                        if (shown.any((e) => e.project.status == status)) ...[
-                          HcSectionHeading(
-                            projectStatusLabel(l10n, status),
-                            key: Key('projects-group-$status'),
-                          ),
-                          HcCardList(
-                            children: [
-                              for (final e in shown)
-                                if (e.project.status == status)
-                                  HcRow(
-                                    key: Key('project-${e.project.id}'),
-                                    title: e.project.title,
-                                    text: [
-                                      if (e.amounts.planned != budget.zero ||
-                                          e.amounts.committed != budget.zero ||
-                                          e.amounts.paid != budget.zero)
-                                        l10n.plannedAmount(m(e.amounts.planned))
-                                      else
-                                        l10n.noBudgetYet,
-                                      if (e.project.priority == 'high')
-                                        l10n.highPriority,
-                                    ].join(' · '),
-                                    pills: gapPills(e.amounts, currency),
-                                    onTap: () => _open(
-                                      context,
-                                      ProjectScreen(
-                                        homeId: home.id,
-                                        projectId: e.project.id,
-                                      ),
-                                    ),
-                                  ),
-                            ],
-                          ),
-                        ],
                     if (writable)
-                      HcAddButton(
-                        key: const Key('project-add'),
-                        label: l10n.addProject,
-                        primary: false,
-                        gap: shown.isEmpty ? HcSpace.s2 : HcSpace.s3,
-                        onPressed: () => _add(context, home.id),
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: OutlinedButton(
+                          key: const Key('envelope-set'),
+                          onPressed: () => _open(
+                            context,
+                            EnvelopeFormScreen(homeId: home.id),
+                          ),
+                          child: Text(l10n.envelopeSet),
+                        ),
                       ),
                   ],
-                );
-              },
-            ),
+                ),
+              ),
+              if (shown.isEmpty)
+                HcEmpty(
+                  all.isEmpty ? l10n.projectsEmpty : l10n.projectsNoneInTab,
+                )
+              else
+                // A group per status, under its heading, in the order
+                // of the web (`STATUS_ORDER`), as the list gives them.
+                for (final status in budget.projectStatuses)
+                  if (shown.any((e) => e.project.status == status)) ...[
+                    HcSectionHeading(
+                      projectStatusLabel(l10n, status),
+                      key: Key('projects-group-$status'),
+                    ),
+                    HcCardList(
+                      children: [
+                        for (final e in shown)
+                          if (e.project.status == status)
+                            _projectRow(
+                              context,
+                              e,
+                              home.id,
+                              currency,
+                              comparing: comparing,
+                              // Android: a long press starts the
+                              // selection with the row (row 12).
+                              onLongPress: !ios && canCompare && !comparing
+                                  ? () => setState(() {
+                                      _comparing = true;
+                                      _ticked.add(e.project.id);
+                                    })
+                                  : null,
+                            ),
+                      ],
+                    ),
+                  ],
+              if (comparing)
+                Padding(
+                  padding: const EdgeInsets.only(top: HcSpace.s3),
+                  child: Wrap(
+                    spacing: HcSpace.s2,
+                    runSpacing: HcSpace.s2,
+                    children: [
+                      FilledButton(
+                        key: const Key('projects-compare-ticked'),
+                        onPressed: () => _compare(context, home.id, [
+                          for (final e in shown)
+                            if (_ticked.contains(e.project.id)) e.project.id,
+                        ]),
+                        child: Text(
+                          l10n.compareTicked,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      OutlinedButton(
+                        key: const Key('projects-compare-cancel'),
+                        onPressed: _leaveComparison,
+                        child: Text(l10n.cancel),
+                      ),
+                    ],
+                  ),
+                )
+              else if (canCompare)
+                HcAddButton(
+                  key: const Key('projects-compare'),
+                  label: l10n.compareProjects,
+                  primary: false,
+                  onPressed: () => setState(() => _comparing = true),
+                ),
+              if (writable)
+                HcAddButton(
+                  key: const Key('project-add'),
+                  label: l10n.addProject,
+                  primary: false,
+                  gap: shown.isEmpty ? HcSpace.s2 : HcSpace.s3,
+                  onPressed: () => _add(context, home.id),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
+
+  /// A row of the list: it opens its project, or in the mode of comparison
+  /// it is ticked from anywhere (the web's `label.row` around its box), one
+  /// target, said as one check box with the title.
+  Widget _projectRow(
+    BuildContext context,
+    ProjectEntry e,
+    String homeId,
+    String currency, {
+    required bool comparing,
+    VoidCallback? onLongPress,
+  }) {
+    final l10n = AppLocalizations.of(context);
+    String m(Decimal v) => moneyIn(context, currency, v);
+    final ticked = _ticked.contains(e.project.id);
+    final row = HcRow(
+      key: Key('project-${e.project.id}'),
+      title: e.project.title,
+      text: [
+        if (e.amounts.planned != budget.zero ||
+            e.amounts.committed != budget.zero ||
+            e.amounts.paid != budget.zero)
+          l10n.plannedAmount(m(e.amounts.planned))
+        else
+          l10n.noBudgetYet,
+        if (e.project.priority == 'high') l10n.highPriority,
+      ].join(' · '),
+      pills: gapPills(e.amounts, currency),
+      trailing: comparing
+          ? ExcludeSemantics(
+              child: Checkbox.adaptive(
+                key: Key('project-tick-${e.project.id}'),
+                value: ticked,
+                activeColor: HcColors.primary,
+                // The border of a field (`--hc-color-border-strong`), so the
+                // empty box stands out as a control, 3:1 at least.
+                side: const BorderSide(
+                  color: HcColors.borderStrong,
+                  width: HcComponent.iconStroke,
+                ),
+                onChanged: (_) => _tick(e.project.id),
+              ),
+            )
+          : null,
+      onTap: comparing
+          ? () => _tick(e.project.id)
+          : () => _open(
+              context,
+              ProjectScreen(homeId: homeId, projectId: e.project.id),
+            ),
+      onLongPress: onLongPress,
+    );
+    if (!comparing) return row;
+    return Semantics(
+      checked: ticked,
+      inMutuallyExclusiveGroup: false,
+      child: row,
+    );
+  }
+
+  /// Opens the comparison of [ids], in the order of the list (the web sends
+  /// the boxes of its form in the order of the page).
+  Future<void> _compare(
+    BuildContext context,
+    String homeId,
+    List<String> ids,
+  ) =>
+      Navigator.of(context)
+          .push(hcRoute(ProjectCompareScreen(homeId: homeId, projectIds: ids)));
 
   /// Created from the list of its own section, the new project opens (web
   /// design guide, After a form): the next step is there, a quote or a
@@ -213,6 +342,102 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       if (const ['in_progress', 'planned', 'idea'].contains(e.project.status))
         e.amounts,
   ]);
+}
+
+/// Compare projects (`projects/compare.html`): the projects ticked in the
+/// list side by side, at most six, in a table read column by column (web
+/// design guide, Tables on a phone): status, planned cost, what accepted
+/// quotes commit, duration, priority and season, in the currency of the home.
+/// A row opens its project. With fewer than two, it asks to tick more.
+class ProjectCompareScreen extends StatelessWidget {
+  const ProjectCompareScreen({
+    super.key,
+    required this.homeId,
+    required this.projectIds,
+  });
+
+  final String homeId;
+  final List<String> projectIds;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return DataView<(HomeRow?, List<ProjectEntry>)>(
+      load: (r) async =>
+          (await r.home(homeId), await r.compareProjects(homeId, projectIds)),
+      builder: (context, data) {
+        final (home, rows) = data;
+        if (home == null) return HcScaffold();
+        String m(Decimal v) => moneyIn(context, home.currency, v);
+        String? season(String code) => switch (code) {
+          recurrence.spring => l10n.seasonSpring,
+          recurrence.summer => l10n.seasonSummer,
+          recurrence.autumn => l10n.seasonAutumn,
+          recurrence.winter => l10n.seasonWinter,
+          recurrence.custom => l10n.seasonCustom,
+          _ => null,
+        };
+        String priority(String code) => switch (code) {
+          'high' => l10n.priorityHigh,
+          'low' => l10n.priorityLow,
+          _ => l10n.priorityNormal,
+        };
+        const none = '\u2014';
+        return HcScaffold(
+          title: l10n.compareProjects,
+          actions: const [HelpButton(page: HelpPages.projects)],
+          body: HcScreenList(
+            children: [
+              if (rows.length < 2)
+                HcEmpty(l10n.compareTickTwo)
+              else
+                HcColumnTable(
+                  key: const Key('project-compare-table'),
+                  label: l10n.compareCaption,
+                  head: [
+                    l10n.compareProject,
+                    l10n.status,
+                    l10n.comparePlannedCost,
+                    l10n.amountCommitted,
+                    l10n.compareDuration,
+                    l10n.priority,
+                    l10n.season,
+                  ],
+                  rows: [
+                    for (final e in rows)
+                      HcTableRow(
+                        key: Key('compare-${e.project.id}'),
+                        head: e.project.title,
+                        cells: [
+                          projectStatusLabel(l10n, e.project.status),
+                          m(e.amounts.planned),
+                          m(e.amounts.committed),
+                          switch (e.project.estimatedMinutes) {
+                            final int minutes when minutes > 0 => durationLabel(
+                              l10n,
+                              minutes,
+                            ),
+                            _ => none,
+                          },
+                          priority(e.project.priority),
+                          season(e.project.season) ?? none,
+                        ],
+                        onTap: () => _open(
+                          context,
+                          ProjectScreen(
+                            homeId: homeId,
+                            projectId: e.project.id,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _ProjectData {
