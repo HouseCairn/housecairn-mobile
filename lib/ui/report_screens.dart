@@ -363,9 +363,10 @@ class ReportFormScreen extends StatefulWidget implements HcFormScreen {
 
   final String homeId;
 
-  /// The value of **Fill in for me** of the guide: the title (`prefill_fields`
-  /// of the web's report form, which leaves Where to the person), on the
-  /// example home only.
+  /// The values of **Fill in for me** of the guide, on the example home
+  /// only: the title (`prefill_fields` of the web's report form) and the
+  /// room or the item Where starts with (`?room=` and `?item=` of its
+  /// `get_initial`), when the form is not opened on a place already.
   final GuideFill fill;
 
   /// The place Where starts with: one at most.
@@ -408,10 +409,18 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
     super.didChangeDependencies();
     if (_loaded) return;
     _loaded = true;
-    if (fillsHere(context, widget.homeId, widget.fill)) {
-      if (widget.fill['title'] case final String title
-          when title.trim().isNotEmpty) {
+    final fill = widget.fill;
+    if (fillsHere(context, widget.homeId, fill)) {
+      if (fill['title'] case final String title when title.trim().isNotEmpty) {
         _title.text = title;
+      }
+      // A place of this home only: the field leaves out any other.
+      if (_place == null) {
+        if (fill['room'] case final String room) {
+          _place = 'room:$room';
+        } else if (fill['item'] case final String item) {
+          _place = 'item:$item';
+        }
       }
     }
     _loadPlaces(AppScope.of(context).repository);

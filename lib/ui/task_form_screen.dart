@@ -60,10 +60,11 @@ class TaskFormScreen extends StatefulWidget implements HcFormScreen {
   /// `null` for a new task.
   final String? taskId;
 
-  /// The values of **Fill in for me** of the guide: the title, the procedure,
-  /// the repetition, the first date and the duration, shown on the example
-  /// home only (`prefill_fields` of the web's task form, which leaves the
-  /// room and the item to the person).
+  /// The values of **Fill in for me** of the guide, shown on the example home
+  /// only: the title, the procedure, the repetition, the first date and the
+  /// duration (`prefill_fields` of the web's task form), and the room and the
+  /// item a new task starts attached to (`?room=` and `?item=` of its
+  /// `get_initial`), when [roomId] and [itemId] do not say them already.
   final GuideFill fill;
 
   @override
@@ -175,6 +176,7 @@ class _TaskFormScreenState extends State<TaskFormScreen>
       _loaded = true;
       _roomId = widget.roomId;
       _itemId = widget.itemId;
+      _fillPlace();
       if (widget.taskId != null) {
         _load();
       } else {
@@ -182,6 +184,20 @@ class _TaskFormScreenState extends State<TaskFormScreen>
         _ready = true;
         _loadPlaces();
       }
+    }
+  }
+
+  /// The room and the item of the guide for a new task, as the web's
+  /// `get_initial`: an item brings its room (`_loadPlaces`). The lists of
+  /// the home then keep only a room and an item of this home.
+  void _fillPlace() {
+    if (widget.taskId != null || _roomId != null || _itemId != null) return;
+    final fill = widget.fill;
+    if (!fillsHere(context, widget.homeId, fill)) return;
+    if (fill['item'] case final String item) {
+      _itemId = item;
+    } else if (fill['room'] case final String room) {
+      _roomId = room;
     }
   }
 
@@ -232,11 +248,27 @@ class _TaskFormScreenState extends State<TaskFormScreen>
     if (roomId == null && _itemId != null) {
       roomId = (await repository.item(_itemId!))?.roomId;
     }
+    // A new task starts only on a room and an item of this home (the web's
+    // `_pick` reads them in the home).
+    var itemId = _itemId;
+    if (widget.taskId == null &&
+        roomId != null &&
+        roomId != _newChoice &&
+        !rooms.any((r) => r.id == roomId)) {
+      roomId = itemId = null;
+    }
     final items = roomId == null || roomId == _newChoice
         ? <ItemRow>[]
         : await repository.itemsOf(roomId);
+    if (widget.taskId == null &&
+        itemId != null &&
+        itemId != _newChoice &&
+        !items.any((i) => i.id == itemId)) {
+      itemId = null;
+    }
     if (!mounted) return;
     setState(() {
+      _itemId = itemId;
       _currency = home?.currency ?? '';
       _rooms = rooms;
       _contractors = contractors;

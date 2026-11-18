@@ -187,9 +187,9 @@ class TaskRows extends StatelessWidget {
               key: const Key('task-from-template'),
               label: l10n.addFromTemplate,
               primary: false,
-              onPressed: () =>
-                  Navigator.of(context)
-                      .push(hcRoute(TemplatesScreen(roomId: roomId))),
+              onPressed: () => Navigator.of(
+                context,
+              ).push(hcRoute(TemplatesScreen(homeId: homeId, roomId: roomId))),
             ),
           ],
         ],

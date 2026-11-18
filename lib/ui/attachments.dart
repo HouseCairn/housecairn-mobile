@@ -12,6 +12,7 @@ import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../l10n/app_localizations.dart';
+import 'guide_screens.dart';
 import 'parts.dart';
 import 'state.dart';
 
@@ -358,6 +359,7 @@ class _AttachmentScreenState extends State<AttachmentScreen> {
         attachment != null && repository.attachmentIsImage(attachment);
     return HcScaffold(
       title: attachment?.name ?? l10n.attachmentsHeading,
+      belowTitle: ExampleHomeBanner(homeId: attachment?.homeId),
       body: attachment == null
           ? const SizedBox.shrink()
           : HcScreenList(

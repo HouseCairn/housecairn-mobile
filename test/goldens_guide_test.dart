@@ -2,8 +2,9 @@
 
 // Golden files of the interactive guide (web ADR 0084, lot A3): the list of
 // the scenarios with the card of the example home, the page of a scenario
-// with a step done and its buttons, the confirmation of Delete the example
-// home, and the banner of the example home on its page; on an iPhone and on
+// with a step done and its buttons, a step marked by hand (optional), the
+// confirmation of Delete the example home, and the banner of the example
+// home on its page; on an iPhone and on
 // Android, at 390 px and at the narrow 320 px with text at twice the size, in
 // English and French. Regenerate after a deliberate change:
 //   flutter test --update-goldens test/goldens_guide_test.dart
@@ -14,6 +15,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/data/repository.dart';
+import 'package:housecairn_mobile/design/widgets.dart';
 import 'package:housecairn_mobile/domain/guide.dart';
 import 'package:housecairn_mobile/l10n/app_localizations_en.dart';
 import 'package:housecairn_mobile/l10n/app_localizations_fr.dart';
@@ -100,8 +102,21 @@ void main() {
           );
         }
 
+        // At 320 px with text at twice the size, the top of a page is its
+        // title: the captures scroll down to what they are about.
+        final narrow = width < 390;
+
         testWidgets('the guide, $name', (tester) async {
           await start(tester);
+          if (narrow) {
+            await show(
+              tester,
+              find.descendant(
+                of: find.byKey(const Key('guide-scenario-rooms-equipment')),
+                matching: find.byType(HcPill),
+              ),
+            );
+          }
           await capture(tester, 'guide');
         });
 
@@ -121,7 +136,30 @@ void main() {
             find.byKey(const Key('guide-scenario-rooms-equipment')),
           );
           await tester.pumpAndSettle();
+          if (narrow) {
+            await show(
+              tester,
+              find.byKey(const Key('guide-open-rooms-equipment.2')),
+            );
+          }
           await capture(tester, 'guide_scenario');
+        });
+
+        testWidgets('a step marked by hand, optional, $name', (tester) async {
+          await start(tester);
+          await show(
+            tester,
+            find.byKey(const Key('guide-scenario-recurring-task')),
+          );
+          await tester.tap(
+            find.byKey(const Key('guide-scenario-recurring-task')),
+          );
+          await tester.pumpAndSettle();
+          await show(
+            tester,
+            find.byKey(const Key('guide-tick-recurring-task.4')),
+          );
+          await capture(tester, 'guide_mark');
         });
 
         testWidgets('Delete the example home, the dialog, $name', (

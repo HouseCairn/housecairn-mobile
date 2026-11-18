@@ -425,9 +425,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     key: const Key('tasks-add-template'),
                     label: l10n.addFromTemplate,
                     primary: false,
-                    onPressed: () =>
-                        Navigator.of(context)
-                            .push(hcRoute(TemplatesScreen(roomId: _roomId))),
+                    onPressed: () => Navigator.of(context).push(
+                      hcRoute(
+                        TemplatesScreen(homeId: widget.homeId, roomId: _roomId),
+                      ),
+                    ),
                   ),
                 ],
               ],

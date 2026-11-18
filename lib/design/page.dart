@@ -299,9 +299,86 @@ class HcLargeTitle extends StatelessWidget {
     ),
     child: Semantics(
       header: true,
-      child: Text(title, key: const Key('page-title'), style: HcText.pageTitle),
+      child: HcWholeWords(
+        title,
+        key: const Key('page-title'),
+        style: HcText.pageTitle,
+      ),
     ),
   );
+}
+
+/// A text that goes to the next line between words only: when its longest
+/// word is wider than the line (a narrow phone, text at twice the size), the
+/// text comes down in size until that word fits, rather than be cut in two.
+/// Every other text keeps the size of the person.
+///
+/// It reads the width of its line, so it does not go where intrinsic sizes
+/// are asked (a dialog); [HcWholeWord] is the one for a label of one word.
+class HcWholeWords extends StatelessWidget {
+  const HcWholeWords(this.text, {super.key, this.style, this.textAlign});
+
+  final String text;
+  final TextStyle? style;
+  final TextAlign? textAlign;
+
+  @override
+  Widget build(BuildContext context) {
+    final scaler = MediaQuery.textScalerOf(context);
+    final resolved = DefaultTextStyle.of(context).style.merge(style);
+    final direction = Directionality.of(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        var fitted = scaler;
+        final width = constraints.maxWidth;
+        final size = resolved.fontSize;
+        if (width.isFinite && size != null && size > 0) {
+          var widest = 0.0;
+          for (final word in text.split(RegExp(r'\s+'))) {
+            if (word.isEmpty) continue;
+            final painter = TextPainter(
+              text: TextSpan(text: word, style: resolved),
+              textDirection: direction,
+              textScaler: scaler,
+              maxLines: 1,
+            )..layout();
+            if (painter.width > widest) widest = painter.width;
+            painter.dispose();
+          }
+          if (widest > width) {
+            // A hair under the exact ratio, for the rounding of the layout.
+            final factor = scaler.scale(size) / size * width / widest * 0.98;
+            fitted = TextScaler.linear(factor);
+          }
+        }
+        return Text(
+          text,
+          style: style,
+          textAlign: textAlign,
+          textScaler: fitted,
+        );
+      },
+    );
+  }
+}
+
+/// A label of one word that is never cut: on one line, made smaller only
+/// when the line is narrower than the word. Safe where intrinsic sizes are
+/// asked (the buttons of a dialog); a label of several words is a plain
+/// [Text], which wraps between them.
+class HcWholeWord extends StatelessWidget {
+  const HcWholeWord(this.text, {super.key, this.style, this.textAlign});
+
+  final String text;
+  final TextStyle? style;
+  final TextAlign? textAlign;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = Text(text, style: style, textAlign: textAlign);
+    if (text.trim().contains(RegExp(r'\s'))) return label;
+    return FittedBox(fit: BoxFit.scaleDown, child: label);
+  }
 }
 
 /// A screen that is a form: on iOS it opens as a modal sheet ([hcRoute]).

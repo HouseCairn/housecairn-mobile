@@ -245,12 +245,10 @@ StepLinks _linksOf(
               itemId: existing,
               fill: f,
             )
-          : ItemFormScreen(
-              homeId: id,
-              chooseRoom: true,
-              roomId: f['room'] as String?,
-              fill: f,
-            ),
+          : ItemFormScreen(homeId: id, chooseRoom: true, fill: f),
+    // The room and the item of a new task, and the place of a report, come
+    // with the values (`?room=` and `?item=` of the web), under the same
+    // guard as the others (`fillsHere`).
     'tasks.task' => (f) => TaskFormScreen(
       homeId: id,
       taskId: existing,
@@ -617,26 +615,39 @@ class _StepCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (ticked || step.raw['optional'] == true) ...[
-              Wrap(
-                spacing: HcSpace.s2,
-                runSpacing: HcSpace.s1,
-                children: [
-                  if (ticked)
-                    HcPill(l10n.guideStepDone, tone: HcPillTone.success),
-                  if (step.raw['optional'] == true)
-                    HcPill(l10n.guideOptional, tone: HcPillTone.ghost),
-                ],
+            // Done before the title, Optional after it, as the web's
+            // `guide-step-title`.
+            if (ticked) ...[
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: HcPill(l10n.guideStepDone, tone: HcPillTone.success),
               ),
               const SizedBox(height: HcSpace.s2),
             ],
             Semantics(
               header: true,
-              child: Text(
-                l10n.guideStepNumbered(
-                  number,
-                  step.id.split('.').last,
-                  text(step.raw['title']),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: l10n.guideStepNumbered(
+                        number,
+                        step.id.split('.').last,
+                        text(step.raw['title']),
+                      ),
+                    ),
+                    if (step.raw['optional'] == true) ...[
+                      const TextSpan(text: ' '),
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: HcPill(
+                          l10n.guideOptional,
+                          key: Key('guide-optional-${step.id}'),
+                          tone: HcPillTone.ghost,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 style: HcText.cardTitle,
               ),

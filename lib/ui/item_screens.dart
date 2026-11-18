@@ -307,7 +307,8 @@ class ItemFormScreen extends StatefulWidget implements HcFormScreen {
   final String homeId;
 
   /// The values of **Fill in for me** of the guide: `name`, `kind`, `brand`
-  /// and `model` (the room is [roomId]), shown on the example home only.
+  /// and `model`, and the `room` a new item starts in when [roomId] does not
+  /// say it, shown on the example home only.
   final GuideFill fill;
 
   /// The room of the item; for a new item opened from Equipment, the room
@@ -398,13 +399,19 @@ class _ItemFormScreenState extends State<ItemFormScreen>
         ? null
         : await repository.item(widget.itemId!);
     if (!mounted) return;
+    // The room the guide fills in, for a new item of the example home only.
+    final start =
+        widget.roomId ??
+        (item == null && fillsHere(context, widget.homeId, widget.fill)
+            ? widget.fill['room'] as String?
+            : null);
     setState(() {
       _contractors = contractors;
       _rooms = rooms;
       _room = !widget.chooseRoom
           ? widget.roomId
-          : rooms.any((r) => r.id == widget.roomId)
-          ? widget.roomId
+          : rooms.any((r) => r.id == start)
+          ? start
           : (rooms.isEmpty ? null : rooms.first.id);
       if (item == null) {
         _applyFill();

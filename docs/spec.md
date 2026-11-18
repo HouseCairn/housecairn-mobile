@@ -174,8 +174,10 @@ is kept of it.
   applied. A phone on a server keeps it beside the server's homes, as its one local home.
 - **Left out of the counts**: not a home for the rule of the last active home, not in the
   selector, not in **All homes** of Today, no reminder; its own screens show it.
-- **Recognisable on its screens**: every screen of the example home (its page, its Today, a
-  room, an item, a task, a report, a project and their forms) starts with the banner
+- **Recognisable on its screens**: these screens of the example home (its page, its Today, a
+  room, an item, a task and its list, the reports and a report with its photo, a project, a
+  budget line, a quote, the envelope, a stock item, a supplier, a contractor, a done
+  occurrence, a photo, an attachment, and their forms) starts with the banner
   **Example home**, with **Back to the guide** and **Delete the example home**; **My homes**
   lists it after the real homes with the pill **Example**; its page has no **Archive** nor
   **Delete** at the bottom, the banner deletes it.
@@ -334,7 +336,10 @@ contractor with it.
     file does not have it), the labels it cites from `design/glossary.json`, in bold; only the
     words around them are in the ARB files. The values of a form are taken only on the example
     home, each checked as the form checks what is typed (a choice of its list, a room of the
-    home, a number); the fields are those the web fills (`prefill_fields`). **Delete the example
+    home, a number); the fields are those the web fills (`prefill_fields`), and the room and the
+    item a new task starts on, and the place of a report, as the web's `?room=` and `?item=`
+    (step 3.1 opens the task on the kitchen and the machine, step 4.1 the report on the
+    kitchen). **Delete the example
     home** asks once, in a dialog (**Delete** and **Cancel**), no name to type and no export,
     then goes back to the guide.
 
