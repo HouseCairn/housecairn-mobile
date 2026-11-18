@@ -192,8 +192,8 @@ extension SyncRepository on Repository {
       id != null && await _homeOf(table, id) == homeId ? id : null;
 
   /// Writes the operation of a local change in `op_log`, inside the
-  /// transaction of [Repository._put]; never for a row of the example home
-  /// of the guide (web ADR 0084).
+  /// transaction of [Repository._put], which returns before it for a row of
+  /// the example home of the guide (web ADR 0084).
   Future<void> _logOperation(
     String table,
     String id,
@@ -202,7 +202,6 @@ extension SyncRepository on Repository {
     String hlc,
   ) async {
     final home = table == 'homes' ? id : homeId ?? await _homeOf(table, id);
-    if (await isExampleHome(home)) return;
     final op = <String, Object?>{
       Op.type: entityOf[table],
       Op.home: ?home,
