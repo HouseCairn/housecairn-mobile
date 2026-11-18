@@ -16,6 +16,7 @@ import 'package:housecairn_mobile/core/code_camera.dart';
 import 'package:housecairn_mobile/data/database.dart';
 import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/domain/label_sheet.dart';
+import 'package:housecairn_mobile/domain/guide.dart';
 import 'package:housecairn_mobile/domain/labels.dart';
 import 'package:housecairn_mobile/domain/scanned_code.dart';
 import 'package:housecairn_mobile/l10n/app_localizations_en.dart';
@@ -89,6 +90,43 @@ class FakeCodeCamera implements CodeCamera {
 }
 
 const _code = 'AbCdEfGhIjKlMnOpQrSt_-';
+
+/// Where the sheet puts the first labels, read from the objects of an
+/// uncompressed PDF: the white square under each QR code (`x y side`) and the
+/// start of each name (`x y`), in points.
+class _Placed {
+  _Placed(String pdf)
+    : squares = [
+        for (final m in RegExp(
+          r'1 1 1 rg ([\d.]+) ([\d.]+) ([\d.]+) ([\d.]+) re f',
+        ).allMatches(pdf))
+          [for (var i = 1; i <= 4; i++) double.parse(m.group(i)!)],
+      ],
+      names = [
+        for (final m in RegExp(
+          r'/F\d+ [\d.]+ Tf ([\d.]+) ([\d.]+) Td',
+        ).allMatches(pdf))
+          [double.parse(m.group(1)!), double.parse(m.group(2)!)],
+      ],
+      module = double.parse(
+        RegExp(r'0 0 0 rg [\d.]+ [\d.]+ [\d.]+ ([\d.]+) re')
+            .firstMatch(pdf)!
+            .group(1)!,
+      );
+
+  final List<List<double>> squares;
+  final List<List<double>> names;
+
+  /// The height of the first dark run: one module.
+  final double module;
+}
+
+void _near(List<double> actual, List<double> expected) {
+  expect(actual, hasLength(expected.length));
+  for (var i = 0; i < expected.length; i++) {
+    expect(actual[i], closeTo(expected[i], 0.01), reason: 'value $i');
+  }
+}
 
 void main() {
   group('the code and what the QR code holds', () {
@@ -219,6 +257,43 @@ void main() {
       );
       expect(RegExp(r'/Type\s*/Page\b').allMatches(pdf), hasLength(3));
       expect(pdf, contains('/MediaBox[0 0 175.74803 113.38583]'));
+    });
+
+    // The numbers of `labels/printing.py` of the web v0.5.1, computed from
+    // its layouts (ReportLab points, A4 = 595.27559 by 841.88976).
+    test('A4: the first labels where the web puts them', () async {
+      final placed = _Placed(
+        latin1.decode(await labelSheet(stickers(2), a4Sheet, compress: false)),
+      );
+      // Square, then name: left 7.2 + 1.5 mm, top 15.1 mm, QR 27 mm.
+      _near(placed.squares[0], [24.66142, 712.77165, 76.53543, 76.53543]);
+      _near(placed.names[0], [105.44882, 786.33465]);
+      // Next column: 63.5 + 2.5 mm to the right (the gap).
+      _near(placed.squares[1], [211.74803, 712.77165, 76.53543, 76.53543]);
+      _near(placed.names[2], [292.53543, 786.33465]);
+    });
+
+    test('the roll: the label where the web puts it', () async {
+      final placed = _Placed(
+        latin1.decode(await labelSheet(stickers(1), roll62, compress: false)),
+      );
+      _near(placed.squares.single, [4.25197, 11.33858, 90.70866, 90.70866]);
+      _near(placed.names.first, [99.2126, 99.13386]);
+    });
+
+    test('the quiet zone is 4 modules, in the PDF too', () async {
+      expect(labelQuietZone, 4);
+      final modules = labelMatrix(labelPayload(_code)).length;
+      for (final layout in labelLayouts) {
+        final placed = _Placed(
+          latin1.decode(await labelSheet(stickers(1), layout, compress: false)),
+        );
+        expect(
+          placed.module,
+          closeTo(placed.squares.first[2] / (modules + 8), 0.0001),
+          reason: layout.code,
+        );
+      }
     });
 
     test('between 1 and 200 labels', () async {
@@ -374,6 +449,54 @@ void main() {
         repo.labelsToPrint(home, const []),
         throwsA(isA<Refused>()),
       );
+    });
+
+    group('the example home of the guide has no label', () {
+      late String example;
+      late String exampleRoom;
+
+      setUp(() async {
+        final guide = parseGuide(File('design/guide.json').readAsStringSync());
+        example = await repo.createExampleHome(guide);
+        exampleRoom = await repo.createRoom(example, name: 'Kitchen');
+        // A row that could only come from outside: the repository never
+        // makes one in the example home.
+        await repo.db.customStatement(
+          'INSERT INTO labels (id, created_at, updated_at, home_id, kind, '
+          'room_id, code) SELECT x\'0123456789ab4def8123456789abcdef\', 1, 1, '
+          'h.id, ?, r.id, ? FROM homes h JOIN rooms r ON r.home_id = h.id '
+          'WHERE h.is_example = 1',
+          ['room', _code],
+        );
+      });
+
+      Future<LabelRow> planted() async =>
+          (await repo.db.select(repo.db.labels).getSingle());
+
+      Matcher notFound() => throwsA(
+        isA<Refused>().having((r) => r.reason, 'reason', Refusal.notFound),
+      );
+
+      test('createLabel is refused', () async {
+        await expectLater(
+          repo.createLabel(example, LabelKind.room, exampleRoom),
+          notFound(),
+        );
+        expect(await count('labels'), 1);
+      });
+
+      test('regenerateLabel is refused', () async {
+        final label = await planted();
+        await expectLater(repo.regenerateLabel(label.id), notFound());
+        expect(await count('labels'), 1);
+        expect((await planted()).revokedAt, isNull);
+      });
+
+      test('revokeLabel is refused', () async {
+        final label = await planted();
+        await expectLater(repo.revokeLabel(label.id), notFound());
+        expect((await planted()).revokedAt, isNull);
+      });
     });
 
     test('erased with its home', () async {
