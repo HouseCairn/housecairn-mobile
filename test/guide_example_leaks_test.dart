@@ -13,6 +13,7 @@ import 'dart:typed_data';
 
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:housecairn_mobile/core/clock.dart';
 import 'package:housecairn_mobile/data/database.dart';
 import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/domain/file_reference.dart';
@@ -198,6 +199,79 @@ void main() {
           .getSingle();
       expect(planted.data['n'], 1);
       expect(await repo.filesDue(FileWay.up), isEmpty);
+    });
+  });
+
+  group('ticks and counts', () {
+    Future<int> tickRows() async =>
+        (await repo.db
+                    .customSelect('SELECT COUNT(*) AS n FROM step_ticks')
+                    .getSingle())
+                .data['n']!
+            as int;
+
+    test(
+      'tickGuide on a real home returns nothing and writes no tick',
+      () async {
+        final real = await repo.createHome(name: 'Main home');
+        await repo.createRoom(real, name: 'Kitchen');
+        expect(await repo.tickGuide(guide, real), isEmpty);
+        expect(await tickRows(), 0);
+      },
+    );
+
+    test('a room made then deleted before tickGuide ticks nothing', () async {
+      final id = await repo.createExampleHome(guide);
+      final room = await repo.createRoom(id, name: 'Kitchen');
+      await repo.deleteRoom(room);
+      expect(await repo.tickGuide(guide, id), ['create-home.1']);
+      expect(await repo.guideTicks(id), {'create-home.1'});
+    });
+
+    test(
+      'a second tickGuide changes no tick, nor the time of the first',
+      () async {
+        final clock = FixedClock(testNow);
+        final timed = await openRepository(clock: clock);
+        final id = await timed.createExampleHome(guide);
+        await timed.createRoom(id, name: 'Kitchen');
+        expect(await timed.tickGuide(guide, id), hasLength(2));
+        Future<Map<String, int>> times() async => {
+          for (final r
+              in await timed.db
+                  .customSelect('SELECT step_id, ticked_at FROM step_ticks')
+                  .get())
+            r.data['step_id']! as String: r.data['ticked_at']! as int,
+        };
+        final first = await times();
+        clock.advance(const Duration(hours: 3));
+        expect(await timed.tickGuide(guide, id), isEmpty);
+        expect(await times(), first);
+      },
+    );
+
+    test('seasonEntries of every home has nothing of the example', () async {
+      final real = await repo.createHome(name: 'Main home');
+      final id = await repo.createExampleHome(guide);
+      for (final (home, title) in [(real, 'Terrace'), (id, 'Pool cover')]) {
+        await repo.createTask(
+          home,
+          TaskInput(
+            title: title,
+            season: 'custom',
+            seasonStartMonth: testToday.month,
+            seasonEndMonth: testToday.month,
+          ),
+        );
+      }
+      expect(
+        [for (final e in await repo.seasonEntries()) e.task.title],
+        ['Terrace'],
+      );
+      expect(
+        [for (final e in await repo.seasonEntries(homeId: id)) e.task.title],
+        ['Pool cover'],
+      );
     });
   });
 }
