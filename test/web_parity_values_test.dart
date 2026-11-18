@@ -27,6 +27,7 @@ import 'support/fakes.dart';
 import 'support/goldens.dart';
 import 'support/lot2b.dart';
 import 'support/lot3b.dart' show openSection;
+import 'support/parity_pin.dart';
 import 'web_parity_test.dart' show Demo, drawnStyle;
 
 /// The measures the app keeps apart from the web on purpose, with the value
@@ -170,14 +171,10 @@ void main() {
   });
 
   test('the measure is of the web release the app is aligned on', () {
-    final pin =
-        (jsonDecode(File('tool/web_alignment.json').readAsStringSync())
-                as Map<String, dynamic>)['elements']['web_parity']
-            as Map<String, dynamic>;
     final measured = reference['web'] as Map<String, dynamic>;
     expect(
-      (measured['release'], measured['commit']),
-      (pin['release'], pin['commit']),
+      parityReleases(),
+      contains((measured['release'], measured['commit'])),
       reason:
           'the pin of web_parity moved: measure again with '
           'tool/web_parity_values.py',

@@ -3176,11 +3176,11 @@ abstract class AppLocalizations {
   /// **'Estimate each time'**
   String get estimateEachTime;
 
-  /// Web catalogue (projects, budget or reports): dont articles en stock : %(amount)s.
+  /// Under the estimate of a task of the upkeep whose materials come from the stock (web ADR 0081). Web catalogue (projects, budget or reports): matériel depuis le stock : %(amount)s.
   ///
   /// In en, this message translates to:
-  /// **'of which stock'**
-  String get ofWhichStock;
+  /// **'materials from the stock'**
+  String get materialsFromStock;
 
   /// Web catalogue (projects, budget or reports): Coût par an.
   ///
@@ -3878,11 +3878,35 @@ abstract class AppLocalizations {
   /// **'Cost'**
   String get taskCost;
 
-  /// Part of the estimate that comes from the stock. Web catalogue: Dont articles en stock.
+  /// Pill above what a task is planned to cost, apart from what was paid (web ADR 0081). Web catalogue, context amount: Prévu.
   ///
   /// In en, this message translates to:
-  /// **'Of which stock'**
-  String get taskOfWhichStock;
+  /// **'Planned'**
+  String get taskCostPlanned;
+
+  /// Pill above what the times done of a task really cost (web ADR 0081). Web catalogue: Réel.
+  ///
+  /// In en, this message translates to:
+  /// **'Real'**
+  String get taskCostReal;
+
+  /// The materials of one time of a task, calculated from its priced stock items (web ADR 0081). Web catalogue: Matériel, depuis le stock.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials, from the stock'**
+  String get taskMaterialsFromStock;
+
+  /// Under the planned cost of a task whose materials come from the stock. Web catalogue: Le matériel est calculé à partir des articles de la tâche : quantité fois prix unitaire.
+  ///
+  /// In en, this message translates to:
+  /// **'The materials are calculated from the stock items of the task: quantity times unit price.'**
+  String get taskMaterialsFromStockHelp;
+
+  /// In the task form, in place of the material budget field when the task has a priced stock item (web ADR 0081). Web catalogue: %(amount)s à chaque fois, calculé à partir des articles de la tâche.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} each time, calculated from the stock items of the task.'**
+  String taskMaterialFromStockField(String amount);
 
   /// What the times done of a task cost. Web catalogue: Payé jusqu'ici.
   ///

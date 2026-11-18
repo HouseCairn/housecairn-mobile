@@ -1827,7 +1827,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get estimateEachTime => 'Estimate each time';
 
   @override
-  String get ofWhichStock => 'of which stock';
+  String get materialsFromStock => 'materials from the stock';
 
   @override
   String get costAYear => 'Cost a year';
@@ -2251,7 +2251,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskCost => 'Cost';
 
   @override
-  String get taskOfWhichStock => 'Of which stock';
+  String get taskCostPlanned => 'Planned';
+
+  @override
+  String get taskCostReal => 'Real';
+
+  @override
+  String get taskMaterialsFromStock => 'Materials, from the stock';
+
+  @override
+  String get taskMaterialsFromStockHelp =>
+      'The materials are calculated from the stock items of the task: quantity times unit price.';
+
+  @override
+  String taskMaterialFromStockField(String amount) {
+    return '$amount each time, calculated from the stock items of the task.';
+  }
 
   @override
   String get taskPaidSoFar => 'Paid so far';

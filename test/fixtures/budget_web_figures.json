@@ -1,5 +1,5 @@
 {
- "source": {"repository": "HouseCairn/housecairn", "commit": "a76837fe30b5a313980184703454654a45b1f031", "housecairn": "0.3.2", "fixture": "test/fixtures/budget_fixture.json"},
+ "source": {"repository": "HouseCairn/housecairn", "commit": "274246909fcc010cc101b95b79dbffdd0f5a49cd", "housecairn": "0.5.1", "fixture": "test/fixtures/budget_fixture.json"},
  "today": "2026-06-15",
  "homes": {
   "a": {
@@ -22,20 +22,20 @@
       "gap": "5140.00"
      },
      "upkeep": {
-      "planned": "190.00",
+      "planned": "201.60",
       "committed": "0.00",
       "paid": "0.00",
       "engaged": "0.00",
       "to_pay": "0.00",
-      "gap": "190.00"
+      "gap": "201.60"
      },
      "total": {
-      "planned": "5330.00",
+      "planned": "5341.60",
       "committed": "0.00",
       "paid": "0.00",
       "engaged": "0.00",
       "to_pay": "0.00",
-      "gap": "5330.00"
+      "gap": "5341.60"
      }
     },
     {
@@ -50,20 +50,20 @@
       "gap": "-80.01"
      },
      "upkeep": {
-      "planned": "265.74",
+      "planned": "292.34",
       "committed": "0.00",
-      "paid": "60.40",
-      "engaged": "60.40",
+      "paid": "68.30",
+      "engaged": "68.30",
       "to_pay": "0.00",
-      "gap": "205.34"
+      "gap": "224.04"
      },
      "total": {
-      "planned": "1565.74",
+      "planned": "1592.34",
       "committed": "1260.01",
-      "paid": "230.40",
-      "engaged": "1440.41",
+      "paid": "238.30",
+      "engaged": "1448.31",
       "to_pay": "1210.01",
-      "gap": "125.33"
+      "gap": "144.03"
      }
     },
     {
@@ -99,16 +99,16 @@
     "2027": {
      "envelope": null,
      "total": {
-      "planned": "5330.00",
+      "planned": "5341.60",
       "committed": "0.00",
       "paid": "0.00",
       "engaged": "0.00",
       "to_pay": "0.00",
-      "gap": "5330.00"
+      "gap": "5341.60"
      },
-     "set_aside": "5330.00",
+     "set_aside": "5341.60",
      "spent": "0.00",
-     "left": "5330.00",
+     "left": "5341.60",
      "left_over": "0.00",
      "percent": 0,
      "left_to_plan": null,
@@ -117,20 +117,20 @@
     "2026": {
      "envelope": "5000.00",
      "total": {
-      "planned": "1565.74",
+      "planned": "1592.34",
       "committed": "1260.01",
-      "paid": "230.40",
-      "engaged": "1440.41",
+      "paid": "238.30",
+      "engaged": "1448.31",
       "to_pay": "1210.01",
-      "gap": "125.33"
+      "gap": "144.03"
      },
      "set_aside": "5000.00",
-     "spent": "1440.41",
-     "left": "3559.59",
+     "spent": "1448.31",
+     "left": "3551.69",
      "left_over": "0.00",
      "percent": 29,
-     "left_to_plan": "3434.26",
-     "left_to_spend": "3559.59"
+     "left_to_plan": "3407.66",
+     "left_to_spend": "3551.69"
     },
     "2025": {
      "envelope": "1000.00",
@@ -156,12 +156,12 @@
      {
       "room": "kitchen",
       "amounts": {
-       "planned": "70.00",
+       "planned": "81.60",
        "committed": "0.00",
        "paid": "0.00",
        "engaged": "0.00",
        "to_pay": "0.00",
-       "gap": "70.00"
+       "gap": "81.60"
       },
       "projects": {
        "planned": "0.00",
@@ -172,12 +172,12 @@
        "gap": "0.00"
       },
       "upkeep": {
-       "planned": "70.00",
+       "planned": "81.60",
        "committed": "0.00",
        "paid": "0.00",
        "engaged": "0.00",
        "to_pay": "0.00",
-       "gap": "70.00"
+       "gap": "81.60"
       }
      },
      {
@@ -266,12 +266,12 @@
      {
       "room": "kitchen",
       "amounts": {
-       "planned": "720.00",
+       "planned": "731.60",
        "committed": "600.01",
-       "paid": "78.40",
-       "engaged": "678.41",
+       "paid": "86.30",
+       "engaged": "686.31",
        "to_pay": "600.01",
-       "gap": "41.59"
+       "gap": "45.29"
       },
       "projects": {
        "planned": "650.00",
@@ -282,23 +282,23 @@
        "gap": "-10.01"
       },
       "upkeep": {
-       "planned": "70.00",
+       "planned": "81.60",
        "committed": "0.00",
-       "paid": "18.40",
-       "engaged": "18.40",
+       "paid": "26.30",
+       "engaged": "26.30",
        "to_pay": "0.00",
-       "gap": "51.60"
+       "gap": "55.30"
       }
      },
      {
       "room": "bathroom",
       "amounts": {
-       "planned": "650.24",
+       "planned": "665.24",
        "committed": "600.00",
        "paid": "60.00",
        "engaged": "660.00",
        "to_pay": "600.00",
-       "gap": "-9.76"
+       "gap": "5.24"
       },
       "projects": {
        "planned": "650.00",
@@ -309,12 +309,12 @@
        "gap": "-10.00"
       },
       "upkeep": {
-       "planned": "0.24",
+       "planned": "15.24",
        "committed": "0.00",
        "paid": "0.00",
        "engaged": "0.00",
        "to_pay": "0.00",
-       "gap": "0.24"
+       "gap": "15.24"
       }
      },
      {
@@ -487,26 +487,26 @@
     "2027": {
      "unlisted": 1,
      "total": {
-      "planned": "190.00",
+      "planned": "201.60",
       "committed": "0.00",
       "paid": "0.00",
       "engaged": "0.00",
       "to_pay": "0.00",
-      "gap": "190.00"
+      "gap": "201.60"
      },
      "lines": [
       {
        "task": "filter",
        "amounts": {
-        "planned": "70.00",
+        "planned": "50.00",
         "committed": "0.00",
         "paid": "0.00",
         "engaged": "0.00",
         "to_pay": "0.00",
-        "gap": "70.00"
+        "gap": "50.00"
        },
-       "estimate": "17.50",
-       "annual_cost": "70.00",
+       "estimate": "12.50",
+       "annual_cost": "50.00",
        "stock_estimate": "12.50",
        "unpriced_materials": 0,
        "total_paid": "18.40",
@@ -584,32 +584,86 @@
        "total_paid": "42.00",
        "missing_costs": 0,
        "projected": 0
+      },
+      {
+       "task": "descale",
+       "amounts": {
+        "planned": "31.60",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "31.60"
+       },
+       "estimate": "7.90",
+       "annual_cost": "31.60",
+       "stock_estimate": "7.90",
+       "unpriced_materials": 0,
+       "total_paid": "7.90",
+       "missing_costs": 0,
+       "projected": 4
+      },
+      {
+       "task": "hinges",
+       "amounts": {
+        "planned": "0.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "0.00"
+       },
+       "estimate": "0.00",
+       "annual_cost": null,
+       "stock_estimate": "0.00",
+       "unpriced_materials": 0,
+       "total_paid": "0.00",
+       "missing_costs": 0,
+       "projected": 0
+      },
+      {
+       "task": "skirting",
+       "amounts": {
+        "planned": "0.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "0.00"
+       },
+       "estimate": "15.00",
+       "annual_cost": null,
+       "stock_estimate": "0.00",
+       "unpriced_materials": 1,
+       "total_paid": "0.00",
+       "missing_costs": 0,
+       "projected": 0
       }
      ]
     },
     "2026": {
      "unlisted": 1,
      "total": {
-      "planned": "265.74",
+      "planned": "292.34",
       "committed": "0.00",
-      "paid": "60.40",
-      "engaged": "60.40",
+      "paid": "68.30",
+      "engaged": "68.30",
       "to_pay": "0.00",
-      "gap": "205.34"
+      "gap": "224.04"
      },
      "lines": [
       {
        "task": "filter",
        "amounts": {
-        "planned": "70.00",
+        "planned": "50.00",
         "committed": "0.00",
         "paid": "18.40",
         "engaged": "18.40",
         "to_pay": "0.00",
-        "gap": "51.60"
+        "gap": "31.60"
        },
-       "estimate": "17.50",
-       "annual_cost": "70.00",
+       "estimate": "12.50",
+       "annual_cost": "50.00",
        "stock_estimate": "12.50",
        "unpriced_materials": 0,
        "total_paid": "18.40",
@@ -687,6 +741,60 @@
        "total_paid": "42.00",
        "missing_costs": 0,
        "projected": 0
+      },
+      {
+       "task": "descale",
+       "amounts": {
+        "planned": "31.60",
+        "committed": "0.00",
+        "paid": "7.90",
+        "engaged": "7.90",
+        "to_pay": "0.00",
+        "gap": "23.70"
+       },
+       "estimate": "7.90",
+       "annual_cost": "31.60",
+       "stock_estimate": "7.90",
+       "unpriced_materials": 0,
+       "total_paid": "7.90",
+       "missing_costs": 0,
+       "projected": 2
+      },
+      {
+       "task": "hinges",
+       "amounts": {
+        "planned": "0.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "0.00"
+       },
+       "estimate": "0.00",
+       "annual_cost": null,
+       "stock_estimate": "0.00",
+       "unpriced_materials": 0,
+       "total_paid": "0.00",
+       "missing_costs": 0,
+       "projected": 0
+      },
+      {
+       "task": "skirting",
+       "amounts": {
+        "planned": "15.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "15.00"
+       },
+       "estimate": "15.00",
+       "annual_cost": null,
+       "stock_estimate": "0.00",
+       "unpriced_materials": 1,
+       "total_paid": "0.00",
+       "missing_costs": 0,
+       "projected": 0
       }
      ]
     },
@@ -711,8 +819,8 @@
         "to_pay": "0.00",
         "gap": "0.00"
        },
-       "estimate": "17.50",
-       "annual_cost": "70.00",
+       "estimate": "12.50",
+       "annual_cost": "50.00",
        "stock_estimate": "12.50",
        "unpriced_materials": 0,
        "total_paid": "18.40",
@@ -790,6 +898,60 @@
        "total_paid": "42.00",
        "missing_costs": 0,
        "projected": 0
+      },
+      {
+       "task": "descale",
+       "amounts": {
+        "planned": "0.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "0.00"
+       },
+       "estimate": "7.90",
+       "annual_cost": "31.60",
+       "stock_estimate": "7.90",
+       "unpriced_materials": 0,
+       "total_paid": "7.90",
+       "missing_costs": 0,
+       "projected": 0
+      },
+      {
+       "task": "hinges",
+       "amounts": {
+        "planned": "0.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "0.00"
+       },
+       "estimate": "0.00",
+       "annual_cost": null,
+       "stock_estimate": "0.00",
+       "unpriced_materials": 0,
+       "total_paid": "0.00",
+       "missing_costs": 0,
+       "projected": 0
+      },
+      {
+       "task": "skirting",
+       "amounts": {
+        "planned": "0.00",
+        "committed": "0.00",
+        "paid": "0.00",
+        "engaged": "0.00",
+        "to_pay": "0.00",
+        "gap": "0.00"
+       },
+       "estimate": "15.00",
+       "annual_cost": null,
+       "stock_estimate": "0.00",
+       "unpriced_materials": 1,
+       "total_paid": "0.00",
+       "missing_costs": 0,
+       "projected": 0
       }
      ]
     }
@@ -799,12 +961,12 @@
      {
       "nature": "material",
       "amounts": {
-       "planned": "110.00",
+       "planned": "121.60",
        "committed": "0.00",
        "paid": "0.00",
        "engaged": "0.00",
        "to_pay": "0.00",
-       "gap": "110.00"
+       "gap": "121.60"
       }
      },
      {
@@ -845,12 +1007,12 @@
      {
       "nature": "material",
       "amounts": {
-       "planned": "400.24",
+       "planned": "426.84",
        "committed": "60.00",
-       "paid": "188.40",
-       "engaged": "198.40",
+       "paid": "196.30",
+       "engaged": "206.30",
        "to_pay": "10.00",
-       "gap": "201.84"
+       "gap": "220.54"
       }
      },
      {
@@ -984,7 +1146,7 @@
       },
       "year": 2026,
       "status": "in_progress",
-      "tasks_planned": "305.00"
+      "tasks_planned": "225.00"
      },
      {
       "project": "floor",
@@ -1006,12 +1168,12 @@
     "since": "2025-06-16",
     "until": "2026-06-15",
     "upkeep": {
-     "planned": "155.00",
+     "planned": "152.90",
      "committed": "0.00",
-     "paid": "195.40",
-     "engaged": "195.40",
+     "paid": "203.30",
+     "engaged": "203.30",
      "to_pay": "0.00",
-     "gap": "-40.40"
+     "gap": "-50.40"
     },
     "missing": 1
    }

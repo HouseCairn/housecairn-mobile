@@ -1,5 +1,5 @@
 {
-  "$comment": "Neutral rows of two homes, loaded by the web (tool/budget_figures.py) and by the app (test/budget_web_test.dart); every budget figure of the two must be equal. Cases: odd cents shared between three rooms, an abandoned project with an accepted quote, a line paid above its quotes, task estimates beyond the lines, a stock article without a price, a task late from last year, an open task with no date, a fixed series every 48 years, a project dated by its first quote, a done occurrence with no cost.",
+  "$comment": "Neutral rows of two homes, loaded by the web (tool/budget_figures.py) and by the app (test/budget_web_test.dart); every budget figure of the two must be equal. Cases: odd cents shared between three rooms, an abandoned project with an accepted quote, a line paid above its quotes, task estimates beyond the lines, a stock article without a price, a task late from last year, an open task with no date, a fixed series every 48 years, a project dated by its first quote, a done occurrence with no cost; and the materials of web ADR 0081: a filter at 7.90 every 3 months whose price was typed in the material budget as well (31.60 a year, counted once), a stock item priced at zero (a price), a task with only unpriced stock items (its typed budget counts).",
   "today": "2026-06-15",
   "homes": [
     {
@@ -13,7 +13,9 @@
       ],
       "articles": [
         {"key": "filter", "name": "Ventilation filter", "unit_price": "12.50"},
-        {"key": "paint", "name": "White paint", "unit_price": null}
+        {"key": "paint", "name": "White paint", "unit_price": null},
+        {"key": "descaler", "name": "Descaling filter", "unit_price": "7.90"},
+        {"key": "sample", "name": "Free sample of grease", "unit_price": "0.00"}
       ],
       "projects": [
         {
@@ -180,6 +182,46 @@
           "materials": [],
           "occurrences": [
             ["planned", "2027-04-01", null, null]
+          ]
+        },
+        {
+          "key": "descale",
+          "title": "Descale the espresso machine",
+          "room": "kitchen",
+          "material_budget": "7.90",
+          "labour_budget": null,
+          "repeat": {"mode": "fixed", "unit": "month", "interval": 3},
+          "series_start": "2026-03-05",
+          "materials": [["descaler", "1"]],
+          "occurrences": [
+            ["done", "2026-03-05", "2026-03-05", "7.90"],
+            ["planned", "2026-06-05", null, null]
+          ]
+        },
+        {
+          "key": "hinges",
+          "title": "Grease the hinges",
+          "room": "garage",
+          "material_budget": "9.00",
+          "labour_budget": null,
+          "repeat": {"mode": "once", "unit": "month", "interval": 1},
+          "series_start": null,
+          "materials": [["sample", "1"]],
+          "occurrences": [
+            ["planned", "2026-09-01", null, null]
+          ]
+        },
+        {
+          "key": "skirting",
+          "title": "Touch up the skirting",
+          "room": "bathroom",
+          "material_budget": "15.00",
+          "labour_budget": null,
+          "repeat": {"mode": "once", "unit": "month", "interval": 1},
+          "series_start": null,
+          "materials": [["paint", "1"]],
+          "occurrences": [
+            ["planned", "2026-08-01", null, null]
           ]
         }
       ],
