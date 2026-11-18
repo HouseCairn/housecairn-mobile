@@ -371,6 +371,57 @@ tab in the 390 px parity check.
 
 **Depends on**: lot 3c, and the web release v0.5.1.
 
+## Lot 3e. What the web still had and the app did not
+
+**Scope** (the parity report of the web and the app, proposed lot 3e, checked again screen by
+screen against the web release v0.5.1 before any code): of the six functions the report listed,
+five were already in the app, and only the **comparison of projects** was missing.
+
+- Already there, with their proof: the photos and the PDF of a task, from the camera, the gallery,
+  the Files app and the document picker (lot 4d, `lib/ui/attachments.dart`,
+  `test/attachments_test.dart`); the budget by nature, by year and over the last 12 months, every
+  figure equal to the web's (lot 3b and D12, `lib/ui/budget_screens.dart`,
+  `test/budget_web_test.dart` on `tool/budget_figures.py`); **Report a problem** from a room, an
+  item and a stock item, with the place as Where (the record pages as the web, `lib/ui/rooms.dart`,
+  `lib/ui/item_screens.dart`, `lib/ui/stock_screens.dart`, `test/record_pages_test.dart`).
+- **Compare projects** (`projects/project_list.html`, `projects/compare.html`,
+  `projects.services.compare`): from two projects in the tab, the list offers **Compare
+  projects**, which turns the rows into boxes to tick (the row is ticked from anywhere, said as one
+  check box), then **Compare the ticked projects** and **Cancel**; on an iPhone **Select** in the
+  bar starts it too, on Android a long press on a row, which is ticked (web `design/patterns.md`,
+  Platform adaptations, row 12). The comparison sets at most six projects side by side
+  (`MAX_COMPARED`), in the order of the list, the projects of another home never: status, planned
+  cost and what accepted quotes commit (line by line, `amounts_by_project`), duration, priority and
+  season, in the currency of the home; with fewer than two it asks to tick more. It is a table read
+  column by column (web design guide, Tables on a phone): 640 wide at least, in an area that
+  scrolls on its own and is named by the caption of the web, the columns shared as a browser
+  shares them; a row opens its project and is a target of 48 px. No migration, no new entity.
+
+**Acceptance**:
+- The repository gives the web's comparison: the order of the list, six ids at most, nothing of
+  another home, of a deleted project or of an unknown id, the amounts of the lines; two homes in
+  EUR and CHF (`test/projects_compare_test.dart`).
+- Screens aligned with the web at 390 px: `test/web_parity_compare_test.dart` compares the list,
+  its mode of comparison, the comparison and the comparison of one project with
+  `test/parity/web_compare_fr_390.json`, measured by `tool/web_parity_compare.py` at v0.5.1, the
+  release that brought the mode of comparison (later than the pin of `web_parity`, v0.3.2; the
+  test fails when the latest release pinned in `tool/web_alignment.json` is not the one measured).
+- The accessibility guidelines on both platforms, the goldens of the list in its mode and of the
+  comparison at 390 px ×1 and 320 px ×2, in English and French, on Android and iPhone.
+
+**Device**: a PDF attached to a task, as lot 4d delivered it: on an iPhone, a task, **Add photos
+or files**, **Choose a file (PDF or photo)**, a PDF from the Files app (iCloud Drive or On My iPhone):
+the file is listed with its name and size, opens in another app from the share sheet, and is
+deleted from its screen after a confirmation; on Android the same from the document picker of
+the system (Downloads, then a cloud provider). Then the comparison: on the iPhone, **Select** in
+the bar of Projects, two rows ticked, **Compare the ticked projects**, the table scrolled
+sideways with a finger, a row opened; on Android the same from a long press on a row; with
+VoiceOver and TalkBack, a row of the list is read as a check box with its title.
+
+**Delivered in one pull request.**
+
+**Depends on**: lot 3b and lot D12 (the list of projects as the web).
+
 ## Lot 4. Sync engine (without network, without crypto)
 
 **Scope**: operations, HLC, apply and merge rules, deterministic ids, repair rules, schema

@@ -235,6 +235,11 @@ abstract final class HcComponent {
   /// `.row-text { line-height }`: 1.35, not a token of the web.
   static const rowTextLineHeight = 1.35;
   static const rowTextGap = 2.0;
+
+  /// `.table-scroll table { min-width: 40rem }`: a table read column by
+  /// column keeps this width and scrolls on its own (web design guide,
+  /// Tables on a phone).
+  static const columnTableMinWidth = 640.0;
   static const pillPaddingY = 3.0;
   static const pillPaddingX = 8.0;
   static const buttonLineHeight = 1.2;

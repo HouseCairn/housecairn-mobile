@@ -4927,6 +4927,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Label of {name}'**
   String articleLabelPhoto(String name);
+
+  /// Button of the list of projects and title of the comparison. Web catalogue (projects): Comparer les projets.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare projects'**
+  String get compareProjects;
+
+  /// Primary button of the list in its mode of comparison. Web catalogue (projects): Comparer les projets cochés.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare the ticked projects'**
+  String get compareTicked;
+
+  /// Comparison with fewer than two projects. Web catalogue (projects): Cochez au moins deux projets dans la liste pour les comparer.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick at least two projects in the list to compare them.'**
+  String get compareTickTwo;
+
+  /// Spoken name of the table of the comparison (its caption on the web). Web catalogue (projects): Les projets côte à côte.
+  ///
+  /// In en, this message translates to:
+  /// **'The projects side by side'**
+  String get compareCaption;
+
+  /// Head of the column of the titles in the comparison. Web catalogue (projects): Projet.
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get compareProject;
+
+  /// Head of a column of the comparison. Web catalogue (projects): Coût prévu.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned cost'**
+  String get comparePlannedCost;
+
+  /// Head of a column of the comparison. Web catalogue (projects): Durée.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get compareDuration;
+
+  /// Action of the bar of iOS that starts a selection of rows (web design/patterns.md, Platform adaptations, row 12); not a web string. iOS says Sélectionner.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get selectRows;
 }
 
 class _AppLocalizationsDelegate

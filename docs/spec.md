@@ -295,7 +295,12 @@ contractor with it.
    duration and season* (closed on a new project, open when one of its fields has a value):
    the rooms as chips, the estimated duration and the preferred season (months typed on the
    web for a custom season are kept, not edited). Saved, a new project opens, and Back from it
-   returns to the list.
+   returns to the list. From two projects in the tab, **Compare projects** turns the rows into
+   boxes to tick (on an iPhone also **Select** in the bar, on Android a long press on a row; web
+   `design/patterns.md`, Platform adaptations, row 12), then **Compare the ticked projects** sets
+   at most six side by side (`projects/compare.html`, `projects.services.compare`): status,
+   planned cost, committed, duration, priority and season, in a table that scrolls sideways on
+   its own; a row opens its project.
 8. **Budget**: the year of the current home against its envelope, by room, by project, upkeep
    (read only). Each home has its own currency and envelopes (`homes/models.py:33-39`,
    `projects/models.py:355-377`), so homes are never added together. Each tab has the title and

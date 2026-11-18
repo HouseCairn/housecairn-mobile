@@ -1,0 +1,232 @@
+{
+ "$comment": "Measures of the comparison of projects of the web application at 390 x 844 CSS px, factor 3, in French, with its demonstration data, written by tool/web_parity_compare.py; read by test/web_parity_compare_test.dart.",
+ "web": {
+  "repository": "HouseCairn/housecairn",
+  "release": "v0.5.1",
+  "commit": "274246909fcc010cc101b95b79dbffdd0f5a49cd"
+ },
+ "screens": {
+  "projects": {
+   "h1": {
+    "text": "Projets",
+    "font": 24,
+    "weight": 800,
+    "line": 30
+   },
+   "content_left": 16,
+   "rows": [
+    {
+     "title": "Repeindre le salon",
+     "text": "Prévu : 890,00 €",
+     "height": 90.84375,
+     "tick": null,
+     "tick_is_row": false
+    },
+    {
+     "title": "Refaire la salle de bain",
+     "text": "Prévu : 4 200,00 €",
+     "height": 91.84375,
+     "tick": null,
+     "tick_is_row": false
+    }
+   ],
+   "compare_link": {
+    "text": "Comparer les projets",
+    "box": {
+     "x": 16,
+     "y": 775.1875,
+     "w": 358,
+     "h": 45.1875
+    },
+    "radius": 12,
+    "font": 16,
+    "weight": 700,
+    "line": 19.2,
+    "secondary": true
+   },
+   "submit": null,
+   "cancel": null,
+   "button_row_gap": null,
+   "empty": null,
+   "table": null,
+   "url": "/h/<id>/projects/"
+  },
+  "projects_compare": {
+   "h1": {
+    "text": "Projets",
+    "font": 24,
+    "weight": 800,
+    "line": 30
+   },
+   "content_left": 16,
+   "rows": [
+    {
+     "title": "Repeindre le salon",
+     "text": "Prévu : 890,00 €",
+     "height": 90.84375,
+     "tick": {
+      "x": 335,
+      "y": 613.921875,
+      "w": 22,
+      "h": 22
+     },
+     "tick_is_row": true
+    },
+    {
+     "title": "Refaire la salle de bain",
+     "text": "Prévu : 4 200,00 €",
+     "height": 91.84375,
+     "tick": {
+      "x": 335,
+      "y": 709.765625,
+      "w": 22,
+      "h": 22
+     },
+     "tick_is_row": true
+    }
+   ],
+   "compare_link": null,
+   "submit": {
+    "text": "Comparer les projets cochés",
+    "box": {
+     "x": 16,
+     "y": 783.1875,
+     "w": 257,
+     "h": 45.1875
+    },
+    "radius": 12,
+    "font": 16,
+    "weight": 700,
+    "line": 19.2,
+    "secondary": false
+   },
+   "cancel": {
+    "text": "Annuler",
+    "box": {
+     "x": 16,
+     "y": 836.375,
+     "w": 95,
+     "h": 45.1875
+    },
+    "radius": 12,
+    "font": 16,
+    "weight": 700,
+    "line": 19.2,
+    "secondary": true
+   },
+   "button_row_gap": 8,
+   "empty": null,
+   "table": null,
+   "url": "/h/<id>/projects/?compare=1"
+  },
+  "project_compare": {
+   "h1": {
+    "text": "Comparer les projets",
+    "font": 24,
+    "weight": 800,
+    "line": 30
+   },
+   "content_left": 16,
+   "rows": [],
+   "compare_link": null,
+   "submit": null,
+   "cancel": null,
+   "button_row_gap": null,
+   "empty": null,
+   "table": {
+    "region": {
+     "role": "region",
+     "tabindex": "0",
+     "label": "Les projets côte à côte",
+     "box": {
+      "x": 16,
+      "y": 162,
+      "w": 358,
+      "h": 112.5
+     }
+    },
+    "width": 640,
+    "head": [
+     "Projet",
+     "Statut",
+     "Coût prévu",
+     "Engagé",
+     "Durée",
+     "Priorité",
+     "Saison"
+    ],
+    "head_style": {
+     "font": 13,
+     "weight": 700,
+     "line": 19.5
+    },
+    "cell_style": {
+     "font": 14,
+     "weight": 400,
+     "line": 21
+    },
+    "row_head_style": {
+     "font": 13,
+     "weight": 700,
+     "line": 19.5
+    },
+    "head_height": 36,
+    "rows": [
+     {
+      "cells": [
+       "Repeindre le salon",
+       "Prévu",
+       "890,00 €",
+       "0,00 €",
+       "16 h",
+       "Normale",
+       "—"
+      ],
+      "height": 37.5,
+      "link": true
+     },
+     {
+      "cells": [
+       "Refaire la salle de bain",
+       "Prévu",
+       "4 200,00 €",
+       "2 850,00 €",
+       "—",
+       "Normale",
+       "—"
+      ],
+      "height": 38,
+      "link": true
+     }
+    ],
+    "columns": [
+     175.859375,
+     64.546875,
+     97.9375,
+     97.9375,
+     60.09375,
+     77.90625,
+     65.71875
+    ]
+   },
+   "url": "/h/<id>/projects/compare/?p=<id>&p=<id>"
+  },
+  "project_compare_one": {
+   "h1": {
+    "text": "Comparer les projets",
+    "font": 24,
+    "weight": 800,
+    "line": 30
+   },
+   "content_left": null,
+   "rows": [],
+   "compare_link": null,
+   "submit": null,
+   "cancel": null,
+   "button_row_gap": null,
+   "empty": "Cochez au moins deux projets dans la liste pour les comparer.",
+   "table": null,
+   "url": "/h/<id>/projects/compare/?p=<id>"
+  }
+ }
+}
