@@ -571,16 +571,28 @@ class Repository {
 
   /// The ids of the example homes of this phone (one at most, web ADR
   /// 0084), read once and kept up to date by `createExampleHome` and the
-  /// erasure of a home; `null` until read.
-  Set<String>? _examples;
+  /// erasure of a home; `null` until read. The read itself is kept, not its
+  /// result: callers that come first at the same time wait for the same
+  /// read and share one set, which is never replaced while it is in use.
+  Future<Set<String>>? _examples;
 
-  Future<Set<String>> _exampleHomes() async => _examples ??= {
+  Future<Set<String>> _readExampleHomes() async => {
     for (final r
         in await db
             .customSelect('SELECT id FROM homes WHERE is_example = 1')
             .get())
       Uuid.unparse(r.data['id'] as Uint8List),
   };
+
+  Future<Set<String>> _exampleHomes() async {
+    final load = _examples ??= _readExampleHomes();
+    try {
+      return await load;
+    } catch (_) {
+      if (identical(_examples, load)) _examples = null;
+      rethrow;
+    }
+  }
 
   /// Whether [homeId] is the example home of the guide: none of its rows
   /// leaves the phone, in any way of the app (web ADR 0084).

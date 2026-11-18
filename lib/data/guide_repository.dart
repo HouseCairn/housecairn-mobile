@@ -32,8 +32,8 @@ extension GuideRepository on Repository {
   /// step 1, pre-filled with the values of [guide]: what is left out reads
   /// from the file, in [language] (the code of the phone's language, `fr`
   /// or `fr-FR`; English when the file does not have it). One example home
-  /// per phone: a second is refused ([Refusal.exampleExists]) until the
-  /// first is deleted.
+  /// per phone, also when two calls come at once: a second is refused
+  /// ([Refusal.exampleExists]) until the first is deleted.
   Future<String> createExampleHome(
     Guide guide, {
     String? language,
@@ -41,9 +41,6 @@ extension GuideRepository on Repository {
     String? currency,
     String? hemisphere,
   }) async {
-    if (await exampleHome() != null) {
-      throw const Refused(Refusal.exampleExists);
-    }
     final chosen = guide.languageFor(language);
     final clean = Repository._name(
       name ?? '${guide.text(guide.home['name'], chosen)}',
@@ -54,22 +51,29 @@ extension GuideRepository on Repository {
         hemisphere ?? guide.home['hemisphere'] as String? ?? recurrence.north;
     Repository._checkHomeFields(money, half);
     final id = newId();
-    // Known as the example before its first write, so that the row of the
-    // home itself has no clock and no operation either.
-    (await _exampleHomes()).add(id);
+    // The check and the insert are one transaction: two calls at once are
+    // taken one after the other, and the second finds the first.
+    var known = false;
     try {
-      await db.transaction(
-        () => _put('homes', id, {
+      await db.transaction(() async {
+        if (await exampleHome() != null) {
+          throw const Refused(Refusal.exampleExists);
+        }
+        // Known as the example before its first write, so that the row of
+        // the home itself has no clock and no operation either.
+        (await _exampleHomes()).add(id);
+        known = true;
+        await _put('homes', id, {
           'name': clean,
           'currency': money,
           'hemisphere': half,
           'archived_at': null,
           'deleted_at': null,
           'is_example': true,
-        }, create: true),
-      );
+        }, create: true);
+      });
     } catch (_) {
-      _examples = null;
+      if (known) _examples = null;
       rethrow;
     }
     return id;
