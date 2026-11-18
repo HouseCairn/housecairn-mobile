@@ -3003,4 +3003,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String articleLabelPhoto(String name) {
     return 'Label of $name';
   }
+
+  @override
+  String get compareProjects => 'Compare projects';
+
+  @override
+  String get compareTicked => 'Compare the ticked projects';
+
+  @override
+  String get compareTickTwo =>
+      'Tick at least two projects in the list to compare them.';
+
+  @override
+  String get compareCaption => 'The projects side by side';
+
+  @override
+  String get compareProject => 'Project';
+
+  @override
+  String get comparePlannedCost => 'Planned cost';
+
+  @override
+  String get compareDuration => 'Duration';
+
+  @override
+  String get selectRows => 'Select';
 }

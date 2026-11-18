@@ -966,5 +966,13 @@
   "fileSizeBytes": "{count} octets",
   "fileSizeKb": "{count} Ko",
   "fileSizeMb": "{count} Mo",
-  "articleLabelPhoto": "Étiquette de {name}"
+  "articleLabelPhoto": "Étiquette de {name}",
+  "compareProjects": "Comparer les projets",
+  "compareTicked": "Comparer les projets cochés",
+  "compareTickTwo": "Cochez au moins deux projets dans la liste pour les comparer.",
+  "compareCaption": "Les projets côte à côte",
+  "compareProject": "Projet",
+  "comparePlannedCost": "Coût prévu",
+  "compareDuration": "Durée",
+  "selectRows": "Sélectionner"
 }
