@@ -7,6 +7,7 @@ import 'dart:math';
 
 import 'package:decimal/decimal.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:uuid/uuid.dart';
 
 import '../core/clock.dart';
@@ -728,6 +729,19 @@ class Repository {
     return Variable<Object>(value);
   }
 
+  /// [_put] reached from a test, in a transaction, to try its guards (the
+  /// mark `is_example`) that no public method leads to.
+  @visibleForTesting
+  Future<void> putForTest(
+    String table,
+    String id,
+    Map<String, Object?> fields, {
+    String? homeId,
+    bool create = false,
+  }) => db.transaction(
+    () => _put(table, id, fields, homeId: homeId, create: create),
+  );
+
   /// One operation: sets [fields] of the row [id] of [table] (creating it
   /// when [create]), and their clocks, and writes it in `op_log` for sync
   /// (lot 4). Runs inside the caller's transaction. `updated_at` is the
@@ -738,7 +752,9 @@ class Repository {
   /// `field_clock`, no operation in `op_log`, whoever calls (a screen, a
   /// repair, the guide), in every way of the app (web ADR 0084, "the
   /// example never leaves its device"). The mark `is_example` is written
-  /// only when the example home is made.
+  /// only when the example home is made, and any other write of it
+  /// is refused (`StateError`): defence in depth, since no screen or sync
+  /// path sets it.
   Future<void> _put(
     String table,
     String id,
