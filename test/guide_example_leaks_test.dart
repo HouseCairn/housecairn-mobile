@@ -274,4 +274,54 @@ void main() {
       );
     });
   });
+
+  group('the server rules leave the example alone', () {
+    test('a write of the example does not tell the sync to run; a real one '
+        'does', () async {
+      final real = await repo.createHome(name: 'Main home');
+      final id = await repo.createExampleHome(guide);
+      var events = 0;
+      final listening = repo.localWrites.listen((_) => events++);
+      addTearDown(listening.cancel);
+      await repo.createRoom(id, name: 'Kitchen');
+      await repo.updateHome(id, name: 'Practice house');
+      await Future<void>.delayed(Duration.zero);
+      expect(events, 0);
+      await repo.createRoom(real, name: 'Hall');
+      await Future<void>.delayed(Duration.zero);
+      expect(events, greaterThan(0));
+    });
+
+    test(
+      'reconcileAfterRestart drops, marks and resends nothing of it',
+      () async {
+        final real = await repo.createHome(name: 'Main home');
+        final id = await repo.createExampleHome(guide);
+        Future<(String, String)> twoRooms(String home) async {
+          final seen = await repo.createRoom(home, name: 'Seen');
+          final unseen = await repo.createRoom(home, name: 'Unseen');
+          await repo.markServerSeen([('rooms.room', home, seen)]);
+          return (seen, unseen);
+        }
+
+        final (_, _) = await twoRooms(real);
+        final (seen, unseen) = await twoRooms(id);
+        // The server's snapshot holds neither home's rooms. The same call on
+        // the real home drops the room the server had and resends the other.
+        final onReal = await repo.reconcileAfterRestart(real, {});
+        expect(onReal, hasLength(1));
+        final onExample = await repo.reconcileAfterRestart(id, {});
+        expect(onExample, isEmpty);
+        expect({for (final r in await repo.rooms(id)) r.id}, {seen, unseen});
+        expect(await repo.serverSeenIn(id), {('rooms.room', seen)});
+        final logged = await repo.db
+            .customSelect(
+              'SELECT COUNT(*) AS n FROM op_log WHERE home_id = ?',
+              variables: [Variable<Uint8List>(uuidBytes(id))],
+            )
+            .getSingle();
+        expect(logged.data['n'], 0);
+      },
+    );
+  });
 }
