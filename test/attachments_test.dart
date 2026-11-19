@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/core/document_source.dart';
 import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/l10n/app_localizations_en.dart';
+import 'package:housecairn_mobile/ui/attachments.dart' show fileNameBreakable;
 import 'package:housecairn_mobile/ui/report_screens.dart';
 import 'package:housecairn_mobile/ui/state.dart' show FileOpener;
 import 'package:housecairn_mobile/ui/stock_screens.dart';
@@ -19,6 +20,16 @@ import 'support/lot4d.dart';
 /// The photos and files of a task, the photo of a report and the label of
 /// an article on their screens (lot 4d, docs/adr/0013).
 void main() {
+  // A name of a photo goes down a line before its extension when it does
+  // not fit under its thumbnail: so here, in the test font, wider than the
+  // fonts of the app (the golden files show both cases).
+  test('a file name may go down a line before its extension only', () {
+    expect(fileNameBreakable('boiler.jpg'), 'boiler\u200B.jpg');
+    expect(fileNameBreakable('a.b.pdf'), 'a.b\u200B.pdf');
+    expect(fileNameBreakable('README'), 'README');
+    expect(fileNameBreakable('.hidden'), '.hidden');
+  });
+
   final l = AppLocalizationsEn();
 
   Future<Lot4d> open(
@@ -66,8 +77,8 @@ void main() {
     final d = await open(tester, taskOf);
     await scrollTo(tester, find.byKey(const Key('attachment-add')));
     expect(find.text(l.attachmentsHeading.toUpperCase()), findsOneWidget);
-    expect(find.text('boiler.jpg'), findsOneWidget);
-    expect(find.text('valve.jpg'), findsOneWidget);
+    expect(find.text(fileNameBreakable('boiler.jpg')), findsOneWidget);
+    expect(find.text(fileNameBreakable('valve.jpg')), findsOneWidget);
     expect(find.text('invoice.pdf'), findsOneWidget);
     expect(find.text(l.fileSizeKb('2.5')), findsOneWidget);
     expect(find.text(l.addAttachments), findsOneWidget);
@@ -113,8 +124,8 @@ void main() {
       () => Future<void>.delayed(const Duration(milliseconds: 300)),
     );
     await tester.pumpAndSettle();
-    await scrollTo(tester, find.text('photo.jpg'));
-    expect(find.text('photo.jpg'), findsOneWidget);
+    await scrollTo(tester, find.text(fileNameBreakable('photo.jpg')));
+    expect(find.text(fileNameBreakable('photo.jpg')), findsOneWidget);
     final all = await tester.runAsync(() => repository.attachmentsOf(d.task));
     expect(all, hasLength(4));
     expect(all!.last.isImage, isTrue);

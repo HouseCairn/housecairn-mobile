@@ -324,42 +324,67 @@ class HcWholeWords extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scaler = MediaQuery.textScalerOf(context);
-    final resolved = DefaultTextStyle.of(context).style.merge(style);
-    final direction = Directionality.of(context);
     return LayoutBuilder(
-      builder: (context, constraints) {
-        var fitted = scaler;
-        final width = constraints.maxWidth;
-        final size = resolved.fontSize;
-        if (width.isFinite && size != null && size > 0) {
-          var widest = 0.0;
-          for (final word in text.split(RegExp(r'\s+'))) {
-            if (word.isEmpty) continue;
-            final painter = TextPainter(
-              text: TextSpan(text: word, style: resolved),
-              textDirection: direction,
-              textScaler: scaler,
-              maxLines: 1,
-            )..layout();
-            if (painter.width > widest) widest = painter.width;
-            painter.dispose();
-          }
-          if (widest > width) {
-            // A hair under the exact ratio, for the rounding of the layout.
-            final factor = scaler.scale(size) / size * width / widest * 0.98;
-            fitted = TextScaler.linear(factor);
-          }
-        }
-        return Text(
-          text,
-          style: style,
-          textAlign: textAlign,
-          textScaler: fitted,
-        );
-      },
+      builder: (context, constraints) => Text(
+        text,
+        style: style,
+        textAlign: textAlign,
+        textScaler: hcWholeWordsScaler(
+          context,
+          [text],
+          [style ?? const TextStyle()],
+          constraints.maxWidth,
+        ),
+      ),
     );
   }
+}
+
+/// Where a line may break besides spaces: after a slash or a hyphen, and at
+/// a zero width space (before the extension of a file name).
+final _wordBreak = RegExp(r'\s+|(?<=[/-])|\u200B');
+
+/// The rule of [HcWholeWords] for texts that share one size (the labels of
+/// the bottom bar, the tabs of a section): the text scale of the person, or
+/// smaller when the longest word of [texts], in the widest of [styles], is
+/// wider than [width], so that it fits on its line. Never larger than the
+/// scale of the person.
+TextScaler hcWholeWordsScaler(
+  BuildContext context,
+  Iterable<String> texts,
+  Iterable<TextStyle> styles,
+  double width,
+) {
+  final scaler = MediaQuery.textScalerOf(context);
+  if (!width.isFinite || width <= 0) return scaler;
+  final direction = Directionality.of(context);
+  // As a Text draws it: on the default style of where it is (the spacing
+  // of the letters of the body text of the theme).
+  final ambient = DefaultTextStyle.of(context).style;
+  var widest = 0.0;
+  for (final given in styles) {
+    final style = ambient.merge(given);
+    final size = style.fontSize;
+    if (size == null || size <= 0) continue;
+    for (final text in texts) {
+      // A line may also break after a slash or a hyphen (an address, a
+      // compound word): those parts are the words that must fit.
+      for (final word in text.split(_wordBreak)) {
+        if (word.isEmpty) continue;
+        final painter = TextPainter(
+          text: TextSpan(text: word, style: style),
+          textDirection: direction,
+          textScaler: scaler,
+          maxLines: 1,
+        )..layout();
+        if (painter.width > widest) widest = painter.width;
+        painter.dispose();
+      }
+    }
+  }
+  if (widest <= width) return scaler;
+  // A hair under the exact ratio, for the rounding of the layout.
+  return TextScaler.linear(scaler.scale(1) * width / widest * 0.98);
 }
 
 /// A label of one word that is never cut: on one line, made smaller only

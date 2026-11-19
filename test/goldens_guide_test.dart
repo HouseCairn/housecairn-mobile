@@ -2,9 +2,9 @@
 
 // Golden files of the interactive guide (web ADR 0084, lot A3): the list of
 // the scenarios with the card of the example home, the page of a scenario
-// with a step done and its buttons, a step marked by hand (optional), the
-// confirmation of Delete the example home, and the banner of the example
-// home on its page; on an iPhone and on
+// with a step done and its buttons (and its title alone at 320 px), a step
+// marked by hand (optional), the confirmation of Delete the example home,
+// and the banner of the example home on its page; on an iPhone and on
 // Android, at 390 px and at the narrow 320 px with text at twice the size, in
 // English and French. Regenerate after a deliberate change:
 //   flutter test --update-goldens test/goldens_guide_test.dart
@@ -144,6 +144,23 @@ void main() {
           }
           await capture(tester, 'guide_scenario');
         });
+
+        // The top of a scenario at 320 px x2: its title, whole words only
+        // (HcWholeWords), the capture above scrolling to its buttons.
+        if (narrow) {
+          testWidgets('the title of a scenario, $name', (tester) async {
+            await start(tester);
+            await show(
+              tester,
+              find.byKey(const Key('guide-scenario-rooms-equipment')),
+            );
+            await tester.tap(
+              find.byKey(const Key('guide-scenario-rooms-equipment')),
+            );
+            await tester.pumpAndSettle();
+            await capture(tester, 'guide_scenario_title');
+          });
+        }
 
         testWidgets('a step marked by hand, optional, $name', (tester) async {
           await start(tester);

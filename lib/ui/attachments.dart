@@ -206,6 +206,32 @@ String fileSizeLabel(BuildContext context, int bytes) {
   return l10n.fileSizeMb(number.format(bytes / (1024 * 1024)));
 }
 
+/// [name] with a place to go down a line before its extension (a zero
+/// width space before the last dot), as a word ends there.
+@visibleForTesting
+String fileNameBreakable(String name) {
+  final dot = name.lastIndexOf('.');
+  if (dot <= 0) return name;
+  return '${name.substring(0, dot)}\u200B${name.substring(dot)}';
+}
+
+/// Whether [name] fits on one line of [width], in the small body text at the
+/// text size of the person.
+bool _fits(BuildContext context, String name, double width) {
+  final painter = TextPainter(
+    text: TextSpan(
+      text: name,
+      style: DefaultTextStyle.of(context).style.merge(HcText.bodySmall),
+    ),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+    maxLines: 1,
+  )..layout();
+  final fits = painter.width <= width;
+  painter.dispose();
+  return fits;
+}
+
 class _ImageTile extends StatelessWidget {
   const _ImageTile({
     required this.attachment,
@@ -255,12 +281,31 @@ class _ImageTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: HcSpace.s1),
-              Text(
-                attachment.name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: HcText.bodySmall,
-              ),
+              // A name is never cut inside a word (boiler.j / pg on 320 px
+              // at twice the size): when it does not fit on its line, it
+              // goes down a line before its extension, and comes down in
+              // size until its longest part fits, the rule of HcWholeWords.
+              // A name that fits is drawn as before.
+              if (_fits(context, attachment.name, side))
+                Text(
+                  attachment.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: HcText.bodySmall,
+                )
+              else
+                Text(
+                  fileNameBreakable(attachment.name),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: HcText.bodySmall,
+                  textScaler: hcWholeWordsScaler(
+                    context,
+                    [fileNameBreakable(attachment.name)],
+                    [HcText.bodySmall],
+                    side,
+                  ),
+                ),
             ],
           ),
         ),
