@@ -251,6 +251,10 @@ abstract final class HcComponent {
   /// `.about-logo`: the cairn of About, 4.5rem.
   static const aboutLogo = 72.0;
 
+  /// `.qr-frame` of the web (`labels.css`): the QR code of a label on its
+  /// page, at most 16rem wide.
+  static const qrSide = 256.0;
+
   static const Map<String, double> byName = {
     'border-width': borderWidth,
     'focus-ring': focusRing,

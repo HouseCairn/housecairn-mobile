@@ -100,6 +100,7 @@ void main() {
     await pumpApp(tester);
     await tester.tap(destination('More'));
     await tester.pumpAndSettle();
+    await scrollMoreTo(tester, find.byKey(const Key('more-about')));
     await tester.tap(find.byKey(const Key('more-about')));
     await tester.pumpAndSettle();
     expect(find.byType(HcBrand), findsNothing);

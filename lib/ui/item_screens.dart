@@ -13,11 +13,13 @@ import '../domain/choices.dart';
 import '../domain/day.dart';
 import '../domain/warranty.dart';
 import 'help_button.dart';
+import '../domain/labels.dart';
 import '../l10n/app_localizations.dart';
 import 'budget_parts.dart';
 import 'choices.dart';
 import 'autosave.dart';
 import 'contractor_screens.dart';
+import 'label_screens.dart';
 import 'messages.dart';
 import 'parts.dart';
 import 'photos.dart';
@@ -165,6 +167,11 @@ class ItemScreen extends StatelessWidget {
                     // action of the bar.
                     RecordActions(
                       children: [
+                        LabelButton(
+                          homeId: homeId,
+                          kind: LabelKind.item,
+                          targetId: itemId,
+                        ),
                         OutlinedButton(
                           key: const Key('item-report'),
                           onPressed: () => Navigator.of(context).push(

@@ -37,6 +37,17 @@ enum HcIcons {
   /// Reports in More (`flag`).
   flag([_P('M5.5 21V4'), _P('M5.5 5h12l-2.5 4 2.5 4h-12')]),
 
+  /// QR labels in More (`qr`), and the scan of a label.
+  qr([
+    _R(4, 4, 6, 6, 1),
+    _R(14, 4, 6, 6, 1),
+    _R(4, 14, 6, 6, 1),
+    _P('M14 14h2.5v2.5H14z'),
+    _P('M19 14v.01'),
+    _P('M14 19.5v.01'),
+    _P('M17 19h3v-2.5'),
+  ]),
+
   /// Contractors in More (`hardhat`).
   hardhat([
     _P('M5 15.5a7 7 0 0 1 14 0'),

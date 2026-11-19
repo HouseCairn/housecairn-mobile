@@ -644,7 +644,9 @@ final screens = <Screen>[
     name: 'room',
     open: (tester, demo) =>
         openScreen(tester, RoomScreen(homeId: demo.home, roomId: demo.utility)),
-    measure: (t) => measure(t, add: 'Ajouter une tâche'),
+    // Taller than the phone since the record has its QR label button, as
+    // the web's (`labels/_tools.html`).
+    measure: (t) => measureTall(t, add: 'Ajouter une tâche'),
   ),
   (
     name: 'room_form',

@@ -944,6 +944,8 @@ extension SyncRepository on Repository {
         'server_seen',
         'file_sync',
         'step_ticks',
+        // The QR labels, kept on the phone (docs/adr/0014-qr-labels.md).
+        'labels',
       ]) {
         await db.customStatement('DELETE FROM $table WHERE home_id = ?', [key]);
       }

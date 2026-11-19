@@ -629,8 +629,11 @@ void main() {
       // The tables come from the schema, not from the code under test.
       final owned = homeOwnedTables(repo);
       expect(owned, isNotEmpty);
+      // The QR labels are kept on the phone and not synced, so they are not
+      // in `homeTables` (docs/adr/0014-qr-labels.md); the erasure of a home
+      // removes them with the other tables of the phone, checked below.
       expect(
-        homeTables.toSet(),
+        {...homeTables, 'labels'},
         owned.toSet(),
         reason: 'deleteHome must visit every table with a home_id',
       );

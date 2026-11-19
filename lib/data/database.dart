@@ -29,6 +29,8 @@ part 'database.g.dart';
 /// Schema 9 (lot 4d) adds `task_attachments`, the photos and files of tasks.
 /// Schema 10 (web ADR 0084) adds the mark `homes.is_example` of the example
 /// home of the guide and `step_ticks`, the steps of the guide done.
+/// Schema 11 (docs/adr/0014-qr-labels.md) adds `labels`, the QR labels of
+/// rooms, items and stock articles, kept on the phone.
 /// Migrations are drift's
 /// guided migrations: `dart run drift_dev make-migrations` keeps one schema
 /// file per version in `drift_schemas/` and generates the step-by-step code
@@ -70,6 +72,7 @@ part 'database.g.dart';
     FileSync,
     TaskAttachments,
     StepTicks,
+    Labels,
   ],
 )
 class AppDatabase extends _$AppDatabase implements Db {
@@ -81,7 +84,7 @@ class AppDatabase extends _$AppDatabase implements Db {
       AppDatabase(driftDatabase(name: 'housecairn'));
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -240,6 +243,13 @@ class AppDatabase extends _$AppDatabase implements Db {
             // one, and the ticks of its steps, a new empty table.
             await m.addColumn(schema.homes, schema.homes.isExample);
             await m.createTable(schema.stepTicks);
+          },
+          from10To11: (m, schema) async {
+            // The QR labels (docs/adr/0014-qr-labels.md), a new empty table
+            // and its indexes: no row moves.
+            await m.createTable(schema.labels);
+            await m.create(schema.labelCode);
+            await m.create(schema.labelHomeKind);
           },
         ),
       );

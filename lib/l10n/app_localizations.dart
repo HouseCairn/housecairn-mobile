@@ -4928,6 +4928,282 @@ abstract class AppLocalizations {
   /// **'Label of {name}'**
   String articleLabelPhoto(String name);
 
+  /// Web catalogue (labels): QR labels.
+  ///
+  /// In en, this message translates to:
+  /// **'QR labels'**
+  String get qrLabels;
+
+  /// Web catalogue (labels): QR label.
+  ///
+  /// In en, this message translates to:
+  /// **'QR label'**
+  String get qrLabel;
+
+  /// Subtitle of QR labels in More. Web catalogue (core, More): Stickers that open a room, an item or an article.
+  ///
+  /// In en, this message translates to:
+  /// **'Stickers that open a room, an item or an article'**
+  String get moreLabelsText;
+
+  /// Title of the scanner of QR labels, and its button on QR labels.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a label'**
+  String get scanLabel;
+
+  /// Web catalogue (labels): Make a QR label.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a QR label'**
+  String get makeQrLabel;
+
+  /// Web catalogue (labels): QR label of %(name)s.
+  ///
+  /// In en, this message translates to:
+  /// **'QR label of {name}'**
+  String labelOf(String name);
+
+  /// Spoken label of the drawn QR code. Web catalogue (labels): QR code of %(name)s.
+  ///
+  /// In en, this message translates to:
+  /// **'QR code of {name}'**
+  String labelQrOf(String name);
+
+  /// Under the QR code of a label made on the phone (docs/adr/0014-qr-labels.md); the web says it holds an address.
+  ///
+  /// In en, this message translates to:
+  /// **'The QR code holds this code and nothing else, no address:'**
+  String get labelHolds;
+
+  /// Web catalogue (labels): Open the page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the page'**
+  String get labelOpenPage;
+
+  /// Web catalogue (labels): Print.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get labelPrint;
+
+  /// Web catalogue (labels): Layout.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout'**
+  String get labelLayout;
+
+  /// Web catalogue (labels): A4 sheet, 3 by 8 labels (63.5 by 33.9 mm).
+  ///
+  /// In en, this message translates to:
+  /// **'A4 sheet, 3 by 8 labels (63.5 by 33.9 mm)'**
+  String get labelLayoutA4;
+
+  /// Web catalogue (labels): 62 mm roll, one label per page (label printer).
+  ///
+  /// In en, this message translates to:
+  /// **'62 mm roll, one label per page (label printer)'**
+  String get labelLayoutRoll;
+
+  /// Web catalogue (labels): Print this label.
+  ///
+  /// In en, this message translates to:
+  /// **'Print this label'**
+  String get labelPrintThis;
+
+  /// Web catalogue (labels): If the sticker is lost or shared.
+  ///
+  /// In en, this message translates to:
+  /// **'If the sticker is lost or shared'**
+  String get labelLostTitle;
+
+  /// Web catalogue (labels): A new label has a new code; the old sticker stops opening anything.
+  ///
+  /// In en, this message translates to:
+  /// **'A new label has a new code; the old sticker stops opening anything.'**
+  String get labelLostText;
+
+  /// Web catalogue (labels): Make a new label.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a new label'**
+  String get labelRegenerate;
+
+  /// Web catalogue (labels): Revoke the label.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke the label'**
+  String get labelRevoke;
+
+  /// Title of the confirmation before a label is revoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke the label?'**
+  String get labelRevokeTitle;
+
+  /// Text of the confirmation before a label is revoked.
+  ///
+  /// In en, this message translates to:
+  /// **'The sticker will no longer open anything. A revoked label cannot be brought back.'**
+  String get labelRevokeBody;
+
+  /// Web catalogue (labels): QR label revoked: the sticker no longer opens anything.
+  ///
+  /// In en, this message translates to:
+  /// **'QR label revoked: the sticker no longer opens anything.'**
+  String get labelRevoked;
+
+  /// Web catalogue (labels): The old sticker no longer opens anything. Print the new label.
+  ///
+  /// In en, this message translates to:
+  /// **'The old sticker no longer opens anything. Print the new label.'**
+  String get labelRegenerated;
+
+  /// Introduction of QR labels; the web's, with this phone as the reader.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick what to label, choose a layout and print the sheet. Scanning a sticker with this phone opens the page of the object.'**
+  String get labelsIntro;
+
+  /// Web catalogue (labels): No label yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No label yet'**
+  String get labelNoneYet;
+
+  /// Web catalogue (labels): No label.
+  ///
+  /// In en, this message translates to:
+  /// **'No label'**
+  String get labelNone;
+
+  /// Web catalogue (labels): Up to %(max)s labels at a time.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {max} labels at a time.'**
+  String labelsMax(int max);
+
+  /// Web catalogue (labels): A label is made for each object ticked that has none.
+  ///
+  /// In en, this message translates to:
+  /// **'A label is made for each object ticked that has none.'**
+  String get labelsMadeForTicked;
+
+  /// Web catalogue (labels): You can print the labels that exist; members who can edit make new ones.
+  ///
+  /// In en, this message translates to:
+  /// **'You can print the labels that exist; members who can edit make new ones.'**
+  String get labelsReadOnly;
+
+  /// Web catalogue (labels): Print the labels.
+  ///
+  /// In en, this message translates to:
+  /// **'Print the labels'**
+  String get labelsPrint;
+
+  /// Web catalogue (labels): Nothing to label yet: add rooms, items or stock items first.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to label yet: add rooms, items or stock items first.'**
+  String get labelsEmpty;
+
+  /// Web catalogue (labels): Choose the objects from the list.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the objects from the list.'**
+  String get labelsChoose;
+
+  /// Group of the rooms in QR labels.
+  ///
+  /// In en, this message translates to:
+  /// **'Rooms'**
+  String get labelSectionRooms;
+
+  /// Group of the items in QR labels.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get labelSectionItems;
+
+  /// Group of the stock items in QR labels.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock items'**
+  String get labelSectionArticles;
+
+  /// Web catalogue (labels): Room.
+  ///
+  /// In en, this message translates to:
+  /// **'Room'**
+  String get labelKindRoom;
+
+  /// Web catalogue (labels): Item.
+  ///
+  /// In en, this message translates to:
+  /// **'Item'**
+  String get labelKindItem;
+
+  /// Web catalogue (labels): Stock item.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock item'**
+  String get labelKindArticle;
+
+  /// Under the view of the camera, in the scanner of labels.
+  ///
+  /// In en, this message translates to:
+  /// **'Point the camera at the QR code of a label.'**
+  String get scanHint;
+
+  /// Spoken label of the view of the camera in the scanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get scanCamera;
+
+  /// The person refused the camera to the scanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Housecairn needs the camera to read a code. Allow it in the settings of the phone, then try again.'**
+  String get scanDenied;
+
+  /// No camera for the scanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone has no camera to read a code.'**
+  String get scanUnavailable;
+
+  /// A scanned QR code that holds no label code.
+  ///
+  /// In en, this message translates to:
+  /// **'This QR code is not a Housecairn label.'**
+  String get scanNotLabel;
+
+  /// A scanned label code that no label of this phone has (docs/adr/0014-qr-labels.md).
+  ///
+  /// In en, this message translates to:
+  /// **'This label is not known on this phone. It was made on another phone or on the web, or its home is not on this phone.'**
+  String get scanUnknown;
+
+  /// A scanned label that was revoked.
+  ///
+  /// In en, this message translates to:
+  /// **'This label was revoked: it no longer opens anything.'**
+  String get scanRevoked;
+
+  /// A scanned label whose room, item or stock item was deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'What this label opened was deleted.'**
+  String get scanGone;
+
+  /// Web catalogue (labels): Choose between 1 and %(max)d labels.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose between 1 and 200 labels.'**
+  String get errTooManyLabels;
+
   /// Button of the list of projects and title of the comparison. Web catalogue (projects): Comparer les projets.
   ///
   /// In en, this message translates to:

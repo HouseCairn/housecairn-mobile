@@ -32,7 +32,7 @@ Dart 3, Material 3 widgets with the Housecairn design tokens. No web or desktop 
 | Time zone database | timezone | 0.11.2, 2026-10-12 | labs.dart.dev | BSD-2-Clause | all | <https://pub.dev/packages/timezone> |
 | Time zone of the phone | flutter_timezone | 5.1.1, 2026-10-03 | wolverinebeach.net | Apache-2.0 | Android, iOS, others | <https://pub.dev/packages/flutter_timezone> |
 | In-app purchases (StoreKit, Play Billing) | in_app_purchase | 3.3.1, 2026-09-18 | flutter.dev | BSD-3-Clause | Android, iOS, macOS | <https://pub.dev/packages/in_app_purchase> |
-| Scanning the invitation QR code | mobile_scanner | 7.5.0, 2026-11-01 | steenbakker.dev | BSD-3-Clause | Android, iOS, macOS, web | <https://pub.dev/packages/mobile_scanner> |
+| Scanning the invitation QR code | ~~mobile_scanner~~, replaced by the scanner of [ADR 0014](0014-qr-labels.md) (camera, zxing_lib) | 7.5.0, 2026-11-01 | steenbakker.dev | BSD-3-Clause | Android, iOS, macOS, web | <https://pub.dev/packages/mobile_scanner> |
 | Making the QR code | qr (drawn by a small painter of ours) | 4.0.1, 2026-10-29 | kevmoo.com | BSD-3-Clause | all | <https://pub.dev/packages/qr> |
 | Background sync | workmanager | 0.10.10, 2026-09-07 | fluttercommunity.dev | MIT | Android, iOS, macOS, web | <https://pub.dev/packages/workmanager> |
 | Wake-up push on Android (store build) | firebase_messaging | 17.0.1, 2026-10-23 | firebase.google.com | BSD-3-Clause | Android, iOS, macOS, web | <https://pub.dev/packages/firebase_messaging> |
@@ -114,6 +114,14 @@ now, to open a file attached to a task in another app of the phone through the s
 `share_plus_platform_interface` 7.2.0 (2026-07-23), both older than the seven days of the rule
 below; its other dependencies were already in `pubspec.lock`. `tool/check_licenses.dart`
 accepts both (BSD-3-Clause).
+
+**Lot 3f, changes to the table** ([ADR 0014](0014-qr-labels.md)). `camera` 0.12.2, `zxing_lib`
+1.1.4, `qr` 3.0.3 and `pdf` 3.13.1 are added, for the QR labels: the frames of the camera, the
+reader of QR codes and product codes, the matrix of the code and the sheet as a PDF.
+`mobile_scanner` is rejected (ML Kit of Google on Android); `zxing_lib` has had no release in
+twelve months, noted there with its reason. `camera_platform_interface` is kept at 2.15.0 by
+`pubspec.lock` (2.15.1 is younger than the seven days of the rule below). Every package is
+accepted by `tool/check_licenses.dart` (BSD-3-Clause, Apache-2.0, MIT).
 
 ## Consequences
 

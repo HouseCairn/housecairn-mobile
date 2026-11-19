@@ -102,6 +102,11 @@ one server, and in the third way **all its homes are on the server**. Mixing the
 a server that also joins a family on the relay, or homes of one phone split between local and
 server) is not offered: the maintainer decided it so, not only for v1.
 
+*Amended by [ADR 0014](0014-qr-labels.md):* the QR labels of the homes of a server stay on the
+phone that made them, since the sync API of the web (`v0.5.1`) does not carry `labels.label`;
+they join the server once it does. Nothing else of a home of a server is kept on the phone
+alone.
+
 ### Business model
 
 The principle, decided on 2026-11-14; it sets no price and says nothing of store accounts.
