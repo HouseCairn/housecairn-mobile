@@ -522,8 +522,9 @@ class _TaskPageState extends State<TaskPage> {
     );
   }
 
-  /// Cost: the estimate of one time, its part from the stock, a year of it,
-  /// and what the times done cost (`budget/_task_cost.html`).
+  /// Cost: what is planned (the estimate of one time, its materials when
+  /// they come from the stock, a year of it), then what was really paid,
+  /// each under its own pill (`budget/_task_cost.html`, web ADR 0081).
   Widget? _costSection(AppLocalizations l10n) {
     final row = _cost;
     if (row == null) return null;
@@ -531,18 +532,53 @@ class _TaskPageState extends State<TaskPage> {
     if (!row.hasEstimate && paid == budget.zero) return null;
     String money(Decimal value) => moneyIn(context, _currency, value);
     final annual = row.annualCost;
+    Widget kind(String label, HcPillTone tone, Key key) => Padding(
+      padding: const EdgeInsets.only(bottom: HcSpace.s2),
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: Semantics(
+          header: true,
+          child: HcPill(label, key: key, tone: tone),
+        ),
+      ),
+    );
     return _section(
       l10n.taskCost,
       HcCard(
-        child: HcValueList(
+        key: const Key('task-cost'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (row.hasEstimate) ...[
-              HcValueRow(l10n.estimateEachTime, money(row.estimate)),
-              if (row.stock.priced > 0)
-                HcValueRow(l10n.taskOfWhichStock, money(row.stock.amount)),
-              if (annual != null) HcValueRow(l10n.costAYear, money(annual)),
+              kind(
+                l10n.taskCostPlanned,
+                HcPillTone.sand,
+                const Key('task-cost-planned'),
+              ),
+              HcValueList(
+                children: [
+                  HcValueRow(l10n.estimateEachTime, money(row.estimate)),
+                  if (row.materialFromStock)
+                    HcValueRow(
+                      l10n.taskMaterialsFromStock,
+                      money(row.stock.amount),
+                      key: const Key('task-materials-from-stock'),
+                    ),
+                  if (annual != null) HcValueRow(l10n.costAYear, money(annual)),
+                ],
+              ),
+              if (row.materialFromStock)
+                smallNote(l10n.taskMaterialsFromStockHelp),
+              const SizedBox(height: HcSpace.s4),
             ],
-            HcValueRow(l10n.taskPaidSoFar, money(paid)),
+            kind(
+              l10n.taskCostReal,
+              HcPillTone.neutral,
+              const Key('task-cost-real'),
+            ),
+            HcValueList(
+              children: [HcValueRow(l10n.taskPaidSoFar, money(paid))],
+            ),
           ],
         ),
       ),

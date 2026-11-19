@@ -235,6 +235,11 @@ abstract final class HcComponent {
   /// `.row-text { line-height }`: 1.35, not a token of the web.
   static const rowTextLineHeight = 1.35;
   static const rowTextGap = 2.0;
+
+  /// `.table-scroll table { min-width: 40rem }`: a table read column by
+  /// column keeps this width and scrolls on its own (web design guide,
+  /// Tables on a phone).
+  static const columnTableMinWidth = 640.0;
   static const pillPaddingY = 3.0;
   static const pillPaddingX = 8.0;
   static const buttonLineHeight = 1.2;
@@ -245,6 +250,10 @@ abstract final class HcComponent {
 
   /// `.about-logo`: the cairn of About, 4.5rem.
   static const aboutLogo = 72.0;
+
+  /// `.qr-frame` of the web (`labels.css`): the QR code of a label on its
+  /// page, at most 16rem wide.
+  static const qrSide = 256.0;
 
   static const Map<String, double> byName = {
     'border-width': borderWidth,

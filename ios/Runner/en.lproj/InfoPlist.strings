@@ -1,3 +1,3 @@
-"NSCameraUsageDescription" = "Housecairn uses the camera to photograph a room or an item. The photo stays on this phone.";
+"NSCameraUsageDescription" = "Housecairn uses the camera to photograph a room or an item, and to read the QR code of a label. The photo stays on this phone.";
 "NSPhotoLibraryUsageDescription" = "Housecairn lets you pick a photo of a room or an item. The photo stays on this phone.";
 "NSPhotoLibraryAddUsageDescription" = "Housecairn saves a photo attached to a task to your photos when you ask it to.";

@@ -2,6 +2,10 @@
 
 part of 'repository.dart';
 
+/// How many projects a comparison sets side by side at most (`MAX_COMPARED`
+/// of `projects/views.py`).
+const maxCompared = 6;
+
 /// What a project is made of, as its form edits it (`projects/models.py`
 /// `Project`). Only [title] is required; [budget], on creation only, becomes
 /// its first budget line, "Budget", of nature Other (`create_project`).
@@ -227,6 +231,22 @@ extension BudgetRepository on Repository {
     return [
       for (final p in rows)
         ProjectEntry(p, totals[p.id] ?? budget.Amounts.none),
+    ];
+  }
+
+  /// The projects of [homeId] whose ids are in [ids], side by side, in the
+  /// order of the list (`compare`): only the first [maxCompared] ids count,
+  /// as the web reads the first six of its address (`MAX_COMPARED`), and an
+  /// id of another home, of a deleted project or unknown gives nothing. The
+  /// amounts are those of the list, line by line (`amounts_by_project`).
+  Future<List<ProjectEntry>> compareProjects(
+    String homeId,
+    List<String> ids,
+  ) async {
+    final chosen = ids.take(maxCompared).toSet();
+    return [
+      for (final entry in await projects(homeId))
+        if (chosen.contains(entry.project.id)) entry,
     ];
   }
 

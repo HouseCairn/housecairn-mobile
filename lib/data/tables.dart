@@ -406,6 +406,29 @@ class Reports extends Table with ModelColumns, HomeOwned {
   TextColumn get photo => text().nullable()();
 }
 
+/// `labels.label` of the web (`labels/models.py:33-53`, web ADR 0047; schema
+/// 11, docs/adr/0014-qr-labels.md): the QR label of a room, an item or a
+/// stock article, by [kind] and the one reference of that kind. [code] is the
+/// web's opaque code (`lib/domain/labels.dart`), unique in the table, revoked
+/// rows included, so that a printed code never opens anything else. A label
+/// is revoked, never deleted; an object has at most one active label (the
+/// repository keeps it so).
+///
+/// Kept on this phone, never synced, in every way of the app: the sync API of
+/// the web (v0.5.1) does not carry this type, and the relay comes later. No
+/// `field_clock`, no `op_log`; erased with its home.
+@DataClassName('LabelRow')
+@TableIndex(name: 'label_code', columns: {#code}, unique: true)
+@TableIndex(name: 'label_home_kind', columns: {#homeId, #kind})
+class Labels extends Table with ModelColumns, HomeOwned {
+  TextColumn get kind => text()();
+  BlobColumn get roomId => blob().map(const UuidConverter()).nullable()();
+  BlobColumn get itemId => blob().map(const UuidConverter()).nullable()();
+  BlobColumn get articleId => blob().map(const UuidConverter()).nullable()();
+  TextColumn get code => text()();
+  IntColumn get revokedAt => integer().nullable()();
+}
+
 /// The clock of the last write of each field
 /// (docs/adr/0002-local-storage-and-migrations.md): written in the same
 /// transaction as the row, by the repository, so that turning sync on later

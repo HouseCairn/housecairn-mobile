@@ -374,7 +374,11 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           ),
                         if (line.extra['stock_estimate'] case final Decimal s
                             when s != budget.zero)
-                          HcValueRow(l10n.ofWhichStock, m(s), dense: true),
+                          HcValueRow(
+                            l10n.materialsFromStock,
+                            m(s),
+                            dense: true,
+                          ),
                         if (line.extra['annual_cost'] case final Decimal a)
                           HcValueRow(l10n.costAYear, m(a), dense: true),
                         HcValueRow(

@@ -20009,6 +20009,671 @@ class StepTicksCompanion extends UpdateCompanion<StepTickRow> {
   }
 }
 
+class $LabelsTable extends Labels with TableInfo<$LabelsTable, LabelRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LabelsTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> id =
+      GeneratedColumn<Uint8List>(
+        'id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($LabelsTable.$converterid);
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String, Uint8List> homeId =
+      GeneratedColumn<Uint8List>(
+        'home_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      ).withConverter<String>($LabelsTable.$converterhomeId);
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<String?, Uint8List> roomId =
+      GeneratedColumn<Uint8List>(
+        'room_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: false,
+      ).withConverter<String?>($LabelsTable.$converterroomIdn);
+  @override
+  late final GeneratedColumnWithTypeConverter<String?, Uint8List> itemId =
+      GeneratedColumn<Uint8List>(
+        'item_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: false,
+      ).withConverter<String?>($LabelsTable.$converteritemIdn);
+  @override
+  late final GeneratedColumnWithTypeConverter<String?, Uint8List> articleId =
+      GeneratedColumn<Uint8List>(
+        'article_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: false,
+      ).withConverter<String?>($LabelsTable.$converterarticleIdn);
+  static const VerificationMeta _codeMeta = const VerificationMeta('code');
+  @override
+  late final GeneratedColumn<String> code = GeneratedColumn<String>(
+    'code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _revokedAtMeta = const VerificationMeta(
+    'revokedAt',
+  );
+  @override
+  late final GeneratedColumn<int> revokedAt = GeneratedColumn<int>(
+    'revoked_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    kind,
+    roomId,
+    itemId,
+    articleId,
+    code,
+    revokedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'labels';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LabelRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('code')) {
+      context.handle(
+        _codeMeta,
+        code.isAcceptableOrUnknown(data['code']!, _codeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_codeMeta);
+    }
+    if (data.containsKey('revoked_at')) {
+      context.handle(
+        _revokedAtMeta,
+        revokedAt.isAcceptableOrUnknown(data['revoked_at']!, _revokedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LabelRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LabelRow(
+      id: $LabelsTable.$converterid.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}id'],
+        )!,
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      homeId: $LabelsTable.$converterhomeId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}home_id'],
+        )!,
+      ),
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      roomId: $LabelsTable.$converterroomIdn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}room_id'],
+        ),
+      ),
+      itemId: $LabelsTable.$converteritemIdn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}item_id'],
+        ),
+      ),
+      articleId: $LabelsTable.$converterarticleIdn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.blob,
+          data['${effectivePrefix}article_id'],
+        ),
+      ),
+      code: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}code'],
+      )!,
+      revokedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revoked_at'],
+      ),
+    );
+  }
+
+  @override
+  $LabelsTable createAlias(String alias) {
+    return $LabelsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<String, Uint8List> $converterid = const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterhomeId =
+      const UuidConverter();
+  static TypeConverter<String, Uint8List> $converterroomId =
+      const UuidConverter();
+  static TypeConverter<String?, Uint8List?> $converterroomIdn =
+      NullAwareTypeConverter.wrap($converterroomId);
+  static TypeConverter<String, Uint8List> $converteritemId =
+      const UuidConverter();
+  static TypeConverter<String?, Uint8List?> $converteritemIdn =
+      NullAwareTypeConverter.wrap($converteritemId);
+  static TypeConverter<String, Uint8List> $converterarticleId =
+      const UuidConverter();
+  static TypeConverter<String?, Uint8List?> $converterarticleIdn =
+      NullAwareTypeConverter.wrap($converterarticleId);
+}
+
+class LabelRow extends DataClass implements Insertable<LabelRow> {
+  final String id;
+  final int createdAt;
+  final int updatedAt;
+  final int? deletedAt;
+  final String homeId;
+  final String kind;
+  final String? roomId;
+  final String? itemId;
+  final String? articleId;
+  final String code;
+  final int? revokedAt;
+  const LabelRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.homeId,
+    required this.kind,
+    this.roomId,
+    this.itemId,
+    this.articleId,
+    required this.code,
+    this.revokedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['id'] = Variable<Uint8List>($LabelsTable.$converterid.toSql(id));
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    {
+      map['home_id'] = Variable<Uint8List>(
+        $LabelsTable.$converterhomeId.toSql(homeId),
+      );
+    }
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || roomId != null) {
+      map['room_id'] = Variable<Uint8List>(
+        $LabelsTable.$converterroomIdn.toSql(roomId),
+      );
+    }
+    if (!nullToAbsent || itemId != null) {
+      map['item_id'] = Variable<Uint8List>(
+        $LabelsTable.$converteritemIdn.toSql(itemId),
+      );
+    }
+    if (!nullToAbsent || articleId != null) {
+      map['article_id'] = Variable<Uint8List>(
+        $LabelsTable.$converterarticleIdn.toSql(articleId),
+      );
+    }
+    map['code'] = Variable<String>(code);
+    if (!nullToAbsent || revokedAt != null) {
+      map['revoked_at'] = Variable<int>(revokedAt);
+    }
+    return map;
+  }
+
+  LabelsCompanion toCompanion(bool nullToAbsent) {
+    return LabelsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      homeId: Value(homeId),
+      kind: Value(kind),
+      roomId: roomId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(roomId),
+      itemId: itemId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(itemId),
+      articleId: articleId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(articleId),
+      code: Value(code),
+      revokedAt: revokedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(revokedAt),
+    );
+  }
+
+  factory LabelRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LabelRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      homeId: serializer.fromJson<String>(json['homeId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      roomId: serializer.fromJson<String?>(json['roomId']),
+      itemId: serializer.fromJson<String?>(json['itemId']),
+      articleId: serializer.fromJson<String?>(json['articleId']),
+      code: serializer.fromJson<String>(json['code']),
+      revokedAt: serializer.fromJson<int?>(json['revokedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'homeId': serializer.toJson<String>(homeId),
+      'kind': serializer.toJson<String>(kind),
+      'roomId': serializer.toJson<String?>(roomId),
+      'itemId': serializer.toJson<String?>(itemId),
+      'articleId': serializer.toJson<String?>(articleId),
+      'code': serializer.toJson<String>(code),
+      'revokedAt': serializer.toJson<int?>(revokedAt),
+    };
+  }
+
+  LabelRow copyWith({
+    String? id,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? homeId,
+    String? kind,
+    Value<String?> roomId = const Value.absent(),
+    Value<String?> itemId = const Value.absent(),
+    Value<String?> articleId = const Value.absent(),
+    String? code,
+    Value<int?> revokedAt = const Value.absent(),
+  }) => LabelRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    homeId: homeId ?? this.homeId,
+    kind: kind ?? this.kind,
+    roomId: roomId.present ? roomId.value : this.roomId,
+    itemId: itemId.present ? itemId.value : this.itemId,
+    articleId: articleId.present ? articleId.value : this.articleId,
+    code: code ?? this.code,
+    revokedAt: revokedAt.present ? revokedAt.value : this.revokedAt,
+  );
+  LabelRow copyWithCompanion(LabelsCompanion data) {
+    return LabelRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      homeId: data.homeId.present ? data.homeId.value : this.homeId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      roomId: data.roomId.present ? data.roomId.value : this.roomId,
+      itemId: data.itemId.present ? data.itemId.value : this.itemId,
+      articleId: data.articleId.present ? data.articleId.value : this.articleId,
+      code: data.code.present ? data.code.value : this.code,
+      revokedAt: data.revokedAt.present ? data.revokedAt.value : this.revokedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LabelRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('kind: $kind, ')
+          ..write('roomId: $roomId, ')
+          ..write('itemId: $itemId, ')
+          ..write('articleId: $articleId, ')
+          ..write('code: $code, ')
+          ..write('revokedAt: $revokedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    homeId,
+    kind,
+    roomId,
+    itemId,
+    articleId,
+    code,
+    revokedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LabelRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.homeId == this.homeId &&
+          other.kind == this.kind &&
+          other.roomId == this.roomId &&
+          other.itemId == this.itemId &&
+          other.articleId == this.articleId &&
+          other.code == this.code &&
+          other.revokedAt == this.revokedAt);
+}
+
+class LabelsCompanion extends UpdateCompanion<LabelRow> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> homeId;
+  final Value<String> kind;
+  final Value<String?> roomId;
+  final Value<String?> itemId;
+  final Value<String?> articleId;
+  final Value<String> code;
+  final Value<int?> revokedAt;
+  final Value<int> rowid;
+  const LabelsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.homeId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.roomId = const Value.absent(),
+    this.itemId = const Value.absent(),
+    this.articleId = const Value.absent(),
+    this.code = const Value.absent(),
+    this.revokedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LabelsCompanion.insert({
+    required String id,
+    required int createdAt,
+    required int updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String homeId,
+    required String kind,
+    this.roomId = const Value.absent(),
+    this.itemId = const Value.absent(),
+    this.articleId = const Value.absent(),
+    required String code,
+    this.revokedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       homeId = Value(homeId),
+       kind = Value(kind),
+       code = Value(code);
+  static Insertable<LabelRow> custom({
+    Expression<Uint8List>? id,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<Uint8List>? homeId,
+    Expression<String>? kind,
+    Expression<Uint8List>? roomId,
+    Expression<Uint8List>? itemId,
+    Expression<Uint8List>? articleId,
+    Expression<String>? code,
+    Expression<int>? revokedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (homeId != null) 'home_id': homeId,
+      if (kind != null) 'kind': kind,
+      if (roomId != null) 'room_id': roomId,
+      if (itemId != null) 'item_id': itemId,
+      if (articleId != null) 'article_id': articleId,
+      if (code != null) 'code': code,
+      if (revokedAt != null) 'revoked_at': revokedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LabelsCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? homeId,
+    Value<String>? kind,
+    Value<String?>? roomId,
+    Value<String?>? itemId,
+    Value<String?>? articleId,
+    Value<String>? code,
+    Value<int?>? revokedAt,
+    Value<int>? rowid,
+  }) {
+    return LabelsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      homeId: homeId ?? this.homeId,
+      kind: kind ?? this.kind,
+      roomId: roomId ?? this.roomId,
+      itemId: itemId ?? this.itemId,
+      articleId: articleId ?? this.articleId,
+      code: code ?? this.code,
+      revokedAt: revokedAt ?? this.revokedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<Uint8List>(
+        $LabelsTable.$converterid.toSql(id.value),
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (homeId.present) {
+      map['home_id'] = Variable<Uint8List>(
+        $LabelsTable.$converterhomeId.toSql(homeId.value),
+      );
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (roomId.present) {
+      map['room_id'] = Variable<Uint8List>(
+        $LabelsTable.$converterroomIdn.toSql(roomId.value),
+      );
+    }
+    if (itemId.present) {
+      map['item_id'] = Variable<Uint8List>(
+        $LabelsTable.$converteritemIdn.toSql(itemId.value),
+      );
+    }
+    if (articleId.present) {
+      map['article_id'] = Variable<Uint8List>(
+        $LabelsTable.$converterarticleIdn.toSql(articleId.value),
+      );
+    }
+    if (code.present) {
+      map['code'] = Variable<String>(code.value);
+    }
+    if (revokedAt.present) {
+      map['revoked_at'] = Variable<int>(revokedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LabelsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('homeId: $homeId, ')
+          ..write('kind: $kind, ')
+          ..write('roomId: $roomId, ')
+          ..write('itemId: $itemId, ')
+          ..write('articleId: $articleId, ')
+          ..write('code: $code, ')
+          ..write('revokedAt: $revokedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -20050,6 +20715,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $StepTicksTable stepTicks = $StepTicksTable(this);
+  late final $LabelsTable labels = $LabelsTable(this);
   late final Index roomHomePosition = Index(
     'room_home_position',
     'CREATE INDEX room_home_position ON rooms (home_id, position)',
@@ -20102,6 +20768,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'attachment_task',
     'CREATE INDEX attachment_task ON task_attachments (task_id)',
   );
+  late final Index labelCode = Index(
+    'label_code',
+    'CREATE UNIQUE INDEX label_code ON labels (code)',
+  );
+  late final Index labelHomeKind = Index(
+    'label_home_kind',
+    'CREATE INDEX label_home_kind ON labels (home_id, kind)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -20141,6 +20815,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     fileSync,
     taskAttachments,
     stepTicks,
+    labels,
     roomHomePosition,
     taskHomeCreated,
     occHomeStatusDue,
@@ -20154,6 +20829,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     quoteProject,
     reportHomeStatus,
     attachmentTask,
+    labelCode,
+    labelHomeKind,
   ];
 }
 
@@ -30280,6 +30957,326 @@ typedef $$StepTicksTableProcessedTableManager =
       StepTickRow,
       PrefetchHooks Function()
     >;
+typedef $$LabelsTableCreateCompanionBuilder = LabelsCompanion Function({
+  required String id,
+  required int createdAt,
+  required int updatedAt,
+  Value<int?> deletedAt,
+  required String homeId,
+  required String kind,
+  Value<String?> roomId,
+  Value<String?> itemId,
+  Value<String?> articleId,
+  required String code,
+  Value<int?> revokedAt,
+  Value<int> rowid,
+});
+typedef $$LabelsTableUpdateCompanionBuilder = LabelsCompanion Function({
+  Value<String> id,
+  Value<int> createdAt,
+  Value<int> updatedAt,
+  Value<int?> deletedAt,
+  Value<String> homeId,
+  Value<String> kind,
+  Value<String?> roomId,
+  Value<String?> itemId,
+  Value<String?> articleId,
+  Value<String> code,
+  Value<int?> revokedAt,
+  Value<int> rowid,
+});
+
+class $$LabelsTableFilterComposer
+    extends Composer<_$AppDatabase, $LabelsTable> {
+  $$LabelsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get id =>
+      $composableBuilder(
+        column: $table.id,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String, String, Uint8List> get homeId =>
+      $composableBuilder(
+        column: $table.homeId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<String?, String, Uint8List> get roomId =>
+      $composableBuilder(
+        column: $table.roomId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String?, String, Uint8List> get itemId =>
+      $composableBuilder(
+        column: $table.itemId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<String?, String, Uint8List> get articleId =>
+      $composableBuilder(
+        column: $table.articleId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revokedAt => $composableBuilder(
+    column: $table.revokedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LabelsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LabelsTable> {
+  $$LabelsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<Uint8List> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get homeId => $composableBuilder(
+    column: $table.homeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get roomId => $composableBuilder(
+    column: $table.roomId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get itemId => $composableBuilder(
+    column: $table.itemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get articleId => $composableBuilder(
+    column: $table.articleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revokedAt => $composableBuilder(
+    column: $table.revokedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LabelsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LabelsTable> {
+  $$LabelsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<String, Uint8List> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String, Uint8List> get homeId =>
+      $composableBuilder(column: $table.homeId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String?, Uint8List> get roomId =>
+      $composableBuilder(column: $table.roomId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String?, Uint8List> get itemId =>
+      $composableBuilder(column: $table.itemId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<String?, Uint8List> get articleId =>
+      $composableBuilder(column: $table.articleId, builder: (column) => column);
+
+  GeneratedColumn<String> get code =>
+      $composableBuilder(column: $table.code, builder: (column) => column);
+
+  GeneratedColumn<int> get revokedAt =>
+      $composableBuilder(column: $table.revokedAt, builder: (column) => column);
+}
+
+class $$LabelsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LabelsTable,
+          LabelRow,
+          $$LabelsTableFilterComposer,
+          $$LabelsTableOrderingComposer,
+          $$LabelsTableAnnotationComposer,
+          $$LabelsTableCreateCompanionBuilder,
+          $$LabelsTableUpdateCompanionBuilder,
+          (LabelRow, BaseReferences<_$AppDatabase, $LabelsTable, LabelRow>),
+          LabelRow,
+          PrefetchHooks Function()
+        > {
+  $$LabelsTableTableManager(_$AppDatabase db, $LabelsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LabelsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LabelsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LabelsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> homeId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String?> roomId = const Value.absent(),
+                Value<String?> itemId = const Value.absent(),
+                Value<String?> articleId = const Value.absent(),
+                Value<String> code = const Value.absent(),
+                Value<int?> revokedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LabelsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                kind: kind,
+                roomId: roomId,
+                itemId: itemId,
+                articleId: articleId,
+                code: code,
+                revokedAt: revokedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String homeId,
+                required String kind,
+                Value<String?> roomId = const Value.absent(),
+                Value<String?> itemId = const Value.absent(),
+                Value<String?> articleId = const Value.absent(),
+                required String code,
+                Value<int?> revokedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LabelsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                homeId: homeId,
+                kind: kind,
+                roomId: roomId,
+                itemId: itemId,
+                articleId: articleId,
+                code: code,
+                revokedAt: revokedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LabelsTable, LabelRow>(table),
+                  BaseReferences<_$AppDatabase, $LabelsTable, LabelRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LabelsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LabelsTable,
+      LabelRow,
+      $$LabelsTableFilterComposer,
+      $$LabelsTableOrderingComposer,
+      $$LabelsTableAnnotationComposer,
+      $$LabelsTableCreateCompanionBuilder,
+      $$LabelsTableUpdateCompanionBuilder,
+      (LabelRow, BaseReferences<_$AppDatabase, $LabelsTable, LabelRow>),
+      LabelRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -30352,4 +31349,6 @@ class $AppDatabaseManager {
       $$TaskAttachmentsTableTableManager(_db, _db.taskAttachments);
   $$StepTicksTableTableManager get stepTicks =>
       $$StepTicksTableTableManager(_db, _db.stepTicks);
+  $$LabelsTableTableManager get labels =>
+      $$LabelsTableTableManager(_db, _db.labels);
 }

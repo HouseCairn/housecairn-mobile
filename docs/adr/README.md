@@ -20,3 +20,4 @@ repository (`docs/adr/` there).
 | [0011](0011-design-from-the-web-app.md) | The look of the web application, adapted to the phone | proposed |
 | [0012](0012-files-with-a-server.md) | Photos and files with a Housecairn server | proposed, amends 0010 |
 | [0013](0013-more-files-with-a-server.md) | Attachments of tasks, photos of reports and labels with a server | proposed, extends 0012 |
+| [0014](0014-qr-labels.md) | QR labels on the phone: the web's opaque code, a sheet made on the phone, a scanner of our own | proposed, amends 0001 and 0010 |

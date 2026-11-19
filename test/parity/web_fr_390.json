@@ -2,8 +2,8 @@
  "$comment": "Measures of the web application at 390 x 844 CSS px, factor 3, in French, with its demonstration data, written by tool/web_parity.py; read by test/web_parity_test.dart. Regenerate when the web reference of tool/web_alignment.json changes.",
  "web": {
   "repository": "HouseCairn/housecairn",
-  "release": "v0.3.2",
-  "commit": "a76837fe30b5a313980184703454654a45b1f031"
+  "release": "v0.5.1",
+  "commit": "274246909fcc010cc101b95b79dbffdd0f5a49cd"
  },
  "viewport": {
   "width": 390,
@@ -1258,6 +1258,83 @@
    "label_font": 14,
    "doc_height": 844,
    "url": "/h/<id>/tasks/<id>/occurrences/<id>/edit/"
+  },
+  "equipment": {
+   "h1_font": 24,
+   "h1_box": {
+    "x": 16,
+    "y": 68,
+    "w": 358,
+    "h": 30
+   },
+   "h2_font": null,
+   "h2_weight": null,
+   "row_title_font": 16,
+   "row_text_font": 13,
+   "row_title_weight": 600,
+   "row_text_weight": 400,
+   "row_title_line": 20.8,
+   "row_text_line": 17.55,
+   "pill_font": null,
+   "pill_weight": null,
+   "sections": [],
+   "body_font": 16,
+   "row_height": null,
+   "done_button": null,
+   "add_button": {
+    "x": 16,
+    "y": 415.78125,
+    "w": 358,
+    "h": 45.1875
+   },
+   "add_radius": 12,
+   "add_class": "button button-secondary button-block",
+   "add_font": 16,
+   "add_text": "Ajouter un élément",
+   "add_gap": 12,
+   "done_font": null,
+   "appbar_height": 60,
+   "nav_height": 64,
+   "content_left": 16,
+   "field_height": 50,
+   "label_font": 14,
+   "doc_height": 844,
+   "url": "/h/<id>/items/",
+   "day": "2026-11-18"
   }
+ },
+ "carried": {
+  "release": "v0.3.2",
+  "commit": "a76837fe30b5a313980184703454654a45b1f031",
+  "screens": [
+   "article",
+   "article_form",
+   "budget",
+   "contractor",
+   "contractor_form",
+   "contractors",
+   "history",
+   "homes",
+   "item",
+   "item_form",
+   "more",
+   "occurrence_form",
+   "project",
+   "project_form",
+   "projects",
+   "reminders",
+   "report_form",
+   "reports",
+   "room",
+   "room_form",
+   "rooms",
+   "stock",
+   "supplier_form",
+   "task",
+   "task_form",
+   "tasks",
+   "templates",
+   "today"
+  ]
  }
 }

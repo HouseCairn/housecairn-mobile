@@ -18,6 +18,7 @@ import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
 import '../domain/file_reference.dart';
 import '../domain/guide.dart';
+import '../domain/labels.dart';
 import '../domain/photos.dart';
 import '../domain/recurrence.dart' as recurrence;
 import '../domain/reminders.dart';
@@ -35,6 +36,7 @@ part 'attachment_repository.dart';
 part 'budget_repository.dart';
 part 'file_repository.dart';
 part 'guide_repository.dart';
+part 'label_repository.dart';
 part 'server_repository.dart';
 part 'stock_repository.dart';
 part 'sync_repository.dart';
@@ -203,6 +205,9 @@ enum Refusal {
   /// One example home per phone: a second is refused until the first is
   /// deleted (web ADR 0084, `guide.services.create_example_home`).
   exampleExists,
+
+  /// A sheet holds between 1 and 200 labels (`MAX_LABELS` of the web).
+  tooManyLabels,
 }
 
 class Refused implements Exception {

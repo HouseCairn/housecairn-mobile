@@ -44,6 +44,7 @@ import 'support/fakes.dart';
 import 'support/goldens.dart';
 import 'support/lot2b.dart';
 import 'support/lot3b.dart' show openSection;
+import 'support/parity_pin.dart';
 
 const capture = bool.fromEnvironment('PARITY_CAPTURE');
 
@@ -643,7 +644,9 @@ final screens = <Screen>[
     name: 'room',
     open: (tester, demo) =>
         openScreen(tester, RoomScreen(homeId: demo.home, roomId: demo.utility)),
-    measure: (t) => measure(t, add: 'Ajouter une tâche'),
+    // Taller than the phone since the record has its QR label button, as
+    // the web's (`labels/_tools.html`).
+    measure: (t) => measureTall(t, add: 'Ajouter une tâche'),
   ),
   (
     name: 'room_form',
@@ -695,10 +698,29 @@ final screens = <Screen>[
     measure: (t) =>
         measure(t, rowTitle: 'Filtre de VMC', add: 'Ajouter un article'),
   ),
-  // Not measured yet: the Equipment tab (every item of the home). The
-  // reference above is taken at the pinned web release (v0.3.2), which does
-  // not have that screen; it joins this list with a later lot
-  // once a web release (v0.4.0) has it.
+  // The Equipment tab (every item of the home), which the web has since
+  // v0.4.0: measured alone at the pinned release (`tool/web_parity.py --only
+  // equipment`), the other screens keeping the measure the reference names
+  // in `carried`.
+  (
+    name: 'equipment',
+    open: (tester, demo) async {
+      await openRooms(tester, 'Pièces');
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const Key('rooms-tabs')),
+          matching: find.text('Équipements'),
+        ),
+      );
+      await tester.pumpAndSettle();
+    },
+    measure: (t) => measure(
+      t,
+      rowTitle: 'Chaudière',
+      add: 'Ajouter un élément',
+      field: true,
+    ),
+  ),
   (
     name: 'article',
     open: (tester, demo) => openScreen(
@@ -844,6 +866,27 @@ void main() {
         .writeAsStringSync(const JsonEncoder.withIndent(' ').convert(results));
   });
 
+  test('the reference names the release each screen was measured at', () {
+    final pin =
+        (jsonDecode(File('tool/web_alignment.json').readAsStringSync())
+                as Map<String, dynamic>)['elements']['web_parity']
+            as Map<String, dynamic>;
+    final measured = reference['web'] as Map<String, dynamic>;
+    expect(
+      (measured['release'], measured['commit']),
+      (pin['release'], pin['commit']),
+    );
+    final carried = reference['carried'] as Map<String, dynamic>?;
+    final kept = {...?(carried?['screens'] as List?)?.cast<String>()};
+    // A screen carried from an earlier release is one the reference has, and
+    // never the Equipment tab, which that release did not have.
+    expect(web.keys.toSet().containsAll(kept), isTrue);
+    expect(kept, isNot(contains('equipment')));
+    expect(carried?['commit'], isNot(pin['commit']));
+    // Every screen of this test has its measure.
+    expect(web.keys.toSet(), containsAll(screens.map((s) => s.name)));
+  });
+
   group('pills of state', () {
     final pills = (jsonDecode(
       File('test/parity/web_pills_fr_390.json').readAsStringSync(),
@@ -851,14 +894,10 @@ void main() {
     final measured = pills['pills'] as Map<String, dynamic>;
 
     test('the measure is of the web release the app is aligned on', () {
-      final pin =
-          (jsonDecode(File('tool/web_alignment.json').readAsStringSync())
-                  as Map<String, dynamic>)['elements']['web_parity']
-              as Map<String, dynamic>;
       final web = pills['web'] as Map<String, dynamic>;
       expect(
-        (web['release'], web['commit']),
-        (pin['release'], pin['commit']),
+        parityReleases(),
+        contains((web['release'], web['commit'])),
         reason:
             'the pin of web_parity moved: measure again with '
             'tool/web_parity_pills.py',

@@ -15,9 +15,11 @@ import '../domain/day.dart';
 import '../domain/stock.dart' as stock;
 import 'guide_screens.dart';
 import 'help_button.dart';
+import '../domain/labels.dart';
 import '../l10n/app_localizations.dart';
 import 'autosave.dart';
 import 'item_screens.dart';
+import 'label_screens.dart';
 import 'messages.dart';
 import 'parts.dart';
 import 'photos.dart' show MissingPhotoTile;
@@ -368,6 +370,11 @@ class ArticleScreen extends StatelessWidget {
                             ),
                             child: Text(l10n.editArticle),
                           ),
+                        LabelButton(
+                          homeId: homeId,
+                          kind: LabelKind.article,
+                          targetId: a.id,
+                        ),
                         OutlinedButton(
                           key: const Key('article-report'),
                           onPressed: () => open(

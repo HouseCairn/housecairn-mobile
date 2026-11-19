@@ -52,6 +52,7 @@ and each operation names its home ([ADR 0008](adr/0008-several-homes-one-family-
 | Annual envelope (one per year) | `projects/models.py:355-377` | |
 | Report: what is wrong, where (room, item or article, at most one), photo, status, task made from it | `reports/models.py:26-30`, `:43-103` | |
 | Task templates (bundled library, EN and FR, with sources) | `tasks/task_templates.yaml`, web ADR 0049 | Shipped with the app, read only: `assets/task_templates.yaml`, a copy at the web release pinned in `tool/web_alignment.json` ([plan](plan.md#alignment-with-the-web-application)). |
+| QR label of a room, an item or a stock article: kind, the one object, code, revoked | `labels/models.py:33-53`, web ADR 0047 | In v1, in the app and offline (maintainer's decision of 2026-11-15). The web's code (16 random bytes, 22 URL-safe characters, unique, revoked rows kept); the QR code holds the code alone, no address. Kept on the phone, never synced, until a server carries the type ([ADR 0014](adr/0014-qr-labels.md)). |
 
 **Rules taken as they are** (ported to Dart, checked against the Python code by shared test
 vectors, [ADR 0001](adr/0001-flutter-stack-and-packages.md)):
@@ -71,7 +72,11 @@ vectors, [ADR 0001](adr/0001-flutter-stack-and-packages.md)):
 - Budget figures: planned, committed, paid, used, gap, still to pay; a project counted in the
   year it starts; upkeep is the tasks in no project; projection of repeating tasks over a
   year (web ADR 0051, `budget/services.py`; cost a year `:41`). Computed in decimal, never in
-  floating point.
+  floating point. The materials of one time of a task (web ADR 0081, `material_of`): with a stock
+  item that has a unit price (zero is a price), quantity times unit price and nothing else; the
+  material budget typed is then kept, not counted, and counts again if the priced items go;
+  without one, the material budget typed. The budget, the page of the task, its form and the
+  tasks of a project all read that one rule (`materialOf`, `lib/domain/budget.dart`).
 - Reminders: first reminder `days_before` (default 1) at `send_at` (default 08:00), quiet
   hours, daily summary (`notifications/models.py:61-91`); follow-ups every 1, 3 or 7 days by
   priority (`notifications/reminders.py:56`); the person reminded is the assignee, otherwise
@@ -102,7 +107,6 @@ vectors, [ADR 0001](adr/0001-flutter-stack-and-packages.md)):
 | Events received from Home Assistant | `events/models.py:10-16` | Home Assistant is not in v1. |
 | Notification channels (Apprise) and web push devices | `notifications/models.py:30-50`, `:153-192` | Replaced by local notifications. |
 | Calendar feeds (secret ICS address) | `calendar/models.py:10-26` | Needs a server. A one-shot `.ics` export is possible later. |
-| QR labels of rooms, items, articles | `labels/models.py:33-53` | Labels printed by the web point to web addresses; app links are a later lot. |
 | Paperless-ngx fields of a quote | `projects/models.py:236-240` | Connectors are not in v1. Kept if they come from a later import (unknown fields are preserved, [ADR 0003](adr/0003-sync-protocol.md)). |
 | CSV import and export, export jobs, archive of a home in format 3 | `homes/models.py:172-226`, web ADR 0048 | Replaced by the encrypted export below. Reading a web archive in the app comes after v1 (maintainer's decision). |
 | Invitations to one home by e-mail, with a role | `homes/models.py:90-145` | A phone joins the family, hence every home ([ADR 0008](adr/0008-several-homes-one-family-space.md)); a home shared outside the family is after v1. |
@@ -239,8 +243,11 @@ Homes and Settings shows the current home.
    not see keeps its title and place and has no report of origin on the phone, so the task page
    shows no Reported problem for it), then When (repetition, due date,
    first date of a postponed one, masking, the next three dates), How to do it, Details
-   (duration, budgets, contractor, notes), Cost (estimate, part from the stock, a year, paid so
-   far), materials, photos of the item or the room, Photos and files (lot 4d: the photos as a
+   (duration, budgets, contractor, notes), Cost (web ADR 0081: under a pill Planned, the estimate
+   each time, the materials from the stock when an item has a price, with the line that says how
+   they are calculated, and a year; under a pill Real, paid so far; in the form, a priced item
+   puts the materials calculated in place of the material budget field, whose value is kept),
+   materials, photos of the item or the room, Photos and files (lot 4d: the photos as a
    grid of tiles with their name, then the other files with an icon, their name and size, then
    Add photos or files: take a photo, choose from the gallery or choose a PDF or a photo; a
    photo opens full width, a file in another app through the share sheet, Delete is on its
@@ -295,7 +302,12 @@ contractor with it.
    duration and season* (closed on a new project, open when one of its fields has a value):
    the rooms as chips, the estimated duration and the preferred season (months typed on the
    web for a custom season are kept, not edited). Saved, a new project opens, and Back from it
-   returns to the list.
+   returns to the list. From two projects in the tab, **Compare projects** turns the rows into
+   boxes to tick (on an iPhone also **Select** in the bar, on Android a long press on a row; web
+   `design/patterns.md`, Platform adaptations, row 12), then **Compare the ticked projects** sets
+   at most six side by side (`projects/compare.html`, `projects.services.compare`): status,
+   planned cost, committed, duration, priority and season, in a table that scrolls sideways on
+   its own; a row opens its project.
 8. **Budget**: the year of the current home against its envelope, by room, by project, upkeep
    (read only). Each home has its own currency and envelopes (`homes/models.py:33-39`,
    `projects/models.py:355-377`), so homes are never added together. Each tab has the title and
@@ -306,6 +318,18 @@ contractor with it.
    Where (a link to the place), Reported on, Closed on and Task as lines of label and value, and
    the action row.
 10. **Contractors**: list and card, call and e-mail from the card.
+    **QR labels** (maintainer's decision of 2026-11-15, [ADR 0014](adr/0014-qr-labels.md)): on
+    the record of a room, an item and a stock article, QR label (its page) or Make a QR label,
+    before Report a problem, as the web; the page of a label shows its QR code, the code it holds
+    and nothing else, Open the page, the print of that label, and for a home that is written
+    Make a new label and Revoke the label (confirmed); in More, QR labels, where the web has it
+    (Scan a label first, then every room, item and stock article to tick, the layout, Print the
+    labels). The sheet is the web's:
+    an A4 sheet of 3 by 8 labels of 63.5 by 33.9 mm or a 62 mm roll, in Helvetica, at most 200
+    labels, a PDF handed to the share sheet of the phone and not kept. The scan asks for the
+    camera then, never before; it opens the page of a code this phone knows and says in words
+    when a code is unknown here, revoked, of an object deleted, or not a label. It reads the code
+    alone and the address `…/l/<code>/` of a sticker of the web, of which only the code is kept.
 11. **Homes**: the list of homes, active then archived; create, rename, change currency or
     hemisphere, archive, unarchive, delete ([Homes](#homes)).
 12. **Settings**: language, reminders, export and import, the way the app is used and the move
@@ -430,7 +454,7 @@ application, so that both say the same words.
 
 ## Not in v1
 
-Home Assistant, Paperless-ngx, Sure, Apprise, calendar feeds, QR labels, widgets, a watch
+Home Assistant, Paperless-ngx, Sure, Apprise, calendar feeds, widgets, a watch
 app, a tablet layout, a web or desktop build, roles other than admin, a home shared with
 someone outside the family, reading a web archive, a build without Google services (after
 1.0).

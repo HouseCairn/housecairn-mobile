@@ -104,6 +104,7 @@ class HcRow extends StatelessWidget {
     this.leading,
     this.trailing,
     this.onTap,
+    this.onLongPress,
   });
 
   final String title;
@@ -118,6 +119,10 @@ class HcRow extends StatelessWidget {
   final Widget? trailing;
   final VoidCallback? onTap;
 
+  /// The long press of Android that starts a selection of rows (web
+  /// `design/patterns.md`, Platform adaptations, row 12).
+  final VoidCallback? onLongPress;
+
   @override
   Widget build(BuildContext context) {
     final end =
@@ -131,6 +136,7 @@ class HcRow extends StatelessWidget {
               ));
     return InkWell(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: HcComponent.rowMinHeight),
         child: Padding(
@@ -394,10 +400,20 @@ class HcField extends StatelessWidget {
 /// web (`.button-small`), so that it leaves room for the back button and the
 /// title.
 class HcBarAction extends StatelessWidget {
-  const HcBarAction({super.key, required this.label, required this.onPressed});
+  const HcBarAction({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.besideBrand = false,
+  });
 
   final String label;
   final VoidCallback onPressed;
+
+  /// In the bar of a section root, next to the brand and the help button:
+  /// it leaves the cairn of the brand its room (the name of the brand goes
+  /// first when the bar is tight, as [HcBrand] says).
+  final bool besideBrand;
 
   // Its text grows with the text size of the phone up to 1.3 times, as the
   // buttons of the navigation bar of iOS do: larger, it would push the back
@@ -408,8 +424,12 @@ class HcBarAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ConstrainedBox(
     constraints: BoxConstraints(
-      maxWidth:
-          MediaQuery.sizeOf(context).width - HcComponent.appbarMinHeight * 2,
+      maxWidth: besideBrand
+          ? MediaQuery.sizeOf(context).width -
+                HcLayout.logoIcon -
+                HcSpace.s4 * 2 -
+                HcComponent.appbarMinHeight
+          : MediaQuery.sizeOf(context).width - HcComponent.appbarMinHeight * 2,
     ),
     child: MediaQuery.withClampedTextScaling(
       maxScaleFactor: 1.3,
@@ -769,4 +789,177 @@ class HcLink extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// A row of an [HcColumnTable]: its head (the `th` of the row) and its
+/// cells; [onTap] opens what the row is about.
+class HcTableRow {
+  const HcTableRow({
+    required this.head,
+    required this.cells,
+    this.key,
+    this.onTap,
+  });
+
+  final Key? key;
+  final String head;
+  final List<String> cells;
+  final VoidCallback? onTap;
+}
+
+/// A table read column by column (web design guide, Tables on a phone: a
+/// comparison of projects side by side): it stays a table, at least
+/// [HcComponent.columnTableMinWidth] wide, in an area that scrolls on its own
+/// so that the page keeps its width, named for screen readers by [label]
+/// (the `caption` of the web, `role="region"` and `aria-labelledby`). Heads
+/// and cells are those of `components.css`: a padding of 8, a line under
+/// each, the heads in the muted colour. A row is one target of 48 px at
+/// least, which opens it (the web's link is the title of the row).
+class HcColumnTable extends StatelessWidget {
+  const HcColumnTable({
+    super.key,
+    required this.label,
+    required this.head,
+    required this.rows,
+  });
+
+  final String label;
+  final List<String> head;
+  final List<HcTableRow> rows;
+
+  static const _line = BorderSide(
+    color: HcColors.border,
+    width: HcComponent.borderWidth,
+  );
+
+  Widget _cell(String text, TextStyle style, {bool header = false}) =>
+      Semantics(
+        header: header,
+        child: Padding(
+          padding: const EdgeInsets.all(HcSpace.s2),
+          child: Text(text, style: style),
+        ),
+      );
+
+  /// The widths of the columns as a browser lays out a table whose width is
+  /// given (`table-layout: auto`): each column takes the widest of its cells
+  /// on one line, and the room left over is shared in proportion to them.
+  List<double> _widths(BuildContext context, double width) {
+    final scaler = MediaQuery.textScalerOf(context);
+    double measure(String text, TextStyle style) {
+      final painter = TextPainter(
+        text: TextSpan(text: text, style: style),
+        textDirection: Directionality.of(context),
+        textScaler: scaler,
+        maxLines: 1,
+      )..layout();
+      final w = painter.width;
+      painter.dispose();
+      return w + HcSpace.s2 * 2;
+    }
+
+    final natural = [
+      for (final (i, h) in head.indexed)
+        [
+          measure(h, HcText.tableHead),
+          for (final r in rows)
+            i == 0
+                ? measure(r.head, HcText.tableHead)
+                : measure(
+                    i - 1 < r.cells.length ? r.cells[i - 1] : '',
+                    HcText.tableCell,
+                  ),
+        ].reduce((a, b) => a > b ? a : b),
+    ];
+    final total = natural.fold(0.0, (a, b) => a + b);
+    if (total >= width) return natural;
+    return [for (final w in natural) w * width / total];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final columns = head.length;
+    Widget line(
+      List<Widget> cells,
+      List<double> widths, {
+      VoidCallback? onTap,
+      Key? key,
+    }) {
+      final row = Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          for (final (i, cell) in cells.indexed)
+            SizedBox(width: widths[i], child: cell),
+        ],
+      );
+      final drawn = DecoratedBox(
+        decoration: const BoxDecoration(border: Border(bottom: _line)),
+        child: onTap == null
+            ? row
+            : ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: HcLayout.touchTargetLg,
+                ),
+                child: row,
+              ),
+      );
+      if (onTap == null) return drawn;
+      return Semantics(
+        button: true,
+        child: InkWell(key: key, onTap: onTap, child: drawn),
+      );
+    }
+
+    return Semantics(
+      container: true,
+      label: label,
+      explicitChildNodes: true,
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final width = box.maxWidth > HcComponent.columnTableMinWidth
+              ? box.maxWidth
+              : HcComponent.columnTableMinWidth;
+          final widths = _widths(context, width);
+          return SingleChildScrollView(
+            key: const Key('column-table-scroll'),
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: widths.fold<double>(0, (a, b) => a + b),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  line([
+                    for (final h in head)
+                      _cell(h, HcText.tableHead, header: true),
+                  ], widths),
+                  for (final r in rows)
+                    line(
+                      [
+                        Padding(
+                          padding: const EdgeInsets.all(HcSpace.s2),
+                          child: Text(
+                            r.head,
+                            style: HcText.tableHead.copyWith(
+                              color: HcColors.primary,
+                              decoration: r.onTap == null
+                                  ? null
+                                  : TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                        for (final c in r.cells.take(columns - 1))
+                          _cell(c, HcText.tableCell),
+                      ],
+                      widths,
+                      onTap: r.onTap,
+                      key: r.key,
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }

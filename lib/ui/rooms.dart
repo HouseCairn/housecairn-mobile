@@ -9,6 +9,7 @@ import '../design/tokens.dart';
 import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/choices.dart';
+import '../domain/labels.dart';
 import '../l10n/app_localizations.dart';
 import 'autosave.dart';
 import 'budget_parts.dart';
@@ -16,6 +17,7 @@ import 'choices.dart';
 import 'equipment_screen.dart';
 import 'home_selector.dart';
 import 'item_screens.dart';
+import 'label_screens.dart';
 import 'messages.dart';
 import 'parts.dart';
 import 'photos.dart';
@@ -282,6 +284,11 @@ class RoomScreen extends StatelessWidget {
                     ],
                     RecordActions(
                       children: [
+                        LabelButton(
+                          homeId: homeId,
+                          kind: LabelKind.room,
+                          targetId: roomId,
+                        ),
                         OutlinedButton(
                           key: const Key('room-report'),
                           onPressed: () => open(

@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/app.dart';
 import 'package:housecairn_mobile/core/document_source.dart';
 import 'package:housecairn_mobile/core/notifier.dart';
+import 'package:housecairn_mobile/core/code_camera.dart';
 import 'package:housecairn_mobile/core/photo_source.dart';
 import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/design/icons.dart';
@@ -14,6 +15,7 @@ import 'package:housecairn_mobile/domain/guide.dart';
 import 'package:housecairn_mobile/domain/photos.dart';
 import 'package:housecairn_mobile/domain/templates.dart';
 import 'package:housecairn_mobile/sync/mode.dart';
+import 'package:housecairn_mobile/ui/sections.dart';
 import 'package:housecairn_mobile/ui/state.dart';
 import 'package:housecairn_mobile/ui/task_screen.dart';
 import 'package:material_ui/material_ui.dart';
@@ -45,6 +47,7 @@ Future<AppState> pumpApp(
   String locale = 'en',
   Future<void> Function(Repository repository)? seed,
   PhotoSource? photoSource,
+  CodeCamera Function()? codeCamera,
   DocumentSource? documentSource,
   Notifier? notifier,
   UrlOpener? openUrl,
@@ -58,6 +61,7 @@ Future<AppState> pumpApp(
   final state = AppState(
     repository,
     photoSource: photoSource,
+    codeCamera: codeCamera,
     documentSource: documentSource,
     notifier: notifier,
     // Synchronous, so that the widget tests do not wait for an isolate.
@@ -161,5 +165,22 @@ Future<void> saveTask(WidgetTester tester) async {
   final button = find.byKey(const Key('task-save'));
   await seeInTaskForm(tester, button);
   await tester.tap(button);
+  await tester.pumpAndSettle();
+}
+
+/// Scrolls the list of More until [target] is built and on screen: More is
+/// longer than a phone since it has the web's QR labels.
+Future<void> scrollMoreTo(WidgetTester tester, Finder target) async {
+  final list = find
+      .descendant(
+        of: find.byType(MoreScreen),
+        matching: find.byType(Scrollable),
+      )
+      .first;
+  for (var i = 0; i < 20 && target.evaluate().isEmpty; i++) {
+    await tester.drag(list, const Offset(0, -150));
+    await tester.pumpAndSettle();
+  }
+  await tester.ensureVisible(target.first);
   await tester.pumpAndSettle();
 }

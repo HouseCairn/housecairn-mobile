@@ -1,3 +1,3 @@
-"NSCameraUsageDescription" = "Housecairn utilise l'appareil photo pour photographier une pièce ou un équipement. La photo reste sur ce téléphone.";
+"NSCameraUsageDescription" = "Housecairn utilise l'appareil photo pour photographier une pièce ou un équipement, et pour lire le code QR d'une étiquette. La photo reste sur ce téléphone.";
 "NSPhotoLibraryUsageDescription" = "Housecairn vous laisse choisir une photo d'une pièce ou d'un équipement. La photo reste sur ce téléphone.";
 "NSPhotoLibraryAddUsageDescription" = "Housecairn enregistre dans vos photos une photo jointe à une tâche quand vous le demandez.";

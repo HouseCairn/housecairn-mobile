@@ -7,7 +7,7 @@ import 'recurrence.dart' as recurrence;
 
 /// The budget of a home, by year, room, project and maintenance task: the
 /// rules of the web (`budget/services.py`, `projects/services.py` `Amounts`,
-/// web ADR 0050, 0051, 0062, 0073), ported line by line. Nothing here is
+/// web ADR 0050, 0051, 0062, 0073, 0081), ported line by line. Nothing here is
 /// stored: every figure is worked out when read, in [Decimal], from the budget
 /// lines and accepted quotes of projects and from the estimates and real costs
 /// of tasks. No figure ever passes through floating point
@@ -309,6 +309,14 @@ StockPlan stockPlan(Iterable<(Decimal, Decimal?)> lines) {
   return StockPlan(cents(total), priced, unpriced);
 }
 
+/// The materials a task plans each time (`material_of`, web ADR 0081): with
+/// a stock item that has a unit price (zero is a price), the stock plan
+/// alone, quantity times unit price; the material budget typed is then kept
+/// but not counted, since it would be a second figure for the same filter.
+/// Without a priced stock item, the budget typed.
+Decimal materialOf(Decimal? typed, StockPlan stock) =>
+    stock.priced > 0 ? stock.amount : typed ?? zero;
+
 /// A project as the budget counts it (`ProjectRow`). An abandoned project
 /// plans nothing any more.
 class ProjectBudget {
@@ -402,8 +410,13 @@ class TaskBudget {
       task.labourBudget != null ||
       stock.priced > 0;
 
-  /// The materials of one time: the amount typed and the stock at its prices.
-  Decimal get materialPlanned => materialTyped + stock.amount;
+  /// The materials of one time: the stock items at their prices, else the
+  /// amount typed ([materialOf]).
+  Decimal get materialPlanned => materialOf(task.materialBudget, stock);
+
+  /// Whether the materials are worked out from the stock rather than typed
+  /// (`material_from_stock`, web ADR 0081).
+  bool get materialFromStock => stock.priced > 0;
 
   Decimal get estimate => materialPlanned + labour;
 
@@ -518,10 +531,10 @@ class Ledger {
         if (day != null) (taskDays[projectId] ??= []).add(day);
       }
       final times = Decimal.fromInt(task.occurrences.length);
-      final stock = stockPlan(task.stock).amount;
+      final stock = stockPlan(task.stock);
       final wanted = fromTasks[projectId] ??= {};
       for (final (nature, each) in [
-        (material, (task.materialBudget ?? zero) + stock),
+        (material, materialOf(task.materialBudget, stock)),
         (labour, task.labourBudget ?? zero),
       ]) {
         wanted[nature] = (wanted[nature] ?? zero) + each * times;

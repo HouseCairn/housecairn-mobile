@@ -8,6 +8,7 @@ import 'app.dart';
 import 'core/clock.dart';
 import 'core/document_source.dart';
 import 'core/local_notifier.dart';
+import 'core/code_camera.dart';
 import 'core/photo_source.dart';
 import 'core/secure_store.dart';
 import 'data/database.dart';
@@ -45,6 +46,7 @@ Future<void> main() async {
   state = AppState(
     repository,
     photoSource: ImagePickerSource(),
+    codeCamera: PluginCodeCamera.new,
     documentSource: const FilePickerSource(),
     notifier: notifier,
     store: secrets,
