@@ -295,3 +295,65 @@ Map<String, Set<String>> wantedFields(Guide guide) {
   }
   return wanted;
 }
+
+/// The terms of `design/glossary.json` (a byte-for-byte copy of the web
+/// file) that the texts of the guide cite as `{{id}}`: each is written in the
+/// language of the reader, as the screens write it (web ADR 0084, "Labels of
+/// screens are never typed in a sentence").
+class GuideGlossary {
+  const GuideGlossary(this.terms);
+
+  /// Term id → language → the label.
+  final Map<String, Map<String, String>> terms;
+
+  /// The label of [id] in [language], English when the glossary has none in
+  /// it; the id itself for a term the glossary does not have (the test of the
+  /// web file refuses one, so it is never shown).
+  String term(String id, String language) {
+    final labels = terms[id];
+    if (labels == null) return id;
+    return labels[language] ?? labels[guideFallbackLanguage] ?? id;
+  }
+}
+
+/// The glossary from the JSON of `design/glossary.json`.
+GuideGlossary parseGlossary(String source) {
+  final document = _map(jsonDecode(source), 'The glossary');
+  final terms = <String, Map<String, String>>{};
+  for (final raw in document['terms']! as List) {
+    final term = _map(raw, 'a term');
+    terms[term['id']! as String] = {
+      // The labels are under the code of their language (`en`, `fr`).
+      for (final MapEntry(:key, :value) in term.entries)
+        if (key.length == 2 && value is String) key: value,
+    };
+  }
+  return GuideGlossary(terms);
+}
+
+/// A cited term in a text of the guide: `{{id}}`.
+final _cited = RegExp(r'\{\{([a-z0-9-]+)\}\}');
+
+/// A part of a text of the guide: plain words, or a term of the glossary,
+/// which the screens write in bold (`terms.render` of the web).
+typedef GuidePiece = ({String text, bool term});
+
+/// [text] cut into its words and its cited terms, each term written in
+/// [language] from [glossary].
+List<GuidePiece> guidePieces(
+  String text,
+  GuideGlossary glossary,
+  String language,
+) {
+  final pieces = <GuidePiece>[];
+  var last = 0;
+  for (final match in _cited.allMatches(text)) {
+    if (match.start > last) {
+      pieces.add((text: text.substring(last, match.start), term: false));
+    }
+    pieces.add((text: glossary.term(match[1]!, language), term: true));
+    last = match.end;
+  }
+  if (last < text.length) pieces.add((text: text.substring(last), term: false));
+  return pieces;
+}

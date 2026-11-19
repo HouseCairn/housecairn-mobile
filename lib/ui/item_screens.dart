@@ -25,6 +25,7 @@ import 'parts.dart';
 import 'photos.dart';
 import 'report_screens.dart';
 import 'rooms.dart';
+import 'guide_screens.dart';
 import 'state.dart';
 
 /// An item (docs/spec.md, "Screens of v1", 5; `rooms/item_detail.html`):
@@ -68,6 +69,7 @@ class ItemScreen extends StatelessWidget {
             item.contractNumber.isNotEmpty ||
             item.contractUrl.isNotEmpty;
         return HcScaffold(
+          belowTitle: ExampleHomeBanner(homeId: homeId),
           title: item.name,
           actions: actionsOrHelp([
             if (writable)
@@ -306,9 +308,15 @@ class ItemFormScreen extends StatefulWidget implements HcFormScreen {
     this.roomId,
     this.chooseRoom = false,
     this.itemId,
+    this.fill = const {},
   });
 
   final String homeId;
+
+  /// The values of **Fill in for me** of the guide: `name`, `kind`, `brand`
+  /// and `model`, and the `room` a new item starts in when [roomId] does not
+  /// say it, shown on the example home only.
+  final GuideFill fill;
 
   /// The room of the item; for a new item opened from Equipment, the room
   /// the form starts with, `null` for the first one.
@@ -360,6 +368,25 @@ class _ItemFormScreenState extends State<ItemFormScreen>
   String? _room;
   bool _loaded = false;
 
+  /// The values of the guide that this form takes (`prefill_fields` of the
+  /// web's item form): a kind the list has, texts that are not empty.
+  void _applyFill() {
+    final fill = widget.fill;
+    if (!fillsHere(context, widget.homeId, fill)) return;
+    if (fill['kind'] case final String kind when itemKinds.contains(kind)) {
+      _kind = kind;
+    }
+    for (final (name, controller) in [
+      ('name', _name),
+      ('brand', _brand),
+      ('model', _model),
+    ]) {
+      if (fill[name] case final String value when value.trim().isNotEmpty) {
+        controller.text = value;
+      }
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -379,15 +406,24 @@ class _ItemFormScreenState extends State<ItemFormScreen>
         ? null
         : await repository.item(widget.itemId!);
     if (!mounted) return;
+    // The room the guide fills in, for a new item of the example home only.
+    final start =
+        widget.roomId ??
+        (item == null && fillsHere(context, widget.homeId, widget.fill)
+            ? widget.fill['room'] as String?
+            : null);
     setState(() {
       _contractors = contractors;
       _rooms = rooms;
       _room = !widget.chooseRoom
           ? widget.roomId
-          : rooms.any((r) => r.id == widget.roomId)
-          ? widget.roomId
+          : rooms.any((r) => r.id == start)
+          ? start
           : (rooms.isEmpty ? null : rooms.first.id);
-      if (item == null) return;
+      if (item == null) {
+        _applyFill();
+        return;
+      }
       _name.text = item.name;
       _kind = item.kind;
       _brand.text = item.brand;
@@ -421,6 +457,7 @@ class _ItemFormScreenState extends State<ItemFormScreen>
           TextEditingController(text: link.url),
         ));
       }
+      _applyFill();
     });
     sheetLoaded();
   }
@@ -591,6 +628,7 @@ class _ItemFormScreenState extends State<ItemFormScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return HcScaffold(
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       title: widget.itemId == null ? l10n.newItem : l10n.editItem,
       actions: [
         Center(child: savedStatus()),

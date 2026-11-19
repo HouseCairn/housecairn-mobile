@@ -367,6 +367,8 @@ class HcDialog extends StatelessWidget {
         scrollable: scrollable,
         title: Text(title),
         content: content,
+        // A label of one word is never cut in two, even at twice the size
+        // on a narrow phone: it comes down in size instead.
         actions: [
           for (final a in actions)
             a.kind == HcDialogKind.danger
@@ -374,12 +376,12 @@ class HcDialog extends StatelessWidget {
                     key: a.key,
                     style: hcDangerStyle(),
                     onPressed: a.onPressed,
-                    child: Text(a.label),
+                    child: HcWholeWord(a.label),
                   )
                 : TextButton(
                     key: a.key,
                     onPressed: a.onPressed,
-                    child: Text(a.label),
+                    child: HcWholeWord(a.label),
                   ),
         ],
       );

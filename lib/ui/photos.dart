@@ -13,6 +13,7 @@ import '../domain/choices.dart';
 import '../domain/photos.dart';
 import '../l10n/app_localizations.dart';
 import 'choices.dart';
+import 'guide_screens.dart';
 import 'parts.dart';
 import 'state.dart';
 
@@ -265,6 +266,7 @@ class ReportPhotoScreen extends StatelessWidget {
         final file = AppScope.of(context).repository.reportPhoto(report);
         return HcScaffold(
           title: l10n.reportPhoto,
+          belowTitle: ExampleHomeBanner(homeId: homeId),
           body: HcScreenList(
             children: [
               const SizedBox(height: HcSpace.s2),
@@ -416,6 +418,7 @@ class _PhotoScreenState extends State<PhotoScreen> {
     final file = photo == null ? null : repository.photoFile(photo);
     return HcScaffold(
       title: l10n.photos,
+      belowTitle: ExampleHomeBanner(homeId: photo?.homeId),
       actions: [
         if (widget.writable && photo != null)
           HcBarAction(label: l10n.save, onPressed: _save),

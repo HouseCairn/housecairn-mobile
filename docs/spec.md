@@ -178,6 +178,13 @@ is kept of it.
   applied. A phone on a server keeps it beside the server's homes, as its one local home.
 - **Left out of the counts**: not a home for the rule of the last active home, not in the
   selector, not in **All homes** of Today, no reminder; its own screens show it.
+- **Recognisable on its screens**: these screens of the example home (its page, its Today, a
+  room, an item, a task and its list, the reports and a report with its photo, a project, a
+  budget line, a quote, the envelope, a stock item, a supplier, a contractor, a done
+  occurrence, a photo, an attachment, and their forms) starts with the banner
+  **Example home**, with **Back to the guide** and **Delete the example home**; **My homes**
+  lists it after the real homes with the pill **Example**; its page has no **Archive** nor
+  **Delete** at the bottom, the banner deletes it.
 - **The ticks of the steps**: a step whose state (`done_when` of the file) is true is ticked,
   and stays ticked even if the state goes away afterwards; four steps are ticked by hand. The
   evaluator is the web's (`guide.states`), checked on the web's vectors
@@ -335,6 +342,30 @@ contractor with it.
     link to the source code, then the links of the project (site, documentation, code, Home
     Assistant app and integration, mobile application, Android coming soon) and the iPhone
     beta, which can be opened or copied.
+13. **Guide** (web ADR 0084, the web's `docs/screens/guide.md` and `guide-scenario.md`), opened
+    from **More**, **Help**, **Guide** and from the card **Guide** of an empty Today (under
+    *Nothing to do for now.*, **Open the guide**; the card goes as soon as Today shows a task,
+    and is not on the Today of the example home). It lists the five scenarios, each with its
+    progress (**1 of 3**, then **Done**; an optional step does not count), then, once the
+    example home exists, its card and **Delete the example home**. A scenario shows its steps,
+    ticked by the evaluator of the example home: **Fill in for me** opens the form of the step
+    with the values of `design/guide.json` in it (nothing saved until its button is pressed),
+    **Open** the same form empty or the screen of the step (the page of the home, its Today, the
+    report); a step on a row already there opens the form of that row, a budget line or a quote
+    waits for its project. The first step opens **New home** filled in with the example and a
+    sentence that says so; saving makes the example home. The four steps that leave no trace have
+    **Mark as done**. A scenario after the first offers **Add what the earlier scenarios make**
+    while an earlier step that ticks by itself is not ticked, or while there is no example home.
+    Every sentence comes from `design/guide.json`, in the language of the phone (English when the
+    file does not have it), the labels it cites from `design/glossary.json`, in bold; only the
+    words around them are in the ARB files. The values of a form are taken only on the example
+    home, each checked as the form checks what is typed (a choice of its list, a room of the
+    home, a number); the fields are those the web fills (`prefill_fields`), and the room and the
+    item a new task starts on, and the place of a report, as the web's `?room=` and `?item=`
+    (step 3.1 opens the task on the kitchen and the machine, step 4.1 the report on the
+    kitchen). **Delete the example
+    home** asks once, in a dialog (**Delete** and **Cancel**), no name to type and no export,
+    then goes back to the guide.
 
 ## Reminders
 

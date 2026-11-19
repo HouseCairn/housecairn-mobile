@@ -4928,6 +4928,186 @@ abstract class AppLocalizations {
   /// **'Label of {name}'**
   String articleLabelPhoto(String name);
 
+  /// Entry of More, Help, and title of the interactive guide: five scenarios done on an example home (web ADR 0084). Glossary term guide.
+  ///
+  /// In en, this message translates to:
+  /// **'Guide'**
+  String get guide;
+
+  /// Subtitle of the entry Guide of More. Web catalogue (core): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Five scenarios to try on an example home'**
+  String get moreGuideText;
+
+  /// Sentence under the title of the guide. Web catalogue (guide): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Five short scenarios, done for real on an example home with fictional values. You delete the example home in one press when you are done.'**
+  String get guideLead;
+
+  /// A scenario of the guide with its number, as the web writes it ("1. Create a home"). The title comes from design/guide.json.
+  ///
+  /// In en, this message translates to:
+  /// **'{number}. {title}'**
+  String guideNumbered(int number, String title);
+
+  /// A step of a scenario of the guide with its number, as the web writes it ("2.1 Add a room"). The title comes from design/guide.json.
+  ///
+  /// In en, this message translates to:
+  /// **'{scenario}.{step} {title}'**
+  String guideStepNumbered(int scenario, String step, String title);
+
+  /// How far a scenario of the guide is: steps ticked of the steps it counts (an optional one does not). Web catalogue (guide): %(done)s sur %(total)s.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total}'**
+  String guideProgress(int done, int total);
+
+  /// Pill of a scenario of the guide whose steps are all ticked. Web catalogue (guide), context guide scenario: Fait.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get guideScenarioDone;
+
+  /// Pill of a step of the guide that is ticked (une étape). Web catalogue (guide), context guide step: Faite.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get guideStepDone;
+
+  /// Pill of a step of the guide that does not count in the progress (une étape). Web catalogue (guide): Facultative.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get guideOptional;
+
+  /// Button of a step of the guide: opens its form with the values of the example in it; nothing is saved yet. Web catalogue (guide): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in for me'**
+  String get guideFill;
+
+  /// Button of a step of the guide: opens its screen, or its form empty, in the example home. Web catalogue (guide), context guide step: Ouvrir.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get guideOpen;
+
+  /// Button of a step of the guide that leaves no trace in the data: ticks it by hand. Web catalogue (guide): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as done'**
+  String get guideMarkDone;
+
+  /// Under a step of the guide when there is no example home yet. Web catalogue (guide): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Add the example home first, in the first scenario.'**
+  String get guideNeedsHome;
+
+  /// Card of a scenario of the guide when a step of an earlier one is not ticked. Web catalogue (guide): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'The earlier scenarios are not all done. The guide can add what they make to the example home, so that you can start here.'**
+  String get guideCatchUpText;
+
+  /// Card of a scenario of the guide when there is no example home yet. Web catalogue (guide): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'There is no example home yet. The guide can make it, with what the earlier scenarios add, so that you can start here.'**
+  String get guideCatchUpNoHome;
+
+  /// Button of the card of catching up: makes the example home if needed and adds the rows of the earlier scenarios it lacks. Web catalogue (guide): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Add what the earlier scenarios make'**
+  String get guideCatchUp;
+
+  /// Message once the guide added what the earlier scenarios make. Web catalogue (guide): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'The earlier scenarios are done in the example home.'**
+  String get guideCaughtUp;
+
+  /// Link of the banner of the example home, and last button of the last scenario. Web catalogue (guide): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the guide'**
+  String get guideBack;
+
+  /// The disposable home of the guide: heading of its card on the guide, and its banner. Glossary term example-home.
+  ///
+  /// In en, this message translates to:
+  /// **'Example home'**
+  String get exampleHome;
+
+  /// Banner of every screen of the example home. Web catalogue (guide): the same, with "on this instance" for "on this phone" (the example home never leaves the phone).
+  ///
+  /// In en, this message translates to:
+  /// **'Fictional values, to try Housecairn for real. It stays on this phone.'**
+  String get exampleBannerText;
+
+  /// Button of the guide and of the banner of the example home: one press, one confirmation, no name to type. Web catalogue (guide): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the example home'**
+  String get exampleDelete;
+
+  /// Title of the confirmation of Delete the example home. Web catalogue (guide): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the example home?'**
+  String get exampleDeleteTitle;
+
+  /// Text of the confirmation of Delete the example home. Web catalogue (guide): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in it goes, for good. Your other homes do not change.'**
+  String get exampleDeleteBody;
+
+  /// Message once the example home is deleted. Web catalogue (guide): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'The example home was deleted.'**
+  String get exampleDeleted;
+
+  /// Pill next to the name of the example home in the list of homes. Web catalogue (homes), context home: Exemple.
+  ///
+  /// In en, this message translates to:
+  /// **'Example'**
+  String get exampleMark;
+
+  /// Under the title of the form of a new home opened from the guide. Web catalogue (homes): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'This is the example home of the guide: its values are fictional, and you delete it in one press when you are done.'**
+  String get exampleNewHomeNotice;
+
+  /// Card of an empty Today. Web catalogue (tasks): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Not sure where to start? Try Housecairn on an example home, in five short scenarios.'**
+  String get todayGuideText;
+
+  /// Button of the card Guide of an empty Today. Web catalogue (tasks): (same).
+  ///
+  /// In en, this message translates to:
+  /// **'Open the guide'**
+  String get todayGuideOpen;
+
+  /// Button to the previous scenario of the guide, under its steps, as the web writes it. The title comes from design/guide.json.
+  ///
+  /// In en, this message translates to:
+  /// **'‹ {title}'**
+  String guidePrevious(String title);
+
+  /// Button to the next scenario of the guide, under its steps, as the web writes it. The title comes from design/guide.json.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} ›'**
+  String guideNext(String title);
+
   /// Web catalogue (labels): QR labels.
   ///
   /// In en, this message translates to:

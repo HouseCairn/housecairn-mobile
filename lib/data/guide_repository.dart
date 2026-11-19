@@ -217,6 +217,48 @@ extension GuideRepository on Repository {
     return (await _storeTicks(homeId, [stepId])).isNotEmpty;
   }
 
+  // ---------- the rows of the steps ----------
+
+  /// The id of each row of [guide] that the example home [homeId] already
+  /// has, by the key of the row in the file, found as [fillExample] finds
+  /// them and never made: the screen a step opens is the form of that row
+  /// when it is there (its brand, its repetition, its payment), else the
+  /// form that adds it (`guide.links` of the web). A row not found is left
+  /// out.
+  Future<Map<String, String>> exampleRowIds(
+    Guide guide,
+    String homeId, {
+    String? language,
+  }) async {
+    final maker = _ExampleMaker(
+      this,
+      homeId,
+      guide,
+      guide.languageFor(language),
+      findOnly: true,
+    );
+    for (final row in guide.rows) {
+      await maker.add(row);
+    }
+    return {
+      for (final MapEntry(:key, :value) in maker.made.entries) key: ?value,
+    };
+  }
+
+  /// The report of [homeId] made last, the one step 4.2 opens; `null` when
+  /// the home has none.
+  Future<String?> latestReport(String homeId) async {
+    final rows =
+        await (db.select(db.reports)
+              ..where(
+                (r) => r.homeId.equalsValue(homeId) & r.deletedAt.isNull(),
+              )
+              ..orderBy([(r) => OrderingTerm.desc(r.createdAt)])
+              ..limit(1))
+            .get();
+    return rows.firstOrNull?.id;
+  }
+
   // ---------- catching up ----------
 
   /// Adds what the scenarios before number [upTo] make and the example home
@@ -257,14 +299,24 @@ extension GuideRepository on Repository {
 /// Adds the rows of the file that the example home lacks, through the
 /// ordinary methods of the repository (`guide.services._Maker`).
 class _ExampleMaker {
-  _ExampleMaker(this.repo, this.homeId, this.guide, this.language)
-    : today = repo.today();
+  _ExampleMaker(
+    this.repo,
+    this.homeId,
+    this.guide,
+    this.language, {
+    this.findOnly = false,
+  }) : today = repo.today();
 
   final Repository repo;
   final String homeId;
   final Guide guide;
   final String language;
   final Day today;
+
+  /// Finds the rows already there and makes none: the links of the steps
+  /// (`guide.links._Finder` of the web, which finds them as `fill_example`
+  /// does).
+  final bool findOnly;
 
   /// The id of the row made or found for each key of the file.
   final made = <String, String?>{};
@@ -320,20 +372,23 @@ class _ExampleMaker {
   Day? _offset(Object? days) =>
       days == null ? null : today.addDays((days as num).toInt());
 
-  Future<String> _room(Map<String, Object?> f) async {
+  Future<String?> _room(Map<String, Object?> f) async {
     _only(f, {'name', 'kind'});
     final name = _text(f['name']);
     final found = (await repo.rooms(homeId)).where((r) => r.name == name);
     if (found.isNotEmpty) return found.first.id;
+    if (findOnly) return null;
     return repo.createRoom(homeId, name: name, kind: _text(f['kind']));
   }
 
-  Future<String> _item(Map<String, Object?> f) async {
+  Future<String?> _item(Map<String, Object?> f) async {
     _only(f, {'room', 'name', 'kind', 'brand', 'model'});
-    final room = f['room']! as String;
+    final room = f['room'] as String?;
+    if (room == null) return null;
     final name = _text(f['name']);
     final found = (await repo.itemsOf(room)).where((i) => i.name == name);
     if (found.isNotEmpty) return found.first.id;
+    if (findOnly) return null;
     return repo.addItem(
       room,
       ItemInput(
@@ -345,7 +400,7 @@ class _ExampleMaker {
     );
   }
 
-  Future<String> _task(Map<String, Object?> f) async {
+  Future<String?> _task(Map<String, Object?> f) async {
     _only(f, {
       'title',
       'room',
@@ -367,6 +422,7 @@ class _ExampleMaker {
             ))
             .get();
     if (found.isNotEmpty) return found.first.id;
+    if (findOnly) return null;
     return repo.createTask(
       homeId,
       TaskInput(
@@ -385,7 +441,8 @@ class _ExampleMaker {
 
   Future<String?> _occurrence(Map<String, Object?> f) async {
     _only(f, {'task', 'status', 'completed_offset_days'});
-    final task = f['task']! as String;
+    final task = f['task'] as String?;
+    if (task == null) return null;
     final done =
         await (repo.db.select(repo.db.occurrences)..where(
               (o) =>
@@ -396,6 +453,7 @@ class _ExampleMaker {
             ))
             .get();
     if (done.isNotEmpty) return done.first.id;
+    if (findOnly) return null;
     final open = await repo.openOccurrencesOf(task);
     if (open.isEmpty) return null;
     final closing = await repo.complete(
@@ -405,7 +463,7 @@ class _ExampleMaker {
     return closing.occurrenceId;
   }
 
-  Future<String> _report(Map<String, Object?> f) async {
+  Future<String?> _report(Map<String, Object?> f) async {
     _only(f, {'title', 'room', 'status'});
     final title = _text(f['title']);
     final found =
@@ -417,6 +475,7 @@ class _ExampleMaker {
             ))
             .get();
     if (found.isNotEmpty) return found.first.id;
+    if (findOnly) return null;
     final roomId = f['room'] as String?;
     final room = roomId == null ? null : await repo.room(roomId);
     final id = await repo.createReport(
@@ -432,7 +491,7 @@ class _ExampleMaker {
     return id;
   }
 
-  Future<String> _project(Map<String, Object?> f) async {
+  Future<String?> _project(Map<String, Object?> f) async {
     _only(f, {'title', 'goal', 'rooms', 'status'});
     final title = _text(f['title']);
     final found =
@@ -444,6 +503,7 @@ class _ExampleMaker {
             ))
             .get();
     if (found.isNotEmpty) return found.first.id;
+    if (findOnly) return null;
     return repo.createProject(
       homeId,
       ProjectInput(
@@ -458,9 +518,10 @@ class _ExampleMaker {
     );
   }
 
-  Future<String> _line(Map<String, Object?> f) async {
+  Future<String?> _line(Map<String, Object?> f) async {
     _only(f, {'project', 'label', 'nature', 'planned', 'paid'});
-    final project = f['project']! as String;
+    final project = f['project'] as String?;
+    if (project == null) return null;
     final label = _text(f['label']);
     final found =
         await (repo.db.select(repo.db.budgetLines)..where(
@@ -472,6 +533,7 @@ class _ExampleMaker {
             ))
             .get();
     if (found.isNotEmpty) return found.first.id;
+    if (findOnly) return null;
     return repo.createLine(
       project,
       LineInput(
@@ -483,18 +545,19 @@ class _ExampleMaker {
     );
   }
 
-  Future<String> _contractor(Map<String, Object?> f) async {
+  Future<String?> _contractor(Map<String, Object?> f) async {
     _only(f, {'name', 'trade'});
     final name = _text(f['name']);
     final found = (await repo.contractors(homeId)).where((c) => c.name == name);
     if (found.isNotEmpty) return found.first.id;
+    if (findOnly) return null;
     return repo.addContractor(
       homeId,
       ContractorInput(name: name, trade: _text(f['trade'])),
     );
   }
 
-  Future<String> _quote(Map<String, Object?> f) async {
+  Future<String?> _quote(Map<String, Object?> f) async {
     _only(f, {
       'project',
       'contractor',
@@ -504,7 +567,8 @@ class _ExampleMaker {
       'issued_offset_days',
       'valid_days',
     });
-    final project = f['project']! as String;
+    final project = f['project'] as String?;
+    if (project == null) return null;
     final contractor = f['contractor'] as String?;
     final found =
         await (repo.db.select(repo.db.quotes)..where(
@@ -518,6 +582,7 @@ class _ExampleMaker {
             ))
             .get();
     if (found.isNotEmpty) return found.first.id;
+    if (findOnly) return null;
     final issued = _offset(f['issued_offset_days']);
     final valid = f['valid_days'] as num?;
     return repo.createQuote(
@@ -535,7 +600,7 @@ class _ExampleMaker {
     );
   }
 
-  Future<String> _envelope(Map<String, Object?> f) async {
+  Future<String?> _envelope(Map<String, Object?> f) async {
     _only(f, {'year', 'amount'});
     final raw = f['year'];
     final year = raw == 'current' ? today.year : int.parse('$raw');
@@ -544,9 +609,9 @@ class _ExampleMaker {
         await (repo.db.select(repo.db.annualEnvelopes)
               ..where((e) => e.id.equalsValue(id) & e.deletedAt.isNull()))
             .getSingleOrNull();
-    if (existing == null) {
-      await repo.setEnvelope(homeId, year, _text(f['amount']));
-    }
+    if (existing != null) return id;
+    if (findOnly) return null;
+    await repo.setEnvelope(homeId, year, _text(f['amount']));
     return id;
   }
 }

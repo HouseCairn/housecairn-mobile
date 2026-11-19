@@ -299,9 +299,111 @@ class HcLargeTitle extends StatelessWidget {
     ),
     child: Semantics(
       header: true,
-      child: Text(title, key: const Key('page-title'), style: HcText.pageTitle),
+      child: HcWholeWords(
+        title,
+        key: const Key('page-title'),
+        style: HcText.pageTitle,
+      ),
     ),
   );
+}
+
+/// A text that goes to the next line between words only: when its longest
+/// word is wider than the line (a narrow phone, text at twice the size), the
+/// text comes down in size until that word fits, rather than be cut in two.
+/// Every other text keeps the size of the person.
+///
+/// It reads the width of its line, so it does not go where intrinsic sizes
+/// are asked (a dialog); [HcWholeWord] is the one for a label of one word.
+class HcWholeWords extends StatelessWidget {
+  const HcWholeWords(this.text, {super.key, this.style, this.textAlign});
+
+  final String text;
+  final TextStyle? style;
+  final TextAlign? textAlign;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) => Text(
+        text,
+        style: style,
+        textAlign: textAlign,
+        textScaler: hcWholeWordsScaler(
+          context,
+          [text],
+          [style ?? const TextStyle()],
+          constraints.maxWidth,
+        ),
+      ),
+    );
+  }
+}
+
+/// Where a line may break besides spaces: after a slash or a hyphen, and at
+/// a zero width space (before the extension of a file name).
+final _wordBreak = RegExp(r'\s+|(?<=[/-])|\u200B');
+
+/// The rule of [HcWholeWords] for texts that share one size (the labels of
+/// the bottom bar, the tabs of a section): the text scale of the person, or
+/// smaller when the longest word of [texts], in the widest of [styles], is
+/// wider than [width], so that it fits on its line. Never larger than the
+/// scale of the person.
+TextScaler hcWholeWordsScaler(
+  BuildContext context,
+  Iterable<String> texts,
+  Iterable<TextStyle> styles,
+  double width,
+) {
+  final scaler = MediaQuery.textScalerOf(context);
+  if (!width.isFinite || width <= 0) return scaler;
+  final direction = Directionality.of(context);
+  // As a Text draws it: on the default style of where it is (the spacing
+  // of the letters of the body text of the theme).
+  final ambient = DefaultTextStyle.of(context).style;
+  var widest = 0.0;
+  for (final given in styles) {
+    final style = ambient.merge(given);
+    final size = style.fontSize;
+    if (size == null || size <= 0) continue;
+    for (final text in texts) {
+      // A line may also break after a slash or a hyphen (an address, a
+      // compound word): those parts are the words that must fit.
+      for (final word in text.split(_wordBreak)) {
+        if (word.isEmpty) continue;
+        final painter = TextPainter(
+          text: TextSpan(text: word, style: style),
+          textDirection: direction,
+          textScaler: scaler,
+          maxLines: 1,
+        )..layout();
+        if (painter.width > widest) widest = painter.width;
+        painter.dispose();
+      }
+    }
+  }
+  if (widest <= width) return scaler;
+  // A hair under the exact ratio, for the rounding of the layout.
+  return TextScaler.linear(scaler.scale(1) * width / widest * 0.98);
+}
+
+/// A label of one word that is never cut: on one line, made smaller only
+/// when the line is narrower than the word. Safe where intrinsic sizes are
+/// asked (the buttons of a dialog); a label of several words is a plain
+/// [Text], which wraps between them.
+class HcWholeWord extends StatelessWidget {
+  const HcWholeWord(this.text, {super.key, this.style, this.textAlign});
+
+  final String text;
+  final TextStyle? style;
+  final TextAlign? textAlign;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = Text(text, style: style, textAlign: textAlign);
+    if (text.trim().contains(RegExp(r'\s'))) return label;
+    return FittedBox(fit: BoxFit.scaleDown, child: label);
+  }
 }
 
 /// A screen that is a form: on iOS it opens as a modal sheet ([hcRoute]).
@@ -314,15 +416,19 @@ abstract interface class HcFormScreen {
 
 /// The route of [page]: a page, or a modal sheet for a form on iOS
 /// (design/patterns.md, Platform adaptations 7). On Android a form stays a
-/// page, its back button being Cancel.
-Route<void> hcRoute(Widget page) => hcRouteOf<void>(page);
+/// page, its back button being Cancel. [settings] names the route, for a
+/// screen that goes back to it (the guide, after its example home is gone).
+Route<void> hcRoute(Widget page, {RouteSettings? settings}) =>
+    hcRouteOf<void>(page, settings: settings);
 
 /// [hcRoute] for a screen that gives back a [T] when it closes (the form of
 /// a task says whether the task is kept).
-Route<T> hcRouteOf<T>(Widget page) => MaterialPageRoute<T>(
-  builder: (_) => page,
-  fullscreenDialog:
-      (page as Object) is HcFormScreen &&
-      (page as HcFormScreen).opensAsSheet &&
-      hcCupertino(defaultTargetPlatform),
-);
+Route<T> hcRouteOf<T>(Widget page, {RouteSettings? settings}) =>
+    MaterialPageRoute<T>(
+      settings: settings,
+      builder: (_) => page,
+      fullscreenDialog:
+          (page as Object) is HcFormScreen &&
+          (page as HcFormScreen).opensAsSheet &&
+          hcCupertino(defaultTargetPlatform),
+    );
