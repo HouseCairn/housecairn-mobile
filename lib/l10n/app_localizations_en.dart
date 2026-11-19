@@ -1269,7 +1269,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wayAloneText =>
-      'Your homes stay on this phone. Nothing is sent anywhere. You can turn on sharing later.';
+      'Your homes stay on this phone. Nothing leaves the phone, except a product\'s barcode to open product databases when you allow it. You can turn on sharing later.';
 
   @override
   String get wayFamilyTitle => 'Family sync';
@@ -3310,4 +3310,137 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectRows => 'Select';
+
+  @override
+  String get barcodeField => 'Barcode (EAN)';
+
+  @override
+  String get barcodeHelp =>
+      'The 8 to 14 digits under the bars. Scan it, or type it.';
+
+  @override
+  String get barcodeScan => 'Scan';
+
+  @override
+  String get barcodeScanLabel => 'Scan the barcode with the camera';
+
+  @override
+  String get barcodeScanTitle => 'Scan a barcode';
+
+  @override
+  String get barcodeScanHint => 'Hold the barcode in front of the camera.';
+
+  @override
+  String get barcodeNoCamera =>
+      'No camera could be used. Type the digits under the bars.';
+
+  @override
+  String get barcodeLooking => 'Looking this code up…';
+
+  @override
+  String get barcodeTakingLong =>
+      'The lookup is taking long. Scan the code again in a moment.';
+
+  @override
+  String barcodeFound(String source) {
+    return 'Found in $source. Check before you use it: only the empty fields are filled, nothing is saved until you save the form.';
+  }
+
+  @override
+  String get barcodeCategory => 'Category';
+
+  @override
+  String get barcodePhoto => 'Photo of the product';
+
+  @override
+  String get barcodeKeepPhoto => 'Keep this photo, if the sheet has none';
+
+  @override
+  String get barcodeUse => 'Use these values';
+
+  @override
+  String get barcodeNotFound =>
+      'This code is in none of the open databases. Fill the sheet by hand.';
+
+  @override
+  String get barcodeFailed =>
+      'The open databases could not be read. Try again later, or fill the sheet by hand.';
+
+  @override
+  String get barcodeInvalid =>
+      'This code is not a valid barcode: check its digits.';
+
+  @override
+  String get barcodeLimited =>
+      'Too many codes looked up in a short time. Try again in a minute.';
+
+  @override
+  String get barcodeOffline =>
+      'No connection: the code is kept with the sheet. Fill it by hand, or scan again later.';
+
+  @override
+  String get barcodeOffAlone =>
+      'The code is kept with the sheet. Looking it up in the open databases is off on this phone (Settings, in More).';
+
+  @override
+  String get barcodeOffServer =>
+      'The code is kept with the sheet. Looking it up in the open databases is off on this server.';
+
+  @override
+  String get barcodeServerUnavailable =>
+      'The code is kept with the sheet. This server does not look codes up for the app yet.';
+
+  @override
+  String photoBy(String author) {
+    return 'Photo by $author';
+  }
+
+  @override
+  String get barcodeConsentTitle => 'Look up barcodes';
+
+  @override
+  String get barcodeConsentIntro =>
+      'The phone can ask open databases what a scanned code is, to fill the name, the brand and a photo for you.';
+
+  @override
+  String get barcodeConsentWhatTitle => 'What leaves the phone';
+
+  @override
+  String get barcodeConsentWhat =>
+      'The code you scan, and nothing else: no name, no home, no account. Only when you scan.';
+
+  @override
+  String get barcodeConsentWhoTitle => 'To whom';
+
+  @override
+  String get barcodeConsentWho =>
+      'Open Products Facts, then Open Food Facts, two open databases of the Open Food Facts project. Like any website, they see the address of your connection.';
+
+  @override
+  String get barcodeConsentLicenceTitle => 'Licences';
+
+  @override
+  String get barcodeConsentLicence =>
+      'Their data is under the ODbL and their photos under CC BY-SA 3.0: a photo kept shows its author and its source under it.';
+
+  @override
+  String get barcodeConsentChange =>
+      'You can change this at any time in Settings, in More. Without it, a scan only fills the code.';
+
+  @override
+  String get barcodeConsentAllow => 'Allow the lookup';
+
+  @override
+  String get barcodeConsentRefuse => 'Keep only the code';
+
+  @override
+  String get barcodeLookupSetting => 'Online lookup of barcodes';
+
+  @override
+  String get barcodeLookupSettingText =>
+      'Ask Open Products Facts, then Open Food Facts, what a scanned code is. Only the code is sent, nothing else. Off: a code is only kept.';
+
+  @override
+  String get errEanInvalid =>
+      'Not a valid barcode: type the 8, 12, 13 or 14 digits under the bars (EAN-8, UPC-A, EAN-13 or GTIN-14).';
 }

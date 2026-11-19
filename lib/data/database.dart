@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
@@ -84,7 +86,7 @@ class AppDatabase extends _$AppDatabase implements Db {
       AppDatabase(driftDatabase(name: 'housecairn'));
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -251,6 +253,20 @@ class AppDatabase extends _$AppDatabase implements Db {
             await m.create(schema.labelCode);
             await m.create(schema.labelHomeKind);
           },
+          from11To12: (m, schema) async {
+            // The barcodes (docs/adr/0015-barcode-lookup.md, web ADR 0083):
+            // four columns with a default, so that every row already there
+            // has no code and no credit. A value a server sent before this
+            // build waits in `extra` and moves to its column (below).
+            await m.addColumn(schema.items, schema.items.ean);
+            await m.addColumn(schema.articles, schema.articles.ean);
+            await m.addColumn(
+              schema.articles,
+              schema.articles.labelAttribution,
+            );
+            await m.addColumn(schema.photos, schema.photos.attribution);
+            await moveBarcodeFieldsOutOfExtra(this);
+          },
         ),
       );
     },
@@ -271,5 +287,70 @@ class AppDatabase extends _$AppDatabase implements Db {
   Future<String> integrityCheck() async {
     final rows = await customSelect('PRAGMA integrity_check').get();
     return rows.map((row) => row.data.values.first.toString()).join('\n');
+  }
+}
+
+/// The barcode fields a server sends (web ADR 0083), by entity type and
+/// table: before schema 12 the phone had no column for them and kept them
+/// in `extra` as they came. The migration to schema 12 gives each to its
+/// column; a value its column cannot hold stays in `extra`.
+const barcodeFields = {
+  'rooms.item': ('items', ['ean']),
+  'stock.article': ('articles', ['ean', 'label_attribution']),
+  'rooms.photo': ('photos', ['attribution']),
+};
+
+/// Moves the barcode fields kept in `extra` to their columns (schema 12).
+/// Their clocks are in `field_clock` already: a field is clocked when it
+/// arrives, known or not. Nothing is logged: the server has the values.
+Future<void> moveBarcodeFieldsOutOfExtra(GeneratedDatabase db) async {
+  final rows = await db
+      .customSelect(
+        'SELECT entity, row_id, json FROM extra WHERE entity IN '
+        "('rooms.item', 'stock.article', 'rooms.photo')",
+      )
+      .get();
+  for (final r in rows) {
+    final entity = r.data['entity'] as String;
+    final (table, fields) = barcodeFields[entity]!;
+    final Map<String, Object?> kept;
+    try {
+      final json = jsonDecode(r.data['json'] as String);
+      if (json is! Map) continue;
+      kept = json.cast<String, Object?>();
+    } on FormatException {
+      continue;
+    }
+    final moved = <String, String>{};
+    for (final field in fields) {
+      final value = kept[field];
+      if (field == 'ean' && value is String && value.length <= 14) {
+        moved[field] = value;
+      } else if (field != 'ean' && value is Map) {
+        moved[field] = jsonEncode(value);
+      }
+    }
+    if (moved.isEmpty) continue;
+    final rowId = r.data['row_id'] as Uint8List;
+    await db.customUpdate(
+      'UPDATE $table SET ${[for (final f in moved.keys) '$f = ?'].join(', ')} '
+      'WHERE id = ?',
+      variables: [
+        for (final v in moved.values) Variable<String>(v),
+        Variable<Uint8List>(rowId),
+      ],
+    );
+    final left = {...kept}..removeWhere((k, _) => moved.containsKey(k));
+    if (left.isEmpty) {
+      await db.customStatement(
+        'DELETE FROM extra WHERE entity = ? AND row_id = ?',
+        [entity, rowId],
+      );
+    } else {
+      await db.customStatement(
+        'UPDATE extra SET json = ? WHERE entity = ? AND row_id = ?',
+        [jsonEncode(left), entity, rowId],
+      );
+    }
   }
 }

@@ -2231,7 +2231,7 @@ abstract class AppLocalizations {
   /// Explains the first way (alone on this phone).
   ///
   /// In en, this message translates to:
-  /// **'Your homes stay on this phone. Nothing is sent anywhere. You can turn on sharing later.'**
+  /// **'Your homes stay on this phone. Nothing leaves the phone, except a product\'s barcode to open product databases when you allow it. You can turn on sharing later.'**
   String get wayAloneText;
 
   /// Second way to use the app: sync through the end-to-end encrypted relay.
@@ -5431,6 +5431,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select'**
   String get selectRows;
+
+  /// Label of the barcode field of an item and a stock item. Web catalogue (barcodes): barcode (EAN), code-barres (EAN).
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode (EAN)'**
+  String get barcodeField;
+
+  /// Help under the barcode field. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'The 8 to 14 digits under the bars. Scan it, or type it.'**
+  String get barcodeHelp;
+
+  /// Button next to the barcode field that opens the camera. Web catalogue (barcodes): Scan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan'**
+  String get barcodeScan;
+
+  /// Spoken label of the Scan button. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the barcode with the camera'**
+  String get barcodeScanLabel;
+
+  /// Title of the scanner opened from the barcode field.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a barcode'**
+  String get barcodeScanTitle;
+
+  /// Under the view of the camera, for a barcode. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold the barcode in front of the camera.'**
+  String get barcodeScanHint;
+
+  /// No camera for the barcode scanner. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'No camera could be used. Type the digits under the bars.'**
+  String get barcodeNoCamera;
+
+  /// While a scanned code is looked up. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking this code up…'**
+  String get barcodeLooking;
+
+  /// The server's lookup did not end in time. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'The lookup is taking long. Scan the code again in a moment.'**
+  String get barcodeTakingLong;
+
+  /// Above what a lookup found. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'Found in {source}. Check before you use it: only the empty fields are filled, nothing is saved until you save the form.'**
+  String barcodeFound(String source);
+
+  /// Name of the category a lookup found (it goes in the notes). Web catalogue (barcodes): Category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get barcodeCategory;
+
+  /// Spoken label of the photo a lookup found. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo of the product'**
+  String get barcodePhoto;
+
+  /// Box under the photo a lookup found. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep this photo, if the sheet has none'**
+  String get barcodeKeepPhoto;
+
+  /// Fills the empty fields with what a lookup found. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'Use these values'**
+  String get barcodeUse;
+
+  /// Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'This code is in none of the open databases. Fill the sheet by hand.'**
+  String get barcodeNotFound;
+
+  /// Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'The open databases could not be read. Try again later, or fill the sheet by hand.'**
+  String get barcodeFailed;
+
+  /// A scanned code with a wrong check digit. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'This code is not a valid barcode: check its digits.'**
+  String get barcodeInvalid;
+
+  /// The server's rate limit. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many codes looked up in a short time. Try again in a minute.'**
+  String get barcodeLimited;
+
+  /// A lookup that got no answer (offline). Not a web string.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection: the code is kept with the sheet. Fill it by hand, or scan again later.'**
+  String get barcodeOffline;
+
+  /// The person refused the lookup, alone. Not a web string.
+  ///
+  /// In en, this message translates to:
+  /// **'The code is kept with the sheet. Looking it up in the open databases is off on this phone (Settings, in More).'**
+  String get barcodeOffAlone;
+
+  /// The server's lookup is off. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'The code is kept with the sheet. Looking it up in the open databases is off on this server.'**
+  String get barcodeOffServer;
+
+  /// The server refused the app on its lookup (web v0.5.1). Not a web string.
+  ///
+  /// In en, this message translates to:
+  /// **'The code is kept with the sheet. This server does not look codes up for the app yet.'**
+  String get barcodeServerUnavailable;
+
+  /// Credit of a photo from an open database. Web catalogue (barcodes): Photo by %(author)s.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo by {author}'**
+  String photoBy(String author);
+
+  /// Title of the question asked at the first scan, when the phone is alone. Not a web string.
+  ///
+  /// In en, this message translates to:
+  /// **'Look up barcodes'**
+  String get barcodeConsentTitle;
+
+  /// First paragraph of the question of the first scan. Not a web string.
+  ///
+  /// In en, this message translates to:
+  /// **'The phone can ask open databases what a scanned code is, to fill the name, the brand and a photo for you.'**
+  String get barcodeConsentIntro;
+
+  /// Heading of the question of the first scan. Not a web string.
+  ///
+  /// In en, this message translates to:
+  /// **'What leaves the phone'**
+  String get barcodeConsentWhatTitle;
+
+  /// What the lookup sends. Not a web string.
+  ///
+  /// In en, this message translates to:
+  /// **'The code you scan, and nothing else: no name, no home, no account. Only when you scan.'**
+  String get barcodeConsentWhat;
+
+  /// Heading of the question of the first scan. Not a web string.
+  ///
+  /// In en, this message translates to:
+  /// **'To whom'**
+  String get barcodeConsentWhoTitle;
+
+  /// Who receives the code. Not a web string.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Products Facts, then Open Food Facts, two open databases of the Open Food Facts project. Like any website, they see the address of your connection.'**
+  String get barcodeConsentWho;
+
+  /// Heading of the question of the first scan. Not a web string.
+  ///
+  /// In en, this message translates to:
+  /// **'Licences'**
+  String get barcodeConsentLicenceTitle;
+
+  /// Licences of the data and photos. Web About page names the same licences.
+  ///
+  /// In en, this message translates to:
+  /// **'Their data is under the ODbL and their photos under CC BY-SA 3.0: a photo kept shows its author and its source under it.'**
+  String get barcodeConsentLicence;
+
+  /// Last line of the question of the first scan. Not a web string.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this at any time in Settings, in More. Without it, a scan only fills the code.'**
+  String get barcodeConsentChange;
+
+  /// Button of the question of the first scan. Not a web string.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow the lookup'**
+  String get barcodeConsentAllow;
+
+  /// Button of the question of the first scan. Not a web string.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep only the code'**
+  String get barcodeConsentRefuse;
+
+  /// Switch in Settings when the phone is alone. Web catalogue (barcodes): Online lookup of barcodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Online lookup of barcodes'**
+  String get barcodeLookupSetting;
+
+  /// Text of the switch in Settings. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Open Products Facts, then Open Food Facts, what a scanned code is. Only the code is sent, nothing else. Off: a code is only kept.'**
+  String get barcodeLookupSettingText;
+
+  /// Error of the barcode field. Web catalogue (barcodes), same.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a valid barcode: type the 8, 12, 13 or 14 digits under the bars (EAN-8, UPC-A, EAN-13 or GTIN-14).'**
+  String get errEanInvalid;
 }
 
 class _AppLocalizationsDelegate

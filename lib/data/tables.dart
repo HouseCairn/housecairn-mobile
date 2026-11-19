@@ -116,6 +116,10 @@ class Items extends Table with ModelColumns, HomeOwned {
   /// (`rooms/models.py:15`, `:35-49`).
   TextColumn get links => text().withDefault(const Constant('[]'))();
   TextColumn get notes => text().withDefault(const Constant(''))();
+
+  /// The barcode (schema 12, web ADR 0083): empty, or 8, 12, 13 or 14
+  /// digits with a valid check digit (lib/domain/gtin.dart).
+  TextColumn get ean => text().withDefault(const Constant(''))();
 }
 
 /// `rooms.photo` (`rooms/models.py:189-196`, `:210-245`): exactly one of room
@@ -129,6 +133,11 @@ class Photos extends Table with ModelColumns, HomeOwned {
   TextColumn get category => text().withDefault(const Constant('general'))();
   TextColumn get caption => text().withDefault(const Constant(''))();
   TextColumn get image => text().nullable()();
+
+  /// The credit of a photo from an open database (schema 12, web ADR 0083),
+  /// JSON text of `source`, `source_url`, `license`, `license_url` and
+  /// `author`, shown under it; `{}` for a photo taken by a member.
+  TextColumn get attribution => text().withDefault(const Constant('{}'))();
 }
 
 /// `tasks.contractor` (`tasks/models.py:116-158`).
@@ -214,6 +223,11 @@ class Articles extends Table with ModelColumns, HomeOwned {
   TextColumn get unitPrice => text().nullable()();
   TextColumn get notes => text().withDefault(const Constant(''))();
   TextColumn get label => text().nullable()();
+
+  /// The barcode, and the credit of a label photo from an open database
+  /// (schema 12, web ADR 0083), as on an item and a photo.
+  TextColumn get ean => text().withDefault(const Constant(''))();
+  TextColumn get labelAttribution => text().withDefault(const Constant('{}'))();
 }
 
 /// `stock.article_rooms`: a room where an article is used. The id is

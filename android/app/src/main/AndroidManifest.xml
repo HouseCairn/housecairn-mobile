@@ -5,6 +5,11 @@
          permission: a day-level reminder is scheduled inexactly
          (docs/spec.md, "Reminders"). The camera is opened through the
          system's own camera app, which needs none. -->
+    <!-- The network (docs/adr/0015-barcode-lookup.md): the server typed in
+         the third way, and, alone, the lookup of a scanned barcode once the
+         person allowed it. Only the debug and profile manifests declared it
+         before, so a release build could reach neither. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <!-- The scanner of QR labels (docs/adr/0014-qr-labels.md): the camera,

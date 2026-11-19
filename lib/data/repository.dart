@@ -17,6 +17,7 @@ import '../domain/choices.dart';
 import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
 import '../domain/file_reference.dart';
+import '../domain/gtin.dart';
 import '../domain/guide.dart';
 import '../domain/labels.dart';
 import '../domain/photos.dart';
@@ -97,6 +98,10 @@ enum Refusal {
   /// A warranty of less than 1 or more than 99 months or years
   /// (`MAX_WARRANTY_DURATION`, `rooms/models.py`).
   warrantyDurationOutOfRange,
+
+  /// Not a valid barcode: 8, 12, 13 or 14 digits with their check digit
+  /// (`barcodes/gtin.py`, web ADR 0083).
+  eanInvalid,
 
   /// A phone number: digits, spaces and `+ ( ) - . /` only
   /// (`tasks/models.py:112`).
@@ -320,6 +325,34 @@ class ItemLink {
 }
 
 /// What an item is made of (`rooms/models.py:124-157`).
+/// The credit of a photo from an open database as its column keeps it
+/// (web ADR 0083, `barcodes.services.photo_of`): the five keys of the web,
+/// each a line of text; `null` for none.
+String? attributionJson(Map<String, String>? credit) {
+  if (credit == null || credit.isEmpty) return null;
+  String line(String key, int length) {
+    final text = (credit[key] ?? '').split(RegExp(r'\s+')).join(' ').trim();
+    return text.length > length ? text.substring(0, length) : text;
+  }
+
+  return jsonEncode({
+    'source': line('source', 120),
+    'source_url': line('source_url', 500),
+    'license': line('license', 60),
+    'license_url': line('license_url', 500),
+    'author': line('author', 120),
+  });
+}
+
+/// A barcode as the web stores it (`barcodes/fields.py`): spaces and dashes
+/// taken out, empty or valid, else [Refusal.eanInvalid].
+String cleanEan(String raw) {
+  final code = cleanGtin(raw);
+  if (code.isEmpty) return '';
+  if (!isValidGtin(code)) throw const Refused(Refusal.eanInvalid);
+  return code;
+}
+
 class ItemInput {
   const ItemInput({
     required this.name,
@@ -340,6 +373,7 @@ class ItemInput {
     this.contractUrl = '',
     this.links = const [],
     this.notes = '',
+    this.ean = '',
   });
 
   final String name;
@@ -371,6 +405,9 @@ class ItemInput {
   final String contractUrl;
   final List<ItemLink> links;
   final String notes;
+
+  /// The barcode as typed or scanned; spaces and dashes are taken out.
+  final String ean;
 }
 
 /// What a contractor is made of (`tasks/models.py:116-158`).
@@ -872,6 +909,21 @@ class Repository {
 
   Future<void> setSyncMode(SyncMode mode) =>
       _setSetting('sync_mode', mode.stored);
+
+  // ---------- the lookup of barcodes ----------
+
+  /// Whether the person allowed the phone alone to send a scanned code to
+  /// the open databases (docs/adr/0015-barcode-lookup.md): `null` until they
+  /// were asked, at their first scan.
+  Future<bool?> barcodeLookupAllowed() async =>
+      switch (await _setting('barcode_lookup')) {
+        'allowed' => true,
+        'refused' => false,
+        _ => null,
+      };
+
+  Future<void> setBarcodeLookupAllowed(bool allowed) =>
+      _setSetting('barcode_lookup', allowed ? 'allowed' : 'refused');
 
   // ---------- homes ----------
 
@@ -1426,6 +1478,7 @@ class Repository {
           : _webUrl(input.contractUrl),
       'links': linksJson(input.links),
       'notes': _text(input.notes, notesMaxLength),
+      'ean': cleanEan(input.ean),
     };
   }
 
@@ -1627,7 +1680,8 @@ class Repository {
 
   /// Every item of the home, all rooms together, by room (in the household's
   /// order) then name; only those of [roomId] when given, and those whose
-  /// name, brand, model or serial number holds [query], whatever its case
+  /// name, brand, model or serial number holds [query], whatever its case,
+  /// or whose barcode is the code of [query] or holds its digits (web ADR 0083)
   /// (`rooms/services.py` `item_rows`). Each with its room, its warranty at
   /// [today] and its next task: the open occurrence of its tasks due the
   /// soonest, the late ones first, one without a date last.
@@ -1649,7 +1703,8 @@ class Repository {
               item.brand,
               item.model,
               item.serialNumber,
-            ].any((t) => t.toLowerCase().contains(words))) {
+            ].any((t) => t.toLowerCase().contains(words)) &&
+            !gtinMatches(words, item.ean)) {
           continue;
         }
         final next = (await tasksOf(itemId: item.id))
@@ -1713,6 +1768,7 @@ class Repository {
     String? roomId,
     String? itemId,
     String category = 'general',
+    Map<String, String>? attribution,
   }) async {
     if ((roomId == null) == (itemId == null)) {
       throw ArgumentError('A photo is of one room or one item.');
@@ -1745,6 +1801,8 @@ class Repository {
             'category': category,
             'caption': '',
             'image': photo.fileReference().encode(),
+            // The credit of a photo from an open database (web ADR 0083).
+            'attribution': ?attributionJson(attribution),
             'deleted_at': null,
           },
           homeId: homeId,

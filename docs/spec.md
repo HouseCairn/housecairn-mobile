@@ -16,7 +16,9 @@
    (`tasks/models.py:162`, ADR 0033 of the web application).
 4. **No outbound call that the person did not configure**: no telemetry, no link preview, no
    remote image. The only network peer is the relay, or the Housecairn server, the person chose
-   ([Ways to use the app](#ways-to-use-the-app)).
+   ([Ways to use the app](#ways-to-use-the-app)); alone, Open Products Facts and Open Food Facts
+   receive a scanned barcode, and nothing else, once the person allowed it at their first scan
+   ([ADR 0015](adr/0015-barcode-lookup.md), maintainer's decision of 2026-11-15).
 5. **Derived figures are computed, never stored or synced**: stock levels, budget figures,
    committed amounts, visibility dates.
 
@@ -115,7 +117,8 @@ vectors, [ADR 0001](adr/0001-flutter-stack-and-packages.md)):
 
 At the first start the app offers three ways, one at a time per phone
 ([ADR 0010](adr/0010-three-ways-to-use-the-app.md), maintainer's decision of 2026-11-14):
-**alone on this phone** (the default, no network), **family sync** through the end-to-end
+**alone on this phone** (the default, no network but the lookup of a scanned barcode once
+allowed, [ADR 0015](adr/0015-barcode-lookup.md)), **family sync** through the end-to-end
 encrypted relay (with a subscription on the hosted relay), and **my Housecairn server** (an
 instance and a sign-in to it by OAuth 2 with PKCE; the server stores and reads all the homes of
 the phone, which then also appear in its web pages; unlocked by a single in-app purchase). A
@@ -330,6 +333,13 @@ contractor with it.
     camera then, never before; it opens the page of a code this phone knows and says in words
     when a code is unknown here, revoked, of an object deleted, or not a label. It reads the code
     alone and the address `…/l/<code>/` of a sticker of the web, of which only the code is kept.
+    **Barcodes** ([ADR 0015](adr/0015-barcode-lookup.md), web ADR 0083): an item and a stock item
+    have a field Barcode (EAN), typed or scanned with the same scanner (EAN-8, EAN-13, UPC-A),
+    checked as the web checks it; a scan shows what Open Products Facts or Open Food Facts know
+    of the code, through the server in the third way, and *Use these values* fills the empty
+    fields only; a photo found is kept only where there is none, without metadata, with its
+    credit under it. Alone, the first scan asks before anything is sent, and Settings has the
+    switch. The stock and Equipment are searched by a code too.
 11. **Homes**: the list of homes, active then archived; create, rename, change currency or
     hemisphere, archive, unarchive, delete ([Homes](#homes)).
 12. **Settings**: language, reminders, export and import, the way the app is used and the move

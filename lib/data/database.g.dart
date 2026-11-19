@@ -1779,6 +1779,16 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, ItemRow> {
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _eanMeta = const VerificationMeta('ean');
+  @override
+  late final GeneratedColumn<String> ean = GeneratedColumn<String>(
+    'ean',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1805,6 +1815,7 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, ItemRow> {
     contractUrl,
     links,
     notes,
+    ean,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1977,6 +1988,12 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, ItemRow> {
         notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
       );
     }
+    if (data.containsKey('ean')) {
+      context.handle(
+        _eanMeta,
+        ean.isAcceptableOrUnknown(data['ean']!, _eanMeta),
+      );
+    }
     return context;
   }
 
@@ -2090,6 +2107,10 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, ItemRow> {
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
       )!,
+      ean: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ean'],
+      )!,
     );
   }
 
@@ -2137,6 +2158,10 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
   /// (`rooms/models.py:15`, `:35-49`).
   final String links;
   final String notes;
+
+  /// The barcode (schema 12, web ADR 0083): empty, or 8, 12, 13 or 14
+  /// digits with a valid check digit (lib/domain/gtin.dart).
+  final String ean;
   const ItemRow({
     required this.id,
     required this.createdAt,
@@ -2162,6 +2187,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     required this.contractUrl,
     required this.links,
     required this.notes,
+    required this.ean,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2216,6 +2242,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     map['contract_url'] = Variable<String>(contractUrl);
     map['links'] = Variable<String>(links);
     map['notes'] = Variable<String>(notes);
+    map['ean'] = Variable<String>(ean);
     return map;
   }
 
@@ -2259,6 +2286,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
       contractUrl: Value(contractUrl),
       links: Value(links),
       notes: Value(notes),
+      ean: Value(ean),
     );
   }
 
@@ -2298,6 +2326,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
       contractUrl: serializer.fromJson<String>(json['contractUrl']),
       links: serializer.fromJson<String>(json['links']),
       notes: serializer.fromJson<String>(json['notes']),
+      ean: serializer.fromJson<String>(json['ean']),
     );
   }
   @override
@@ -2328,6 +2357,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
       'contractUrl': serializer.toJson<String>(contractUrl),
       'links': serializer.toJson<String>(links),
       'notes': serializer.toJson<String>(notes),
+      'ean': serializer.toJson<String>(ean),
     };
   }
 
@@ -2356,6 +2386,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     String? contractUrl,
     String? links,
     String? notes,
+    String? ean,
   }) => ItemRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -2389,6 +2420,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     contractUrl: contractUrl ?? this.contractUrl,
     links: links ?? this.links,
     notes: notes ?? this.notes,
+    ean: ean ?? this.ean,
   );
   ItemRow copyWithCompanion(ItemsCompanion data) {
     return ItemRow(
@@ -2440,6 +2472,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
           : this.contractUrl,
       links: data.links.present ? data.links.value : this.links,
       notes: data.notes.present ? data.notes.value : this.notes,
+      ean: data.ean.present ? data.ean.value : this.ean,
     );
   }
 
@@ -2469,7 +2502,8 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
           ..write('contractNumber: $contractNumber, ')
           ..write('contractUrl: $contractUrl, ')
           ..write('links: $links, ')
-          ..write('notes: $notes')
+          ..write('notes: $notes, ')
+          ..write('ean: $ean')
           ..write(')'))
         .toString();
   }
@@ -2500,6 +2534,7 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
     contractUrl,
     links,
     notes,
+    ean,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -2528,7 +2563,8 @@ class ItemRow extends DataClass implements Insertable<ItemRow> {
           other.contractNumber == this.contractNumber &&
           other.contractUrl == this.contractUrl &&
           other.links == this.links &&
-          other.notes == this.notes);
+          other.notes == this.notes &&
+          other.ean == this.ean);
 }
 
 class ItemsCompanion extends UpdateCompanion<ItemRow> {
@@ -2556,6 +2592,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
   final Value<String> contractUrl;
   final Value<String> links;
   final Value<String> notes;
+  final Value<String> ean;
   final Value<int> rowid;
   const ItemsCompanion({
     this.id = const Value.absent(),
@@ -2582,6 +2619,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     this.contractUrl = const Value.absent(),
     this.links = const Value.absent(),
     this.notes = const Value.absent(),
+    this.ean = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ItemsCompanion.insert({
@@ -2609,6 +2647,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     this.contractUrl = const Value.absent(),
     this.links = const Value.absent(),
     this.notes = const Value.absent(),
+    this.ean = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -2641,6 +2680,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     Expression<String>? contractUrl,
     Expression<String>? links,
     Expression<String>? notes,
+    Expression<String>? ean,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2671,6 +2711,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
       if (contractUrl != null) 'contract_url': contractUrl,
       if (links != null) 'links': links,
       if (notes != null) 'notes': notes,
+      if (ean != null) 'ean': ean,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2700,6 +2741,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     Value<String>? contractUrl,
     Value<String>? links,
     Value<String>? notes,
+    Value<String>? ean,
     Value<int>? rowid,
   }) {
     return ItemsCompanion(
@@ -2727,6 +2769,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
       contractUrl: contractUrl ?? this.contractUrl,
       links: links ?? this.links,
       notes: notes ?? this.notes,
+      ean: ean ?? this.ean,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2818,6 +2861,9 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
+    if (ean.present) {
+      map['ean'] = Variable<String>(ean.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2851,6 +2897,7 @@ class ItemsCompanion extends UpdateCompanion<ItemRow> {
           ..write('contractUrl: $contractUrl, ')
           ..write('links: $links, ')
           ..write('notes: $notes, ')
+          ..write('ean: $ean, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2964,6 +3011,18 @@ class $PhotosTable extends Photos with TableInfo<$PhotosTable, PhotoRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _attributionMeta = const VerificationMeta(
+    'attribution',
+  );
+  @override
+  late final GeneratedColumn<String> attribution = GeneratedColumn<String>(
+    'attribution',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('{}'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2976,6 +3035,7 @@ class $PhotosTable extends Photos with TableInfo<$PhotosTable, PhotoRow> {
     category,
     caption,
     image,
+    attribution,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3027,6 +3087,15 @@ class $PhotosTable extends Photos with TableInfo<$PhotosTable, PhotoRow> {
       context.handle(
         _imageMeta,
         image.isAcceptableOrUnknown(data['image']!, _imageMeta),
+      );
+    }
+    if (data.containsKey('attribution')) {
+      context.handle(
+        _attributionMeta,
+        attribution.isAcceptableOrUnknown(
+          data['attribution']!,
+          _attributionMeta,
+        ),
       );
     }
     return context;
@@ -3086,6 +3155,10 @@ class $PhotosTable extends Photos with TableInfo<$PhotosTable, PhotoRow> {
         DriftSqlType.string,
         data['${effectivePrefix}image'],
       ),
+      attribution: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}attribution'],
+      )!,
     );
   }
 
@@ -3118,6 +3191,11 @@ class PhotoRow extends DataClass implements Insertable<PhotoRow> {
   final String category;
   final String caption;
   final String? image;
+
+  /// The credit of a photo from an open database (schema 12, web ADR 0083),
+  /// JSON text of `source`, `source_url`, `license`, `license_url` and
+  /// `author`, shown under it; `{}` for a photo taken by a member.
+  final String attribution;
   const PhotoRow({
     required this.id,
     required this.createdAt,
@@ -3129,6 +3207,7 @@ class PhotoRow extends DataClass implements Insertable<PhotoRow> {
     required this.category,
     required this.caption,
     this.image,
+    required this.attribution,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3161,6 +3240,7 @@ class PhotoRow extends DataClass implements Insertable<PhotoRow> {
     if (!nullToAbsent || image != null) {
       map['image'] = Variable<String>(image);
     }
+    map['attribution'] = Variable<String>(attribution);
     return map;
   }
 
@@ -3184,6 +3264,7 @@ class PhotoRow extends DataClass implements Insertable<PhotoRow> {
       image: image == null && nullToAbsent
           ? const Value.absent()
           : Value(image),
+      attribution: Value(attribution),
     );
   }
 
@@ -3203,6 +3284,7 @@ class PhotoRow extends DataClass implements Insertable<PhotoRow> {
       category: serializer.fromJson<String>(json['category']),
       caption: serializer.fromJson<String>(json['caption']),
       image: serializer.fromJson<String?>(json['image']),
+      attribution: serializer.fromJson<String>(json['attribution']),
     );
   }
   @override
@@ -3219,6 +3301,7 @@ class PhotoRow extends DataClass implements Insertable<PhotoRow> {
       'category': serializer.toJson<String>(category),
       'caption': serializer.toJson<String>(caption),
       'image': serializer.toJson<String?>(image),
+      'attribution': serializer.toJson<String>(attribution),
     };
   }
 
@@ -3233,6 +3316,7 @@ class PhotoRow extends DataClass implements Insertable<PhotoRow> {
     String? category,
     String? caption,
     Value<String?> image = const Value.absent(),
+    String? attribution,
   }) => PhotoRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -3244,6 +3328,7 @@ class PhotoRow extends DataClass implements Insertable<PhotoRow> {
     category: category ?? this.category,
     caption: caption ?? this.caption,
     image: image.present ? image.value : this.image,
+    attribution: attribution ?? this.attribution,
   );
   PhotoRow copyWithCompanion(PhotosCompanion data) {
     return PhotoRow(
@@ -3257,6 +3342,9 @@ class PhotoRow extends DataClass implements Insertable<PhotoRow> {
       category: data.category.present ? data.category.value : this.category,
       caption: data.caption.present ? data.caption.value : this.caption,
       image: data.image.present ? data.image.value : this.image,
+      attribution: data.attribution.present
+          ? data.attribution.value
+          : this.attribution,
     );
   }
 
@@ -3272,7 +3360,8 @@ class PhotoRow extends DataClass implements Insertable<PhotoRow> {
           ..write('itemId: $itemId, ')
           ..write('category: $category, ')
           ..write('caption: $caption, ')
-          ..write('image: $image')
+          ..write('image: $image, ')
+          ..write('attribution: $attribution')
           ..write(')'))
         .toString();
   }
@@ -3289,6 +3378,7 @@ class PhotoRow extends DataClass implements Insertable<PhotoRow> {
     category,
     caption,
     image,
+    attribution,
   );
   @override
   bool operator ==(Object other) =>
@@ -3303,7 +3393,8 @@ class PhotoRow extends DataClass implements Insertable<PhotoRow> {
           other.itemId == this.itemId &&
           other.category == this.category &&
           other.caption == this.caption &&
-          other.image == this.image);
+          other.image == this.image &&
+          other.attribution == this.attribution);
 }
 
 class PhotosCompanion extends UpdateCompanion<PhotoRow> {
@@ -3317,6 +3408,7 @@ class PhotosCompanion extends UpdateCompanion<PhotoRow> {
   final Value<String> category;
   final Value<String> caption;
   final Value<String?> image;
+  final Value<String> attribution;
   final Value<int> rowid;
   const PhotosCompanion({
     this.id = const Value.absent(),
@@ -3329,6 +3421,7 @@ class PhotosCompanion extends UpdateCompanion<PhotoRow> {
     this.category = const Value.absent(),
     this.caption = const Value.absent(),
     this.image = const Value.absent(),
+    this.attribution = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PhotosCompanion.insert({
@@ -3342,6 +3435,7 @@ class PhotosCompanion extends UpdateCompanion<PhotoRow> {
     this.category = const Value.absent(),
     this.caption = const Value.absent(),
     this.image = const Value.absent(),
+    this.attribution = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -3358,6 +3452,7 @@ class PhotosCompanion extends UpdateCompanion<PhotoRow> {
     Expression<String>? category,
     Expression<String>? caption,
     Expression<String>? image,
+    Expression<String>? attribution,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3371,6 +3466,7 @@ class PhotosCompanion extends UpdateCompanion<PhotoRow> {
       if (category != null) 'category': category,
       if (caption != null) 'caption': caption,
       if (image != null) 'image': image,
+      if (attribution != null) 'attribution': attribution,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3386,6 +3482,7 @@ class PhotosCompanion extends UpdateCompanion<PhotoRow> {
     Value<String>? category,
     Value<String>? caption,
     Value<String?>? image,
+    Value<String>? attribution,
     Value<int>? rowid,
   }) {
     return PhotosCompanion(
@@ -3399,6 +3496,7 @@ class PhotosCompanion extends UpdateCompanion<PhotoRow> {
       category: category ?? this.category,
       caption: caption ?? this.caption,
       image: image ?? this.image,
+      attribution: attribution ?? this.attribution,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3444,6 +3542,9 @@ class PhotosCompanion extends UpdateCompanion<PhotoRow> {
     if (image.present) {
       map['image'] = Variable<String>(image.value);
     }
+    if (attribution.present) {
+      map['attribution'] = Variable<String>(attribution.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3463,6 +3564,7 @@ class PhotosCompanion extends UpdateCompanion<PhotoRow> {
           ..write('category: $category, ')
           ..write('caption: $caption, ')
           ..write('image: $image, ')
+          ..write('attribution: $attribution, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6488,6 +6590,28 @@ class $ArticlesTable extends Articles
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _eanMeta = const VerificationMeta('ean');
+  @override
+  late final GeneratedColumn<String> ean = GeneratedColumn<String>(
+    'ean',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _labelAttributionMeta = const VerificationMeta(
+    'labelAttribution',
+  );
+  @override
+  late final GeneratedColumn<String> labelAttribution = GeneratedColumn<String>(
+    'label_attribution',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('{}'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -6505,6 +6629,8 @@ class $ArticlesTable extends Articles
     unitPrice,
     notes,
     label,
+    ean,
+    labelAttribution,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6608,6 +6734,21 @@ class $ArticlesTable extends Articles
         label.isAcceptableOrUnknown(data['label']!, _labelMeta),
       );
     }
+    if (data.containsKey('ean')) {
+      context.handle(
+        _eanMeta,
+        ean.isAcceptableOrUnknown(data['ean']!, _eanMeta),
+      );
+    }
+    if (data.containsKey('label_attribution')) {
+      context.handle(
+        _labelAttributionMeta,
+        labelAttribution.isAcceptableOrUnknown(
+          data['label_attribution']!,
+          _labelAttributionMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -6681,6 +6822,14 @@ class $ArticlesTable extends Articles
         DriftSqlType.string,
         data['${effectivePrefix}label'],
       ),
+      ean: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ean'],
+      )!,
+      labelAttribution: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label_attribution'],
+      )!,
     );
   }
 
@@ -6710,6 +6859,11 @@ class ArticleRow extends DataClass implements Insertable<ArticleRow> {
   final String? unitPrice;
   final String notes;
   final String? label;
+
+  /// The barcode, and the credit of a label photo from an open database
+  /// (schema 12, web ADR 0083), as on an item and a photo.
+  final String ean;
+  final String labelAttribution;
   const ArticleRow({
     required this.id,
     required this.createdAt,
@@ -6726,6 +6880,8 @@ class ArticleRow extends DataClass implements Insertable<ArticleRow> {
     this.unitPrice,
     required this.notes,
     this.label,
+    required this.ean,
+    required this.labelAttribution,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6759,6 +6915,8 @@ class ArticleRow extends DataClass implements Insertable<ArticleRow> {
     if (!nullToAbsent || label != null) {
       map['label'] = Variable<String>(label);
     }
+    map['ean'] = Variable<String>(ean);
+    map['label_attribution'] = Variable<String>(labelAttribution);
     return map;
   }
 
@@ -6787,6 +6945,8 @@ class ArticleRow extends DataClass implements Insertable<ArticleRow> {
       label: label == null && nullToAbsent
           ? const Value.absent()
           : Value(label),
+      ean: Value(ean),
+      labelAttribution: Value(labelAttribution),
     );
   }
 
@@ -6813,6 +6973,8 @@ class ArticleRow extends DataClass implements Insertable<ArticleRow> {
       unitPrice: serializer.fromJson<String?>(json['unitPrice']),
       notes: serializer.fromJson<String>(json['notes']),
       label: serializer.fromJson<String?>(json['label']),
+      ean: serializer.fromJson<String>(json['ean']),
+      labelAttribution: serializer.fromJson<String>(json['labelAttribution']),
     );
   }
   @override
@@ -6834,6 +6996,8 @@ class ArticleRow extends DataClass implements Insertable<ArticleRow> {
       'unitPrice': serializer.toJson<String?>(unitPrice),
       'notes': serializer.toJson<String>(notes),
       'label': serializer.toJson<String?>(label),
+      'ean': serializer.toJson<String>(ean),
+      'labelAttribution': serializer.toJson<String>(labelAttribution),
     };
   }
 
@@ -6853,6 +7017,8 @@ class ArticleRow extends DataClass implements Insertable<ArticleRow> {
     Value<String?> unitPrice = const Value.absent(),
     String? notes,
     Value<String?> label = const Value.absent(),
+    String? ean,
+    String? labelAttribution,
   }) => ArticleRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -6869,6 +7035,8 @@ class ArticleRow extends DataClass implements Insertable<ArticleRow> {
     unitPrice: unitPrice.present ? unitPrice.value : this.unitPrice,
     notes: notes ?? this.notes,
     label: label.present ? label.value : this.label,
+    ean: ean ?? this.ean,
+    labelAttribution: labelAttribution ?? this.labelAttribution,
   );
   ArticleRow copyWithCompanion(ArticlesCompanion data) {
     return ArticleRow(
@@ -6893,6 +7061,10 @@ class ArticleRow extends DataClass implements Insertable<ArticleRow> {
       unitPrice: data.unitPrice.present ? data.unitPrice.value : this.unitPrice,
       notes: data.notes.present ? data.notes.value : this.notes,
       label: data.label.present ? data.label.value : this.label,
+      ean: data.ean.present ? data.ean.value : this.ean,
+      labelAttribution: data.labelAttribution.present
+          ? data.labelAttribution.value
+          : this.labelAttribution,
     );
   }
 
@@ -6913,7 +7085,9 @@ class ArticleRow extends DataClass implements Insertable<ArticleRow> {
           ..write('threshold: $threshold, ')
           ..write('unitPrice: $unitPrice, ')
           ..write('notes: $notes, ')
-          ..write('label: $label')
+          ..write('label: $label, ')
+          ..write('ean: $ean, ')
+          ..write('labelAttribution: $labelAttribution')
           ..write(')'))
         .toString();
   }
@@ -6935,6 +7109,8 @@ class ArticleRow extends DataClass implements Insertable<ArticleRow> {
     unitPrice,
     notes,
     label,
+    ean,
+    labelAttribution,
   );
   @override
   bool operator ==(Object other) =>
@@ -6954,7 +7130,9 @@ class ArticleRow extends DataClass implements Insertable<ArticleRow> {
           other.threshold == this.threshold &&
           other.unitPrice == this.unitPrice &&
           other.notes == this.notes &&
-          other.label == this.label);
+          other.label == this.label &&
+          other.ean == this.ean &&
+          other.labelAttribution == this.labelAttribution);
 }
 
 class ArticlesCompanion extends UpdateCompanion<ArticleRow> {
@@ -6973,6 +7151,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleRow> {
   final Value<String?> unitPrice;
   final Value<String> notes;
   final Value<String?> label;
+  final Value<String> ean;
+  final Value<String> labelAttribution;
   final Value<int> rowid;
   const ArticlesCompanion({
     this.id = const Value.absent(),
@@ -6990,6 +7170,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleRow> {
     this.unitPrice = const Value.absent(),
     this.notes = const Value.absent(),
     this.label = const Value.absent(),
+    this.ean = const Value.absent(),
+    this.labelAttribution = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ArticlesCompanion.insert({
@@ -7008,6 +7190,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleRow> {
     this.unitPrice = const Value.absent(),
     this.notes = const Value.absent(),
     this.label = const Value.absent(),
+    this.ean = const Value.absent(),
+    this.labelAttribution = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -7030,6 +7214,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleRow> {
     Expression<String>? unitPrice,
     Expression<String>? notes,
     Expression<String>? label,
+    Expression<String>? ean,
+    Expression<String>? labelAttribution,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -7049,6 +7235,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleRow> {
       if (unitPrice != null) 'unit_price': unitPrice,
       if (notes != null) 'notes': notes,
       if (label != null) 'label': label,
+      if (ean != null) 'ean': ean,
+      if (labelAttribution != null) 'label_attribution': labelAttribution,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -7069,6 +7257,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleRow> {
     Value<String?>? unitPrice,
     Value<String>? notes,
     Value<String?>? label,
+    Value<String>? ean,
+    Value<String>? labelAttribution,
     Value<int>? rowid,
   }) {
     return ArticlesCompanion(
@@ -7088,6 +7278,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleRow> {
       unitPrice: unitPrice ?? this.unitPrice,
       notes: notes ?? this.notes,
       label: label ?? this.label,
+      ean: ean ?? this.ean,
+      labelAttribution: labelAttribution ?? this.labelAttribution,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -7146,6 +7338,12 @@ class ArticlesCompanion extends UpdateCompanion<ArticleRow> {
     if (label.present) {
       map['label'] = Variable<String>(label.value);
     }
+    if (ean.present) {
+      map['ean'] = Variable<String>(ean.value);
+    }
+    if (labelAttribution.present) {
+      map['label_attribution'] = Variable<String>(labelAttribution.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -7170,6 +7368,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleRow> {
           ..write('unitPrice: $unitPrice, ')
           ..write('notes: $notes, ')
           ..write('label: $label, ')
+          ..write('ean: $ean, ')
+          ..write('labelAttribution: $labelAttribution, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -21588,6 +21788,7 @@ typedef $$ItemsTableCreateCompanionBuilder = ItemsCompanion Function({
   Value<String> contractUrl,
   Value<String> links,
   Value<String> notes,
+  Value<String> ean,
   Value<int> rowid,
 });
 typedef $$ItemsTableUpdateCompanionBuilder = ItemsCompanion Function({
@@ -21615,6 +21816,7 @@ typedef $$ItemsTableUpdateCompanionBuilder = ItemsCompanion Function({
   Value<String> contractUrl,
   Value<String> links,
   Value<String> notes,
+  Value<String> ean,
   Value<int> rowid,
 });
 
@@ -21749,6 +21951,11 @@ class $$ItemsTableFilterComposer extends Composer<_$AppDatabase, $ItemsTable> {
     column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get ean => $composableBuilder(
+    column: $table.ean,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$ItemsTableOrderingComposer
@@ -21879,6 +22086,11 @@ class $$ItemsTableOrderingComposer
     column: $table.notes,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get ean => $composableBuilder(
+    column: $table.ean,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ItemsTableAnnotationComposer
@@ -21986,6 +22198,9 @@ class $$ItemsTableAnnotationComposer
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get ean =>
+      $composableBuilder(column: $table.ean, builder: (column) => column);
 }
 
 class $$ItemsTableTableManager
@@ -22040,6 +22255,7 @@ class $$ItemsTableTableManager
                 Value<String> contractUrl = const Value.absent(),
                 Value<String> links = const Value.absent(),
                 Value<String> notes = const Value.absent(),
+                Value<String> ean = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ItemsCompanion(
                 id: id,
@@ -22066,6 +22282,7 @@ class $$ItemsTableTableManager
                 contractUrl: contractUrl,
                 links: links,
                 notes: notes,
+                ean: ean,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -22094,6 +22311,7 @@ class $$ItemsTableTableManager
                 Value<String> contractUrl = const Value.absent(),
                 Value<String> links = const Value.absent(),
                 Value<String> notes = const Value.absent(),
+                Value<String> ean = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ItemsCompanion.insert(
                 id: id,
@@ -22120,6 +22338,7 @@ class $$ItemsTableTableManager
                 contractUrl: contractUrl,
                 links: links,
                 notes: notes,
+                ean: ean,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -22164,6 +22383,7 @@ typedef $$PhotosTableCreateCompanionBuilder = PhotosCompanion Function({
   Value<String> category,
   Value<String> caption,
   Value<String?> image,
+  Value<String> attribution,
   Value<int> rowid,
 });
 typedef $$PhotosTableUpdateCompanionBuilder = PhotosCompanion Function({
@@ -22177,6 +22397,7 @@ typedef $$PhotosTableUpdateCompanionBuilder = PhotosCompanion Function({
   Value<String> category,
   Value<String> caption,
   Value<String?> image,
+  Value<String> attribution,
   Value<int> rowid,
 });
 
@@ -22242,6 +22463,11 @@ class $$PhotosTableFilterComposer
     column: $table.image,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get attribution => $composableBuilder(
+    column: $table.attribution,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$PhotosTableOrderingComposer
@@ -22302,6 +22528,11 @@ class $$PhotosTableOrderingComposer
     column: $table.image,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get attribution => $composableBuilder(
+    column: $table.attribution,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PhotosTableAnnotationComposer
@@ -22342,6 +22573,11 @@ class $$PhotosTableAnnotationComposer
 
   GeneratedColumn<String> get image =>
       $composableBuilder(column: $table.image, builder: (column) => column);
+
+  GeneratedColumn<String> get attribution => $composableBuilder(
+    column: $table.attribution,
+    builder: (column) => column,
+  );
 }
 
 class $$PhotosTableTableManager
@@ -22382,6 +22618,7 @@ class $$PhotosTableTableManager
                 Value<String> category = const Value.absent(),
                 Value<String> caption = const Value.absent(),
                 Value<String?> image = const Value.absent(),
+                Value<String> attribution = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PhotosCompanion(
                 id: id,
@@ -22394,6 +22631,7 @@ class $$PhotosTableTableManager
                 category: category,
                 caption: caption,
                 image: image,
+                attribution: attribution,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -22408,6 +22646,7 @@ class $$PhotosTableTableManager
                 Value<String> category = const Value.absent(),
                 Value<String> caption = const Value.absent(),
                 Value<String?> image = const Value.absent(),
+                Value<String> attribution = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PhotosCompanion.insert(
                 id: id,
@@ -22420,6 +22659,7 @@ class $$PhotosTableTableManager
                 category: category,
                 caption: caption,
                 image: image,
+                attribution: attribution,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -23800,6 +24040,8 @@ typedef $$ArticlesTableCreateCompanionBuilder = ArticlesCompanion Function({
   Value<String?> unitPrice,
   Value<String> notes,
   Value<String?> label,
+  Value<String> ean,
+  Value<String> labelAttribution,
   Value<int> rowid,
 });
 typedef $$ArticlesTableUpdateCompanionBuilder = ArticlesCompanion Function({
@@ -23818,6 +24060,8 @@ typedef $$ArticlesTableUpdateCompanionBuilder = ArticlesCompanion Function({
   Value<String?> unitPrice,
   Value<String> notes,
   Value<String?> label,
+  Value<String> ean,
+  Value<String> labelAttribution,
   Value<int> rowid,
 });
 
@@ -23906,6 +24150,16 @@ class $$ArticlesTableFilterComposer
     column: $table.label,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get ean => $composableBuilder(
+    column: $table.ean,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get labelAttribution => $composableBuilder(
+    column: $table.labelAttribution,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$ArticlesTableOrderingComposer
@@ -23991,6 +24245,16 @@ class $$ArticlesTableOrderingComposer
     column: $table.label,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get ean => $composableBuilder(
+    column: $table.ean,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get labelAttribution => $composableBuilder(
+    column: $table.labelAttribution,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ArticlesTableAnnotationComposer
@@ -24052,6 +24316,14 @@ class $$ArticlesTableAnnotationComposer
 
   GeneratedColumn<String> get label =>
       $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<String> get ean =>
+      $composableBuilder(column: $table.ean, builder: (column) => column);
+
+  GeneratedColumn<String> get labelAttribution => $composableBuilder(
+    column: $table.labelAttribution,
+    builder: (column) => column,
+  );
 }
 
 class $$ArticlesTableTableManager
@@ -24100,6 +24372,8 @@ class $$ArticlesTableTableManager
                 Value<String?> unitPrice = const Value.absent(),
                 Value<String> notes = const Value.absent(),
                 Value<String?> label = const Value.absent(),
+                Value<String> ean = const Value.absent(),
+                Value<String> labelAttribution = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ArticlesCompanion(
                 id: id,
@@ -24117,6 +24391,8 @@ class $$ArticlesTableTableManager
                 unitPrice: unitPrice,
                 notes: notes,
                 label: label,
+                ean: ean,
+                labelAttribution: labelAttribution,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -24136,6 +24412,8 @@ class $$ArticlesTableTableManager
                 Value<String?> unitPrice = const Value.absent(),
                 Value<String> notes = const Value.absent(),
                 Value<String?> label = const Value.absent(),
+                Value<String> ean = const Value.absent(),
+                Value<String> labelAttribution = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ArticlesCompanion.insert(
                 id: id,
@@ -24153,6 +24431,8 @@ class $$ArticlesTableTableManager
                 unitPrice: unitPrice,
                 notes: notes,
                 label: label,
+                ean: ean,
+                labelAttribution: labelAttribution,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

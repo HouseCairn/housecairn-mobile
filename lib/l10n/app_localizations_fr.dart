@@ -1280,7 +1280,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get wayAloneText =>
-      'Vos logements restent sur ce téléphone. Rien n\'est envoyé nulle part. Vous pourrez activer le partage plus tard.';
+      'Vos logements restent sur ce téléphone. Rien ne quitte le téléphone, sauf le code-barres d\'un produit vers des bases de produits libres, si vous l\'autorisez. Vous pourrez activer le partage plus tard.';
 
   @override
   String get wayFamilyTitle => 'Synchronisation en famille';
@@ -3339,4 +3339,137 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get selectRows => 'Sélectionner';
+
+  @override
+  String get barcodeField => 'Code-barres (EAN)';
+
+  @override
+  String get barcodeHelp =>
+      'Les 8 à 14 chiffres sous les barres. Scannez-le, ou saisissez-le.';
+
+  @override
+  String get barcodeScan => 'Scanner';
+
+  @override
+  String get barcodeScanLabel => 'Scanner le code-barres avec la caméra';
+
+  @override
+  String get barcodeScanTitle => 'Scanner un code-barres';
+
+  @override
+  String get barcodeScanHint => 'Tenez le code-barres devant la caméra.';
+
+  @override
+  String get barcodeNoCamera =>
+      'Aucune caméra n\'est utilisable. Saisissez les chiffres sous les barres.';
+
+  @override
+  String get barcodeLooking => 'Recherche de ce code…';
+
+  @override
+  String get barcodeTakingLong =>
+      'La recherche prend du temps. Scannez de nouveau le code dans un moment.';
+
+  @override
+  String barcodeFound(String source) {
+    return 'Trouvé dans $source. Vérifiez avant de l\'utiliser : seuls les champs vides sont remplis, rien n\'est enregistré avant que vous enregistriez le formulaire.';
+  }
+
+  @override
+  String get barcodeCategory => 'Catégorie';
+
+  @override
+  String get barcodePhoto => 'Photo du produit';
+
+  @override
+  String get barcodeKeepPhoto => 'Garder cette photo, si la fiche n\'en a pas';
+
+  @override
+  String get barcodeUse => 'Utiliser ces valeurs';
+
+  @override
+  String get barcodeNotFound =>
+      'Ce code n\'est dans aucune des bases ouvertes. Remplissez la fiche à la main.';
+
+  @override
+  String get barcodeFailed =>
+      'Les bases ouvertes n\'ont pas pu être lues. Réessayez plus tard, ou remplissez la fiche à la main.';
+
+  @override
+  String get barcodeInvalid =>
+      'Ce code n\'est pas un code-barres valide : vérifiez ses chiffres.';
+
+  @override
+  String get barcodeLimited =>
+      'Trop de codes cherchés en peu de temps. Réessayez dans une minute.';
+
+  @override
+  String get barcodeOffline =>
+      'Pas de connexion : le code est gardé avec la fiche. Remplissez-la à la main, ou scannez de nouveau plus tard.';
+
+  @override
+  String get barcodeOffAlone =>
+      'Le code est gardé avec la fiche. La recherche dans les bases ouvertes est désactivée sur ce téléphone (Réglages, dans Plus).';
+
+  @override
+  String get barcodeOffServer =>
+      'Le code est gardé avec la fiche. La recherche dans les bases ouvertes est désactivée sur ce serveur.';
+
+  @override
+  String get barcodeServerUnavailable =>
+      'Le code est gardé avec la fiche. Ce serveur ne cherche pas encore les codes pour l\'application.';
+
+  @override
+  String photoBy(String author) {
+    return 'Photo de $author';
+  }
+
+  @override
+  String get barcodeConsentTitle => 'Recherche des codes-barres';
+
+  @override
+  String get barcodeConsentIntro =>
+      'Le téléphone peut demander à des bases ouvertes ce qu\'est un code scanné, pour remplir à votre place le nom, la marque et une photo.';
+
+  @override
+  String get barcodeConsentWhatTitle => 'Ce qui quitte le téléphone';
+
+  @override
+  String get barcodeConsentWhat =>
+      'Le code que vous scannez, et rien d\'autre : ni nom, ni logement, ni compte. Seulement quand vous scannez.';
+
+  @override
+  String get barcodeConsentWhoTitle => 'À qui';
+
+  @override
+  String get barcodeConsentWho =>
+      'Open Products Facts, puis Open Food Facts, deux bases ouvertes du projet Open Food Facts. Comme tout site web, elles voient l\'adresse de votre connexion.';
+
+  @override
+  String get barcodeConsentLicenceTitle => 'Licences';
+
+  @override
+  String get barcodeConsentLicence =>
+      'Leurs données sont sous licence ODbL et leurs photos sous CC BY-SA 3.0 : une photo gardée affiche son auteur et sa source en dessous.';
+
+  @override
+  String get barcodeConsentChange =>
+      'Vous pouvez changer cela à tout moment dans Réglages, dans Plus. Sans cela, un scan ne remplit que le code.';
+
+  @override
+  String get barcodeConsentAllow => 'Autoriser la recherche';
+
+  @override
+  String get barcodeConsentRefuse => 'Garder seulement le code';
+
+  @override
+  String get barcodeLookupSetting => 'Recherche en ligne des codes-barres';
+
+  @override
+  String get barcodeLookupSettingText =>
+      'Demander à Open Products Facts, puis à Open Food Facts, ce qu\'est un code scanné. Seul le code est envoyé, rien d\'autre. Désactivé : le code est seulement gardé.';
+
+  @override
+  String get errEanInvalid =>
+      'Ce n\'est pas un code-barres valide : saisissez les 8, 12, 13 ou 14 chiffres sous les barres (EAN-8, UPC-A, EAN-13 ou GTIN-14).';
 }

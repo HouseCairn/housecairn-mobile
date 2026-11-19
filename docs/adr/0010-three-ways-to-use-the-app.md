@@ -92,8 +92,8 @@ are written with these answers; this list is the short form, and wins over any o
 | Where the data is | On this phone only; in the encrypted export files the person makes ([spec](../spec.md#export-and-import)) | On every phone of the family; on the relay as ciphertext (batches, snapshots, blobs) | On this phone and **on the server, in clear**: its database, its files and its backups |
 | Who can read it | Whoever can unlock this phone | The phones of the family; **not** the relay, which sees only the metadata of the [threat model](../threat-model.md) | The phone; **the server**: whoever administers the instance or its host, every account that is a member of these homes on it, the integrations that hold a token of these homes, and anyone who gets a backup of the server |
 | Who decides a conflict | No conflict | Each phone, by the same merge rules ([ADR 0003](0003-sync-protocol.md)) | The same field rules, applied by the server, which keeps the order ([Architecture](#architecture-one-sync-layer-two-transports)) |
-| Offline | Everything works; no network call, ever | Everything works; changes are sent and merged when the relay is reachable | Everything works on the copy of the phone; changes wait in the log and are sent when the server is reachable; edits made on the web meanwhile arrive then |
-| Network peers | None | The relay the person chose, and the push services | The server the person typed, and nothing else (no push in v1: the phone syncs when opened and in the background) |
+| Offline | Everything works; no network call, ever (*amended by [ADR 0015](0015-barcode-lookup.md)*: a scanned barcode, once the person allowed it) | Everything works; changes are sent and merged when the relay is reachable | Everything works on the copy of the phone; changes wait in the log and are sent when the server is reachable; edits made on the web meanwhile arrive then |
+| Network peers | None; with [ADR 0015](0015-barcode-lookup.md), Open Products Facts and Open Food Facts at a scan the person allowed | The relay the person chose, and the push services | The server the person typed, and nothing else (no push in v1: the phone syncs when opened and in the background) |
 | Account | None | None (device keys, [ADR 0004](0004-encryption-and-family-keys.md)) | The account of the server that the person signed in with |
 | Cost | Free | Subscription for the hosted relay; free on a self-hosted relay ([ADR 0006](0006-subscription.md)) | No subscription, since the publisher's relay is not used; a **single in-app purchase unlocks** the way ([business model](#business-model)) |
 
@@ -101,6 +101,14 @@ are written with these answers; this list is the short form, and wins over any o
 one server, and in the third way **all its homes are on the server**. Mixing them (a phone on
 a server that also joins a family on the relay, or homes of one phone split between local and
 server) is not offered: the maintainer decided it so, not only for v1.
+
+*Amended by [ADR 0015](0015-barcode-lookup.md), on the maintainer's decision of 2026-11-15:*
+scanning the barcode of a stock item or an item fills it from open databases, alone too. This is
+the first network call of the first way, and a narrow one: one module
+(`lib/core/open_facts_http_io.dart`) sends the scanned code, and nothing else, to Open Products
+Facts then Open Food Facts, only at a scan, and only once the person allowed it at their first
+scan (changed in Settings); refused or offline, the scan fills only the code. With a server, the
+lookup goes through the server, never from the phone.
 
 *Amended by [ADR 0014](0014-qr-labels.md):* the QR labels of the homes of a server stay on the
 phone that made them, since the sync API of the web (`v0.5.1`) does not carry `labels.label`;
@@ -151,7 +159,9 @@ opens nothing, asks nothing and calls no network. The texts below are the intent
 strings go in the ARB files with the lot that builds the screen.
 
 - **Alone on this phone**: "Your homes stay on this phone. Nothing is sent anywhere. You can
-  turn on sharing later."
+  turn on sharing later." Since [ADR 0015](0015-barcode-lookup.md): "Your homes stay on this
+  phone. Nothing leaves the phone, except a product's barcode to open product databases when
+  you allow it. You can turn on sharing later."
 - **Family sync**: "Share your homes with the phones of your family. Everything is encrypted
   on your phones before it leaves them: our server cannot read it. Needs a subscription."
 - **My Housecairn server**: "Use the homes of your own Housecairn, the web application or the
