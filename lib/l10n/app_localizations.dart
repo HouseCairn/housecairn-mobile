@@ -2231,7 +2231,7 @@ abstract class AppLocalizations {
   /// Explains the first way (alone on this phone).
   ///
   /// In en, this message translates to:
-  /// **'Your homes stay on this phone. Nothing is sent anywhere. You can turn on sharing later.'**
+  /// **'Your homes stay on this phone. Nothing leaves the phone, except a product\'s barcode to open product databases when you allow it. You can turn on sharing later.'**
   String get wayAloneText;
 
   /// Second way to use the app: sync through the end-to-end encrypted relay.

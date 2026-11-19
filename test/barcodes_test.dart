@@ -30,6 +30,7 @@ import 'package:housecairn_mobile/sync/server_sign_in.dart';
 import 'package:housecairn_mobile/sync/server_transport.dart';
 import 'package:housecairn_mobile/ui/barcode_field.dart';
 import 'package:housecairn_mobile/ui/item_screens.dart';
+import 'package:housecairn_mobile/ui/photos.dart' show PhotoScreen;
 import 'package:housecairn_mobile/ui/state.dart';
 import 'package:housecairn_mobile/ui/stock_screens.dart';
 import 'package:material_ui/material_ui.dart';
@@ -699,6 +700,41 @@ void main() {
       });
       final stored = r.photoFile(photos.single).readAsBytesSync();
       expect(jpegMetadata(stored), isEmpty);
+      // The page of the photo shows its credit under it (CC BY-SA 3.0).
+      await openScreen(
+        tester,
+        PhotoScreen(photoId: photos.single.id, writable: true),
+      );
+      expect(find.byKey(const Key('photo-credit')), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('photo-credit'))).data,
+        'Photo by a-contributor, Open Products Facts, CC BY-SA 3.0',
+      );
+    });
+
+    testWidgets('back from the question without choosing: nothing leaves the '
+        'phone, nothing is kept, and the next scan asks again', (tester) async {
+      final http = foundOpenFacts();
+      final (state, _) = await openItemForm(tester, http: http);
+      await scan(tester);
+      expect(find.byType(BarcodeConsentScreen), findsOneWidget);
+      Navigator.of(tester.element(find.byType(BarcodeConsentScreen))).pop();
+      await tester.pumpAndSettle();
+      expect(find.byType(BarcodeConsentScreen), findsNothing);
+      expect(http.asked, isEmpty);
+      expect(state.barcodeLookupAllowed, isNull);
+      expect(await state.repository.barcodeLookupAllowed(), isNull);
+      expect(find.byKey(const Key('ean-answer-done')), findsNothing);
+      expect(
+        tester
+            .widget<TextFormField>(find.byKey(const Key('ean-field')))
+            .controller!
+            .text,
+        _ean,
+      );
+      await scan(tester);
+      expect(find.byType(BarcodeConsentScreen), findsOneWidget);
+      expect(http.asked, isEmpty);
     });
 
     testWidgets('refused: nothing leaves the phone, the scan fills only the '
@@ -821,6 +857,59 @@ void main() {
         readAttribution(entry.article.labelAttribution)?['source'],
         'Open Products Facts',
       );
+      // The page of the stock item shows the credit under its label.
+      await openScreen(
+        tester,
+        ArticleScreen(homeId: data.homes.main, articleId: entry.article.id),
+      );
+      expect(find.byKey(const Key('article-label')), findsOneWidget);
+      expect(find.byKey(const Key('photo-credit')), findsOneWidget);
+    });
+
+    testWidgets('a stock item: the values fill its empty fields only', (
+      tester,
+    ) async {
+      await onPhone(tester, height: 1600);
+      final http = foundOpenFacts();
+      late Lot2b data;
+      late String article;
+      final state = await pumpApp(
+        tester,
+        seed: (r) async {
+          data = await Lot2b.seed(r);
+          await r.setBarcodeLookupAllowed(true);
+          article = await r.addArticle(
+            data.homes.main,
+            const ArticleInput(
+              name: 'My battery',
+              manufacturerReference: 'REF-9V',
+              notes: 'In the drawer',
+            ),
+          );
+        },
+        codeCamera: () =>
+            FakeCodeCamera(code: const ScannedCode(CodeFormat.ean13, _ean)),
+        openFactsHttp: () => http,
+      );
+      await openScreen(
+        tester,
+        ArticleFormScreen(homeId: data.homes.main, articleId: article),
+      );
+      await tester.ensureVisible(find.byKey(const Key('ean-scan')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('ean-scan')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ean-answer-done')), findsOneWidget);
+      await tester.ensureVisible(find.byKey(const Key('ean-use')));
+      await tester.tap(find.byKey(const Key('ean-use')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(l10n.save));
+      await tester.pumpAndSettle();
+      final row = (await state.repository.article(article))!;
+      expect(row.ean, _ean);
+      expect(row.name, 'My battery');
+      expect(row.manufacturerReference, 'REF-9V');
+      expect(row.notes, 'In the drawer');
     });
 
     test('with a server, the open databases are never asked from the '
@@ -833,6 +922,37 @@ void main() {
         ..barcodeLookupAllowed = true;
       final answer = await state.lookUpBarcode('h', _ean);
       expect(answer.state, isNot(LookupState.done));
+      expect(http.asked, isEmpty);
+    });
+
+    test(
+      'alone and never asked: the lookup is off, nothing is asked',
+      () async {
+        final r = await openRepository();
+        addTearDown(r.db.close);
+        final http = foundOpenFacts();
+        final state = AppState(r, openFactsHttp: () => http)
+          ..syncMode = SyncMode.alone;
+        expect(state.barcodeLookupAllowed, isNull);
+        final answer = await state.lookUpBarcode('h', _ean);
+        expect(answer.state, LookupState.off);
+        expect(http.asked, isEmpty);
+        state.barcodeLookupAllowed = false;
+        expect((await state.lookUpBarcode('h', _ean)).state, LookupState.off);
+        expect(http.asked, isEmpty);
+      },
+    );
+
+    test('in the family way (relay), the open databases are never asked, '
+        'even allowed', () async {
+      final r = await openRepository();
+      addTearDown(r.db.close);
+      final http = foundOpenFacts();
+      final state = AppState(r, openFactsHttp: () => http)
+        ..syncMode = SyncMode.relay
+        ..barcodeLookupAllowed = true;
+      final answer = await state.lookUpBarcode('h', _ean);
+      expect(answer.state, LookupState.off);
       expect(http.asked, isEmpty);
     });
   });

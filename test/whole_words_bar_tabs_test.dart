@@ -5,7 +5,8 @@
 // longest words (Aujourd'hui, Équipements, Terminés): the labels come down in
 // size together until the longest word fits, the rule of HcWholeWords. The
 // real fonts are loaded, as for the golden files: the test font would not
-// measure the words of the app.
+// measure the words of the app. The text of the first way, with its
+// exception for a product's barcode, is held to the same rule.
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -160,6 +161,43 @@ void main() {
       }
     }
   });
+
+  // The text of the first way, with its exception for a product's barcode
+  // (docs/adr/0015): at the first start and in More, 320 px x2.
+  for (final locale in ['fr', 'en']) {
+    testWidgets(
+      'the text of the first way at the first start, 320 px x2 ($locale)',
+      (tester) async {
+        await onPhone(tester, width: 320, textScale: 2);
+        final l10n = await AppLocalizations.delegate.load(Locale(locale));
+        await pumpApp(tester, locale: locale, firstStart: true);
+        final card = find.byKey(const Key('way-alone'));
+        await tester.ensureVisible(card);
+        await tester.pumpAndSettle();
+        expect(
+          find.descendant(of: card, matching: find.text(l10n.wayAloneText)),
+          findsOneWidget,
+        );
+        expectWholeWords(tester, card, 'first start, $locale');
+      },
+    );
+
+    testWidgets('the text of the first way in More, 320 px x2 ($locale)', (
+      tester,
+    ) async {
+      await onPhone(tester, width: 320, textScale: 2);
+      final l10n = await AppLocalizations.delegate.load(Locale(locale));
+      await pumpApp(tester, locale: locale);
+      await openSection(tester, l10n.navMore);
+      final row = find.byKey(const Key('way-row-alone'));
+      await scrollMoreTo(tester, row);
+      expect(
+        find.descendant(of: row, matching: find.text(l10n.wayAloneText)),
+        findsOneWidget,
+      );
+      expectWholeWords(tester, row, 'More, $locale');
+    });
+  }
 
   testWidgets('the size of the labels is kept where they fit', (tester) async {
     for (final (width, scale) in [(390.0, 1.0), (360.0, 1.0), (390.0, 2.0)]) {

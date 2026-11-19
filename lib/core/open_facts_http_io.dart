@@ -10,12 +10,19 @@ import 'open_facts.dart';
 
 /// [OpenFactsHttp] on `dart:io`: the one file of `lib/` that opens a
 /// connection when the phone is used alone (docs/adr/0015, an exception to
-/// \"no network\" of docs/adr/0010 decided by the maintainer on 2026-11-15;
-/// test/ways_test.dart lists it). Only `GET`, only `https`, only the hosts
-/// of [lookupSources]; redirects are not followed; no cookie, no other
-/// header than `Accept` and the `User-Agent` the Open Food Facts project
-/// asks of every application; the system's certificate checks apply and no
-/// `badCertificateCallback` is ever set.
+/// "no network" of docs/adr/0010 decided by the maintainer on 2026-11-15;
+/// test/ways_test.dart lists it). Only `GET`, only `https` on port 443,
+/// only the hosts of [lookupSources], refused before any connection
+/// otherwise; redirects are not followed; no proxy, no cookie; the system's
+/// certificate checks apply and no `badCertificateCallback` is ever set.
+///
+/// The headers sent are these five, and no other
+/// (test/open_facts_http_io_test.dart reads them as they leave):
+/// `user-agent: HouseCairnMobile (+https://github.com/HouseCairn/housecairn-mobile)`
+/// (the name of the app and where its code is, as the Open Food Facts
+/// project asks of every application), `accept`, `accept-encoding: gzip`,
+/// `connection: close` and `host`. Nothing in them identifies the phone or
+/// the person.
 class IoOpenFactsHttp implements OpenFactsHttp {
   IoOpenFactsHttp({this.timeout = const Duration(seconds: 6)})
     : _client = HttpClient()

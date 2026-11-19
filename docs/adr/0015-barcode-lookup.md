@@ -71,11 +71,20 @@ What the web gives at `v0.5.1` for a phone of the third way, read there: the loo
 - **One module** opens a connection: `lib/core/open_facts_http_io.dart`. `GET` only, `https`
   only, to `world.openproductsfacts.org`, `world.openfoodfacts.org` and the hosts of their photos
   (`images.openproductsfacts.org`, `images.openfoodfacts.org`); any other host or port is
-  refused before the connection, and a redirect is not followed; no cookie, no header but `Accept` and a
-  `User-Agent` that names the app and its source, as the Open Food Facts project asks; 1 MB for
+  refused before the connection, and a redirect is not followed; no proxy, no cookie; 1 MB for
   an answer, 5 MB for a photo, 6 seconds a call. The address holds the code and the fields asked
   (the web's `fields`), nothing else. `test/ways_test.dart` tolerates this file and no other
   besides the server transport.
+- **The headers sent are these five, and no other** (`test/open_facts_http_io_test.dart` reads
+  them as they leave, on a local socket):
+  - `user-agent: HouseCairnMobile (+https://github.com/HouseCairn/housecairn-mobile)`: the name
+    of the app and where its code is, as the Open Food Facts project asks of every application;
+    no version, no system, no device;
+  - `accept`: `application/json` for an answer, `image/jpeg,image/png,image/webp` for a photo;
+  - `accept-encoding: gzip` and `host`, set by `dart:io`'s client;
+  - `connection: close`: one connection a call, none kept open.
+
+  Nothing in them identifies the phone or the person.
 - No connection: a calm sentence, the code is filled. Not found, or not read: the web's
   sentences.
 
@@ -97,8 +106,22 @@ What the web gives at `v0.5.1` for a phone of the third way, read there: the loo
   manifests declared it before (read in the badging of the release build of CI), so a release
   build could reach neither a server nor the open databases. It is a normal permission, granted
   at install, with no prompt.
-- **iOS**: nothing to declare: the calls are HTTPS, which App Transport Security allows; no
-  local network is asked.
+- **iOS**: nothing to declare for the network: the calls are HTTPS, which App Transport
+  Security allows; no local network is asked. The camera was declared already, for the photos
+  and the QR labels ([ADR 0014](0014-qr-labels.md)); its reason (`NSCameraUsageDescription`, in
+  `Info.plist` and in `InfoPlist.strings`, English and French) now names the barcode of a
+  product too: "Housecairn uses the camera to photograph a room or an item, and to read the QR
+  code of a label or the barcode of a product. The photo stays on this phone."
+- **Android**: the camera is the scanner's of ADR 0014, unchanged.
+
+### What the first way says
+
+The sentence of the first way, at the first start and in More ("Nothing is sent anywhere",
+[ADR 0010](0010-three-ways-to-use-the-app.md)), is made exact, on the maintainer's decision:
+"Your homes stay on this phone. Nothing leaves the phone, except a product's barcode to open
+product databases when you allow it. You can turn on sharing later." In French: "Vos logements
+restent sur ce téléphone. Rien ne quitte le téléphone, sauf le code-barres d'un produit vers des
+bases de produits libres, si vous l'autorisez. Vous pourrez activer le partage plus tard."
 
 ## Options set aside
 

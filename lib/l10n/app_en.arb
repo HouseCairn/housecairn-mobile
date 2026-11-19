@@ -710,7 +710,7 @@
   "@waysGroup": {"description": "Heading of the group of More that shows the way the app is used, and the two others."},
   "wayAloneTitle": "Alone on this phone",
   "@wayAloneTitle": {"description": "First way to use the app: everything stays on the phone."},
-  "wayAloneText": "Your homes stay on this phone. Nothing is sent anywhere. You can turn on sharing later.",
+  "wayAloneText": "Your homes stay on this phone. Nothing leaves the phone, except a product's barcode to open product databases when you allow it. You can turn on sharing later.",
   "@wayAloneText": {"description": "Explains the first way (alone on this phone)."},
   "wayFamilyTitle": "Family sync",
   "@wayFamilyTitle": {"description": "Second way to use the app: sync through the end-to-end encrypted relay."},

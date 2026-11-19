@@ -503,7 +503,7 @@
   "@waysGroup": {"description": "Heading of the group of More that shows the way the app is used, and the two others."},
   "wayAloneTitle": "Seul sur ce téléphone",
   "@wayAloneTitle": {"description": "First way to use the app: everything stays on the phone."},
-  "wayAloneText": "Vos logements restent sur ce téléphone. Rien n'est envoyé nulle part. Vous pourrez activer le partage plus tard.",
+  "wayAloneText": "Vos logements restent sur ce téléphone. Rien ne quitte le téléphone, sauf le code-barres d'un produit vers des bases de produits libres, si vous l'autorisez. Vous pourrez activer le partage plus tard.",
   "@wayAloneText": {"description": "Explains the first way (alone on this phone)."},
   "wayFamilyTitle": "Synchronisation en famille",
   "@wayFamilyTitle": {"description": "Second way to use the app: sync through the end-to-end encrypted relay."},

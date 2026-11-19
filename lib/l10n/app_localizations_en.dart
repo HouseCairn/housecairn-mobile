@@ -1269,7 +1269,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wayAloneText =>
-      'Your homes stay on this phone. Nothing is sent anywhere. You can turn on sharing later.';
+      'Your homes stay on this phone. Nothing leaves the phone, except a product\'s barcode to open product databases when you allow it. You can turn on sharing later.';
 
   @override
   String get wayFamilyTitle => 'Family sync';

@@ -1280,7 +1280,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get wayAloneText =>
-      'Vos logements restent sur ce téléphone. Rien n\'est envoyé nulle part. Vous pourrez activer le partage plus tard.';
+      'Vos logements restent sur ce téléphone. Rien ne quitte le téléphone, sauf le code-barres d\'un produit vers des bases de produits libres, si vous l\'autorisez. Vous pourrez activer le partage plus tard.';
 
   @override
   String get wayFamilyTitle => 'Synchronisation en famille';

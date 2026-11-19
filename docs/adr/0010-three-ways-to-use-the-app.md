@@ -159,7 +159,9 @@ opens nothing, asks nothing and calls no network. The texts below are the intent
 strings go in the ARB files with the lot that builds the screen.
 
 - **Alone on this phone**: "Your homes stay on this phone. Nothing is sent anywhere. You can
-  turn on sharing later."
+  turn on sharing later." Since [ADR 0015](0015-barcode-lookup.md): "Your homes stay on this
+  phone. Nothing leaves the phone, except a product's barcode to open product databases when
+  you allow it. You can turn on sharing later."
 - **Family sync**: "Share your homes with the phones of your family. Everything is encrypted
   on your phones before it leaves them: our server cannot read it. Needs a subscription."
 - **My Housecairn server**: "Use the homes of your own Housecairn, the web application or the
