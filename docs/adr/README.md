@@ -21,3 +21,4 @@ repository (`docs/adr/` there).
 | [0012](0012-files-with-a-server.md) | Photos and files with a Housecairn server | proposed, amends 0010 |
 | [0013](0013-more-files-with-a-server.md) | Attachments of tasks, photos of reports and labels with a server | proposed, extends 0012 |
 | [0014](0014-qr-labels.md) | QR labels on the phone: the web's opaque code, a sheet made on the phone, a scanner of our own | proposed, amends 0001 and 0010 |
+| [0015](0015-barcode-lookup.md) | Barcode lookup: the code alone to the open databases, asked first when the phone is alone | proposed, amends 0010 |

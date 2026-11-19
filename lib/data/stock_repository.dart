@@ -16,6 +16,7 @@ class ArticleInput {
     this.threshold = '',
     this.unitPrice = '',
     this.notes = '',
+    this.ean = '',
     this.roomIds = const [],
     this.itemIds = const [],
   });
@@ -29,6 +30,9 @@ class ArticleInput {
   final String threshold;
   final String unitPrice;
   final String notes;
+
+  /// The barcode as typed or scanned (web ADR 0083).
+  final String ean;
 
   /// Rooms where it is used, and items it fits, of the article's home.
   final List<String> roomIds;
@@ -190,7 +194,8 @@ extension StockRepository on Repository {
 
   /// The articles of a home by name, each with its stock
   /// (`stock/services.py` `search_articles`): [query] matches the name, the
-  /// manufacturer reference or a supplier's name or reference; [low] keeps
+  /// manufacturer reference, the barcode (web ADR 0083) or a supplier's name
+  /// or reference; [low] keeps
   /// those at or below their threshold.
   Future<List<ArticleEntry>> articles(
     String homeId, {
@@ -233,6 +238,7 @@ extension StockRepository on Repository {
               foldForSearch(a.name),
               foldForSearch(a.manufacturerReference),
             ]) ||
+            gtinMatches(query, a.ean) ||
             bySupplier.contains(a.id))
           ArticleEntry(a, levels[a.id] ?? stock.zero),
     ].where((e) => !low || e.low).toList();
@@ -404,6 +410,7 @@ extension StockRepository on Repository {
       'threshold': _stored(_quantity(input.threshold)),
       'unit_price': _stored(_quantity(input.unitPrice)),
       'notes': Repository._text(input.notes, notesMaxLength),
+      'ean': cleanEan(input.ean),
     };
   }
 
@@ -475,6 +482,35 @@ extension StockRepository on Repository {
       );
     });
     return id;
+  }
+
+  /// Gives the article [id] the photo of a product found by its barcode as
+  /// its label, with its credit (web ADR 0083, `attach_to_article`), only
+  /// when it has no label yet: `false` and nothing written otherwise. The
+  /// photo is already re-encoded, without metadata.
+  Future<bool> setFoundLabel(
+    String id,
+    ProcessedPhoto photo,
+    Map<String, String> attribution,
+  ) async {
+    final current = await _writableArticle(id);
+    if (current.label != null) return false;
+    final directory = homeDirectory(current.homeId)
+      ..createSync(recursive: true);
+    final file = File('${directory.path}/$id.jpg');
+    file.writeAsBytesSync(photo.image, flush: true);
+    try {
+      await db.transaction(
+        () => _put('articles', id, {
+          'label': photo.fileReference().encode(),
+          'label_attribution': attributionJson(attribution) ?? '{}',
+        }),
+      );
+    } catch (_) {
+      if (file.existsSync()) file.deleteSync();
+      rethrow;
+    }
+    return true;
   }
 
   Future<void> updateArticle(String id, ArticleInput input) async {

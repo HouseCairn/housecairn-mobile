@@ -11,12 +11,15 @@ import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/values.dart';
 import '../design/widgets.dart';
+import '../domain/barcode_lookup.dart';
 import '../domain/day.dart';
+import '../domain/gtin.dart';
 import '../domain/stock.dart' as stock;
 import 'help_button.dart';
 import '../domain/labels.dart';
 import '../l10n/app_localizations.dart';
 import 'autosave.dart';
+import 'barcode_field.dart';
 import 'item_screens.dart';
 import 'label_screens.dart';
 import 'messages.dart';
@@ -228,7 +231,8 @@ class _ArticleLabel extends StatelessWidget {
         label: label,
       );
     }
-    return Semantics(
+    final credit = readAttribution(article.labelAttribution);
+    final photo = Semantics(
       image: true,
       label: label,
       child: ClipRRect(
@@ -240,6 +244,17 @@ class _ArticleLabel extends StatelessWidget {
           errorBuilder: (_, _, _) => const SizedBox.shrink(),
         ),
       ),
+    );
+    if (credit == null) return photo;
+    // A photo from an open database shows its credit under it (web ADR
+    // 0083, CC BY-SA 3.0).
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        photo,
+        const SizedBox(height: HcSpace.s1),
+        PhotoCredit(credit),
+      ],
     );
   }
 }
@@ -703,7 +718,15 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
   final _threshold = TextEditingController();
   final _unitPrice = TextEditingController();
   final _notes = TextEditingController();
+  final _ean = TextEditingController();
   String _unit = '';
+
+  /// Whether the article has a label photo: a photo found by its barcode is
+  /// then never offered (web ADR 0083, `attach_to_article`).
+  bool _hasLabel = false;
+
+  /// The answer whose photo the person chose to keep as the label.
+  BarcodeAnswer? _foundPhoto;
   final _rooms = <String>{};
   final _items = <String>{};
   List<RoomRow> _roomChoices = const [];
@@ -751,6 +774,8 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
                 stock.readQuantity(a.unitPrice!),
               );
         _notes.text = a.notes;
+        _ean.text = a.ean;
+        _hasLabel = a.label != null;
         _rooms.addAll(linkedRooms.map((r) => r.id));
         _items.addAll(linkedItems.map((i) => i.id));
       }
@@ -769,6 +794,7 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
       _threshold,
       _unitPrice,
       _notes,
+      _ean,
     ]) {
       c.dispose();
     }
@@ -785,6 +811,7 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
     threshold: _threshold.text,
     unitPrice: fieldAmount(context, _unitPrice),
     notes: _notes.text,
+    ean: _ean.text,
     roomIds: _rooms.toList(),
     itemIds: _items.toList(),
   );
@@ -794,11 +821,25 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
     if (!_form.currentState!.validate()) return;
     final navigator = Navigator.of(context);
     String? added;
+    final found = _foundPhoto;
+    final kept = found != null && cleanGtin(_ean.text) == found.code
+        ? await processFoundPhoto(AppScope.of(context), found)
+        : null;
+    if (!mounted) return;
     final saved = await runChange(context, (r) async {
       if (widget.articleId == null) {
         added = await r.addArticle(widget.homeId, _input());
       } else {
         await r.updateArticle(widget.articleId!, _input());
+      }
+      // The photo of the product as the label, with its credit, only when
+      // the article still has none (`setFoundLabel` checks).
+      if (kept != null) {
+        await r.setFoundLabel(
+          added ?? widget.articleId!,
+          kept,
+          found!.attribution,
+        );
       }
     });
     // A new stock item is given back, for the list that opened the form to
@@ -821,6 +862,24 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
       navigator.pop();
       navigator.pop();
     }
+  }
+
+  /// The values a lookup found, in the fields that are empty only.
+  void _fill(Map<String, String> values, BarcodeAnswer? photo) {
+    setState(() {
+      for (final (field, controller) in [
+        ('name', _name),
+        ('manufacturer_reference', _reference),
+        ('notes', _notes),
+      ]) {
+        final value = values[field];
+        if (value != null && controller.text.trim().isEmpty) {
+          controller.text = value;
+        }
+      }
+      if (photo != null) _foundPhoto = photo;
+    });
+    sheetChanged(now: true);
   }
 
   /// A room or an item ticked or unticked: kept, and saved at once.
@@ -868,6 +927,13 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
                     _reference,
                     key: const Key('article-reference'),
                     sentences: false,
+                  ),
+                  BarcodeField(
+                    controller: _ean,
+                    homeId: widget.homeId,
+                    target: LookupTarget.article,
+                    hasPhoto: _hasLabel,
+                    onFill: _fill,
                   ),
                   hcText(l10n.articleDimensions, _dimensions),
                   hcText(

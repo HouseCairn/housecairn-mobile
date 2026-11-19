@@ -10,7 +10,9 @@ import '../design/tokens.dart';
 import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/choices.dart';
+import '../domain/barcode_lookup.dart';
 import '../domain/day.dart';
+import '../domain/gtin.dart';
 import '../domain/warranty.dart';
 import 'help_button.dart';
 import '../domain/labels.dart';
@@ -18,6 +20,7 @@ import '../l10n/app_localizations.dart';
 import 'budget_parts.dart';
 import 'choices.dart';
 import 'autosave.dart';
+import 'barcode_field.dart';
 import 'contractor_screens.dart';
 import 'label_screens.dart';
 import 'messages.dart';
@@ -344,6 +347,7 @@ class _ItemFormScreenState extends State<ItemFormScreen>
   final _contractNumber = TextEditingController();
   final _contractUrl = TextEditingController();
   final _notes = TextEditingController();
+  final _ean = TextEditingController();
   final _warrantyDuration = TextEditingController();
   final _warrantyProviderName = TextEditingController();
   final _links = <(TextEditingController, TextEditingController)>[];
@@ -359,6 +363,14 @@ class _ItemFormScreenState extends State<ItemFormScreen>
   List<RoomRow> _rooms = const [];
   String? _room;
   bool _loaded = false;
+
+  /// Whether the item has a photo: a photo found by its barcode is then
+  /// never offered (web ADR 0083).
+  bool _hasPhoto = false;
+
+  /// The answer of a lookup whose photo the person chose to keep, added when
+  /// the form is saved and the item still has none.
+  BarcodeAnswer? _foundPhoto;
 
   @override
   void didChangeDependencies() {
@@ -378,8 +390,12 @@ class _ItemFormScreenState extends State<ItemFormScreen>
     final item = widget.itemId == null
         ? null
         : await repository.item(widget.itemId!);
+    final photos = widget.itemId == null
+        ? const <PhotoRow>[]
+        : await repository.photosOf(itemId: widget.itemId);
     if (!mounted) return;
     setState(() {
+      _hasPhoto = photos.isNotEmpty;
       _contractors = contractors;
       _rooms = rooms;
       _room = !widget.chooseRoom
@@ -415,6 +431,7 @@ class _ItemFormScreenState extends State<ItemFormScreen>
       _contractNumber.text = item.contractNumber;
       _contractUrl.text = item.contractUrl;
       _notes.text = item.notes;
+      _ean.text = item.ean;
       for (final link in Repository.linksOf(item)) {
         _links.add((
           TextEditingController(text: link.label),
@@ -435,6 +452,7 @@ class _ItemFormScreenState extends State<ItemFormScreen>
       _contractNumber,
       _contractUrl,
       _notes,
+      _ean,
       _warrantyDuration,
       _warrantyProviderName,
       for (final (a, b) in _links) ...[a, b],
@@ -467,18 +485,55 @@ class _ItemFormScreenState extends State<ItemFormScreen>
           ItemLink(url: url.text, label: label.text),
     ],
     notes: _notes.text,
+    ean: _ean.text,
   );
+
+  /// The values a lookup found, in the fields that are empty only.
+  void _fill(Map<String, String> values, BarcodeAnswer? photo) {
+    setState(() {
+      for (final (field, controller) in [
+        ('name', _name),
+        ('brand', _brand),
+        ('model', _model),
+        ('notes', _notes),
+      ]) {
+        final value = values[field];
+        if (value != null && controller.text.trim().isEmpty) {
+          controller.text = value;
+        }
+      }
+      if (photo != null) _foundPhoto = photo;
+    });
+    sheetChanged(now: true);
+  }
 
   Future<void> _save() async {
     cancelAutosave();
     if (!_form.currentState!.validate()) return;
     final navigator = Navigator.of(context);
     String? added;
+    final found = _foundPhoto;
+    final kept = found != null && cleanGtin(_ean.text) == found.code
+        ? await processFoundPhoto(AppScope.of(context), found)
+        : null;
+    if (!mounted) return;
     final saved = await runChange(context, (r) async {
       if (widget.itemId == null) {
         added = await r.addItem(_room ?? widget.roomId!, _input());
       } else {
         await r.updateItem(widget.itemId!, _input());
+      }
+      final id = added ?? widget.itemId!;
+      // The photo of the product, re-encoded without metadata as any photo,
+      // with its credit; only when the item still has none and the code is
+      // the one it was found for.
+      if (kept != null && (await r.photosOf(itemId: id)).isEmpty) {
+        await r.addPhoto(
+          widget.homeId,
+          kept,
+          itemId: id,
+          attribution: found!.attribution,
+        );
       }
     });
     // A new item is given back, for the list that opened the form to open it.
@@ -633,6 +688,13 @@ class _ItemFormScreenState extends State<ItemFormScreen>
                   hcText(l10n.itemBrand, _brand),
                   hcText(l10n.itemModel, _model),
                   hcText(l10n.itemSerial, _serial, sentences: false),
+                  BarcodeField(
+                    controller: _ean,
+                    homeId: widget.homeId,
+                    target: LookupTarget.item,
+                    hasPhoto: _hasPhoto,
+                    onFill: _fill,
+                  ),
                   HcDateField(
                     label: l10n.itemPurchasedOn,
                     value: _purchasedOn,

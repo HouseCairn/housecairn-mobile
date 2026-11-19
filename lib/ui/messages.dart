@@ -32,6 +32,7 @@ String refusalMessage(
   Refusal.currencyInvalid => l10n.errCurrencyInvalid,
   Refusal.notFound => l10n.errNotFound,
   Refusal.warrantyDurationOutOfRange => l10n.errWarrantyDuration,
+  Refusal.eanInvalid => l10n.errEanInvalid,
   Refusal.phoneInvalid => l10n.errPhoneInvalid,
   Refusal.emailInvalid => l10n.errEmailInvalid,
   Refusal.urlInvalid => l10n.errUrlInvalid,

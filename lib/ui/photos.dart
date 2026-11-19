@@ -9,9 +9,11 @@ import '../design/icons.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
+import '../domain/barcode_lookup.dart';
 import '../domain/choices.dart';
 import '../domain/photos.dart';
 import '../l10n/app_localizations.dart';
+import 'barcode_field.dart' show PhotoCredit;
 import 'choices.dart';
 import 'parts.dart';
 import 'state.dart';
@@ -435,6 +437,12 @@ class _PhotoScreenState extends State<PhotoScreen> {
             )
           else
             HcEmpty(l10n.photoNotHere),
+          // A photo from an open database shows its credit under it (web
+          // ADR 0083, CC BY-SA 3.0).
+          if (readAttribution(photo?.attribution) case final credit?) ...[
+            const SizedBox(height: HcSpace.s1),
+            PhotoCredit(credit),
+          ],
           const SizedBox(height: HcSpace.s4),
           HcCard(
             child: Column(

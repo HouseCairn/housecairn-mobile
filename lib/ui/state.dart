@@ -11,12 +11,16 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../core/document_source.dart';
 import '../core/notifier.dart';
+import '../core/open_facts.dart';
+import '../core/open_facts_http_io.dart';
 import '../core/code_camera.dart';
 import '../core/photo_source.dart';
 import '../core/store.dart';
 import '../data/database.dart';
 import '../data/repository.dart';
+import '../domain/barcode_lookup.dart';
 import '../domain/day.dart';
+import '../domain/gtin.dart';
 import '../domain/photos.dart';
 import '../domain/reminders.dart';
 import '../domain/templates.dart';
@@ -112,6 +116,8 @@ class AppState extends ChangeNotifier {
     this.openFile = shareWithSystem,
     this.store,
     this.serverHttp = IoServerHttp.new,
+    this.openFactsHttp = IoOpenFactsHttp.new,
+    this.lookupPoll = const Duration(seconds: 2),
     this.signInCallbacks,
     this.syncDelay = const Duration(seconds: 2),
   });
@@ -148,6 +154,73 @@ class AppState extends ChangeNotifier {
 
   /// The connection to the address typed, in the third way.
   final ServerHttp Function(ServerAddress address) serverHttp;
+
+  /// The read of the open databases when the phone is alone, made at a scan
+  /// the person allowed (docs/adr/0015-barcode-lookup.md); the tests give a
+  /// fake, and no test reaches a real host.
+  final OpenFactsHttp Function() openFactsHttp;
+
+  /// How long the phone waits before it asks a server again where the
+  /// lookup of a code stands (two seconds, as the web's screen).
+  final Duration lookupPoll;
+
+  /// Whether the person allowed the lookup of a scanned code, when the phone
+  /// is alone; `null` until they were asked.
+  bool? barcodeLookupAllowed;
+
+  Future<void> setBarcodeLookup(bool allowed) async {
+    await repository.setBarcodeLookupAllowed(allowed);
+    barcodeLookupAllowed = allowed;
+    notifyListeners();
+  }
+
+  /// What the open databases know of [code], scanned for a form of
+  /// [homeId] (docs/adr/0015-barcode-lookup.md). Alone, only when the person
+  /// allowed it, from the phone; with a server, through the server's own
+  /// lookup and never straight from the phone; with no lookup,
+  /// [LookupState.off]. Nothing is written: the form fills itself.
+  Future<BarcodeAnswer> lookUpBarcode(String homeId, String code) async {
+    if (!isValidGtin(code)) return BarcodeAnswer(code, LookupState.failed);
+    switch (syncMode) {
+      case SyncMode.alone:
+        if (barcodeLookupAllowed != true) {
+          return BarcodeAnswer(code, LookupState.off);
+        }
+        final http = openFactsHttp();
+        try {
+          return await lookUpAlone(http, code);
+        } finally {
+          if (http is IoOpenFactsHttp) http.close();
+        }
+      case SyncMode.server:
+        final address = await serverAddress();
+        if (address == null) return BarcodeAnswer(code, LookupState.offline);
+        final transport = _transport(address);
+        try {
+          var answer = await transport.barcodeLookup(homeId, code);
+          for (
+            var polls = 0;
+            answer.state == LookupState.running && polls < 12;
+            polls++
+          ) {
+            await Future<void>.delayed(lookupPoll);
+            answer = await transport.barcodeLookup(homeId, code, start: false);
+          }
+          if (answer.state == LookupState.done && answer.hasPhoto) {
+            answer = answer.withPhoto(
+              await transport.barcodePhoto(homeId, code),
+            );
+          }
+          return answer;
+        } on ServerStopped {
+          return BarcodeAnswer(code, LookupState.unavailable);
+        } on ServerBusy {
+          return BarcodeAnswer(code, LookupState.offline);
+        }
+      case SyncMode.relay:
+        return BarcodeAnswer(code, LookupState.off);
+    }
+  }
 
   /// The redirects of the browser back to the app; the app's
   /// [SignInCallbacks] when `null`.
@@ -196,6 +269,7 @@ class AppState extends ChangeNotifier {
       await repository.createHome(name: firstHomeName);
     }
     syncMode = stored ?? SyncMode.alone;
+    barcodeLookupAllowed = await repository.barcodeLookupAllowed();
     serverAddressShown = syncMode == SyncMode.server
         ? (await serverAddress())?.display
         : null;

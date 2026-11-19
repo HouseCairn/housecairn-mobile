@@ -370,7 +370,8 @@ void main() {
 
   group('nothing leaves the phone', () {
     test('lib/ opens no socket and no HTTP client but the transport of a '
-        'Housecairn server, which only the third way uses (lot 4b)', () {
+        'Housecairn server, which only the third way uses (lot 4b), and the '
+        'lookup of a scanned barcode, once allowed (docs/adr/0015)', () {
       final offences = <String>[];
       for (final file
           in Directory('lib')
@@ -384,7 +385,10 @@ void main() {
           offences.add(file.path);
         }
       }
-      expect(offences, ['lib/sync/server_http_io.dart']);
+      expect(offences..sort(), [
+        'lib/core/open_facts_http_io.dart',
+        'lib/sync/server_http_io.dart',
+      ]);
     });
   });
 }

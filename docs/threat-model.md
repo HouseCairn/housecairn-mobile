@@ -106,6 +106,16 @@ an app cannot protect itself from it.
 TLS to the relay, and the content is encrypted end to end anyway. A self-hosted relay without
 valid TLS is refused by the app; plain HTTP is accepted only for `localhost` in debug builds.
 
+### The open databases of products
+
+Alone, once the person allowed it at their first scan, a scanned barcode goes to Open Products
+Facts, then Open Food Facts, over HTTPS ([ADR 0015](adr/0015-barcode-lookup.md)). They learn the
+code and the address of the connection at the time of the scan, as any site does; nothing else
+(no name, no home, no account, no cookie, no identifier of the phone). Their answer is data:
+read as JSON, cut to the lengths of the web, a photo only from their own image hosts and
+re-encoded before it is kept. A wrong answer can only fill a form the person checks before using
+it. In the third way the server asks them, never the phone.
+
 ### A malicious invitation or file
 
 A QR code from an unknown source points to an attacker's relay: the app shows the relay address

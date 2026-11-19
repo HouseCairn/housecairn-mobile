@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import '../core/store.dart';
+import '../domain/barcode_lookup.dart';
 import 'operation.dart';
 import 'server_address.dart';
 import 'server_http.dart';
@@ -412,6 +413,65 @@ class ServerTransport implements SyncTransport {
     );
   }
 
+  // ---------- barcodes ----------
+
+  /// One call of the barcode lookup of the server (web `barcodes/api.py`,
+  /// ADR 0083): [start] posts the code (`POST .../barcodes/lookup/`),
+  /// otherwise its state is read (`GET .../barcodes/<code>/`). Only the code
+  /// goes, to the address typed; the server asks the open databases, never
+  /// the phone. A server that does not open its lookup to the app (web
+  /// v0.5.1: `connection_outside_sync`) is [LookupState.unavailable].
+  Future<BarcodeAnswer> barcodeLookup(
+    String home,
+    String code, {
+    bool start = true,
+  }) async {
+    final ServerReply reply;
+    try {
+      reply = start
+          ? await _send(
+              'POST',
+              address.resolve('/api/v1/homes/$home/barcodes/lookup/'),
+              body: utf8.encode(jsonEncode({'ean': code})),
+              contentType: 'application/json',
+            )
+          : await _send(
+              'GET',
+              address.resolve('/api/v1/homes/$home/barcodes/$code/'),
+            );
+    } on ServerHttpException {
+      return BarcodeAnswer(code, LookupState.offline);
+    }
+    if (reply.status == 200) {
+      try {
+        return parseServerAnswer(code, _json(reply));
+      } on FormatException {
+        return BarcodeAnswer(code, LookupState.failed);
+      }
+    }
+    if (reply.status == 429) return BarcodeAnswer(code, LookupState.limited);
+    if (reply.status == 403 || reply.status == 404) {
+      return BarcodeAnswer(code, LookupState.unavailable);
+    }
+    if (reply.status >= 500) return BarcodeAnswer(code, LookupState.offline);
+    return BarcodeAnswer(code, LookupState.failed);
+  }
+
+  /// The photo the server found for [code], as it stored it (already
+  /// re-encoded there), or `null`.
+  Future<Uint8List?> barcodePhoto(String home, String code) async {
+    try {
+      final reply = await _send(
+        'GET',
+        address.resolve('/api/v1/homes/$home/barcodes/$code/photo/'),
+        accept: 'image/*',
+      );
+      return reply.status == 200 && reply.body.isNotEmpty ? reply.body : null;
+    } on ServerHttpException {
+      return null;
+    }
+  }
+
   // ---------- SyncTransport ----------
 
   @override
@@ -682,8 +742,20 @@ class ServerTransport implements SyncTransport {
     'stock.article': 'label',
   };
 
+  /// The fields the server reads and writes as a JSON object and the phone
+  /// keeps as JSON text, other than the file references: the credit of a
+  /// photo from an open database (web ADR 0083, `rooms.photo.attribution`,
+  /// `stock.article.label_attribution`).
+  static const objectFields = {
+    'rooms.photo': 'attribution',
+    'stock.article': 'label_attribution',
+  };
+
+  static bool _isObjectField(String? type, String field) =>
+      fileFields[type] == field || objectFields[type] == field;
+
   static Object? _fileOnWire(String? type, String field, Object? value) {
-    if (fileFields[type] != field || value is! String) return value;
+    if (!_isObjectField(type, field) || value is! String) return value;
     try {
       final json = jsonDecode(value);
       return json is Map ? json : value;
@@ -693,14 +765,20 @@ class ServerTransport implements SyncTransport {
   }
 
   /// The operation of the feed or of a snapshot as the phone keeps it: the
-  /// file reference, an object on the wire, as JSON text.
-  static Map<String, Object?> _fileFromWire(Map<String, Object?> op) {
-    final field = fileFields[op[Op.type]];
+  /// file reference and the credit of a photo, objects on the wire, as JSON
+  /// text.
+  static Map<String, Object?> kept(Map<String, Object?> op) {
     final fields = op[Op.fields];
-    if (field == null || fields is! Map || fields[field] is! Map) return op;
+    if (fields is! Map) return op;
+    final changed = <String, Object?>{
+      for (final field in [fileFields[op[Op.type]], objectFields[op[Op.type]]])
+        if (field != null && fields[field] is Map)
+          field: jsonEncode(fields[field]),
+    };
+    if (changed.isEmpty) return op;
     return {
       ...op,
-      Op.fields: {...fields, field: jsonEncode(fields[field])},
+      Op.fields: {...fields, ...changed},
     };
   }
 
@@ -889,7 +967,7 @@ class ServerTransport implements SyncTransport {
         for (final change in (json['changes'] as List? ?? const [])) {
           final c = (change as Map).cast<String, Object?>();
           final op = (c['op']! as Map).cast<String, Object?>();
-          operations.add(_fileFromWire({...op, Op.device: c['device']}));
+          operations.add(kept({...op, Op.device: c['device']}));
           marked.add((op[Op.type]! as String, home, op[Op.id]! as String));
           s.staged[home] = c['pos']! as int;
         }
@@ -960,7 +1038,7 @@ class ServerTransport implements SyncTransport {
     // is set.
     return [
       for (final write in writes)
-        _fileFromWire({
+        kept({
           Op.type: row['t'],
           Op.home: row['h'],
           Op.id: row['id'],

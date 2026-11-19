@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/app.dart';
 import 'package:housecairn_mobile/core/document_source.dart';
 import 'package:housecairn_mobile/core/notifier.dart';
+import 'package:housecairn_mobile/core/open_facts.dart';
 import 'package:housecairn_mobile/core/code_camera.dart';
 import 'package:housecairn_mobile/core/photo_source.dart';
 import 'package:housecairn_mobile/data/repository.dart';
@@ -51,6 +53,7 @@ Future<AppState> pumpApp(
   Notifier? notifier,
   UrlOpener? openUrl,
   FileOpener? openFile,
+  OpenFactsHttp Function()? openFactsHttp,
   bool firstStart = false,
 }) async {
   final repository = await openRepository();
@@ -63,6 +66,9 @@ Future<AppState> pumpApp(
     codeCamera: codeCamera,
     documentSource: documentSource,
     notifier: notifier,
+    // Never a real host: a lookup reads the fake given, else gets no answer.
+    openFactsHttp: openFactsHttp ?? () => const NoOpenFacts(),
+    lookupPoll: Duration.zero,
     // Synchronous, so that the widget tests do not wait for an isolate.
     photoProcessor: (bytes) async => processPhoto(bytes),
     // Read at once: the asset bundle needs a real event loop.
@@ -75,6 +81,19 @@ Future<AppState> pumpApp(
   await tester.pumpWidget(HousecairnApp(state: state, locale: Locale(locale)));
   await tester.pumpAndSettle();
   return state;
+}
+
+/// The open databases out of reach: every read is offline (no test reaches
+/// a real host, docs/adr/0015-barcode-lookup.md).
+class NoOpenFacts implements OpenFactsHttp {
+  const NoOpenFacts();
+
+  @override
+  Future<Uint8List> get(
+    Uri url, {
+    required String accept,
+    required int maxBytes,
+  }) async => throw const OpenFactsUnreachable('offline');
 }
 
 Finder destination(String label) =>

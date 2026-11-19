@@ -237,7 +237,11 @@ what is coming and what each way shows to whom, and the interface is settled bef
   stores and can read the homes, that all the phone's homes are kept on it, and that a one-time
   purchase unlocks it (a test on the keys, in both languages). No price in any text.
 - `SyncTransport` has the members of ADR 0010 and no implementation in `lib/`; nothing in
-  `lib/` opens a socket or an HTTP client (a test lists the imports of `lib/`).
+  `lib/` opens a socket or an HTTP client (a test lists the imports of `lib/`). *Amended twice
+  since*: the server transport of lot 4b (`lib/sync/server_http_io.dart`), and, on the
+  maintainer's decision of 2026-11-15, the lookup of a scanned barcode of lot 3g
+  (`lib/core/open_facts_http_io.dart`, [ADR 0015](adr/0015-barcode-lookup.md)); the test
+  tolerates these two files and no other.
 - Widget tests of the screen at 360 px and with the largest system text size.
 
 **Device**: first start on an Android phone and an iPhone, in English and French, with large
@@ -365,7 +369,8 @@ tab in the 390 px parity check.
   v0.5.1 (`tool/web_parity.py --only equipment`); the other screens keep the measure they were
   taken at, named in `carried`.
 - Goldens of the Cost card and of the form at 360 px, in English and French, at text scale 1
-  and 2; no `double` on an amount; no network in `lib/`.
+  and 2; no `double` on an amount; no network in `lib/` (but the two modules the test of the
+  imports tolerates, lot 3g).
 
 **Delivered in one pull request.**
 
@@ -457,6 +462,49 @@ object opens; regenerate the label and scan the old sticker: "revoked"; refuse t
 the scanner says so; scan a sticker printed by the web: "not known on this phone".
 
 **Depends on**: lot 3. The scan of products (EAN) waits for it.
+
+## Lot 3g. The barcode of a stock item or an item
+
+**Decision of the maintainer (2026-11-15)**: scanning the barcode (EAN) fills the stock item or
+the item from open databases, **alone too**. It is the first network call of the phone alone,
+and it amends [ADR 0010](adr/0010-three-ways-to-use-the-app.md) and the rule "no network in
+`lib/`" above: one module only, which sends the code and nothing else to Open Products Facts
+and Open Food Facts, only at a scan ([ADR 0015](adr/0015-barcode-lookup.md)).
+
+**Scope**: what the app had was read first: no `ean`; the web's sync already sends `ean`,
+`attribution` and `label_attribution`, which a phone of the third way kept in `extra`. Schema 12:
+`ean` on `items` and `articles`, the credit of a photo on `photos` and of the label on
+`articles`, the values in `extra` moved to their columns; the web's check (`lib/domain/gtin.dart`);
+the scan with the scanner of lot 3f (EAN-8, EAN-13, UPC-A), typing always possible; alone, the
+question of the first scan and the switch in Settings; with a server, the server's lookup only;
+the values used in the empty fields only, after a look at them; the photo kept re-encoded,
+without metadata, with its credit, shown under it; the search of the stock and of Equipment by a
+code. Android declares `INTERNET` in its main manifest.
+
+**Acceptance** (`test/barcodes_test.dart`, `test/goldens_barcodes_test.dart`):
+- The check of the web on codes of every length; a UPC-A finds its EAN-13; the search finds a
+  code and its digits.
+- Alone: the first scan asks before anything leaves; allowed, only the code goes, to the read API
+  of the sources in the web's order, then the photo from the source's host; refused, nothing
+  leaves and the code is filled; offline, a calm sentence and the code filled; a typed code is
+  never looked up. No test reaches a real host (a fake of the open databases).
+- With a server: the lookup on the address typed, the refusal of `v0.5.1`
+  (`connection_outside_sync`) said, never the open databases from the phone.
+- The values fill the empty fields only; the photo is stored without metadata, with the five keys
+  of its credit, an object on the wire; the label of a stock item only when it has none.
+- The migration from schema 11 keeps every row and moves the codes and credits out of `extra`.
+- Goldens of the question and of the answer at 360 px, in English and French, at text scale 1
+  and 2.
+
+**Device**: alone, on an Android phone (release build) and an iPhone, in a new item, tap Scan
+under Barcode and scan a product (a battery, a light bulb): the question shows before anything
+is sent; allow, check the name, the brand and the photo with its credit, use them, save; the
+photo of the item shows its credit under it. Scan again in a new stock item with flight mode on:
+the calm sentence, the code filled. In More, Settings, turn the lookup off and scan: only the
+code. With a server at `v0.5.1`: the sentence that the server does not look codes up for the app
+yet, the code filled. Search the stock and Equipment by the last digits of the code.
+
+**Depends on**: lot 3f (the scanner), web `v0.5.1` (`ean` in the sync).
 
 ## Lot 4. Sync engine (without network, without crypto)
 

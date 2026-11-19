@@ -17,6 +17,7 @@ import '../sync/server_transport.dart';
 import '../sync/transport.dart';
 import 'server_screens.dart';
 import 'server_sync.dart';
+import 'barcode_field.dart' show BarcodeLookupRow;
 import 'state.dart';
 
 /// The words of one way to use the app (docs/adr/0010), from the ARB files.
@@ -327,6 +328,18 @@ class WaysRows extends StatelessWidget {
           ),
       ],
     );
+    // Alone, the lookup of scanned barcodes, which sends the code to the
+    // open databases only once allowed (docs/adr/0015-barcode-lookup.md).
+    if (inUse == SyncMode.alone) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          rows,
+          const SizedBox(height: HcSpace.s3),
+          HcCardList(children: const [BarcodeLookupRow()]),
+        ],
+      );
+    }
     if (inUse != SyncMode.server) return rows;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

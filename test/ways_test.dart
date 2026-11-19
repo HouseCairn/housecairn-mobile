@@ -627,12 +627,17 @@ void main() {
     });
 
     test('dart:io stays where the files are, and only the server transport '
-        'opens a connection', () {
+        'and the lookup of barcodes open a connection', () {
       final io = [
         for (final MapEntry(:key, :value) in imports.entries)
           if (value.contains('dart:io')) key,
       ]..sort();
       expect(io, [
+        // The one network module of the phone alone (docs/adr/0015,
+        // the maintainer's decision of 2026-11-15): the code scanned, to
+        // Open Products Facts and Open Food Facts, at a scan the person
+        // allowed (test/barcodes_test.dart).
+        'lib/core/open_facts_http_io.dart',
         'lib/core/photo_source.dart',
         'lib/data/repository.dart',
         'lib/main.dart',
@@ -647,6 +652,7 @@ void main() {
       final found = [
         for (final MapEntry(:key, :value) in sources.entries)
           if (key != 'lib/sync/server_http_io.dart' &&
+              key != 'lib/core/open_facts_http_io.dart' &&
               sockets.hasMatch(
                 value
                     .split('\n')
@@ -656,6 +662,18 @@ void main() {
             key,
       ];
       expect(found, isEmpty);
+    });
+
+    test('a release build may reach the network: INTERNET is declared in '
+        'the main manifest (docs/adr/0015-barcode-lookup.md)', () {
+      final manifest = File('android/app/src/main/AndroidManifest.xml')
+          .readAsStringSync();
+      expect(
+        manifest,
+        contains(
+          '<uses-permission android:name="android.permission.INTERNET"/>',
+        ),
+      );
     });
 
     test('the pubspec adds no package for this lot', () {
