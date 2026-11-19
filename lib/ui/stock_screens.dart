@@ -15,6 +15,7 @@ import '../domain/barcode_lookup.dart';
 import '../domain/day.dart';
 import '../domain/gtin.dart';
 import '../domain/stock.dart' as stock;
+import 'guide_screens.dart';
 import 'help_button.dart';
 import '../domain/labels.dart';
 import '../l10n/app_localizations.dart';
@@ -313,6 +314,7 @@ class ArticleScreen extends StatelessWidget {
         void open(Widget screen) => Navigator.of(context).push(hcRoute(screen));
         return HcScaffold(
           title: a.name,
+          belowTitle: ExampleHomeBanner(homeId: homeId),
           actions: const [HelpButton(page: HelpPages.stockItem)],
           body: HcScreenList(
             children: [
@@ -901,6 +903,7 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
     const number = TextInputType.numberWithOptions(decimal: true);
     return HcScaffold(
       title: widget.articleId == null ? l10n.addArticle : l10n.editArticle,
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       actions: [
         Center(child: savedStatus()),
         HcBarAction(label: l10n.save, onPressed: _save),
@@ -1127,6 +1130,7 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
     final l10n = AppLocalizations.of(context);
     return HcScaffold(
       title: widget.supplierId == null ? l10n.addSupplier : l10n.editSupplier,
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
         key: _form,

@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../design/icons.dart';
 import '../design/page.dart';
+import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../l10n/app_localizations.dart';
 import 'sections.dart';
@@ -88,19 +89,43 @@ class _ShellState extends State<Shell> {
               // (lot 4b); nothing otherwise.
               const ServerSyncBanner(),
               MediaQuery.withNoTextScaling(
-                child: NavigationBar(
-                  selectedIndex: _current.index,
-                  onDestinationSelected: _select,
-                  destinations: [
-                    for (final (icon, label) in [
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final destinations = [
                       (HcIcons.today, l10n.navToday),
                       (HcIcons.rooms, l10n.navRooms),
                       (HcIcons.projects, l10n.navProjects),
                       (HcIcons.budget, l10n.navBudget),
                       (HcIcons.more, l10n.navMore),
-                    ])
-                      NavigationDestination(icon: HcIcon(icon), label: label),
-                  ],
+                    ];
+                    // The rule of HcWholeWords: on a phone narrower than the
+                    // longest word of a label (Aujourd'hui on 320 px), all
+                    // the labels come down together until it fits, in the
+                    // bold of the current one, rather than be cut in two.
+                    final fitted = hcWholeWordsScaler(
+                      context,
+                      [for (final (_, label) in destinations) label],
+                      [
+                        HcText.navLabel,
+                        HcText.navLabel.copyWith(fontWeight: HcFont.heavy),
+                      ],
+                      constraints.maxWidth / destinations.length,
+                    );
+                    return MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaler: fitted),
+                      child: NavigationBar(
+                        selectedIndex: _current.index,
+                        onDestinationSelected: _select,
+                        destinations: [
+                          for (final (icon, label) in destinations)
+                            NavigationDestination(
+                              icon: HcIcon(icon),
+                              label: label,
+                            ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
             ],

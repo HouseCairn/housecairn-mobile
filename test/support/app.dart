@@ -13,6 +13,7 @@ import 'package:housecairn_mobile/core/photo_source.dart';
 import 'package:housecairn_mobile/data/repository.dart';
 import 'package:housecairn_mobile/design/icons.dart';
 import 'package:housecairn_mobile/design/widgets.dart';
+import 'package:housecairn_mobile/domain/guide.dart';
 import 'package:housecairn_mobile/domain/photos.dart';
 import 'package:housecairn_mobile/domain/templates.dart';
 import 'package:housecairn_mobile/sync/mode.dart';
@@ -74,6 +75,7 @@ Future<AppState> pumpApp(
     // Read at once: the asset bundle needs a real event loop.
     loadTemplates: () async =>
         parseTemplates(File('assets/task_templates.yaml').readAsStringSync()),
+    loadGuide: () async => readGuideFiles(),
     openUrl: openUrl ?? (_) async => true,
     openFile:
         openFile ?? (_, {required name, required type, origin}) async => true,
@@ -95,6 +97,13 @@ class NoOpenFacts implements OpenFactsHttp {
     required int maxBytes,
   }) async => throw const OpenFactsUnreachable('offline');
 }
+
+/// The guide and its glossary, read at once from `design/` (the asset bundle
+/// needs a real event loop).
+GuideContent readGuideFiles() => GuideContent(
+  parseGuide(File('design/guide.json').readAsStringSync()),
+  parseGlossary(File('design/glossary.json').readAsStringSync()),
+);
 
 Finder destination(String label) =>
     find.descendant(of: find.byType(NavigationBar), matching: find.text(label));

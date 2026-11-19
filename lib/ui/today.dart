@@ -6,6 +6,7 @@ import '../data/repository.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../l10n/app_localizations.dart';
+import 'guide_screens.dart';
 import 'home_selector.dart';
 import 'open_task_row.dart';
 import 'state.dart';
@@ -18,9 +19,17 @@ import 'help_button.dart';
 /// week, and without a date, each with its count as the web's headings, of
 /// the current home or of All homes, where each row names its home. Done is
 /// one tap, with an undo bar; skip and postpone from the menu of the same
-/// row.
+/// row. With [homeId], the Today of the example home of the guide, which is
+/// never the current home (web ADR 0084): its banner instead of the
+/// selector.
+///
+/// When it has nothing to show, a card offers the guide (`tasks/today.html`).
 class TodayScreen extends StatefulWidget {
-  const TodayScreen({super.key});
+  const TodayScreen({super.key, this.homeId});
+
+  /// The example home, opened from a step of the guide; `null` for the
+  /// section, on the current home or All homes.
+  final String? homeId;
 
   @override
   State<TodayScreen> createState() => _TodayScreenState();
@@ -43,13 +52,14 @@ class _TodayScreenState extends State<TodayScreen> {
   }
 
   Future<void> _load(AppState state) async {
-    final homeId = state.todayAllHomes ? null : state.current?.id;
+    final homeId =
+        widget.homeId ?? (state.todayAllHomes ? null : state.current?.id);
     final entries = await state.repository.todayEntries(homeId: homeId);
     final season = await state.repository.seasonEntries(homeId: homeId);
-    final current = state.current;
+    final current = widget.homeId ?? state.current?.id;
     final reports = current == null
         ? 0
-        : await state.repository.reportsWaiting(current.id);
+        : await state.repository.reportsWaiting(current);
     if (mounted) {
       setState(() {
         // A task of a season that is on, without a date, is in the section In
@@ -71,7 +81,10 @@ class _TodayScreenState extends State<TodayScreen> {
     final state = AppScope.of(context);
     final entries = _entries;
     final today = state.repository.today();
-    final named = state.todayAllHomes;
+    final example = widget.homeId;
+    final named = example == null && state.todayAllHomes;
+    // The home of the page: the example home, or the current one.
+    final home = example ?? state.current?.id;
     final groups = <String, List<TodayEntry>>{
       l10n.todayOverdue: [],
       l10n.todayToday: [],
@@ -92,8 +105,10 @@ class _TodayScreenState extends State<TodayScreen> {
     }
     return HcScaffold(
       title: l10n.navToday,
-      brand: true,
-      belowTitle: const HomeSelector(withAllHomes: true),
+      brand: example == null,
+      belowTitle: example == null
+          ? const HomeSelector(withAllHomes: true)
+          : ExampleHomeBanner(homeId: example),
       actions: const [HelpButton(page: HelpPages.today)],
       body: entries == null
           ? const SizedBox.shrink()
@@ -101,33 +116,34 @@ class _TodayScreenState extends State<TodayScreen> {
               children: [
                 // The open reports of the current home, under the title, as
                 // the web's `open_reports_line` (`reports/_today.html`).
-                if (state.current != null)
+                if (home != null)
                   Padding(
                     padding: const EdgeInsets.only(top: HcSpace.s3),
-                    child: TodayReports(
-                      count: _reports,
-                      homeId: state.current!.id,
-                    ),
+                    child: TodayReports(count: _reports, homeId: home),
                   ),
                 // Today beside All, the list of every task of the home
                 // (`tab_bar "today"`); across homes there is no such list.
-                if (state.current != null && !state.todayAllHomes)
+                if (home != null && !named)
                   Padding(
                     padding: const EdgeInsets.only(top: HcSpace.s3),
                     child: HcTabs(
                       key: const Key('today-tabs'),
                       labels: [l10n.navToday, l10n.tasksTabAll],
                       current: 0,
-                      onSelect: (_) => Navigator.of(context).push(
-                        hcRoute(TaskListScreen(homeId: state.current!.id)),
-                      ),
+                      onSelect: (_) =>
+                          Navigator.of(context)
+                              .push(hcRoute(TaskListScreen(homeId: home))),
                     ),
                   ),
-                if (entries.isEmpty && _season.isEmpty)
+                if (entries.isEmpty && _season.isEmpty) ...[
                   Padding(
                     padding: const EdgeInsets.only(top: HcSpace.s4),
                     child: HcEmpty(l10n.todayEmpty),
                   ),
+                  // Under Nothing to do for now, as on the web; not on the
+                  // example home, whose banner leads back to the guide.
+                  if (example == null) const GuideTodayCard(),
+                ],
                 for (final MapEntry(key: heading, value: rows)
                     in groups.entries)
                   if (rows.isNotEmpty) ...[
@@ -148,12 +164,13 @@ class _TodayScreenState extends State<TodayScreen> {
                     ),
                   ],
                 // After the list, as on the web (`tasks/today.html`).
-                if (state.current != null)
+                if (home != null)
                   HcAddButton(
                     key: const Key('today-add'),
                     label: l10n.addTask,
-                    onPressed: () => Navigator.of(context)
-                        .push(hcRoute(TaskScreen(homeId: state.current!.id))),
+                    onPressed: () =>
+                        Navigator.of(context)
+                            .push(hcRoute(TaskScreen(homeId: home))),
                   ),
               ],
             ),

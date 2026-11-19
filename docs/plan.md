@@ -700,6 +700,30 @@ rule that the example never leaves the phone ([spec](spec.md#homes)), in every w
 
 **Depends on**: the guide's files carried from the web ([alignment](#alignment-with-the-web-application)), at the web release v0.5.1.
 
+## Lot A3. The screens of the guide on the phone
+
+**Scope** (web ADR 0084, lot A3): the guide and the page of a scenario
+(`lib/ui/guide_screens.dart`), the values of **Fill in for me** taken by the forms of the
+example home (new home, room, item, task, report, project, budget line, quote, envelope), the
+banner of the example home on its screens, **Delete the example home** with one dialog, the
+mark **Example** in **My homes**, the entries (**More**, **Help**, **Guide**, and the card of
+an empty Today), the chrome strings in the ARB files ([spec](spec.md#screens-of-v1), screen 13).
+
+**Acceptance**:
+- Every text of the guide is read from `design/guide.json` and `design/glossary.json` in the
+  language of the phone; none is written in the code or the ARB files.
+- The progress of a scenario does not count its optional step; scenario 1 walked from the
+  guide ends **Done**, in English and in French.
+- **Fill in for me** fills a form of the example home only; a form of a real home ignores the
+  values; nothing is saved until the person presses the button of the form.
+- **Add what the earlier scenarios make** makes the example home if needed and ticks nothing of
+  the scenario opened.
+- **Delete the example home** asks once, without a name to type, and leaves the real homes.
+- Golden files of the guide, a scenario, the dialog and the banner, at 390 px and at 320 px with
+  text at twice the size, in English and French, on Android and on iOS.
+
+**Depends on**: lot A2.
+
 ## Lot 5. Encryption and family
 
 **Scope**: device keys in secure storage; epochs; batch, snapshot and blob formats of

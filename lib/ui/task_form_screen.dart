@@ -22,6 +22,7 @@ import 'stock_format.dart';
 import 'choices.dart';
 import 'messages.dart';
 import 'parts.dart';
+import 'guide_screens.dart';
 import 'state.dart';
 
 /// The choice that adds a room, an item or a contractor with the task: the
@@ -46,6 +47,7 @@ class TaskFormScreen extends StatefulWidget implements HcFormScreen {
     this.taskId,
     this.roomId,
     this.itemId,
+    this.fill = const {},
   });
 
   final String homeId;
@@ -57,6 +59,13 @@ class TaskFormScreen extends StatefulWidget implements HcFormScreen {
 
   /// `null` for a new task.
   final String? taskId;
+
+  /// The values of **Fill in for me** of the guide, shown on the example home
+  /// only: the title, the procedure, the repetition, the first date and the
+  /// duration (`prefill_fields` of the web's task form), and the room and the
+  /// item a new task starts attached to (`?room=` and `?item=` of its
+  /// `get_initial`), when [roomId] and [itemId] do not say them already.
+  final GuideFill fill;
 
   @override
   bool get opensAsSheet => true;
@@ -167,12 +176,61 @@ class _TaskFormScreenState extends State<TaskFormScreen>
       _loaded = true;
       _roomId = widget.roomId;
       _itemId = widget.itemId;
+      _fillPlace();
       if (widget.taskId != null) {
         _load();
       } else {
+        _applyFill();
         _ready = true;
         _loadPlaces();
       }
+    }
+  }
+
+  /// The room and the item of the guide for a new task, as the web's
+  /// `get_initial`: an item brings its room (`_loadPlaces`). The lists of
+  /// the home then keep only a room and an item of this home.
+  void _fillPlace() {
+    if (widget.taskId != null || _roomId != null || _itemId != null) return;
+    final fill = widget.fill;
+    if (!fillsHere(context, widget.homeId, fill)) return;
+    if (fill['item'] case final String item) {
+      _itemId = item;
+    } else if (fill['room'] case final String room) {
+      _roomId = room;
+    }
+  }
+
+  /// The values of the guide that this form takes, each checked as input: a
+  /// repetition and a unit the form offers, an interval and a duration that
+  /// are numbers.
+  void _applyFill() {
+    final fill = widget.fill;
+    if (!fillsHere(context, widget.homeId, fill)) return;
+    for (final (name, controller) in [
+      ('title', _title),
+      ('procedure', _procedure),
+    ]) {
+      if (fill[name] case final String value when value.trim().isNotEmpty) {
+        controller.text = value;
+      }
+    }
+    if (fill['repeat_mode'] case final String mode
+        when recurrence.modes.contains(mode)) {
+      _mode = mode;
+    }
+    if (fill['repeat_unit'] case final String unit
+        when recurrence.units.contains(unit)) {
+      _unit = unit;
+    }
+    if (fill['repeat_interval'] case final int interval when interval > 0) {
+      _interval.text = '$interval';
+    }
+    if (fill['due_on'] case final Day due) _due = due;
+    if (fill['estimated_minutes'] case final int minutes when minutes > 0) {
+      final (value, unit) = durations.split(minutes);
+      _duration.text = '$value';
+      _durationUnit = unit;
     }
   }
 
@@ -190,11 +248,27 @@ class _TaskFormScreenState extends State<TaskFormScreen>
     if (roomId == null && _itemId != null) {
       roomId = (await repository.item(_itemId!))?.roomId;
     }
+    // A new task starts only on a room and an item of this home (the web's
+    // `_pick` reads them in the home).
+    var itemId = _itemId;
+    if (widget.taskId == null &&
+        roomId != null &&
+        roomId != _newChoice &&
+        !rooms.any((r) => r.id == roomId)) {
+      roomId = itemId = null;
+    }
     final items = roomId == null || roomId == _newChoice
         ? <ItemRow>[]
         : await repository.itemsOf(roomId);
+    if (widget.taskId == null &&
+        itemId != null &&
+        itemId != _newChoice &&
+        !items.any((i) => i.id == itemId)) {
+      itemId = null;
+    }
     if (!mounted) return;
     setState(() {
+      _itemId = itemId;
       _currency = home?.currency ?? '';
       _rooms = rooms;
       _contractors = contractors;
@@ -257,6 +331,7 @@ class _TaskFormScreenState extends State<TaskFormScreen>
       _contractorId = task.contractorId;
       final due = open.isEmpty ? null : open.first.dueOn;
       _due = due == null ? null : Day.parse(due);
+      _applyFill();
       _ready = true;
     });
     await _loadPlaces();
@@ -945,6 +1020,7 @@ class _TaskFormScreenState extends State<TaskFormScreen>
     final wide = MediaQuery.textScalerOf(context).scale(1) > 1.3;
     final title = widget.taskId == null ? l10n.taskAddTitle : l10n.taskEditTask;
     return HcScaffold(
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       title: title,
       actions: [Center(child: savedStatus())],
       body: Form(

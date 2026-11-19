@@ -240,7 +240,9 @@ class _LinkTile extends StatelessWidget {
                   HcIcon(icon, color: colour),
                   const SizedBox(width: HcSpace.s2),
                   Flexible(
-                    child: Text(
+                    // Documentation on 320 px at twice the size: smaller
+                    // rather than cut in two.
+                    child: HcWholeWords(
                       label,
                       style: HcText.buttonSmall.copyWith(color: colour),
                     ),

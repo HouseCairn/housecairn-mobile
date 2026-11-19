@@ -3045,6 +3045,116 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get guide => 'Guide';
+
+  @override
+  String get moreGuideText =>
+      'Cinq scénarios à essayer sur un logement d\'exemple';
+
+  @override
+  String get guideLead =>
+      'Cinq courts scénarios, faits pour de vrai sur un logement d\'exemple aux valeurs fictives. Vous supprimez le logement d\'exemple d\'un geste quand vous avez fini.';
+
+  @override
+  String guideNumbered(int number, String title) {
+    return '$number. $title';
+  }
+
+  @override
+  String guideStepNumbered(int scenario, String step, String title) {
+    return '$scenario.$step $title';
+  }
+
+  @override
+  String guideProgress(int done, int total) {
+    return '$done sur $total';
+  }
+
+  @override
+  String get guideScenarioDone => 'Fait';
+
+  @override
+  String get guideStepDone => 'Faite';
+
+  @override
+  String get guideOptional => 'Facultative';
+
+  @override
+  String get guideFill => 'Remplir pour moi';
+
+  @override
+  String get guideOpen => 'Ouvrir';
+
+  @override
+  String get guideMarkDone => 'Marquer comme faite';
+
+  @override
+  String get guideNeedsHome =>
+      'Ajoutez d\'abord le logement d\'exemple, dans le premier scénario.';
+
+  @override
+  String get guideCatchUpText =>
+      'Les scénarios précédents ne sont pas tous faits. Le guide peut ajouter ce qu\'ils créent au logement d\'exemple, pour que vous commenciez ici.';
+
+  @override
+  String get guideCatchUpNoHome =>
+      'Il n\'y a pas encore de logement d\'exemple. Le guide peut le créer, avec ce qu\'ajoutent les scénarios précédents, pour que vous commenciez ici.';
+
+  @override
+  String get guideCatchUp => 'Ajouter ce que créent les scénarios précédents';
+
+  @override
+  String get guideCaughtUp =>
+      'Les scénarios précédents sont faits dans le logement d\'exemple.';
+
+  @override
+  String get guideBack => 'Retour au guide';
+
+  @override
+  String get exampleHome => 'Logement d\'exemple';
+
+  @override
+  String get exampleBannerText =>
+      'Des valeurs fictives, pour essayer Housecairn pour de vrai. Il reste sur ce téléphone.';
+
+  @override
+  String get exampleDelete => 'Supprimer le logement d\'exemple';
+
+  @override
+  String get exampleDeleteTitle => 'Supprimer le logement d\'exemple ?';
+
+  @override
+  String get exampleDeleteBody =>
+      'Tout ce qu\'il contient disparaît, définitivement. Vos autres logements ne changent pas.';
+
+  @override
+  String get exampleDeleted => 'Le logement d\'exemple a été supprimé.';
+
+  @override
+  String get exampleMark => 'Exemple';
+
+  @override
+  String get exampleNewHomeNotice =>
+      'C\'est le logement d\'exemple du guide : ses valeurs sont fictives, et vous le supprimez d\'un geste quand vous avez fini.';
+
+  @override
+  String get todayGuideText =>
+      'Vous ne savez pas par où commencer ? Essayez Housecairn sur un logement d\'exemple, en cinq courts scénarios.';
+
+  @override
+  String get todayGuideOpen => 'Ouvrir le guide';
+
+  @override
+  String guidePrevious(String title) {
+    return '‹ $title';
+  }
+
+  @override
+  String guideNext(String title) {
+    return '$title ›';
+  }
+
+  @override
   String get qrLabels => 'Étiquettes QR';
 
   @override

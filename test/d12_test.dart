@@ -478,6 +478,9 @@ void main() {
       );
       await openSection(tester, 'More');
       await tester.scrollUntilVisible(hcIcon(HcIcons.info), 100);
+      // Shown whole: Guide comes before About in Help (web ADR 0084).
+      await tester.ensureVisible(hcIcon(HcIcons.info));
+      await tester.pumpAndSettle();
       await tester.tap(hcIcon(HcIcons.info));
       await tester.pumpAndSettle();
       return opened;

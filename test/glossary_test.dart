@@ -81,6 +81,8 @@ const keys = <String, String>{
   'projectsIdeas': 'ideas',
   'projectsFinished': 'finished-tab',
   'quotes': 'quotes',
+  'guide': 'guide',
+  'exampleHome': 'example-home',
 };
 
 /// Keys known to differ from the glossary, with the lot that aligns them

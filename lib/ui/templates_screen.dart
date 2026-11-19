@@ -8,6 +8,7 @@ import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/day.dart';
 import '../domain/templates.dart';
+import 'guide_screens.dart';
 import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'choices.dart';
@@ -16,11 +17,16 @@ import 'state.dart';
 
 /// Add from a template (docs/spec.md, "Screens of v1", 3): the library of
 /// common tasks of a home, grouped by equipment; the person ticks what they
-/// need and each becomes a task of the current home, repeating after the last
+/// need and each becomes a task of the home, repeating after the last
 /// time, with the interval, the duration, the procedure and the source of the
 /// template (web ADR 0049). The templates never leave the phone.
 class TemplatesScreen extends StatefulWidget {
-  const TemplatesScreen({super.key, this.roomId});
+  const TemplatesScreen({super.key, this.homeId, this.roomId});
+
+  /// The home the tasks go to: the one of the page it is opened from (a
+  /// room of the example home adds to the example home), else the current
+  /// home.
+  final String? homeId;
 
   /// The room the tasks are attached to, when the screen is opened from one.
   final String? roomId;
@@ -48,10 +54,10 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
 
   Future<void> _load(AppState state) async {
     final library = await state.loadTemplates();
-    final home = state.current;
+    final home = widget.homeId ?? state.current?.id;
     final rooms = home == null
         ? <RoomRow>[]
-        : await state.repository.rooms(home.id);
+        : await state.repository.rooms(home);
     if (!mounted) return;
     setState(() {
       _library = library;
@@ -63,7 +69,7 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
     final l10n = AppLocalizations.of(context);
     final state = AppScope.of(context);
     final library = _library;
-    final home = state.current;
+    final home = widget.homeId ?? state.current?.id;
     if (library == null || home == null) return;
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
@@ -85,7 +91,7 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
             dueOn: _dueOn,
           ),
     ];
-    if (await runChange(context, (r) => r.createTasks(home.id, inputs))) {
+    if (await runChange(context, (r) => r.createTasks(home, inputs))) {
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.templatesAdded(inputs.length))),
       );
@@ -112,6 +118,7 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
     final language = Localizations.localeOf(context).languageCode;
     return HcScaffold(
       title: l10n.addFromTemplate,
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       actions: const [HelpButton(page: HelpPages.templates)],
       body: library == null
           ? const SizedBox.shrink()

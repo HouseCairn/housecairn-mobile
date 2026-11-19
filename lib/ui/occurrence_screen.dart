@@ -10,6 +10,7 @@ import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
 import '../l10n/app_localizations.dart';
 import 'budget_parts.dart';
+import 'guide_screens.dart';
 import 'stock_format.dart';
 import 'parts.dart';
 import 'state.dart';
@@ -99,6 +100,7 @@ class _OccurrenceScreenState extends State<OccurrenceScreen> {
     final l10n = AppLocalizations.of(context);
     return HcScaffold(
       title: l10n.occurrenceTitle,
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       body: _occurrence == null
           ? const SizedBox.shrink()

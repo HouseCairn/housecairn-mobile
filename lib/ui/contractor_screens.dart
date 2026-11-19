@@ -7,6 +7,7 @@ import '../data/repository.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/choices.dart';
+import 'guide_screens.dart';
 import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'choices.dart';
@@ -128,6 +129,7 @@ class ContractorScreen extends StatelessWidget {
         final trade = contractorTrade(l10n, c);
         return HcScaffold(
           title: c.name,
+          belowTitle: ExampleHomeBanner(homeId: homeId),
           actions: actionsOrHelp([
             if (writable)
               HcBarAction(
@@ -314,6 +316,7 @@ class _ContractorFormScreenState extends State<ContractorFormScreen> {
     final l10n = AppLocalizations.of(context);
     return HcScaffold(
       title: widget.contractorId == null ? l10n.newContractor : l10n.contractor,
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
       actions: [HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
         key: _form,

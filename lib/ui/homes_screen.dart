@@ -10,6 +10,7 @@ import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/recurrence.dart' as recurrence;
 import 'budget_parts.dart';
+import 'guide_screens.dart';
 import 'help_button.dart';
 import '../l10n/app_localizations.dart';
 import 'messages.dart';
@@ -26,6 +27,7 @@ class HomesScreen extends StatelessWidget {
     final state = AppScope.of(context);
     final active = state.homes.where((h) => h.archivedAt == null);
     final archived = state.homes.where((h) => h.archivedAt != null);
+    final example = state.exampleHome;
     void open(HomeRow? home) =>
         Navigator.of(context).push(hcRoute(HomeScreen(homeId: home?.id)));
     return HcScaffold(
@@ -41,6 +43,16 @@ class HomesScreen extends StatelessWidget {
                   title: home.name,
                   text: home.currency,
                   onTap: () => open(home),
+                ),
+              // The example home of the guide after the real ones, with its
+              // mark (`homes/home_list.html`); the only list that shows it.
+              if (example != null)
+                HcRow(
+                  key: const Key('homes-example'),
+                  title: example.name,
+                  text: example.currency,
+                  pills: [HcPill(l10n.exampleMark, tone: HcPillTone.info)],
+                  onTap: () => open(example),
                 ),
             ],
           ),
@@ -73,10 +85,18 @@ class HomesScreen extends StatelessWidget {
 
 /// A home: its form, and archive, unarchive, delete. Without [homeId], a new
 /// home. An archived home is read only: only unarchive and delete.
+///
+/// The example home of the guide has its banner, which deletes it, and no
+/// Archive nor Delete at the bottom (`homes/home_detail.html`). Opened from
+/// the first step of the guide ([guide]), a new home is filled in with the
+/// example home of `design/guide.json` and saving makes the example home.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, this.homeId});
+  const HomeScreen({super.key, this.homeId, this.guide = false});
 
   final String? homeId;
+
+  /// The form of step 1 of the guide: a new home that is the example home.
+  final bool guide;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -94,11 +114,31 @@ class _HomeScreenState extends State<HomeScreen> {
     super.didChangeDependencies();
     if (_loaded) return;
     _loaded = true;
-    final home = _home(AppScope.of(context));
+    final state = AppScope.of(context);
+    final home = _home(state);
     if (home != null) {
       _name.text = home.name;
       _currency.text = home.currency;
       _hemisphere = home.hemisphere;
+    } else if (widget.guide) {
+      final language = Localizations.localeOf(context).toLanguageTag();
+      state.guideContent().then((content) {
+        if (!mounted) return;
+        final guide = content.guide;
+        final example = guide.home;
+        setState(() {
+          _name.text =
+              '${guide.text(example['name'], guide.languageFor(language))}';
+          if (example['currency'] case final String currency) {
+            _currency.text = currency;
+          }
+          if (example['hemisphere'] case final String hemisphere
+              when hemisphere == recurrence.north ||
+                  hemisphere == recurrence.south) {
+            _hemisphere = hemisphere;
+          }
+        });
+      });
     }
   }
 
@@ -111,6 +151,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   HomeRow? _home(AppState state) => widget.homeId == null
       ? null
+      : state.isExample(widget.homeId)
+      ? state.exampleHome
       : state.homes.where((h) => h.id == widget.homeId).firstOrNull;
 
   Future<void> _act(Future<void> Function(Repository repository) action) async {
@@ -130,6 +172,21 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!_form.currentState!.validate()) return;
     final name = _name.text;
     final currency = _currency.text.trim().toUpperCase();
+    if (widget.homeId == null && widget.guide) {
+      final state = AppScope.of(context);
+      final language = Localizations.localeOf(context).toLanguageTag();
+      final guide = (await state.guideContent()).guide;
+      await _act(
+        (repository) => repository.createExampleHome(
+          guide,
+          language: language,
+          name: name,
+          currency: currency,
+          hemisphere: _hemisphere,
+        ),
+      );
+      return;
+    }
     await _act(
       (repository) => widget.homeId == null
           ? repository.createHome(
@@ -164,14 +221,22 @@ class _HomeScreenState extends State<HomeScreen> {
     final home = _home(state);
     final archived = home?.archivedAt != null;
     final editable = !archived;
+    final example = home != null && home.isExample;
     return HcScaffold(
       title: home == null ? l10n.newHome : l10n.editHome,
+      belowTitle: ExampleHomeBanner(homeId: home?.id),
       actions: [if (editable) HcBarAction(label: l10n.save, onPressed: _save)],
       body: Form(
         key: _form,
         child: HcScreenList(
           children: [
             const SizedBox(height: HcSpace.s2),
+            if (home == null && widget.guide)
+              Padding(
+                key: const Key('home-guide-notice'),
+                padding: const EdgeInsets.only(bottom: HcSpace.s4),
+                child: Text(l10n.exampleNewHomeNotice, style: HcText.body),
+              ),
             if (archived)
               Padding(
                 padding: const EdgeInsets.only(bottom: HcSpace.s4),
@@ -223,7 +288,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            if (home != null) ...[
+            // The example home goes from its banner, in one press and one
+            // confirmation (web ADR 0084).
+            if (home != null && !example) ...[
               const SizedBox(height: HcSpace.s4),
               // As the web's page of a home: Archive (secondary) above Delete
               // (danger), each the width of the column.
