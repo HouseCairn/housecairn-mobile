@@ -469,6 +469,74 @@ void main() {
     await expectOccurrencesEqual(task);
   }, skip: skip);
 
+  test('a stock item added from the materials of the task of an item fits '
+      'that item on the server, which lists it for the item and its room, '
+      'without a refusal', () async {
+    // The equipment is there already, made on the web and synced.
+    final room =
+        (await web.json(
+              'POST',
+              '/api/v1/homes/$home/rooms/',
+              body: {'name': 'Boiler room', 'kind': 'other'},
+            ))['id']!
+            as String;
+    final item =
+        (await web.json(
+              'POST',
+              '/api/v1/homes/$home/items/',
+              body: {'room': room, 'name': 'Wall boiler', 'kind': 'equipment'},
+            ))['id']!
+            as String;
+    phone.clock.set(DateTime.now().toUtc());
+    await phone.sync();
+    expect((await phone.repo.item(item))?.name, 'Wall boiler');
+    // What the task form writes: the task on the item, then the stock item
+    // of *Add a stock item…*, fitting the item, and its line.
+    final task = await phone.repo.createTask(
+      home,
+      TaskInput(title: 'Change the seal', roomId: room, itemId: item),
+    );
+    final seal = await phone.repo.addArticle(
+      home,
+      ArticleInput(name: 'Boiler seal', unit: 'piece', itemIds: [item]),
+    );
+    await phone.repo.saveMaterial(task, seal, '2');
+    await phone.sync();
+    expect([
+      for (final r in transport.rejections) '${r.code} ${r.operation}',
+    ], isEmpty);
+    final onWeb = await web.json('GET', '/api/v1/homes/$home/articles/$seal/');
+    expect(onWeb['compatible_items'], [item]);
+    expect(onWeb['unit'], 'piece');
+    Future<List<Object?>> listed(Map<String, String> query) async {
+      final (status, text, _) = await web.raw(
+        'GET',
+        address.resolve('/api/v1/homes/$home/articles/', query),
+        headers: {
+          'accept': 'application/json',
+          'authorization': 'Bearer ${web.apiToken}',
+        },
+      );
+      expect(status, 200, reason: text);
+      return [
+        for (final a in (jsonDecode(text) as Map)['results']! as List)
+          (a as Map)['id'],
+      ];
+    }
+
+    expect(await listed({'item': item}), [seal]);
+    expect(await listed({'room': room}), [seal]);
+    // The link removed on the web reaches the phone.
+    await web.json(
+      'PATCH',
+      '/api/v1/homes/$home/articles/$seal/',
+      body: {'compatible_items': <String>[]},
+    );
+    await phone.sync();
+    expect(await phone.repo.compatibleItemsOf(seal), isEmpty);
+    expect(await phone.repo.articlesOfRoom(room), isEmpty);
+  }, skip: skip);
+
   test('ADR 0003, versions: a field of a newer app is kept by the server and '
       'by this phone, which does not know it; a phone below the server\'s '
       'lowest sv reads but does not write', () async {

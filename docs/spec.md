@@ -260,16 +260,21 @@ Homes and Settings shows the current home.
    the folded sections of the web (`tasks/task_form.html`): title, room, item and due date, then
    Repeat (with a preview of the next five dates, `tasks/recurrence.py:341-351`), Who, Time and
    budget, Materials (one line per stock item and quantity, one empty line offered, up to 50,
-   saved with the task; the stock items themselves are added in Rooms, Stock, not in the form),
-   How to do it; only the title is required; a room, an item or a contractor can be
-   added with the task; Save and Cancel end it, deletion is under them.
+   saved with the task; the last choice of a line, *Add a stock item…*, opens the name and the
+   unit of a new stock item, which joins the stock when the task is saved and fits the item of
+   the task, the one added by the same form included, as on the web: `tasks/views.py`
+   `save_materials`; its name may not be one of the stock, whatever its case, nor be added by
+   another line), How to do it; only the title is required; a room, an item, a contractor or a
+   stock item can be added with the task; Save and Cancel end it, deletion is under them.
 3. **Add from a template**: the bundled library, filtered by the equipment ticked. Each template
    says its interval in the words of the web ("every month · source") and links its source,
    which opens in the browser of the phone.
 4. **Rooms**: list in the household's order; a room shows its type, then **Report a problem**
    (Where starts with the room), its memory (the short values as lines of label and value, with
-   **Edit the memory**, its own form as on the web), its photos, its items and its tasks, in the
-   order of the web (`rooms/room_detail.html`). **Edit** in the bar opens the type, the name and
+   **Edit the memory**, its own form as on the web), its stock (the stock items listed on the
+   room, fitting one of its items, or its paint left over, by name, with their quantity, where
+   they are and **Low stock**; `stock/services.py` `articles_of_room`), its photos, its items and
+   its tasks, in the order of the web (`rooms/room_detail.html`). **Edit** in the bar opens the type, the name and
    the notes, in that order, with the help of the web; choosing a type fills the name in with the
    label of the type while the name is empty or still that of the previous type.
    Its tab **Equipment** lists every item of the home, by room then name, with its next task
@@ -287,13 +292,15 @@ Homes and Settings shows the current home.
 The sheets of an existing item, room, task and stock article save themselves as they are
 changed (web ADR 0082): a choice, a date or a tick at once, a text 800 ms after the typing
 stops, one write of the fields that changed, a discreet "Saved" said by the screen reader. A
-creation and a deletion keep their button, as does a task that adds a room, an item or a
-contractor with it.
+creation and a deletion keep their button, as does a task that adds a room, an item, a
+contractor or a stock item with it.
 6. **Stock**: articles with the **Low stock** flag (`stock/models.py:90-96`), under the tabs
    **All** and **Low stock**, with a search field (name, manufacturer reference, supplier name
    or reference; without regard to case or accents) that follows the typing; an article with its
    movements and suppliers, add an entry, an exit or an inventory. **Edit the stock item** and
-   **Report a problem** (Where starts with the article) are the action row of its page. Saved,
+   **Report a problem** (Where starts with the article) are the action row of its page; its
+   **Compatible items** show their room under their name, and its form offers them grouped by
+   room, in the order of the rooms, then by name (`stock/forms.py` `ItemChoiceField`). Saved,
    a new article opens, and Back from it returns to the list (web design guide, After a form).
 7. **Projects**: list by status (`projects/models.py:61-67`), under the card of the envelope of
    the year, in groups by status with their heading (In progress, Planned, Idea, Finished,
