@@ -5725,6 +5725,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No stock item for this room yet.'**
   String get roomStockEmpty;
+
+  /// Heading of the section of an item page that lists the stock items fitting it. Web catalogue (rooms, item page, after v0.5.1): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials'**
+  String get itemMaterials;
+
+  /// Empty Materials section of an item page: no stock item fits it. Web catalogue (rooms, item page, after v0.5.1): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'No stock item linked to this yet.'**
+  String get itemStockEmpty;
+
+  /// Unit price of a stock item in the Materials section of an item page, after its quantity.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} each'**
+  String itemStockUnitPrice(String price);
+
+  /// Button of the Materials section of an item page: choose stock items of the home that fit the item. Web catalogue (rooms, item page, after v0.5.1): Link a stock item, a page there, a sheet here.
+  ///
+  /// In en, this message translates to:
+  /// **'Link a stock item…'**
+  String get itemStockLink;
+
+  /// Button of the Materials section of an item page: the stock item form, the item ticked in its Compatible items. Web catalogue (tasks): Nouvel article.
+  ///
+  /// In en, this message translates to:
+  /// **'New stock item…'**
+  String get itemStockNew;
+
+  /// Under the title of the stock item form opened by New stock item… on an item page: the item the new stock item fits, whatever is ticked. Web catalogue (stock): Il sera lié à %(name)s.
+  ///
+  /// In en, this message translates to:
+  /// **'It will be linked to {name}.'**
+  String articleWillLink(String name);
+
+  /// Title of the sheet opened by Link a stock item… on an item page.
+  ///
+  /// In en, this message translates to:
+  /// **'Link stock items'**
+  String get itemStockLinkTitle;
+
+  /// Text at the top of the sheet Link stock items.
+  ///
+  /// In en, this message translates to:
+  /// **'The stock items of this home that do not fit this item yet. Those you tick fit it, as in their Compatible items.'**
+  String get itemStockLinkIntro;
+
+  /// Action of the bar of the sheet Link stock items: the ticked stock items fit the item.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get itemStockLinkAction;
+
+  /// Sheet Link stock items when no stock item is left to link.
+  ///
+  /// In en, this message translates to:
+  /// **'Every stock item of this home already fits this item.'**
+  String get itemStockLinkNone;
+
+  /// Message of Link with nothing ticked in the sheet Link stock items.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick at least one stock item.'**
+  String get itemStockNoneTicked;
 }
 
 class _AppLocalizationsDelegate

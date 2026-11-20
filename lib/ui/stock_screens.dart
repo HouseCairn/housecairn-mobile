@@ -694,12 +694,24 @@ class ArticleFormScreen extends StatefulWidget implements HcFormScreen {
   @override
   bool get opensAsSheet => true;
 
-  const ArticleFormScreen({super.key, required this.homeId, this.articleId});
+  const ArticleFormScreen({
+    super.key,
+    required this.homeId,
+    this.articleId,
+    this.fitsItemId,
+  });
 
   final String homeId;
 
   /// `null` for a new article.
   final String? articleId;
+
+  /// For a new article made from an item's Materials (*New stock item…*):
+  /// the item it fits, ticked in its Compatible items and linked on save
+  /// whatever is ticked, as the web's `ItemArticleCreateView` (web ADR 0088). An
+  /// item of another home is refused on save (`Refusal.notInHome`), as the
+  /// web's 404.
+  final String? fitsItemId;
 
   @override
   State<ArticleFormScreen> createState() => _ArticleFormScreenState();
@@ -739,6 +751,9 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
   final _items = <String>{};
   List<RoomRow> _roomChoices = const [];
   List<ItemRow> _itemChoices = const [];
+
+  /// The name of [ArticleFormScreen.fitsItemId], for *It will be linked to…*.
+  String? _fitsName;
   String _currency = '';
   bool _loaded = false;
 
@@ -787,6 +802,10 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
         _hasLabel = a.label != null;
         _rooms.addAll(linkedRooms.map((r) => r.id));
         _items.addAll(linkedItems.map((i) => i.id));
+      } else if (items.where((i) => i.id == widget.fitsItemId).firstOrNull
+          case final fits?) {
+        _items.add(fits.id);
+        _fitsName = fits.name;
       }
     });
     sheetLoaded();
@@ -822,7 +841,13 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
     notes: _notes.text,
     ean: _ean.text,
     roomIds: _rooms.toList(),
-    itemIds: _items.toList(),
+    // Started from an item, a new article fits it whatever is unticked; an
+    // item of another home makes `addArticle` refuse it.
+    itemIds: {
+      ..._items,
+      if (widget.articleId == null && widget.fitsItemId != null)
+        widget.fitsItemId!,
+    }.toList(),
   );
 
   Future<void> _save() async {
@@ -964,6 +989,15 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
         child: HcScreenList(
           children: [
             const SizedBox(height: HcSpace.s2),
+            if (_fitsName case final name?)
+              Padding(
+                padding: const EdgeInsets.only(bottom: HcSpace.s3),
+                child: Text(
+                  l10n.articleWillLink(name),
+                  key: const Key('article-will-link'),
+                  style: HcText.bodySmall,
+                ),
+              ),
             HcCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1378,6 +1412,254 @@ class _TaskMaterialsState extends State<TaskMaterialsSection> {
           ],
         );
       },
+    );
+  }
+}
+
+/// The Stock of an item: the articles that fit it, the other side of their
+/// Compatible items (`compatible_items`), each opening its page, with its
+/// stock and its unit price; Remove ends the link and leaves the article in
+/// the stock. *Link a stock item…* ticks articles of the same home, *New
+/// stock item…* opens the article form with the item ticked.
+class ItemStockSection extends StatelessWidget {
+  const ItemStockSection({
+    super.key,
+    required this.homeId,
+    required this.itemId,
+    required this.writable,
+  });
+
+  final String homeId;
+  final String itemId;
+  final bool writable;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final locale = localeOf(context);
+    final currency = AppScope.of(context).homes
+        .where((h) => h.id == homeId)
+        .firstOrNull
+        ?.currency;
+    void open(Widget screen) => Navigator.of(context).push(hcRoute(screen));
+    return DataView<List<ArticleEntry>>(
+      load: (r) => r.articlesOfItem(itemId),
+      builder: (context, fitting) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          HcSectionHeading(l10n.itemMaterials),
+          if (fitting.isEmpty)
+            HcEmpty(l10n.itemStockEmpty)
+          else
+            HcCardList(
+              key: const Key('item-stock'),
+              children: [
+                for (final entry in fitting)
+                  HcRow(
+                    key: Key('item-article-${entry.article.id}'),
+                    title: entry.article.name,
+                    text: [
+                      amountOf(l10n, locale, entry.article, entry.level),
+                      if (entry.article.unitPrice != null && currency != null)
+                        l10n.itemStockUnitPrice(
+                          formatMoney(
+                            locale,
+                            currency,
+                            stock.readQuantity(entry.article.unitPrice!),
+                          ),
+                        ),
+                    ].join(' · '),
+                    pills: [
+                      if (entry.low)
+                        HcPill(l10n.articleLowStock, tone: HcPillTone.warning),
+                    ],
+                    onTap: () => open(
+                      ArticleScreen(
+                        homeId: homeId,
+                        articleId: entry.article.id,
+                      ),
+                    ),
+                    trailing: writable
+                        ? Semantics(
+                            label: l10n.removeMaterial(entry.article.name),
+                            button: true,
+                            excludeSemantics: true,
+                            child: TextButton(
+                              key: Key(
+                                'item-article-remove-${entry.article.id}',
+                              ),
+                              onPressed: () => runChange(
+                                context,
+                                (r) => r.unlinkArticleFromItem(
+                                  itemId,
+                                  entry.article.id,
+                                ),
+                              ),
+                              child: Text(l10n.remove),
+                            ),
+                          )
+                        : null,
+                  ),
+              ],
+            ),
+          if (writable)
+            Padding(
+              padding: const EdgeInsets.only(top: HcSpace.s3),
+              child: Wrap(
+                spacing: HcSpace.s2,
+                runSpacing: HcSpace.s2,
+                children: [
+                  OutlinedButton(
+                    key: const Key('item-stock-link'),
+                    onPressed: () => open(
+                      ItemStockLinkScreen(homeId: homeId, itemId: itemId),
+                    ),
+                    child: Text(l10n.itemStockLink),
+                  ),
+                  OutlinedButton(
+                    key: const Key('item-stock-new'),
+                    onPressed: () => open(
+                      ArticleFormScreen(homeId: homeId, fitsItemId: itemId),
+                    ),
+                    child: Text(l10n.itemStockNew),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// *Link a stock item…* of an item: the articles of its home that do not
+/// fit it yet, to tick; Link makes the ticked ones fit it, all or none.
+class ItemStockLinkScreen extends StatefulWidget implements HcFormScreen {
+  @override
+  bool get opensAsSheet => true;
+
+  const ItemStockLinkScreen({
+    super.key,
+    required this.homeId,
+    required this.itemId,
+  });
+
+  final String homeId;
+  final String itemId;
+
+  @override
+  State<ItemStockLinkScreen> createState() => _ItemStockLinkScreenState();
+}
+
+class _ItemStockLinkScreenState extends State<ItemStockLinkScreen> {
+  final _ticked = <String>{};
+  List<ArticleEntry>? _choices;
+  bool _stockEmpty = false;
+  bool _loaded = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_loaded) return;
+    _loaded = true;
+    _load(AppScope.of(context).repository);
+  }
+
+  Future<void> _load(Repository r) async {
+    final all = await r.articles(widget.homeId);
+    final fitting = {
+      for (final e in await r.articlesOfItem(widget.itemId)) e.article.id,
+    };
+    if (!mounted) return;
+    setState(() {
+      _stockEmpty = all.isEmpty;
+      _choices = [
+        for (final e in all)
+          if (!fitting.contains(e.article.id)) e,
+      ];
+    });
+  }
+
+  Future<void> _link() async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    if (_ticked.isEmpty) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.itemStockNoneTicked)));
+      return;
+    }
+    if (await runChange(
+      context,
+      (r) => r.linkArticlesToItem(widget.itemId, _ticked),
+    )) {
+      navigator.pop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final locale = localeOf(context);
+    final choices = _choices;
+    return HcScaffold(
+      title: l10n.itemStockLinkTitle,
+      belowTitle: ExampleHomeBanner(homeId: widget.homeId),
+      actions: [
+        if (choices != null && choices.isNotEmpty)
+          HcBarAction(label: l10n.itemStockLinkAction, onPressed: _link),
+      ],
+      body: choices == null
+          ? const SizedBox.shrink()
+          : HcScreenList(
+              children: [
+                const SizedBox(height: HcSpace.s2),
+                if (choices.isEmpty)
+                  HcEmpty(
+                    _stockEmpty
+                        ? l10n.materialsNoArticle
+                        : l10n.itemStockLinkNone,
+                  )
+                else ...[
+                  Text(l10n.itemStockLinkIntro, style: HcText.rowText),
+                  const SizedBox(height: HcSpace.s3),
+                  HcCardList(
+                    key: const Key('item-stock-choices'),
+                    children: [
+                      for (final entry in choices)
+                        CheckboxListTile(
+                          key: Key('item-stock-choice-${entry.article.id}'),
+                          value: _ticked.contains(entry.article.id),
+                          onChanged: (on) => setState(
+                            () => on == true
+                                ? _ticked.add(entry.article.id)
+                                : _ticked.remove(entry.article.id),
+                          ),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          title: Text(
+                            entry.article.name,
+                            style: HcText.rowTitle,
+                          ),
+                          subtitle: Text(
+                            [
+                              amountOf(
+                                l10n,
+                                locale,
+                                entry.article,
+                                entry.level,
+                              ),
+                              if (entry.article.storageLocation.isNotEmpty)
+                                entry.article.storageLocation,
+                            ].join(' · '),
+                            style: HcText.rowText,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
     );
   }
 }

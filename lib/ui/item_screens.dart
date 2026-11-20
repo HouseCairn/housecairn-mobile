@@ -31,6 +31,7 @@ import 'report_screens.dart';
 import 'rooms.dart';
 import 'guide_screens.dart';
 import 'state.dart';
+import 'stock_screens.dart';
 
 /// An item (docs/spec.md, "Screens of v1", 5; `rooms/item_detail.html`):
 /// what it is, its warranty, its maintenance contract and Report a problem,
@@ -205,6 +206,13 @@ class ItemScreen extends StatelessWidget {
                   ],
                 ),
               ],
+              // The stock that fits the item, linked from here too (the
+              // other side of the articles' Compatible items).
+              ItemStockSection(
+                homeId: homeId,
+                itemId: itemId,
+                writable: writable,
+              ),
               PhotoSection(homeId: homeId, itemId: itemId, writable: writable),
               TaskRows(homeId: homeId, itemId: itemId, writable: writable),
             ],

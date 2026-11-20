@@ -538,6 +538,54 @@ void main() {
     expect(await phone.repo.articlesOfRoom(room), isEmpty);
   }, skip: skip);
 
+  test('a stock item linked from the item\'s Stock, then removed there, '
+      'reaches the server without a refusal: the web reads the link, then '
+      'no link, and the stock item stays', () async {
+    // The equipment and the stock item are there already, made on the web.
+    final room =
+        (await web.json(
+              'POST',
+              '/api/v1/homes/$home/rooms/',
+              body: {'name': 'Utility room', 'kind': 'other'},
+            ))['id']!
+            as String;
+    final item =
+        (await web.json(
+              'POST',
+              '/api/v1/homes/$home/items/',
+              body: {'room': room, 'name': 'Water heater', 'kind': 'equipment'},
+            ))['id']!
+            as String;
+    final anode =
+        (await web.json(
+              'POST',
+              '/api/v1/homes/$home/articles/',
+              body: {'name': 'Magnesium anode'},
+            ))['id']!
+            as String;
+    phone.clock.set(DateTime.now().toUtc());
+    await phone.sync();
+    expect((await phone.repo.article(anode))?.name, 'Magnesium anode');
+    // What Link a stock item… of the item writes.
+    await phone.repo.linkArticlesToItem(item, [anode]);
+    await phone.sync();
+    expect([
+      for (final r in transport.rejections) '${r.code} ${r.operation}',
+    ], isEmpty);
+    var onWeb = await web.json('GET', '/api/v1/homes/$home/articles/$anode/');
+    expect(onWeb['compatible_items'], [item]);
+    // What Remove of the item's Stock writes.
+    phone.clock.set(DateTime.now().toUtc());
+    await phone.repo.unlinkArticleFromItem(item, anode);
+    await phone.sync();
+    expect([
+      for (final r in transport.rejections) '${r.code} ${r.operation}',
+    ], isEmpty);
+    onWeb = await web.json('GET', '/api/v1/homes/$home/articles/$anode/');
+    expect(onWeb['compatible_items'], isEmpty);
+    expect(onWeb['name'], 'Magnesium anode');
+  }, skip: skip);
+
   test('ADR 0003, versions: a field of a newer app is kept by the server and '
       'by this phone, which does not know it; a phone below the server\'s '
       'lowest sv reads but does not write', () async {

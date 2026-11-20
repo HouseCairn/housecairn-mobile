@@ -324,6 +324,22 @@ extension StockRepository on Repository {
     return items..sort(byRoomThenName);
   }
 
+  /// The articles that fit [itemId], the other side of their
+  /// `compatible_items`: by name, each with its stock.
+  Future<List<ArticleEntry>> articlesOfItem(String itemId) async {
+    final item = await this.item(itemId);
+    if (item == null) return [];
+    final links = await (db.select(
+      db.articleItems,
+    )..where((l) => l.itemId.equalsValue(itemId) & l.deletedAt.isNull())).get();
+    final ids = {for (final l in links) l.articleId};
+    if (ids.isEmpty) return [];
+    return [
+      for (final entry in await articles(item.homeId))
+        if (ids.contains(entry.article.id)) entry,
+    ];
+  }
+
   /// The articles that concern a room (`stock/services.py`
   /// `articles_of_room`): the room is listed on the article, the article fits
   /// an item of the room that is not deleted, or it is the tin of paint left
@@ -580,6 +596,68 @@ extension StockRepository on Repository {
         input.itemIds,
         articleItemId,
       );
+    });
+  }
+
+  /// Makes the articles [articleIds] fit [itemId], from the item's side: the
+  /// same rows of `stock.article_compatible_items`, with the same ids, as
+  /// ticking the item in each article's Compatible items ([updateArticle]).
+  /// Every article must be of the item's home; one already fitting stays as
+  /// it is. All or none.
+  Future<void> linkArticlesToItem(
+    String itemId,
+    Iterable<String> articleIds,
+  ) async {
+    final item = await this.item(itemId);
+    if (item == null) throw const Refused(Refusal.notFound);
+    await _writableHome(item.homeId);
+    final wanted = articleIds.toSet();
+    final ofHome =
+        await (db.select(db.articles)..where(
+              (a) => a.homeId.equalsValue(item.homeId) & a.deletedAt.isNull(),
+            ))
+            .get();
+    final known = {for (final a in ofHome) a.id};
+    if (!wanted.every(known.contains)) throw const Refused(Refusal.notInHome);
+    final fitting = {
+      for (final e in await articlesOfItem(itemId)) e.article.id,
+    };
+    await db.transaction(() async {
+      for (final articleId in wanted.difference(fitting)) {
+        await _upsert(
+          'article_items',
+          articleItemId(item.homeId, articleId, itemId),
+          {'article_id': articleId, 'item_id': itemId, 'deleted_at': null},
+          item.homeId,
+        );
+      }
+    });
+  }
+
+  /// The article [articleId] no longer fits [itemId]: its link is deleted,
+  /// as unticking the item in the article's Compatible items does. The
+  /// article stays in the stock. An article that is not a live one of the
+  /// item's home is refused, as in [linkArticlesToItem].
+  Future<void> unlinkArticleFromItem(String itemId, String articleId) async {
+    final item = await this.item(itemId);
+    if (item == null) throw const Refused(Refusal.notFound);
+    await _writableHome(item.homeId);
+    if ((await article(articleId))?.homeId != item.homeId) {
+      throw const Refused(Refusal.notInHome);
+    }
+    final links =
+        await (db.select(db.articleItems)..where(
+              (l) =>
+                  l.itemId.equalsValue(itemId) &
+                  l.articleId.equalsValue(articleId) &
+                  l.deletedAt.isNull(),
+            ))
+            .get();
+    final now = _now();
+    await db.transaction(() async {
+      for (final link in links) {
+        await _put('article_items', link.id, {'deleted_at': now});
+      }
     });
   }
 
