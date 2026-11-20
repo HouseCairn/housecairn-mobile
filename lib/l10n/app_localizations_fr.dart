@@ -3472,4 +3472,34 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get errEanInvalid =>
       'Ce n\'est pas un code-barres valide : saisissez les 8, 12, 13 ou 14 chiffres sous les barres (EAN-8, UPC-A, EAN-13 ou GTIN-14).';
+
+  @override
+  String get materialAddArticle => 'Ajouter un article…';
+
+  @override
+  String get materialNewArticle => 'Nouvel article';
+
+  @override
+  String get materialNewArticleName => 'Nom du nouvel article';
+
+  @override
+  String get materialNewArticleHelp =>
+      'Utilisé seulement avec « Ajouter un article… » dans la liste ci-dessus. L\'article rejoint le matériel du logement à l\'enregistrement de la tâche ; complétez-le ensuite sur sa fiche.';
+
+  @override
+  String get errNewArticleName => 'Indiquez le nom du nouvel article.';
+
+  @override
+  String errNewArticleInStock(String name) {
+    return '$name est déjà dans le matériel de ce logement : choisissez-le dans la liste.';
+  }
+
+  @override
+  String errNewArticleTwice(String name) {
+    return '$name est déjà ajouté par une autre ligne : un article n\'est listé qu\'une fois.';
+  }
+
+  @override
+  String get roomStockEmpty =>
+      'Aucun article pour cette pièce pour l\'instant.';
 }

@@ -25,8 +25,8 @@ import 'parts.dart';
 import 'guide_screens.dart';
 import 'state.dart';
 
-/// The choice that adds a room, an item or a contractor with the task: the
-/// last of their lists (`AddInPlaceChoiceField`).
+/// The choice that adds a room, an item, a contractor or a stock item with
+/// the task: the last of their lists (`AddInPlaceChoiceField`).
 const _newChoice = '+new';
 
 /// The form of a task (`tasks/task_form.html`), opened by Edit the task from
@@ -81,14 +81,16 @@ class _TaskFormScreenState extends State<TaskFormScreen>
   @override
   GlobalKey<FormState> get sheetForm => _form;
 
-  /// An existing task saves itself, unless a room, an item or a contractor
-  /// is to be added with it: that waits for the button, all or none.
+  /// An existing task saves itself, unless a room, an item, a contractor or
+  /// a stock item is to be added with it: that waits for the button, all or
+  /// none.
   @override
   bool get existing =>
       widget.taskId != null &&
       _roomId != _newChoice &&
       _itemId != _newChoice &&
-      _contractorId != _newChoice;
+      _contractorId != _newChoice &&
+      !_materials.any((line) => line.article == _newChoice);
 
   @override
   Future<void> writeSheet(Repository repository) async {
@@ -108,17 +110,40 @@ class _TaskFormScreenState extends State<TaskFormScreen>
         material: material,
         labour: labour,
       );
-      await _writeMaterials(repository, widget.taskId!);
+      await _writeMaterials(repository, widget.taskId!, _itemId);
     });
   }
 
   /// Makes the materials of the task those of the lines of the form: a line
   /// without a stock item is the empty line the form offers, and is ignored.
-  Future<void> _writeMaterials(Repository repository, String taskId) async {
-    final wanted = {
-      for (final line in _materials)
-        if (line.article != null) line.article!: line.quantity.text,
-    };
+  /// A line on *Add a stock item…* adds its stock item to the stock of the
+  /// home first, linked to [itemId], the equipment of the task, when it has
+  /// one (`tasks/views.py` `save_materials`: `compatible_items=fits`).
+  Future<void> _writeMaterials(
+    Repository repository,
+    String taskId,
+    String? itemId,
+  ) async {
+    final wanted = <String, String>{};
+    for (final line in _materials) {
+      final id = line.article;
+      if (id == null) continue;
+      if (id != _newChoice) {
+        wanted[id] = line.quantity.text;
+        continue;
+      }
+      final unit = line.newUnit;
+      final made = await repository.addArticle(
+        widget.homeId,
+        ArticleInput(
+          name: _collapse(line.newName.text),
+          unit: unit,
+          unitOther: unit == 'other' ? _collapse(line.newUnitOther.text) : '',
+          itemIds: [?itemId],
+        ),
+      );
+      wanted[made] = line.quantity.text;
+    }
     for (final id in _listedMaterials.difference(wanted.keys.toSet())) {
       await repository.removeMaterial(taskId, id);
     }
@@ -357,7 +382,7 @@ class _TaskFormScreenState extends State<TaskFormScreen>
       c.dispose();
     }
     for (final line in _materials) {
-      line.quantity.dispose();
+      line.dispose();
     }
     super.dispose();
   }
@@ -437,7 +462,7 @@ class _TaskFormScreenState extends State<TaskFormScreen>
             : widget.taskId!;
         if (widget.taskId != null) await repository.updateTask(id, input);
         await repository.setTaskBudgets(id, material: material, labour: labour);
-        await _writeMaterials(repository, id);
+        await _writeMaterials(repository, id, itemId);
       });
     } on Refused catch (refused) {
       if (mounted) showRefusal(context, refused);
@@ -878,11 +903,13 @@ class _TaskFormScreenState extends State<TaskFormScreen>
   /// and the quantity), as the web's section; one empty line is offered, `+`
   /// adds a line and the button of a line removes it, up to
   /// [stock.maxMaterialsPerTask]. Marking the task done takes the quantities
-  /// from the stock. A stock item is added in Rooms, Stock, not in the form.
+  /// from the stock. The last choice of a line, *Add a stock item…*, opens the
+  /// name and the unit of a new stock item, which joins the stock when the
+  /// task is saved, linked to the equipment of the task (web ADR 0046).
   Widget _materialsSection(AppLocalizations l10n) {
     final taken = {
       for (final line in _materials)
-        if (line.article != null) line.article!,
+        if (line.article != null && line.article != _newChoice) line.article!,
     };
     final full = _materials.length >= stock.maxMaterialsPerTask;
     return HcFoldSection(
@@ -890,9 +917,7 @@ class _TaskFormScreenState extends State<TaskFormScreen>
       title: l10n.materials,
       open: taken.isNotEmpty,
       children: [
-        if (_articles.isEmpty)
-          Text(l10n.materialsNoArticle, style: HcText.bodySmall)
-        else ...[
+        ...[
           fieldHelp(l10n.materialsFormHelp),
           for (final (i, line) in _materials.indexed)
             Padding(
@@ -910,10 +935,12 @@ class _TaskFormScreenState extends State<TaskFormScreen>
                         if (a.article.id == line.article ||
                             !taken.contains(a.article.id))
                           (a.article.id, a.article.name),
+                      (_newChoice, l10n.materialAddArticle),
                     ],
                     (v) => setState(() => line.article = v),
                     key: Key('task-material-article-$i'),
                   ),
+                  if (line.article == _newChoice) ..._newArticle(l10n, i),
                   hcText(
                     l10n.movementQuantity,
                     line.quantity,
@@ -943,7 +970,7 @@ class _TaskFormScreenState extends State<TaskFormScreen>
                           onPressed: () {
                             setState(() {
                               final removed = _materials.removeAt(i);
-                              removed.quantity.dispose();
+                              removed.dispose();
                               if (_materials.isEmpty) {
                                 _materials.add(_MaterialLine(null, '1'));
                               }
@@ -976,6 +1003,53 @@ class _TaskFormScreenState extends State<TaskFormScreen>
         ],
       ],
     );
+  }
+
+  /// The fields of the stock item a line adds (`tasks/_material_line.html`,
+  /// `add-in-place`): its name, required and not already in the stock nor
+  /// added by an earlier line, whatever the case, and its unit
+  /// (`MaterialLineForm._clean_new_article`, `BaseMaterialFormSet.clean`).
+  List<Widget> _newArticle(AppLocalizations l10n, int index) {
+    final line = _materials[index];
+    return [
+      HcSectionHeading(l10n.materialNewArticle),
+      fieldHelp(l10n.materialNewArticleHelp),
+      hcText(
+        l10n.materialNewArticleName,
+        line.newName,
+        key: Key('task-material-new-name-$index'),
+        validator: (value) {
+          final name = _collapse(value ?? '');
+          if (name.isEmpty) return l10n.errNewArticleName;
+          final folded = name.toLowerCase();
+          if (_articles.any((a) => a.article.name.toLowerCase() == folded)) {
+            return l10n.errNewArticleInStock(name);
+          }
+          final earlier = _materials
+              .take(index)
+              .where((l) => l.article == _newChoice)
+              .map((l) => _collapse(l.newName.text).toLowerCase());
+          return earlier.contains(folded)
+              ? l10n.errNewArticleTwice(name)
+              : null;
+        },
+      ),
+      hcChoice<String>(
+        l10n.articleUnit,
+        line.newUnit,
+        unitChoices(l10n),
+        (value) => setState(() => line.newUnit = value),
+        key: Key('task-material-new-unit-$index'),
+      ),
+      if (line.newUnit == 'other')
+        hcText(
+          l10n.articleUnitOther,
+          line.newUnitOther,
+          key: Key('task-material-new-unit-other-$index'),
+          validator: (v) =>
+              _collapse(v ?? '').isEmpty ? l10n.errUnitOther : null,
+        ),
+    ];
   }
 
   /// How to do it: the procedure and the notes.
@@ -1076,6 +1150,22 @@ class _MaterialLine {
   _MaterialLine(this.article, String quantity)
     : quantity = TextEditingController(text: quantity);
 
+  /// The stock item of the line, or [_newChoice] for a new one.
   String? article;
   final TextEditingController quantity;
+
+  /// The name and the unit of the stock item the line adds.
+  final newName = TextEditingController();
+  String newUnit = '';
+  final newUnitOther = TextEditingController();
+
+  void dispose() {
+    quantity.dispose();
+    newName.dispose();
+    newUnitOther.dispose();
+  }
 }
+
+/// A name as the web's form keeps it: its runs of spaces made one, and
+/// trimmed (`" ".join(name.split())`).
+String _collapse(String text) => text.trim().split(RegExp(r'\s+')).join(' ');
