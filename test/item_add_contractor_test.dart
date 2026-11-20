@@ -248,7 +248,14 @@ void main() {
       await tester.pumpAndSettle();
       await save(tester);
       await reveal(tester, find.text(m['errTradeOther']!));
-      expect(find.text(m['errTradeOther']!), findsOneWidget);
+      // Under the field of the words, as the web says it.
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('item-new-contractor-other')),
+          matching: find.text(m['errTradeOther']!),
+        ),
+        findsOneWidget,
+      );
       expect(await names(state, data.homes.main), before);
       expect(
         await state.repository.itemList(data.homes.main, query: 'heat pump'),

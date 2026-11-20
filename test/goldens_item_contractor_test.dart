@@ -4,7 +4,8 @@
 // (`contract_contractor` of the web's item form): the fields of the new
 // contractor open under the list, the name refused when it is empty, on
 // Android and on iOS, in English and French, at 360 px at text scale 1 and
-// 2, and at the narrow 320 px at scale 2, where no word of the card is cut.
+// 2, and at the narrow 320 px at scale 2, where no word of the card is cut;
+// everywhere the choice Add a contractor… is read whole in its field.
 // Regenerate after a deliberate change:
 //   flutter test --update-goldens test/goldens_item_contractor_test.dart
 // and review every changed image in the pull request.
@@ -22,6 +23,7 @@ import 'support/app.dart';
 import 'support/arb.dart';
 import 'support/goldens.dart';
 import 'support/lot2b.dart';
+import 'support/whole_choice.dart';
 import 'whole_words_bar_tabs_test.dart' show expectWholeWords;
 
 void main() {
@@ -77,6 +79,14 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.text(m['errNewContractorName']!), findsOneWidget);
           expect(tester.takeException(), isNull);
+          // The choice is read whole in its field, on Android as on iOS: not
+          // cut by a field one line high, nor ended in an ellipsis.
+          expectChoiceWhole(
+            tester,
+            find.byKey(const Key('item-contractor')),
+            m['taskAddContractor']!,
+            'the provider, $name',
+          );
           if (width < 360) {
             expectWholeWords(
               tester,
