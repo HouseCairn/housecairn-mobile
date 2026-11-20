@@ -19,7 +19,9 @@ import 'package:housecairn_mobile/l10n/app_localizations_fr.dart';
 import 'package:housecairn_mobile/sync/mode.dart';
 import 'package:housecairn_mobile/sync/server_address.dart';
 import 'package:housecairn_mobile/sync/server_http.dart';
+import 'package:housecairn_mobile/sync/operation.dart';
 import 'package:housecairn_mobile/sync/server_sign_in.dart';
+import 'package:housecairn_mobile/sync/transport.dart';
 import 'package:housecairn_mobile/ui/state.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -278,6 +280,35 @@ void main() {
         expect(server.pushedNames, isNot(contains('Attic')));
       });
 
+      testWidgets('a change the server cannot read (400) says what it is '
+          'about, why, and the server\'s answer', (tester) async {
+        final state = await start(tester, locale);
+        server.malformedNamed = 'Boiler';
+        await state.repository.addItem(
+          server.kitchen,
+          const ItemInput(name: 'Boiler', ean: '4006381333931'),
+        );
+        await afterDelay(tester);
+        expect(inBanner(l10n.syncRefusedCount(1)), findsOneWidget);
+        await tester.tap(find.byKey(const Key('sync-banner')));
+        await tester.pumpAndSettle();
+        final id = state.serverSync.refused.single.id;
+        final line = find.byKey(Key('refused-$id'));
+        Finder inLine(String text) =>
+            find.descendant(of: line, matching: find.text(text));
+        expect(inLine('Boiler'), findsOneWidget);
+        expect(
+          inLine(l10n.syncRefusedConcerns(l10n.itemKindEquipment)),
+          findsOneWidget,
+        );
+        expect(inLine(l10n.syncRefusedMalformed), findsOneWidget);
+        expect(
+          inLine(l10n.syncRefusedAnswer('ean is not a valid value.')),
+          findsOneWidget,
+        );
+        expect(find.text(l10n.syncFailed), findsNothing);
+      });
+
       testWidgets('a row deleted and purged on the server is dropped after a '
           '410, and the app says so until it is read', (tester) async {
         final state = await start(tester, locale);
@@ -445,6 +476,356 @@ void main() {
       });
     }
   });
+
+  group('after an update of the app', () {
+    testWidgets('an item an older version could not send (links as text, '
+        '400 of web v0.5.1) waits aside; after the update it goes again by '
+        'itself, the server takes it, and this happens once', (tester) async {
+      await onPhone(tester, height: 1200);
+      final repo = await serverPhone();
+      await repo.addItem(
+        server.kitchen,
+        const ItemInput(
+          name: 'Boiler',
+          links: [ItemLink(url: 'https://example.com/manual')],
+        ),
+      );
+      // What the older version did with the server's 400: the change set
+      // aside with its reason, out of op_log; the queue is held.
+      final out = await repo.outgoing();
+      await repo.setAsideAndAcknowledge([
+        RefusedOperation(
+          out.single.operation,
+          'malformed',
+          detail: 'links is not a valid value.',
+        ),
+      ], upTo: out.last.seq);
+      expect(await repo.refusedChanges(), hasLength(1));
+      expect(await repo.outgoing(), isEmpty);
+
+      // The updated app opens and syncs.
+      final state = stateOf(repo);
+      await tester.pumpWidget(
+        HousecairnApp(state: state, locale: const Locale('en')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(server.refusedPushes, 0);
+      expect(server.pushedNames, contains('Boiler'));
+      expect(server.pushedLinks, [
+        [
+          {'url': 'https://example.com/manual'},
+        ],
+      ]);
+      expect(await repo.refusedChanges(), isEmpty);
+      expect(state.serverSync.refused, isEmpty);
+      expect(await repo.outgoing(), isEmpty);
+      expect(find.byKey(const Key('sync-banner')), findsNothing);
+
+      // Once: a change refused by this version stays aside, round after
+      // round, until the person sends it again.
+      server.malformedNamed = 'Shelf';
+      await repo.addItem(server.kitchen, const ItemInput(name: 'Shelf'));
+      await afterDelay(tester);
+      expect(state.serverSync.refused, hasLength(1));
+      await state.syncWithServer();
+      await tester.pumpAndSettle();
+      expect(state.serverSync.refused, hasLength(1));
+      expect(server.refusedPushes, 1);
+    });
+
+    test('links a server sent as a list, kept aside by an older version, go '
+        'to their column; links written on this phone since stay', () async {
+      final repo = await openRepository();
+      addTearDown(repo.db.close);
+      final home = await repo.createHome(name: 'House');
+      final room = await repo.createRoom(home, name: 'Kitchen');
+      final fromServer = await repo.addItem(
+        room,
+        const ItemInput(name: 'Oven'),
+      );
+      final mine = await repo.addItem(room, const ItemInput(name: 'Hob'));
+      // The feed of the server as an older version applied it, without the
+      // conversion of the transport: the list does not fit the text column
+      // and goes to `extra`.
+      Map<String, Object?> links(String id, String clock, String url) => {
+        Op.type: 'rooms.item',
+        Op.home: home,
+        Op.id: id,
+        Op.kind: Op.put,
+        Op.clock: clock,
+        Op.device: _Server.device,
+        Op.schema: 12,
+        Op.fields: {
+          'links': [
+            {'url': url},
+          ],
+        },
+      };
+      await repo.applyOperations([
+        links(fromServer, '7fffffffffff0000', 'https://example.com/oven'),
+        links(mine, '7fffffffffff0001', 'https://example.com/old'),
+      ]);
+      expect(Repository.linksOf((await repo.item(fromServer))!), isEmpty);
+      // Written on this phone after the server's (a later clock).
+      final hob = (await repo.item(mine))!;
+      await repo.updateItem(
+        mine,
+        ItemInput(
+          name: hob.name,
+          links: const [ItemLink(url: 'https://example.com/hob')],
+        ),
+      );
+
+      await repo.settleAfterUpdate();
+
+      expect(
+        Repository.linksOf((await repo.item(fromServer))!).map((l) => l.url),
+        ['https://example.com/oven'],
+      );
+      expect(Repository.linksOf((await repo.item(mine))!).map((l) => l.url), [
+        'https://example.com/hob',
+      ]);
+      final extra = await repo.db
+          .customSelect("SELECT json FROM extra WHERE entity = 'rooms.item'")
+          .get();
+      expect(extra, isEmpty);
+    });
+
+    // The proof the review of the resending asked for: what goes again,
+    // as it was made, and what stays aside; all of it or nothing.
+
+    /// A phone with a home and its room Kitchen, nothing waiting.
+    Future<(Repository, String, String)> phone() async {
+      final repo = await openRepository();
+      addTearDown(repo.db.close);
+      final home = await repo.createHome(name: 'House');
+      final room = await repo.createRoom(home, name: 'Kitchen');
+      await repo.acknowledge((await repo.outgoing()).last.seq);
+      return (repo, home, room);
+    }
+
+    /// What an older version did with the server's refusals: every waiting
+    /// operation set aside, with the code [codeOf] gives it, out of op_log.
+    Future<void> refuseAll(
+      Repository repo,
+      String Function(SyncOperation op) codeOf,
+    ) async {
+      final out = await repo.outgoing();
+      await repo.setAsideAndAcknowledge([
+        for (final o in out) RefusedOperation(o.operation, codeOf(o.operation)),
+      ], upTo: out.last.seq);
+    }
+
+    String? nameOf(SyncOperation op) =>
+        (op[Op.fields] as Map?)?['name'] as String?;
+
+    /// The rows of op_log, oldest first: their clock and their body.
+    Future<List<(String, Object?)>> opLog(Repository repo) async => [
+      for (final r
+          in await repo.db
+              .customSelect('SELECT hlc, body FROM op_log ORDER BY seq')
+              .get())
+        (r.data['hlc'] as String, jsonDecode(r.data['body'] as String)),
+    ];
+
+    Future<String?> revision(Repository repo) async =>
+        (await repo.db
+                    .customSelect(
+                      "SELECT value FROM local_settings WHERE key = 'wire_revision'",
+                    )
+                    .getSingleOrNull())
+                ?.data['value']
+            as String?;
+
+    test('only what the server could not read goes again; a change refused '
+        'for another reason stays aside as it is', () async {
+      final (repo, home, room) = await phone();
+      await repo.addItem(room, const ItemInput(name: 'Boiler'));
+      await repo.addItem(room, const ItemInput(name: 'Shelf'));
+      await repo.addItem(room, const ItemInput(name: 'Fridge'));
+      await repo.createRoom(home, name: 'Attic');
+      await repo.createRoom(home, name: 'Cellar');
+      const codes = {
+        'Boiler': 'malformed',
+        'Shelf': 'clock_ahead',
+        'Fridge': 'id_taken',
+        'Attic': 'forbidden',
+        'Cellar': 'wrong_home',
+      };
+      await refuseAll(repo, (op) => codes[nameOf(op)]!);
+      final before = await repo.refusedChanges();
+
+      await repo.settleAfterUpdate();
+
+      final log = await opLog(repo);
+      expect(log.map((r) => nameOf(r.$2! as SyncOperation)), ['Boiler']);
+      final kept = await repo.refusedChanges();
+      expect(
+        [for (final c in kept) jsonEncode(c.toJson())],
+        [
+          for (final c in before)
+            if (c.code != 'malformed') jsonEncode(c.toJson()),
+        ],
+      );
+      expect(kept.map((c) => c.code), [
+        'clock_ahead',
+        'id_taken',
+        'forbidden',
+        'wrong_home',
+      ]);
+      expect(await revision(repo), '$wireRevision');
+    });
+
+    test('an item the server could not read and its photo, refused because '
+        'of it (invalid_reference), go again both; the reference of '
+        'another row stays aside', () async {
+      final (repo, home, room) = await phone();
+      // Shelf reached the server (and another phone deleted it since);
+      // Boiler did not, the server could not read it.
+      final shelf = await repo.addItem(room, const ItemInput(name: 'Shelf'));
+      await repo.acknowledge((await repo.outgoing()).last.seq);
+      final boiler = await repo.addItem(room, const ItemInput(name: 'Boiler'));
+      await refuseAll(repo, (_) => 'malformed');
+      // Their photos, which the server could not attach.
+      final boilerPhoto = await repo.createPhotoRow(home, itemId: boiler);
+      final shelfPhoto = await repo.createPhotoRow(home, itemId: shelf);
+      await refuseAll(repo, (_) => 'invalid_reference');
+      final before = await repo.refusedChanges();
+      expect(before.map((c) => c.code), [
+        'malformed',
+        'invalid_reference',
+        'invalid_reference',
+      ]);
+
+      await repo.settleAfterUpdate();
+
+      final log = await opLog(repo);
+      expect(
+        [for (final r in log) (r.$2! as SyncOperation)[Op.id]],
+        [boiler, boilerPhoto],
+      );
+      for (final (i, r) in log.indexed) {
+        expect(r.$1, before[i].operation[Op.clock]);
+        expect(jsonEncode(r.$2), jsonEncode(before[i].operation));
+      }
+      final kept = await repo.refusedChanges();
+      expect(kept.single.operation[Op.id], shelfPhoto);
+      expect(kept.single.code, 'invalid_reference');
+    });
+
+    test('several changes the server could not read, of two types, all go '
+        'again as they were made; a later change of the same field made on '
+        'this phone since stays, and wins', () async {
+      final (repo, home, room) = await phone();
+      final boiler = await repo.addItem(room, const ItemInput(name: 'Boiler'));
+      await repo.addItem(room, const ItemInput(name: 'Shelf'));
+      await repo.createRoom(home, name: 'Attic');
+      await refuseAll(repo, (_) => 'malformed');
+      final before = await repo.refusedChanges();
+      expect(before, hasLength(3));
+      expect(before.map((c) => c.operation[Op.type]).toSet(), {
+        'rooms.item',
+        'rooms.room',
+      });
+      // The name of Boiler written again on this phone, later.
+      await repo.updateItem(boiler, const ItemInput(name: 'Gas boiler'));
+      final later = await opLog(repo);
+      expect(later, hasLength(1));
+      final laterClock = later.single.$1;
+      expect(
+        laterClock.compareTo(before.first.operation[Op.clock]! as String),
+        greaterThan(0),
+      );
+
+      await repo.settleAfterUpdate();
+
+      final log = await opLog(repo);
+      expect(log, hasLength(4));
+      expect(log.first.$1, laterClock);
+      expect(jsonEncode(log.first.$2), jsonEncode(later.single.$2));
+      for (final (i, r) in log.skip(1).indexed) {
+        expect(r.$1, before[i].operation[Op.clock]);
+        expect(jsonEncode(r.$2), jsonEncode(before[i].operation));
+      }
+      expect(await repo.refusedChanges(), isEmpty);
+      expect((await repo.item(boiler))!.name, 'Gas boiler');
+      final clock = await repo.db
+          .customSelect(
+            "SELECT hlc FROM field_clock WHERE entity = 'rooms.item' "
+            "AND field = 'name' AND lower(hex(row_id)) = "
+            "'${boiler.replaceAll('-', '').toLowerCase()}'",
+          )
+          .getSingle();
+      expect(clock.data['hlc'], laterClock);
+    });
+
+    test('a failure in the middle of the resending changes nothing, the '
+        'revision included; the next call does all the work', () async {
+      final (repo, home, room) = await phone();
+      final oven = await repo.addItem(room, const ItemInput(name: 'Oven'));
+      await repo.acknowledge((await repo.outgoing()).last.seq);
+      await repo.applyOperations([
+        {
+          Op.type: 'rooms.item',
+          Op.home: home,
+          Op.id: oven,
+          Op.kind: Op.put,
+          Op.clock: '7fffffffffff0000',
+          Op.device: _Server.device,
+          Op.schema: 12,
+          Op.fields: {
+            'links': [
+              {'url': 'https://example.com/oven'},
+            ],
+          },
+        },
+      ]);
+      await repo.addItem(room, const ItemInput(name: 'Boiler'));
+      await repo.addItem(room, const ItemInput(name: 'Shelf'));
+      await refuseAll(repo, (_) => 'malformed');
+      final before = await repo.refusedChanges();
+      expect(before, hasLength(2));
+      Future<int> extras() async =>
+          (await repo.db
+                  .customSelect(
+                    "SELECT 1 FROM extra WHERE entity = 'rooms.item'",
+                  )
+                  .get())
+              .length;
+      expect(await extras(), 1);
+
+      var calls = 0;
+      await expectLater(
+        repo.settleAfterUpdate(
+          resend: (id) async {
+            if (++calls == 2) throw StateError('stopped');
+            await repo.sendAgain(id);
+          },
+        ),
+        throwsStateError,
+      );
+      expect(calls, 2);
+      expect(await opLog(repo), isEmpty);
+      expect(
+        [for (final c in await repo.refusedChanges()) jsonEncode(c.toJson())],
+        [for (final c in before) jsonEncode(c.toJson())],
+      );
+      expect(await extras(), 1);
+      expect(Repository.linksOf((await repo.item(oven))!), isEmpty);
+      expect(await revision(repo), isNull);
+
+      await repo.settleAfterUpdate();
+
+      expect(await opLog(repo), hasLength(2));
+      expect(await repo.refusedChanges(), isEmpty);
+      expect(await extras(), 0);
+      expect(Repository.linksOf((await repo.item(oven))!).map((l) => l.url), [
+        'https://example.com/oven',
+      ]);
+      expect(await revision(repo), '$wireRevision');
+    });
+  });
 }
 
 class _Store implements Store {
@@ -475,6 +856,8 @@ class _Server implements ServerHttp {
   List<(String, String)> reportsInSnapshot = const [];
   bool _revoked = false;
   String? rejectNamed;
+  String? malformedNamed;
+  int refusedPushes = 0;
   Completer<void>? gate;
 
   int calls = 0;
@@ -482,6 +865,9 @@ class _Server implements ServerHttp {
   int _active = 0;
   int mostAtOnce = 0;
   final pushedNames = <String>[];
+
+  /// The `links` of each item operation taken, as they came.
+  final pushedLinks = <Object?>[];
 
   void revoke() => _revoked = true;
 
@@ -565,6 +951,34 @@ class _Server implements ServerHttp {
     }
     if (path.endsWith('/push')) {
       final ops = (jsonDecode(utf8.decode(body!)) as Map)['ops'] as List;
+      // What web v0.5.1 refuses as a whole push, with the index of the
+      // operation (`sync.pushing.decode`): links of an item that are no
+      // list, and the operation of [malformedNamed].
+      for (var i = 0; i < ops.length; i++) {
+        final op = (ops[i] as Map).cast<String, Object?>();
+        final f = (op['f'] as Map?) ?? const {};
+        final badLinks =
+            op['t'] == 'rooms.item' &&
+            f.containsKey('links') &&
+            f['links'] is! List;
+        if (badLinks ||
+            (malformedNamed != null && f['name'] == malformedNamed)) {
+          refusedPushes++;
+          return _json(400, {
+            'detail': badLinks
+                ? 'links is not a valid value.'
+                : 'ean is not a valid value.',
+            'code': 'malformed',
+            'index': i,
+          });
+        }
+      }
+      for (final op in ops) {
+        final f = ((op as Map)['f'] as Map?) ?? const {};
+        if (op['t'] == 'rooms.item' && f.containsKey('links')) {
+          pushedLinks.add(f['links']);
+        }
+      }
       final names = [for (final op in ops) ((op as Map)['f'] as Map?)?['name']];
       for (final name in names) {
         if (name is String && name != rejectNamed) pushedNames.add(name);

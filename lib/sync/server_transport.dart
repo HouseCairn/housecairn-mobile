@@ -751,29 +751,41 @@ class ServerTransport implements SyncTransport {
     'stock.article': 'label_attribution',
   };
 
+  /// The fields the server reads and writes as a JSON list and the phone
+  /// keeps as JSON text: the links of an item (web `rooms.Item.links`, a
+  /// `JSONField` checked by `validate_links`). Sent as text, the server
+  /// refuses the whole push (`400 malformed`, "links is not a valid value."),
+  /// and a list from the server does not fit the text column.
+  static const listFields = {'rooms.item': 'links'};
+
   static bool _isObjectField(String? type, String field) =>
       fileFields[type] == field || objectFields[type] == field;
 
   static Object? _fileOnWire(String? type, String field, Object? value) {
-    if (!_isObjectField(type, field) || value is! String) return value;
+    final list = listFields[type] == field;
+    if (!(list || _isObjectField(type, field)) || value is! String) {
+      return value;
+    }
     try {
       final json = jsonDecode(value);
-      return json is Map ? json : value;
+      return (list ? json is List : json is Map) ? json : value;
     } on FormatException {
       return value;
     }
   }
 
   /// The operation of the feed or of a snapshot as the phone keeps it: the
-  /// file reference and the credit of a photo, objects on the wire, as JSON
-  /// text.
+  /// file reference and the credit of a photo, objects on the wire, and the
+  /// links of an item, a list on the wire, as JSON text.
   static Map<String, Object?> kept(Map<String, Object?> op) {
     final fields = op[Op.fields];
     if (fields is! Map) return op;
+    final list = listFields[op[Op.type]];
     final changed = <String, Object?>{
       for (final field in [fileFields[op[Op.type]], objectFields[op[Op.type]]])
         if (field != null && fields[field] is Map)
           field: jsonEncode(fields[field]),
+      if (list != null && fields[list] is List) list: jsonEncode(fields[list]),
     };
     if (changed.isEmpty) return op;
     return {

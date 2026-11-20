@@ -291,7 +291,12 @@ to other fields. The columns the server keeps for itself, `updated_at` and `crea
 takes), are not sent, nor the derived `visible_from` of `tasks.occurrence` (web
 `SYNC_DERIVED`, recomputed on each side, ADR 0003 "Derived"): one of them makes the whole
 operation `rejected` with `forbidden`. The
-device of the operations is the push's `device`, and their `sv` the push's.
+device of the operations is the push's `device`, and their `sv` the push's. The `links` of
+`rooms.item`, JSON text in the phone's column, go as a JSON list and come back as JSON text
+(`ServerTransport.listFields`), as the file references and the credits of a photo go as objects:
+the web keeps them in a `JSONField` checked by `validate_links`, and web v0.5.1 refuses text there
+for the whole push (`400 malformed`, "links is not a valid value."), which held every item made
+on the phone.
 
 **A push refused** (lot 4b, `ServerTransport.push`). A push holds at most 200 operations of the
 phone, 500 on the wire and 1 MiB of body (the server's `ops_per_push` and `push_bytes`); one
@@ -315,8 +320,21 @@ silence." So the phone forgets the push it would have sent again, then:
 
 An operation `rejected` in a push the server took is kept aside the same way, with its code.
 What is kept aside leaves `op_log` for a list of this phone only (`local_settings`, never
-synced): the app shows each change on its line, with the name of its row and the reason in
-words, to be sent again (back to `op_log`, as it was made) or no longer sent. A change no longer
+synced): the app shows each change on its line, with the name of its row, the kind of row it
+is, the reason in words and the server's own message when it gave one (`detail` of a `400`),
+to be sent again (back to `op_log`, as it was made) or no longer sent. **After an update** that
+changes how the phone writes operations for a server (`wireRevision` in
+`lib/data/sync_repository.dart`, 1 for the links above), the first sync puts back in
+`op_log`, once and as they were made, the changes of the list the server could not read
+(`malformed`), so that what an older version could not send goes as the new one writes it,
+with those refused as `invalid_reference` because a field of theirs names the row of one of
+them (the photo of an item refused before it, which the server could not attach). A change
+refused for any other reason (`clock_ahead`, `id_taken`, `forbidden`, `wrong_home`, another
+`invalid_reference`…) stays aside as it is, until the person decides (maintainer's decision,
+2026-11-20). One still refused is kept aside again by that push. The same step moves the
+links a server sent before, which an older version kept in `extra`, to their column, unless
+this phone wrote the links since. It is one transaction, the revision written last: an app
+stopped in the middle changed nothing, and its next sync does it all. A change no longer
 sent gives the row back the server's value at once (maintainer's decision, 2026-11-16): the
 fields it wrote lose their clock while it is still the change's, and the phone reads the row
 again in the server's snapshot of the home (the sync API has no route that reads one row, and
