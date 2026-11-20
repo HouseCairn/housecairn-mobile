@@ -5726,25 +5726,31 @@ abstract class AppLocalizations {
   /// **'No stock item for this room yet.'**
   String get roomStockEmpty;
 
-  /// Empty Stock section of an item page: no stock item fits it. Not a web string (the web's item page has no stock section at v0.5.1); same form as roomStockEmpty.
+  /// Heading of the section of an item page that lists the stock items fitting it. Web catalogue (rooms, item page, after v0.5.1): same text.
   ///
   /// In en, this message translates to:
-  /// **'No stock item for this item yet.'**
+  /// **'Materials'**
+  String get itemMaterials;
+
+  /// Empty Materials section of an item page: no stock item fits it. Web catalogue (rooms, item page, after v0.5.1): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'No stock item linked to this yet.'**
   String get itemStockEmpty;
 
-  /// Unit price of a stock item in the Stock section of an item page, after its quantity.
+  /// Unit price of a stock item in the Materials section of an item page, after its quantity.
   ///
   /// In en, this message translates to:
   /// **'{price} each'**
   String itemStockUnitPrice(String price);
 
-  /// Button of the Stock section of an item page: choose stock items of the home that fit the item. Not a web string.
+  /// Button of the Materials section of an item page: choose stock items of the home that fit the item. Web catalogue (rooms, item page, after v0.5.1): Link a stock item, a page there, a sheet here.
   ///
   /// In en, this message translates to:
   /// **'Link a stock item…'**
   String get itemStockLink;
 
-  /// Button of the Stock section of an item page: the stock item form, the item ticked in its Compatible items. Web catalogue (tasks): Nouvel article.
+  /// Button of the Materials section of an item page: the stock item form, the item ticked in its Compatible items. Web catalogue (tasks): Nouvel article.
   ///
   /// In en, this message translates to:
   /// **'New stock item…'**

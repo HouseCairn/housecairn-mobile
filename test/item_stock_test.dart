@@ -462,6 +462,7 @@ void main() {
           find.byKey(Key('item-article-remove-${data.filter}')),
         );
         expect(find.byKey(Key('item-article-${data.filter}')), findsNothing);
+        expect(find.text(m['itemMaterials']!.toUpperCase()), findsOneWidget);
         expect(find.text(m['itemStockEmpty']!), findsOneWidget);
         expect(await r.compatibleItemsOf(data.filter), isEmpty);
         expect((await r.article(data.filter))?.name, 'Main filter');

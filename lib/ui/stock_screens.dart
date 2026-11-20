@@ -1424,7 +1424,7 @@ class ItemStockSection extends StatelessWidget {
       builder: (context, fitting) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          HcSectionHeading(l10n.stock),
+          HcSectionHeading(l10n.itemMaterials),
           if (fitting.isEmpty)
             HcEmpty(l10n.itemStockEmpty)
           else

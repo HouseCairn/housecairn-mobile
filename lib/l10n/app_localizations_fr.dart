@@ -3522,8 +3522,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun article pour cette pièce pour l\'instant.';
 
   @override
-  String get itemStockEmpty =>
-      'Aucun article pour cet élément pour l\'instant.';
+  String get itemMaterials => 'Matériel';
+
+  @override
+  String get itemStockEmpty => 'Aucun article lié pour l\'instant.';
 
   @override
   String itemStockUnitPrice(String price) {

@@ -3493,7 +3493,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roomStockEmpty => 'No stock item for this room yet.';
 
   @override
-  String get itemStockEmpty => 'No stock item for this item yet.';
+  String get itemMaterials => 'Materials';
+
+  @override
+  String get itemStockEmpty => 'No stock item linked to this yet.';
 
   @override
   String itemStockUnitPrice(String price) {
