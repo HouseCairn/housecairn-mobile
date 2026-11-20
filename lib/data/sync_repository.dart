@@ -100,6 +100,12 @@ const longTextFields = {'notes', 'procedure', 'goal', 'memory_notes'};
 /// How long a losing long text is kept on the phone.
 const otherVersionDays = 30;
 
+/// The revision of how this app writes and reads operations for a server.
+/// Raised by an update that lets a server take changes it refused before
+/// (1: the links of an item go as a JSON list, web `rooms.Item.links`):
+/// [SyncRepository.settleAfterUpdate] then sends those changes again, once.
+const wireRevision = 1;
+
 /// The fields an operation never sets: the row's key, its home and the
 /// instant of its last change, which each phone works out.
 const _keyFields = {'id', 'home_id', 'updated_at'};
@@ -326,6 +332,77 @@ extension SyncRepository on Repository {
         if (i.id != id) i,
     ]);
   });
+
+  static const _wireRevisionKey = 'wire_revision';
+
+  /// Settles once, after an update of the app that changes how it writes or
+  /// reads operations ([wireRevision]): the links of an item a server sent
+  /// as a list, kept in `extra` until now, go to their column; and every
+  /// change the server refused is put back in `op_log`, to be sent again as
+  /// this version writes it. One the server still refuses is set aside
+  /// again by the next push, with its reason: nothing is lost.
+  Future<void> settleAfterUpdate() async {
+    final done = int.tryParse(await _setting(_wireRevisionKey) ?? '') ?? 0;
+    if (done >= wireRevision) return;
+    await db.transaction(() async {
+      await _moveLinksOutOfExtra();
+      for (final change in await refusedChanges()) {
+        await sendAgain(change.id);
+      }
+      await _setSetting(_wireRevisionKey, '$wireRevision');
+    });
+  }
+
+  /// The links of an item a server sent (a JSON list, which the text column
+  /// did not take before [wireRevision] 1) go from `extra` to the column,
+  /// unless this phone wrote the links since: its own value is then the
+  /// last one, and the copy in `extra` is only dropped.
+  Future<void> _moveLinksOutOfExtra() async {
+    final rows = await db
+        .customSelect("SELECT row_id FROM extra WHERE entity = 'rooms.item'")
+        .get();
+    for (final r in rows) {
+      final rowId = r.data['row_id'] as Uint8List;
+      final id = Uuid.unparse(rowId);
+      final Map<String, Object?> kept;
+      try {
+        kept = await _extraOf('rooms.item', id);
+      } on FormatException {
+        continue;
+      } on TypeError {
+        continue;
+      }
+      final links = kept['links'];
+      if (links is! List) continue;
+      final clock = await db
+          .customSelect(
+            "SELECT device FROM field_clock WHERE entity = 'rooms.item' "
+            "AND row_id = ? AND field = 'links'",
+            variables: [Variable<Uint8List>(rowId)],
+          )
+          .getSingleOrNull();
+      final device = clock?.data['device'] as Uint8List?;
+      final mine = device != null && _sameBytes(device, _device);
+      if (!mine) {
+        await db.customUpdate(
+          'UPDATE items SET links = ? WHERE id = ?',
+          variables: [
+            Variable<String>(jsonEncode(links)),
+            Variable<Uint8List>(rowId),
+          ],
+        );
+      }
+      await _dropExtra('rooms.item', id, const ['links']);
+    }
+  }
+
+  static bool _sameBytes(List<int> a, List<int> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 
   /// Keeps [refused] aside and removes from `op_log` the operations up to
   /// [upTo], or those of [seqs], in one transaction: a stop between the two

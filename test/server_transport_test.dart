@@ -484,6 +484,46 @@ void main() {
       );
     });
 
+    test('the links of an item go as a JSON list, as the web keeps them '
+        '(web v0.5.1 refuses the text: 400 "links is not a valid value."), '
+        'and a list from the server is kept as JSON text', () {
+      const links = '[{"url":"https://example.com/manual","label":"Manual"}]';
+      final item = ServerTransport.wire(
+        put('rooms.item', {'name': 'Boiler', 'links': links}),
+      );
+      expect((item.single[Op.fields]! as Map)['links'], [
+        {'url': 'https://example.com/manual', 'label': 'Manual'},
+      ]);
+      expect(
+        (ServerTransport.wire(put('rooms.item', {'links': '[]'}))
+                .single[Op.fields]!
+            as Map)['links'],
+        isA<List<Object?>>().having((l) => l.length, 'length', 0),
+      );
+      // A text that is no list goes as it is: the server says why.
+      expect(
+        (ServerTransport.wire(put('rooms.item', {'links': '{}'}))
+                .single[Op.fields]!
+            as Map)['links'],
+        '{}',
+      );
+      // Only the links of an item: a field of that name elsewhere is a text.
+      expect(
+        (ServerTransport.wire(put('rooms.room', {'links': '[]'}))
+                .single[Op.fields]!
+            as Map)['links'],
+        '[]',
+      );
+      final kept = ServerTransport.kept(
+        put('rooms.item', {
+          'links': [
+            {'url': 'https://example.com/manual', 'label': 'Manual'},
+          ],
+        }),
+      );
+      expect((kept[Op.fields]! as Map)['links'], links);
+    });
+
     test('the derived visible_from of an occurrence is not sent (web '
         'SYNC_DERIVED; found by the e2e against v0.4.1)', () {
       final occurrence = ServerTransport.wire(

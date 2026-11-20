@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/core/hlc.dart';
 import 'package:housecairn_mobile/core/store.dart';
 import 'package:housecairn_mobile/data/repository.dart';
+import 'package:housecairn_mobile/domain/day.dart';
 import 'package:housecairn_mobile/domain/file_reference.dart';
 import 'package:housecairn_mobile/domain/photos.dart';
 import 'package:housecairn_mobile/domain/recurrence.dart' as recurrence;
@@ -555,6 +556,89 @@ void main() {
       (bad, 'malformed'),
     ]);
     expect(await webRoomStatus(good), 200);
+  }, skip: skip);
+
+  test('an item made on the phone with every field goes to the server as the '
+      'web keeps it, and the web\'s edit of its links comes back', () async {
+    phone.clock.set(DateTime.now().toUtc());
+    final room = await phone.repo.createRoom(home, name: 'Utility room');
+    final contractor = await phone.repo.createContractor(
+      home,
+      name: 'Acme Heating',
+    );
+    final full = await phone.repo.addItem(
+      room,
+      ItemInput(
+        name: 'Boiler',
+        brand: 'Acme',
+        model: 'B-200',
+        serialNumber: 'SN-0187',
+        ean: '4006381333931',
+        installedOn: Day(2025, 3, 1),
+        purchasedOn: Day(2025, 2, 20),
+        warrantyDuration: 2,
+        warrantyProvider: 'manufacturer',
+        warrantyProviderName: 'Acme',
+        contractContractorId: contractor,
+        contractNumber: 'C-2024-0187',
+        contractUrl: 'https://example.com/contract',
+        links: const [
+          ItemLink(url: 'https://example.com/manual', label: 'Manual'),
+          ItemLink(url: 'https://example.com/parts'),
+        ],
+        notes: 'Serviced every autumn.',
+      ),
+    );
+    // The least an item has: its name; no barcode, no link, no warranty.
+    final bare = await phone.repo.addItem(
+      room,
+      const ItemInput(name: 'Radiator'),
+    );
+    await phone.repo.addPhoto(
+      home,
+      processPhoto(jpegWithGps(width: 320, orientation: 1)),
+      itemId: full,
+    );
+
+    final report = await phone.sync();
+
+    expect([
+      for (final r in await phone.repo.refusedChanges())
+        '${r.code} ${r.detail} ${r.operation}',
+    ], isEmpty);
+    expect([
+      for (final r in transport.rejections) '${r.code} ${r.operation}',
+    ], isEmpty);
+    expect(report.filesSent, 1);
+    final items = {
+      for (final i in await web.list('/api/v1/homes/$home/items/')) i['id']: i,
+    };
+    expect(items[full], isNotNull, reason: 'the server keeps the phone\'s id');
+    expect(items[full]!['links'], [
+      {'url': 'https://example.com/manual', 'label': 'Manual'},
+      {'url': 'https://example.com/parts'},
+    ]);
+    expect(items[full]!['ean'], '4006381333931');
+    expect(items[full]!['warranty_duration'], 2);
+    expect(items[full]!['warranty_ends_on'], '2027-02-20');
+    expect(items[full]!['contract_contractor'], contractor);
+    expect(items[bare]!['links'], isEmpty);
+    expect(items[bare]!['ean'], '');
+
+    await web.json(
+      'PATCH',
+      '/api/v1/homes/$home/items/$bare/',
+      body: {
+        'links': [
+          {'url': 'https://example.com/radiator', 'label': 'Valve'},
+        ],
+      },
+    );
+    await phone.sync();
+    final back = (await phone.repo.item(bare))!;
+    expect(Repository.linksOf(back).map((l) => (l.url, l.label)), [
+      ('https://example.com/radiator', 'Valve'),
+    ]);
   }, skip: skip);
 
   test('a photo goes to the server and comes back (file routes of web 0.5.0): '

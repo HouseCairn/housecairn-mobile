@@ -2817,7 +2817,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncRefusedMalformed =>
-      'Le serveur n\'a pas pu lire cette modification.';
+      'Le serveur n\'a pas pu lire cette modification. Elle reste sur ce téléphone : une mise à jour de l\'application qui corrige le problème la renvoie d\'elle-même.';
+
+  @override
+  String syncRefusedConcerns(String thing) {
+    return 'Concerne : $thing';
+  }
+
+  @override
+  String syncRefusedAnswer(String detail) {
+    return 'Réponse du serveur : $detail';
+  }
 
   @override
   String get syncRefusedTooLarge =>

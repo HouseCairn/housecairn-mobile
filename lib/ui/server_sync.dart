@@ -38,6 +38,25 @@ String refusedName(AppLocalizations l10n, RefusedChange change) {
   return name is String && name.isNotEmpty ? name : l10n.syncRefusedUnnamed;
 }
 
+/// What kind of thing a refused change is about, in words (its name is the
+/// title of its line); `null` for a type without a word of its own.
+String? refusedThing(AppLocalizations l10n, RefusedChange change) {
+  final fields = (change.operation[Op.fields] as Map?) ?? const {};
+  return switch (change.operation[Op.type]) {
+    'rooms.item' =>
+      fields['kind'] == 'surface'
+          ? l10n.itemKindSurface
+          : l10n.itemKindEquipment,
+    'rooms.room' => l10n.room,
+    'rooms.photo' => l10n.photo,
+    'tasks.task' => l10n.task,
+    'tasks.contractor' => l10n.contractor,
+    'projects.project' => l10n.compareProject,
+    'projects.annualenvelope' => l10n.envelope,
+    _ => null,
+  };
+}
+
 String _notice(AppLocalizations l10n, SyncNotice notice) =>
     switch (notice.kind) {
       SyncNoticeKind.droppedAfterRestart => l10n.syncNoticeDropped,
@@ -215,14 +234,34 @@ class _RefusedRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
     final l10n = AppLocalizations.of(context);
+    final thing = refusedThing(l10n, change);
+    final detail = change.detail?.trim() ?? '';
     return Padding(
       padding: const EdgeInsets.all(HcSpace.s3),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(refusedName(l10n, change), style: HcText.cardTitle),
+          if (thing != null) ...[
+            const SizedBox(height: HcSpace.s1),
+            Text(
+              l10n.syncRefusedConcerns(thing),
+              key: Key('refused-thing-${change.id}'),
+              style: HcText.bodySmall,
+            ),
+          ],
           const SizedBox(height: HcSpace.s1),
           Text(refusedReason(l10n, change.code), style: HcText.bodySmall),
+          // What the server said, as it said it: the value or the field at
+          // fault ("links is not a valid value.").
+          if (detail.isNotEmpty) ...[
+            const SizedBox(height: HcSpace.s1),
+            Text(
+              l10n.syncRefusedAnswer(detail),
+              key: Key('refused-answer-${change.id}'),
+              style: HcText.bodySmall,
+            ),
+          ],
           const SizedBox(height: HcSpace.s2),
           Wrap(
             spacing: HcSpace.s2,

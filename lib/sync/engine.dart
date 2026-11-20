@@ -53,6 +53,9 @@ class SyncEngine {
   /// cursor are applied, repaired, and what the repair wrote is sent.
   Future<SyncReport> sync() async {
     final notices = <SyncNotice>[];
+    // Once after an update: what the server refused goes again as this
+    // version writes it.
+    await repository.settleAfterUpdate();
     await repository.retryPending();
     await repository.dropOldVersions();
     await _purgeGone();

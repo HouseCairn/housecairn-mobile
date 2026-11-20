@@ -19,7 +19,9 @@ import 'package:housecairn_mobile/l10n/app_localizations_fr.dart';
 import 'package:housecairn_mobile/sync/mode.dart';
 import 'package:housecairn_mobile/sync/server_address.dart';
 import 'package:housecairn_mobile/sync/server_http.dart';
+import 'package:housecairn_mobile/sync/operation.dart';
 import 'package:housecairn_mobile/sync/server_sign_in.dart';
+import 'package:housecairn_mobile/sync/transport.dart';
 import 'package:housecairn_mobile/ui/state.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -278,6 +280,35 @@ void main() {
         expect(server.pushedNames, isNot(contains('Attic')));
       });
 
+      testWidgets('a change the server cannot read (400) says what it is '
+          'about, why, and the server\'s answer', (tester) async {
+        final state = await start(tester, locale);
+        server.malformedNamed = 'Boiler';
+        await state.repository.addItem(
+          server.kitchen,
+          const ItemInput(name: 'Boiler', ean: '4006381333931'),
+        );
+        await afterDelay(tester);
+        expect(inBanner(l10n.syncRefusedCount(1)), findsOneWidget);
+        await tester.tap(find.byKey(const Key('sync-banner')));
+        await tester.pumpAndSettle();
+        final id = state.serverSync.refused.single.id;
+        final line = find.byKey(Key('refused-$id'));
+        Finder inLine(String text) =>
+            find.descendant(of: line, matching: find.text(text));
+        expect(inLine('Boiler'), findsOneWidget);
+        expect(
+          inLine(l10n.syncRefusedConcerns(l10n.itemKindEquipment)),
+          findsOneWidget,
+        );
+        expect(inLine(l10n.syncRefusedMalformed), findsOneWidget);
+        expect(
+          inLine(l10n.syncRefusedAnswer('ean is not a valid value.')),
+          findsOneWidget,
+        );
+        expect(find.text(l10n.syncFailed), findsNothing);
+      });
+
       testWidgets('a row deleted and purged on the server is dropped after a '
           '410, and the app says so until it is read', (tester) async {
         final state = await start(tester, locale);
@@ -445,6 +476,122 @@ void main() {
       });
     }
   });
+
+  group('after an update of the app', () {
+    testWidgets('an item an older version could not send (links as text, '
+        '400 of web v0.5.1) waits aside; after the update it goes again by '
+        'itself, the server takes it, and this happens once', (tester) async {
+      await onPhone(tester, height: 1200);
+      final repo = await serverPhone();
+      await repo.addItem(
+        server.kitchen,
+        const ItemInput(
+          name: 'Boiler',
+          links: [ItemLink(url: 'https://example.com/manual')],
+        ),
+      );
+      // What the older version did with the server's 400: the change set
+      // aside with its reason, out of op_log; the queue is held.
+      final out = await repo.outgoing();
+      await repo.setAsideAndAcknowledge([
+        RefusedOperation(
+          out.single.operation,
+          'malformed',
+          detail: 'links is not a valid value.',
+        ),
+      ], upTo: out.last.seq);
+      expect(await repo.refusedChanges(), hasLength(1));
+      expect(await repo.outgoing(), isEmpty);
+
+      // The updated app opens and syncs.
+      final state = stateOf(repo);
+      await tester.pumpWidget(
+        HousecairnApp(state: state, locale: const Locale('en')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(server.refusedPushes, 0);
+      expect(server.pushedNames, contains('Boiler'));
+      expect(server.pushedLinks, [
+        [
+          {'url': 'https://example.com/manual'},
+        ],
+      ]);
+      expect(await repo.refusedChanges(), isEmpty);
+      expect(state.serverSync.refused, isEmpty);
+      expect(await repo.outgoing(), isEmpty);
+      expect(find.byKey(const Key('sync-banner')), findsNothing);
+
+      // Once: a change refused by this version stays aside, round after
+      // round, until the person sends it again.
+      server.malformedNamed = 'Shelf';
+      await repo.addItem(server.kitchen, const ItemInput(name: 'Shelf'));
+      await afterDelay(tester);
+      expect(state.serverSync.refused, hasLength(1));
+      await state.syncWithServer();
+      await tester.pumpAndSettle();
+      expect(state.serverSync.refused, hasLength(1));
+      expect(server.refusedPushes, 1);
+    });
+
+    test('links a server sent as a list, kept aside by an older version, go '
+        'to their column; links written on this phone since stay', () async {
+      final repo = await openRepository();
+      addTearDown(repo.db.close);
+      final home = await repo.createHome(name: 'House');
+      final room = await repo.createRoom(home, name: 'Kitchen');
+      final fromServer = await repo.addItem(
+        room,
+        const ItemInput(name: 'Oven'),
+      );
+      final mine = await repo.addItem(room, const ItemInput(name: 'Hob'));
+      // The feed of the server as an older version applied it, without the
+      // conversion of the transport: the list does not fit the text column
+      // and goes to `extra`.
+      Map<String, Object?> links(String id, String clock, String url) => {
+        Op.type: 'rooms.item',
+        Op.home: home,
+        Op.id: id,
+        Op.kind: Op.put,
+        Op.clock: clock,
+        Op.device: _Server.device,
+        Op.schema: 12,
+        Op.fields: {
+          'links': [
+            {'url': url},
+          ],
+        },
+      };
+      await repo.applyOperations([
+        links(fromServer, '7fffffffffff0000', 'https://example.com/oven'),
+        links(mine, '7fffffffffff0001', 'https://example.com/old'),
+      ]);
+      expect(Repository.linksOf((await repo.item(fromServer))!), isEmpty);
+      // Written on this phone after the server's (a later clock).
+      final hob = (await repo.item(mine))!;
+      await repo.updateItem(
+        mine,
+        ItemInput(
+          name: hob.name,
+          links: const [ItemLink(url: 'https://example.com/hob')],
+        ),
+      );
+
+      await repo.settleAfterUpdate();
+
+      expect(
+        Repository.linksOf((await repo.item(fromServer))!).map((l) => l.url),
+        ['https://example.com/oven'],
+      );
+      expect(Repository.linksOf((await repo.item(mine))!).map((l) => l.url), [
+        'https://example.com/hob',
+      ]);
+      final extra = await repo.db
+          .customSelect("SELECT json FROM extra WHERE entity = 'rooms.item'")
+          .get();
+      expect(extra, isEmpty);
+    });
+  });
 }
 
 class _Store implements Store {
@@ -475,6 +622,8 @@ class _Server implements ServerHttp {
   List<(String, String)> reportsInSnapshot = const [];
   bool _revoked = false;
   String? rejectNamed;
+  String? malformedNamed;
+  int refusedPushes = 0;
   Completer<void>? gate;
 
   int calls = 0;
@@ -482,6 +631,9 @@ class _Server implements ServerHttp {
   int _active = 0;
   int mostAtOnce = 0;
   final pushedNames = <String>[];
+
+  /// The `links` of each item operation taken, as they came.
+  final pushedLinks = <Object?>[];
 
   void revoke() => _revoked = true;
 
@@ -565,6 +717,34 @@ class _Server implements ServerHttp {
     }
     if (path.endsWith('/push')) {
       final ops = (jsonDecode(utf8.decode(body!)) as Map)['ops'] as List;
+      // What web v0.5.1 refuses as a whole push, with the index of the
+      // operation (`sync.pushing.decode`): links of an item that are no
+      // list, and the operation of [malformedNamed].
+      for (var i = 0; i < ops.length; i++) {
+        final op = (ops[i] as Map).cast<String, Object?>();
+        final f = (op['f'] as Map?) ?? const {};
+        final badLinks =
+            op['t'] == 'rooms.item' &&
+            f.containsKey('links') &&
+            f['links'] is! List;
+        if (badLinks ||
+            (malformedNamed != null && f['name'] == malformedNamed)) {
+          refusedPushes++;
+          return _json(400, {
+            'detail': badLinks
+                ? 'links is not a valid value.'
+                : 'ean is not a valid value.',
+            'code': 'malformed',
+            'index': i,
+          });
+        }
+      }
+      for (final op in ops) {
+        final f = ((op as Map)['f'] as Map?) ?? const {};
+        if (op['t'] == 'rooms.item' && f.containsKey('links')) {
+          pushedLinks.add(f['links']);
+        }
+      }
       final names = [for (final op in ops) ((op as Map)['f'] as Map?)?['name']];
       for (final name in names) {
         if (name is String && name != rejectNamed) pushedNames.add(name);

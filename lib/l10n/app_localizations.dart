@@ -4598,11 +4598,23 @@ abstract class AppLocalizations {
   /// **'The server already has another row with the same id.'**
   String get syncRefusedIdTaken;
 
-  /// Reason of a refused change: malformed.
+  /// Reason of a refused change: malformed (400: the server refused a value of the change, and wrote nothing).
   ///
   /// In en, this message translates to:
-  /// **'The server could not read this change.'**
+  /// **'The server could not read this change. It stays on this phone: an update of the app that fixes it sends it again by itself.'**
   String get syncRefusedMalformed;
+
+  /// Line of a refused change: what kind of thing it is about (an equipment, a room...), its name being the title of the line.
+  ///
+  /// In en, this message translates to:
+  /// **'Concerns: {thing}'**
+  String syncRefusedConcerns(String thing);
+
+  /// Line of a refused change: the message of the server, as it gives it (it may be in another language).
+  ///
+  /// In en, this message translates to:
+  /// **'The server\'s answer: {detail}'**
+  String syncRefusedAnswer(String detail);
 
   /// Reason of a refused change: too_large.
   ///

@@ -2796,7 +2796,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'The server already has another row with the same id.';
 
   @override
-  String get syncRefusedMalformed => 'The server could not read this change.';
+  String get syncRefusedMalformed =>
+      'The server could not read this change. It stays on this phone: an update of the app that fixes it sends it again by itself.';
+
+  @override
+  String syncRefusedConcerns(String thing) {
+    return 'Concerns: $thing';
+  }
+
+  @override
+  String syncRefusedAnswer(String detail) {
+    return 'The server\'s answer: $detail';
+  }
 
   @override
   String get syncRefusedTooLarge => 'This change is too large for the server.';
