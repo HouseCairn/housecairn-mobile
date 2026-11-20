@@ -469,17 +469,29 @@ void main() {
     await expectOccurrencesEqual(task);
   }, skip: skip);
 
-  test('a stock item added from the materials of a task on an item fits '
+  test('a stock item added from the materials of the task of an item fits '
       'that item on the server, which lists it for the item and its room, '
       'without a refusal', () async {
+    // The equipment is there already, made on the web and synced.
+    final room =
+        (await web.json(
+              'POST',
+              '/api/v1/homes/$home/rooms/',
+              body: {'name': 'Boiler room', 'kind': 'other'},
+            ))['id']!
+            as String;
+    final item =
+        (await web.json(
+              'POST',
+              '/api/v1/homes/$home/items/',
+              body: {'room': room, 'name': 'Wall boiler', 'kind': 'equipment'},
+            ))['id']!
+            as String;
     phone.clock.set(DateTime.now().toUtc());
-    // What the task form writes: the room, the item, the task, then the
-    // stock item of *Add a stock item…*, fitting the item, and its line.
-    final room = await phone.repo.createRoom(home, name: 'Boiler room');
-    final item = await phone.repo.addItem(
-      room,
-      const ItemInput(name: 'Wall boiler'),
-    );
+    await phone.sync();
+    expect((await phone.repo.item(item))?.name, 'Wall boiler');
+    // What the task form writes: the task on the item, then the stock item
+    // of *Add a stock item…*, fitting the item, and its line.
     final task = await phone.repo.createTask(
       home,
       TaskInput(title: 'Change the seal', roomId: room, itemId: item),
