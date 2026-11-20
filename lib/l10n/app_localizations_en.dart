@@ -2183,6 +2183,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskNewContractorName => 'Name of the new contractor';
 
   @override
+  String get errNewContractorName => 'Give the name of the new contractor.';
+
+  @override
+  String errNewContractorTaken(String name) {
+    return '$name is already a contractor of this home: choose it in the list.';
+  }
+
+  @override
   String get taskPostponedPill => 'Postponed';
 
   @override

@@ -287,13 +287,16 @@ Homes and Settings shows the current home.
    returns to that page).
 5. **Item**: details, the manufacturer's warranty (a duration in months or years, who gives it,
    its start, else the purchase date, and its end worked out; web ADR 0080), its state,
-   contract, **Report a problem** (Where starts with the item), links, photos, tasks.
+   contract, **Report a problem** (Where starts with the item), links, photos, tasks. The
+   provider of the contract is a contractor of the home or, with the last choice **Add a
+   contractor…**, one added with the item, in the fields of the task form (name, trade), checked
+   as the web does (`clean_new_contractor`: a name, not one of the home whatever its case).
 
 The sheets of an existing item, room, task and stock article save themselves as they are
 changed (web ADR 0082): a choice, a date or a tick at once, a text 800 ms after the typing
 stops, one write of the fields that changed, a discreet "Saved" said by the screen reader. A
 creation and a deletion keep their button, as does a task that adds a room, an item, a
-contractor or a stock item with it.
+contractor or a stock item with it, and an item that adds a contractor with it: all or none.
 6. **Stock**: articles with the **Low stock** flag (`stock/models.py:90-96`), under the tabs
    **All** and **Low stock**, with a search field (name, manufacturer reference, supplier name
    or reference; without regard to case or accents) that follows the typing; an article with its

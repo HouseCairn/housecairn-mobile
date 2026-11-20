@@ -765,6 +765,8 @@
   "taskAddContractor": "Ajouter un intervenant…",
   "taskNewContractor": "Nouvel intervenant",
   "taskNewContractorName": "Nom du nouvel intervenant",
+  "errNewContractorName": "Indiquez le nom du nouvel intervenant.",
+  "errNewContractorTaken": "{name} est déjà un intervenant de ce logement : choisissez-le dans la liste.",
   "taskPostponedPill": "Reportée",
   "taskHighPriority": "Priorité haute",
   "taskLowPriority": "Priorité basse",

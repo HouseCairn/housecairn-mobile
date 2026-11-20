@@ -2200,6 +2200,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get taskNewContractorName => 'Nom du nouvel intervenant';
 
   @override
+  String get errNewContractorName => 'Indiquez le nom du nouvel intervenant.';
+
+  @override
+  String errNewContractorTaken(String name) {
+    return '$name est déjà un intervenant de ce logement : choisissez-le dans la liste.';
+  }
+
+  @override
   String get taskPostponedPill => 'Reportée';
 
   @override

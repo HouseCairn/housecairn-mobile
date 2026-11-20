@@ -174,6 +174,7 @@ class HcSelect<T> extends StatelessWidget {
     required this.onChanged,
     this.validator,
     this.enabled = true,
+    this.wrap = false,
   });
 
   final T value;
@@ -182,15 +183,52 @@ class HcSelect<T> extends StatelessWidget {
   final FormFieldValidator<T>? validator;
   final bool enabled;
 
+  /// Whether the choice shown wraps, its words whole (HcWholeWords), rather
+  /// than be cut on one line: for a list whose choices are sentences (Add a
+  /// contractor…), read whole on the narrow phone with large text. On iOS the
+  /// field grows to the lines of the choice; on Android too (the menu's
+  /// button is no longer dense, a line high), and the menu's rows grow to
+  /// their choice.
+  final bool wrap;
+
   @override
   Widget build(BuildContext context) {
     if (!_ios(context)) {
       return DropdownButtonFormField<T>(
         initialValue: value,
         isExpanded: true,
+        // A dense button is one line high and cuts a choice that wraps, and
+        // a row of the menu is 48 px high: both grow to the choice instead.
+        isDense: !wrap,
+        itemHeight: wrap ? null : kMinInteractiveDimension,
+        // The choice shown in the field: whole words on as many lines as it
+        // takes, at least the height of the dense field; the others on one
+        // line, as only the chosen one is seen (the field takes the height
+        // of the tallest).
+        selectedItemBuilder: wrap
+            ? (context) => [
+                for (final (choice, text) in choices)
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 24),
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: choice == value
+                          ? HcWholeWords(text)
+                          : Text(
+                              text,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                    ),
+                  ),
+              ]
+            : null,
         items: [
           for (final (choice, text) in choices)
-            DropdownMenuItem(value: choice, child: Text(text)),
+            DropdownMenuItem(
+              value: choice,
+              child: wrap ? HcWholeWords(text) : Text(text),
+            ),
         ],
         validator: validator,
         onChanged: enabled ? (v) => onChanged(v as T) : null,
@@ -223,12 +261,14 @@ class HcSelect<T> extends StatelessWidget {
               errorText: field.errorText,
               suffixIcon: const _FieldIcon(HcIcons.chevronDown),
             ),
-            child: Text(
-              text ?? '',
-              style: HcText.body,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: wrap
+                ? HcWholeWords(text ?? '', style: HcText.body)
+                : Text(
+                    text ?? '',
+                    style: HcText.body,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
           ),
         ),
       ),
