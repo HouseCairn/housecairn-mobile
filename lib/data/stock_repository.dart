@@ -636,11 +636,15 @@ extension StockRepository on Repository {
 
   /// The article [articleId] no longer fits [itemId]: its link is deleted,
   /// as unticking the item in the article's Compatible items does. The
-  /// article stays in the stock.
+  /// article stays in the stock. An article that is not a live one of the
+  /// item's home is refused, as in [linkArticlesToItem].
   Future<void> unlinkArticleFromItem(String itemId, String articleId) async {
     final item = await this.item(itemId);
     if (item == null) throw const Refused(Refusal.notFound);
     await _writableHome(item.homeId);
+    if ((await article(articleId))?.homeId != item.homeId) {
+      throw const Refused(Refusal.notInHome);
+    }
     final links =
         await (db.select(db.articleItems)..where(
               (l) =>

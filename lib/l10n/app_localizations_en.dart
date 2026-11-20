@@ -3510,6 +3510,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get itemStockNew => 'New stock item…';
 
   @override
+  String articleWillLink(String name) {
+    return 'It will be linked to $name.';
+  }
+
+  @override
   String get itemStockLinkTitle => 'Link stock items';
 
   @override

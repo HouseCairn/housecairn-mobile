@@ -3539,6 +3539,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get itemStockNew => 'Nouvel article…';
 
   @override
+  String articleWillLink(String name) {
+    return 'Il sera lié à $name.';
+  }
+
+  @override
   String get itemStockLinkTitle => 'Lier des articles';
 
   @override

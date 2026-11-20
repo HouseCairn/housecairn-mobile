@@ -1109,6 +1109,7 @@
   "itemStockUnitPrice": "{price} l'unité",
   "itemStockLink": "Lier un article…",
   "itemStockNew": "Nouvel article…",
+  "articleWillLink": "Il sera lié à {name}.",
   "itemStockLinkTitle": "Lier des articles",
   "itemStockLinkIntro": "Les articles du matériel de ce logement qui ne conviennent pas encore à cet élément. Ceux que vous cochez lui conviennent, comme dans leurs Éléments compatibles.",
   "itemStockLinkAction": "Lier",

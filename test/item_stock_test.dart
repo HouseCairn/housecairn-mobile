@@ -264,6 +264,24 @@ void main() {
       );
     });
 
+    test('removing a stock item of another home, or a deleted one, is '
+        'refused, as linking it is, and nothing changes', () async {
+      final elsewhere = await r.addArticle(
+        data.base.homes.second,
+        const ArticleInput(name: 'Second filter'),
+      );
+      await expectLater(
+        r.unlinkArticleFromItem(data.base.boiler, elsewhere),
+        _refused(Refusal.notInHome),
+      );
+      await r.deleteArticle(battery);
+      await expectLater(
+        r.unlinkArticleFromItem(data.base.boiler, battery),
+        _refused(Refusal.notInHome),
+      );
+      expect(await _fitting(r, data.base.boiler), [data.filter]);
+    });
+
     test('removed: the link ends, the stock item stays; linked again, the '
         'same row comes back', () async {
       await r.unlinkArticleFromItem(data.base.boiler, data.filter);
@@ -449,6 +467,68 @@ void main() {
         expect((await r.articles(data.main)).length, before + 1);
         await _see(tester, find.byKey(Key('item-article-${seal.id}')));
         expect(find.byKey(Key('item-article-${seal.id}')), findsOneWidget);
+      });
+
+      testWidgets('New stock item…: it says it will be linked to the item, '
+          'and is, even with the item unticked (as the web)', (tester) async {
+        final data = await start(tester);
+        final r = stateOf(tester).repository;
+        await _boiler(tester, data);
+        await _tap(tester, find.byKey(const Key('item-stock-new')));
+        expect(
+          find.text(m['articleWillLink']!.replaceAll('{name}', 'Main boiler')),
+          findsOneWidget,
+        );
+        await tester.enterText(
+          find.byKey(const Key('article-name')),
+          'Boiler seal',
+        );
+        final chip = find.byKey(Key('article-item-${data.base.boiler}'));
+        await _tap(tester, chip);
+        expect(tester.widget<FilterChip>(chip).selected, isFalse);
+        await tester.tap(find.text(m['save']!).first);
+        await tester.pumpAndSettle();
+        expect(find.byType(ArticleFormScreen), findsNothing);
+        final seal = (await r.articles(data.main))
+            .singleWhere((e) => e.article.name == 'Boiler seal')
+            .article;
+        expect(
+          [for (final i in await r.compatibleItemsOf(seal.id)) i.id],
+          [data.base.boiler],
+        );
+      });
+
+      testWidgets('New stock item for an item of another home: refused on '
+          'save, as the web\'s 404, and nothing is made', (tester) async {
+        late String other;
+        final data = await start(
+          tester,
+          more: (r, data) async {
+            final room = await r.createRoom(
+              data.base.homes.second,
+              name: 'Garage',
+            );
+            other = await r.addItem(room, const ItemInput(name: 'Freezer'));
+          },
+        );
+        final r = stateOf(tester).repository;
+        final before = (await r.articles(data.main)).length;
+        final beforeSecond = (await r.articles(data.base.homes.second)).length;
+        await openScreen(
+          tester,
+          ArticleFormScreen(homeId: data.main, fitsItemId: other),
+        );
+        expect(find.byKey(const Key('article-will-link')), findsNothing);
+        await tester.enterText(
+          find.byKey(const Key('article-name')),
+          'Freezer seal',
+        );
+        await tester.tap(find.text(m['save']!).first);
+        await tester.pumpAndSettle();
+        expect(find.text(m['errNotInHome']!), findsOneWidget);
+        expect(find.byType(ArticleFormScreen), findsOneWidget);
+        expect((await r.articles(data.main)).length, before);
+        expect((await r.articles(data.base.homes.second)).length, beforeSecond);
       });
 
       testWidgets('Remove: the link ends, the stock item stays', (

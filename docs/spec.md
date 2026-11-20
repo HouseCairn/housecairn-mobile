@@ -292,9 +292,11 @@ Homes and Settings shows the current home.
    `compatible_items`), by name, with their quantity and unit price, each opening its page;
    **Remove** ends a link and leaves the stock item in the stock; **Link a stock item…** ticks
    stock items of the same home that do not fit it yet, **New stock item…** opens the stock item
-   form with the item ticked.
+   form with the item ticked and *It will be linked to* the item: the new stock item fits it
+   whatever is unticked, as on the web (web ADR 0088); an item of another home is refused on save.
    The link is the same row as the one the stock item form writes; none of it in an archived
-   home, and a read-only member of a server home is refused. The
+   home, a read-only member of a server home is refused, and so is a stock item of another home,
+   to link or to remove. The
    provider of the contract is a contractor of the home or, with the last choice **Add a
    contractor…**, one added with the item, in the fields of the task form (name, trade), checked
    as the web does (`clean_new_contractor`: a name, not one of the home whatever its case).

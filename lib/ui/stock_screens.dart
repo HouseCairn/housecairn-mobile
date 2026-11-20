@@ -706,8 +706,11 @@ class ArticleFormScreen extends StatefulWidget implements HcFormScreen {
   /// `null` for a new article.
   final String? articleId;
 
-  /// For a new article made from an item's Stock (*New stock item…*): the
-  /// item it fits from the start, ticked in its Compatible items.
+  /// For a new article made from an item's Materials (*New stock item…*):
+  /// the item it fits, ticked in its Compatible items and linked on save
+  /// whatever is ticked, as the web's `ItemArticleCreateView` (web ADR 0088). An
+  /// item of another home is refused on save (`Refusal.notInHome`), as the
+  /// web's 404.
   final String? fitsItemId;
 
   @override
@@ -748,6 +751,9 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
   final _items = <String>{};
   List<RoomRow> _roomChoices = const [];
   List<ItemRow> _itemChoices = const [];
+
+  /// The name of [ArticleFormScreen.fitsItemId], for *It will be linked to…*.
+  String? _fitsName;
   String _currency = '';
   bool _loaded = false;
 
@@ -796,8 +802,10 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
         _hasLabel = a.label != null;
         _rooms.addAll(linkedRooms.map((r) => r.id));
         _items.addAll(linkedItems.map((i) => i.id));
-      } else if (items.any((i) => i.id == widget.fitsItemId)) {
-        _items.add(widget.fitsItemId!);
+      } else if (items.where((i) => i.id == widget.fitsItemId).firstOrNull
+          case final fits?) {
+        _items.add(fits.id);
+        _fitsName = fits.name;
       }
     });
     sheetLoaded();
@@ -833,7 +841,13 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
     notes: _notes.text,
     ean: _ean.text,
     roomIds: _rooms.toList(),
-    itemIds: _items.toList(),
+    // Started from an item, a new article fits it whatever is unticked; an
+    // item of another home makes `addArticle` refuse it.
+    itemIds: {
+      ..._items,
+      if (widget.articleId == null && widget.fitsItemId != null)
+        widget.fitsItemId!,
+    }.toList(),
   );
 
   Future<void> _save() async {
@@ -975,6 +989,15 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
         child: HcScreenList(
           children: [
             const SizedBox(height: HcSpace.s2),
+            if (_fitsName case final name?)
+              Padding(
+                padding: const EdgeInsets.only(bottom: HcSpace.s3),
+                child: Text(
+                  l10n.articleWillLink(name),
+                  key: const Key('article-will-link'),
+                  style: HcText.bodySmall,
+                ),
+              ),
             HcCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

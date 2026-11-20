@@ -5756,6 +5756,12 @@ abstract class AppLocalizations {
   /// **'New stock item…'**
   String get itemStockNew;
 
+  /// Under the title of the stock item form opened by New stock item… on an item page: the item the new stock item fits, whatever is ticked. Web catalogue (stock): Il sera lié à %(name)s.
+  ///
+  /// In en, this message translates to:
+  /// **'It will be linked to {name}.'**
+  String articleWillLink(String name);
+
   /// Title of the sheet opened by Link a stock item… on an item page.
   ///
   /// In en, this message translates to:
