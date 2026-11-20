@@ -58,7 +58,10 @@ mixin AutosaveSheet<T extends StatefulWidget> on State<T> {
   void cancelAutosave() => _timer?.cancel();
 
   Future<void> _autosave() async {
-    if (!mounted) return;
+    // A save that waited may find the sheet no longer saving itself: a room,
+    // an item, a contractor or a stock item to add with it waits for the
+    // button, and its empty fields are not flagged meanwhile.
+    if (!mounted || !existing) return;
     final form = sheetForm.currentState;
     if (form == null || !form.validate()) return;
     final state = AppScope.of(context);

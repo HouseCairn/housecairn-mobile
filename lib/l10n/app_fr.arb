@@ -1093,5 +1093,13 @@
   "barcodeConsentRefuse": "Garder seulement le code",
   "barcodeLookupSetting": "Recherche en ligne des codes-barres",
   "barcodeLookupSettingText": "Demander à Open Products Facts, puis à Open Food Facts, ce qu'est un code scanné. Seul le code est envoyé, rien d'autre. Désactivé : le code est seulement gardé.",
-  "errEanInvalid": "Ce n'est pas un code-barres valide : saisissez les 8, 12, 13 ou 14 chiffres sous les barres (EAN-8, UPC-A, EAN-13 ou GTIN-14)."
+  "errEanInvalid": "Ce n'est pas un code-barres valide : saisissez les 8, 12, 13 ou 14 chiffres sous les barres (EAN-8, UPC-A, EAN-13 ou GTIN-14).",
+  "materialAddArticle": "Ajouter un article…",
+  "materialNewArticle": "Nouvel article",
+  "materialNewArticleName": "Nom du nouvel article",
+  "materialNewArticleHelp": "Utilisé seulement avec « Ajouter un article… » dans la liste ci-dessus. L'article rejoint le matériel du logement à l'enregistrement de la tâche ; complétez-le ensuite sur sa fiche.",
+  "errNewArticleName": "Indiquez le nom du nouvel article.",
+  "errNewArticleInStock": "{name} est déjà dans le matériel de ce logement : choisissez-le dans la liste.",
+  "errNewArticleTwice": "{name} est déjà ajouté par une autre ligne : un article n'est listé qu'une fois.",
+  "roomStockEmpty": "Aucun article pour cette pièce pour l'instant."
 }

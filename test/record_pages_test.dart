@@ -100,10 +100,11 @@ void main() {
         matching: find.byType(HcValueRow),
       );
       expect(type, findsOneWidget);
-      // The sections of the web, in its order (the stock of a room is a web
-      // feature, ADR 0011).
+      // The sections of the web, in its order, the stock of the room
+      // included (`rooms/room_detail.html`).
       expect(headings(tester), [
         t('Room memory', 'Mémoire de la pièce'),
+        t('Stock', 'Matériel'),
         t('Photos', 'Photos'),
         t('Items', 'Éléments'),
         t('Tasks', 'Tâches'),

@@ -214,7 +214,9 @@ class RoomScreen extends StatelessWidget {
     final state = AppScope.of(context);
     final home = state.homes.where((h) => h.id == homeId).firstOrNull;
     final writable = home != null && home.archivedAt == null;
-    return DataView<(RoomRow?, List<ItemRow>, ArticleEntry?)>(
+    return DataView<
+      (RoomRow?, List<ItemRow>, ArticleEntry?, List<ArticleEntry>)
+    >(
       load: (r) async {
         final room = await r.room(roomId);
         final paint = room?.paintArticleId == null
@@ -226,10 +228,11 @@ class RoomScreen extends StatelessWidget {
           paint == null
               ? null
               : ArticleEntry(paint, await r.stockLevel(paint.id)),
+          await r.articlesOfRoom(roomId),
         );
       },
       builder: (context, data) {
-        final (room, items, paint) = data;
+        final (room, items, paint, stockRows) = data;
         if (room == null) {
           // Deleted meanwhile (here or on another phone): back to the list.
           return HcScaffold(
@@ -368,6 +371,46 @@ class RoomScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              // The stock of the room (`rooms/room_detail.html`,
+              // `room_articles`): kept there, fitting one of its items, or
+              // its paint left over.
+              HcSectionHeading(l10n.stock),
+              if (stockRows.isEmpty)
+                HcEmpty(l10n.roomStockEmpty)
+              else
+                HcCardList(
+                  key: const Key('room-stock'),
+                  children: [
+                    for (final entry in stockRows)
+                      HcRow(
+                        key: Key('room-article-${entry.article.id}'),
+                        title: entry.article.name,
+                        text: [
+                          amountOf(
+                            l10n,
+                            localeOf(context),
+                            entry.article,
+                            entry.level,
+                          ),
+                          if (entry.article.storageLocation.isNotEmpty)
+                            entry.article.storageLocation,
+                        ].join(' · '),
+                        pills: [
+                          if (entry.low)
+                            HcPill(
+                              l10n.articleLowStock,
+                              tone: HcPillTone.warning,
+                            ),
+                        ],
+                        onTap: () => open(
+                          ArticleScreen(
+                            homeId: homeId,
+                            articleId: entry.article.id,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               PhotoSection(homeId: homeId, roomId: roomId, writable: writable),
               HcSectionHeading(l10n.items),
               if (items.isEmpty)

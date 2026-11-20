@@ -295,6 +295,8 @@ extension StockRepository on Repository {
     ];
   }
 
+  /// The items an article fits, by the name of their room, then by name
+  /// (`stock/views.py` `ArticleDetailView`: `room__name`, `name`).
   Future<List<ItemRow>> compatibleItemsOf(String articleId) async {
     final links =
         await (db.select(db.articleItems)..where(
@@ -305,9 +307,50 @@ extension StockRepository on Repository {
     if (ids.isEmpty) return [];
     final article = await this.article(articleId);
     if (article == null) return [];
-    return [
+    final roomNames = {
+      for (final r in await rooms(article.homeId)) r.id: r.name,
+    };
+    final items = [
       for (final i in await itemsOfHome(article.homeId))
         if (ids.contains(i.id)) i,
+    ];
+    int byRoomThenName(ItemRow a, ItemRow b) {
+      final room = (roomNames[a.roomId] ?? '').compareTo(
+        roomNames[b.roomId] ?? '',
+      );
+      return room != 0 ? room : a.name.compareTo(b.name);
+    }
+
+    return items..sort(byRoomThenName);
+  }
+
+  /// The articles that concern a room (`stock/services.py`
+  /// `articles_of_room`): the room is listed on the article, the article fits
+  /// an item of the room that is not deleted, or it is the tin of paint left
+  /// over in the memory of the room. By name, each with its stock.
+  Future<List<ArticleEntry>> articlesOfRoom(String roomId) async {
+    final room = await this.room(roomId);
+    if (room == null) return [];
+    final kept = await (db.select(
+      db.articleRooms,
+    )..where((l) => l.roomId.equalsValue(roomId) & l.deletedAt.isNull())).get();
+    final items = {for (final i in await itemsOf(roomId)) i.id};
+    final fitting = items.isEmpty
+        ? const <ArticleItemRow>[]
+        : await (db.select(db.articleItems)..where(
+                (l) => l.homeId.equalsValue(room.homeId) & l.deletedAt.isNull(),
+              ))
+              .get();
+    final ids = {
+      for (final l in kept) l.articleId,
+      for (final l in fitting)
+        if (items.contains(l.itemId)) l.articleId,
+      ?room.paintArticleId,
+    };
+    if (ids.isEmpty) return [];
+    return [
+      for (final entry in await articles(room.homeId))
+        if (ids.contains(entry.article.id)) entry,
     ];
   }
 

@@ -5665,6 +5665,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not a valid barcode: type the 8, 12, 13 or 14 digits under the bars (EAN-8, UPC-A, EAN-13 or GTIN-14).'**
   String get errEanInvalid;
+
+  /// Last choice of the stock items of a materials line: a new stock item. Web catalogue (tasks): Ajouter un article….
+  ///
+  /// In en, this message translates to:
+  /// **'Add a stock item…'**
+  String get materialAddArticle;
+
+  /// Heading of the fields of a stock item added with a task. Web catalogue (tasks): Nouvel article.
+  ///
+  /// In en, this message translates to:
+  /// **'New stock item'**
+  String get materialNewArticle;
+
+  /// Label of the name of a stock item added with a task. Web catalogue (tasks): Nom du nouvel article.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of the new stock item'**
+  String get materialNewArticleName;
+
+  /// Help of the fields of a stock item added with a task. Web catalogue (tasks): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'Only used with Add a stock item… in the list above. The item joins the stock of the home when you save the task; complete it on its sheet.'**
+  String get materialNewArticleHelp;
+
+  /// Error of an empty name of a stock item added with a task. Web catalogue (tasks): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the name of the new stock item.'**
+  String get errNewArticleName;
+
+  /// Error of a stock item added with a task whose name is in the stock. Web catalogue (tasks): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is already in the stock of this home: choose it in the list.'**
+  String errNewArticleInStock(String name);
+
+  /// Error of a stock item added twice by the lines of a task. Web catalogue (tasks): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is already added by another line: a stock item is listed once.'**
+  String errNewArticleTwice(String name);
+
+  /// Empty Stock section of a room page. Web catalogue (rooms): same text.
+  ///
+  /// In en, this message translates to:
+  /// **'No stock item for this room yet.'**
+  String get roomStockEmpty;
 }
 
 class _AppLocalizationsDelegate

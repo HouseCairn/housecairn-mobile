@@ -1855,5 +1855,21 @@
   "barcodeLookupSettingText": "Ask Open Products Facts, then Open Food Facts, what a scanned code is. Only the code is sent, nothing else. Off: a code is only kept.",
   "@barcodeLookupSettingText": {"description": "Text of the switch in Settings. Web catalogue (barcodes), same."},
   "errEanInvalid": "Not a valid barcode: type the 8, 12, 13 or 14 digits under the bars (EAN-8, UPC-A, EAN-13 or GTIN-14).",
-  "@errEanInvalid": {"description": "Error of the barcode field. Web catalogue (barcodes), same."}
+  "@errEanInvalid": {"description": "Error of the barcode field. Web catalogue (barcodes), same."},
+  "materialAddArticle": "Add a stock item…",
+  "@materialAddArticle": {"description": "Last choice of the stock items of a materials line: a new stock item. Web catalogue (tasks): Ajouter un article…."},
+  "materialNewArticle": "New stock item",
+  "@materialNewArticle": {"description": "Heading of the fields of a stock item added with a task. Web catalogue (tasks): Nouvel article."},
+  "materialNewArticleName": "Name of the new stock item",
+  "@materialNewArticleName": {"description": "Label of the name of a stock item added with a task. Web catalogue (tasks): Nom du nouvel article."},
+  "materialNewArticleHelp": "Only used with Add a stock item… in the list above. The item joins the stock of the home when you save the task; complete it on its sheet.",
+  "@materialNewArticleHelp": {"description": "Help of the fields of a stock item added with a task. Web catalogue (tasks): same text."},
+  "errNewArticleName": "Give the name of the new stock item.",
+  "@errNewArticleName": {"description": "Error of an empty name of a stock item added with a task. Web catalogue (tasks): same text."},
+  "errNewArticleInStock": "{name} is already in the stock of this home: choose it in the list.",
+  "@errNewArticleInStock": {"description": "Error of a stock item added with a task whose name is in the stock. Web catalogue (tasks): same text.", "placeholders": {"name": {"type": "String", "example": "Extractor filter"}}},
+  "errNewArticleTwice": "{name} is already added by another line: a stock item is listed once.",
+  "@errNewArticleTwice": {"description": "Error of a stock item added twice by the lines of a task. Web catalogue (tasks): same text.", "placeholders": {"name": {"type": "String", "example": "Extractor filter"}}},
+  "roomStockEmpty": "No stock item for this room yet.",
+  "@roomStockEmpty": {"description": "Empty Stock section of a room page. Web catalogue (rooms): same text."}
 }

@@ -3451,4 +3451,33 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errEanInvalid =>
       'Not a valid barcode: type the 8, 12, 13 or 14 digits under the bars (EAN-8, UPC-A, EAN-13 or GTIN-14).';
+
+  @override
+  String get materialAddArticle => 'Add a stock item…';
+
+  @override
+  String get materialNewArticle => 'New stock item';
+
+  @override
+  String get materialNewArticleName => 'Name of the new stock item';
+
+  @override
+  String get materialNewArticleHelp =>
+      'Only used with Add a stock item… in the list above. The item joins the stock of the home when you save the task; complete it on its sheet.';
+
+  @override
+  String get errNewArticleName => 'Give the name of the new stock item.';
+
+  @override
+  String errNewArticleInStock(String name) {
+    return '$name is already in the stock of this home: choose it in the list.';
+  }
+
+  @override
+  String errNewArticleTwice(String name) {
+    return '$name is already added by another line: a stock item is listed once.';
+  }
+
+  @override
+  String get roomStockEmpty => 'No stock item for this room yet.';
 }

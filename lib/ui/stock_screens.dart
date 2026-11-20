@@ -201,6 +201,7 @@ class _ArticleData {
     required this.items,
     required this.rooms,
     required this.tasks,
+    required this.roomNames,
   });
 
   final HomeRow home;
@@ -211,6 +212,9 @@ class _ArticleData {
   final List<ItemRow> items;
   final List<RoomRow> rooms;
   final List<TaskRow> tasks;
+
+  /// The name of each room of the home, for the room of a compatible item.
+  final Map<String, String> roomNames;
 }
 
 /// The photo of the label of an article, or its tile while the file is not
@@ -286,6 +290,7 @@ class ArticleScreen extends StatelessWidget {
       items: await r.compatibleItemsOf(articleId),
       rooms: await r.roomsOfArticle(articleId),
       tasks: await r.tasksUsing(articleId),
+      roomNames: {for (final room in await r.rooms(homeId)) room.id: room.name},
     );
   }
 
@@ -415,6 +420,7 @@ class ArticleScreen extends StatelessWidget {
                     for (final item in data.items)
                       HcRow(
                         title: item.name,
+                        text: data.roomNames[item.roomId],
                         onTap: () =>
                             open(ItemScreen(homeId: homeId, itemId: item.id)),
                       ),
@@ -758,7 +764,8 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
     setState(() {
       _currency = home?.currency ?? '';
       _roomChoices = rooms;
-      _itemChoices = items;
+      // By room, then by name: the order of the web's list.
+      _itemChoices = [...items]..sort((a, b) => a.name.compareTo(b.name));
       if (a != null) {
         _name.text = a.name;
         _reference.text = a.manufacturerReference;
@@ -897,6 +904,49 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
         : l10n.errQuantityInvalid;
   }
 
+  /// Compatible items, grouped by room in the order of the rooms, as the
+  /// web's `ItemChoiceField` (`group_by` the room, items by name): two items
+  /// of the same name in two rooms are told apart by their room.
+  Widget _itemChips(AppLocalizations l10n) {
+    final byRoom = <String, List<ItemRow>>{};
+    for (final item in _itemChoices) {
+      (byRoom[item.roomId] ??= []).add(item);
+    }
+    return HcField(
+      label: l10n.articleCompatible,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final room in _roomChoices)
+            if (byRoom[room.id] case final items?) ...[
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: HcSpace.s1,
+                  bottom: HcSpace.s1,
+                ),
+                child: Text(room.name, style: HcText.bodySmall),
+              ),
+              Wrap(
+                spacing: HcSpace.s2,
+                runSpacing: HcSpace.s2,
+                children: [
+                  for (final item in items)
+                    FilterChip(
+                      key: Key('article-item-${item.id}'),
+                      label: Text(item.name),
+                      selected: _items.contains(item.id),
+                      onSelected: (on) => _toggle(
+                        () => on ? _items.add(item.id) : _items.remove(item.id),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -980,15 +1030,7 @@ class _ArticleFormScreenState extends State<ArticleFormScreen>
                   ),
                   _help(l10n.articleUnitPriceHelp(_currency)),
                   if (_itemChoices.isNotEmpty) ...[
-                    _chips(
-                      l10n.articleCompatible,
-                      [for (final i in _itemChoices) (i.id, i.name)],
-                      _items,
-                      (id, on) => _toggle(
-                        () => on ? _items.add(id) : _items.remove(id),
-                      ),
-                      keyPrefix: 'article-item',
-                    ),
+                    _itemChips(l10n),
                     _help(l10n.articleCompatibleHelp),
                   ],
                   if (_roomChoices.isNotEmpty) ...[
