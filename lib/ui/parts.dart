@@ -125,6 +125,7 @@ Widget hcChoice<T>(
   ValueChanged<T> onChanged, {
   Key? key,
   bool enabled = true,
+  bool wrap = false,
 }) => HcField(
   label: label,
   child: HcSelect<T>(
@@ -133,6 +134,7 @@ Widget hcChoice<T>(
     choices: choices,
     onChanged: onChanged,
     enabled: enabled,
+    wrap: wrap,
   ),
 );
 

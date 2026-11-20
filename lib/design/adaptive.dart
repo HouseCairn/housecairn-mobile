@@ -174,6 +174,7 @@ class HcSelect<T> extends StatelessWidget {
     required this.onChanged,
     this.validator,
     this.enabled = true,
+    this.wrap = false,
   });
 
   final T value;
@@ -181,6 +182,12 @@ class HcSelect<T> extends StatelessWidget {
   final ValueChanged<T> onChanged;
   final FormFieldValidator<T>? validator;
   final bool enabled;
+
+  /// Whether the choice shown on iOS wraps, its words whole (HcWholeWords),
+  /// rather than end in an ellipsis on one line: for a list whose choices
+  /// are sentences (Add a contractor…), read whole on the narrow phone with
+  /// large text.
+  final bool wrap;
 
   @override
   Widget build(BuildContext context) {
@@ -223,12 +230,14 @@ class HcSelect<T> extends StatelessWidget {
               errorText: field.errorText,
               suffixIcon: const _FieldIcon(HcIcons.chevronDown),
             ),
-            child: Text(
-              text ?? '',
-              style: HcText.body,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: wrap
+                ? HcWholeWords(text ?? '', style: HcText.body)
+                : Text(
+                    text ?? '',
+                    style: HcText.body,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
           ),
         ),
       ),

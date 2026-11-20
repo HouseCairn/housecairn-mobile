@@ -21,13 +21,14 @@ import 'budget_parts.dart';
 import 'stock_format.dart';
 import 'choices.dart';
 import 'messages.dart';
+import 'new_contractor.dart';
 import 'parts.dart';
 import 'guide_screens.dart';
 import 'state.dart';
 
 /// The choice that adds a room, an item or a contractor with the task: the
 /// last of their lists (`AddInPlaceChoiceField`).
-const _newChoice = '+new';
+const _newChoice = newContractorChoice;
 
 /// The form of a task (`tasks/task_form.html`), opened by Edit the task from
 /// its page, or to add a task. Title, Room, Item and Due date first (the place
@@ -138,8 +139,7 @@ class _TaskFormScreenState extends State<TaskFormScreen>
   final _labour = TextEditingController();
   final _newRoomName = TextEditingController();
   final _newItemName = TextEditingController();
-  final _newContractorName = TextEditingController();
-  final _newContractorOther = TextEditingController();
+  final _newContractor = NewContractorFields();
   String _currency = '';
   Day? _due;
   String _mode = recurrence.once;
@@ -148,7 +148,6 @@ class _TaskFormScreenState extends State<TaskFormScreen>
   String _priority = 'normal';
   String _durationUnit = durations.hour;
   String _newRoomKind = 'other';
-  String _newContractorTrade = '';
   TaskRow? _task;
   String? _roomId;
   String? _itemId;
@@ -351,11 +350,10 @@ class _TaskFormScreenState extends State<TaskFormScreen>
       _labour,
       _newRoomName,
       _newItemName,
-      _newContractorName,
-      _newContractorOther,
     ]) {
       c.dispose();
     }
+    _newContractor.dispose();
     for (final line in _materials) {
       line.quantity.dispose();
     }
@@ -422,13 +420,7 @@ class _TaskFormScreenState extends State<TaskFormScreen>
         if (contractorId == _newChoice) {
           contractorId = await repository.addContractor(
             widget.homeId,
-            ContractorInput(
-              name: _newContractorName.text,
-              trade: _newContractorTrade,
-              tradeOther: _newContractorTrade == 'other'
-                  ? _newContractorOther.text
-                  : '',
-            ),
+            _newContractor.input(),
           );
         }
         final input = _input(roomId, itemId, contractorId, minutes);
@@ -710,42 +702,19 @@ class _TaskFormScreenState extends State<TaskFormScreen>
       ),
       hcChoice<String?>(
         l10n.contractor,
-        _contractorId == _newChoice ||
-                _contractors.any((c) => c.id == _contractorId)
-            ? _contractorId
-            : null,
-        [
-          (null, l10n.contractNone),
-          for (final c in _contractors) (c.id, c.name),
-          (_newChoice, l10n.taskAddContractor),
-        ],
+        shownContractor(_contractorId, _contractors),
+        contractorChoices(l10n, _contractors),
         (value) => setState(() => _contractorId = value),
         key: const Key('task-contractor'),
+        wrap: true,
       ),
-      if (_contractorId == _newChoice) ...[
-        HcSectionHeading(l10n.taskNewContractor),
-        hcText(
-          l10n.taskNewContractorName,
-          _newContractorName,
-          key: const Key('task-new-contractor-name'),
-          validator: (v) => _nameRequired(v, l10n),
+      if (_contractorId == _newChoice)
+        ..._newContractor.build(
+          l10n,
+          prefix: 'task',
+          contractors: _contractors,
+          setState: setState,
         ),
-        hcChoice<String>(
-          l10n.contractorTrade,
-          _newContractorTrade,
-          [('', ''), for (final t in trades) (t, tradeLabel(l10n, t))],
-          (value) => setState(() => _newContractorTrade = value),
-          key: const Key('task-new-contractor-trade'),
-        ),
-        if (_newContractorTrade == 'other')
-          hcText(
-            l10n.contractorTradeOther,
-            _newContractorOther,
-            key: const Key('task-new-contractor-other'),
-            validator: (v) =>
-                (v ?? '').trim().isEmpty ? l10n.errTradeOther : null,
-          ),
-      ],
     ],
   );
 

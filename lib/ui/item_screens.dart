@@ -24,6 +24,7 @@ import 'barcode_field.dart';
 import 'contractor_screens.dart';
 import 'label_screens.dart';
 import 'messages.dart';
+import 'new_contractor.dart';
 import 'parts.dart';
 import 'photos.dart';
 import 'report_screens.dart';
@@ -342,12 +343,16 @@ class _ItemFormScreenState extends State<ItemFormScreen>
   @override
   GlobalKey<FormState> get sheetForm => _form;
 
+  /// An existing item saves itself, unless a contractor is to be added with
+  /// it: that waits for the button, all or none.
   @override
-  bool get existing => widget.itemId != null;
+  bool get existing =>
+      widget.itemId != null && _contractor != newContractorChoice;
 
   @override
   Future<void> writeSheet(Repository repository) =>
-      repository.updateItem(widget.itemId!, _input());
+      repository.updateItem(widget.itemId!, _input(_contractor));
+
   final _name = TextEditingController();
   final _brand = TextEditingController();
   final _model = TextEditingController();
@@ -359,6 +364,9 @@ class _ItemFormScreenState extends State<ItemFormScreen>
   final _warrantyDuration = TextEditingController();
   final _warrantyProviderName = TextEditingController();
   final _links = <(TextEditingController, TextEditingController)>[];
+
+  /// The fields of a contractor added with the item (Add a contractor…).
+  final _newContractor = NewContractorFields();
   String _kind = 'equipment';
   Day? _installedOn;
   Day? _warrantyEndsOn;
@@ -496,10 +504,11 @@ class _ItemFormScreenState extends State<ItemFormScreen>
     ]) {
       c.dispose();
     }
+    _newContractor.dispose();
     super.dispose();
   }
 
-  ItemInput _input() => ItemInput(
+  ItemInput _input(String? contractor) => ItemInput(
     name: _name.text,
     kind: _kind,
     brand: _brand.text,
@@ -513,7 +522,7 @@ class _ItemFormScreenState extends State<ItemFormScreen>
     warrantyProvider: _warrantyProvider,
     warrantyProviderName: _warrantyProviderName.text,
     warrantyStartsOn: _warrantyStartsOn,
-    contractContractorId: _contractor,
+    contractContractorId: contractor,
     contractNumber: _contractNumber.text,
     contractUrl: _contractUrl.text,
     links: [
@@ -555,11 +564,22 @@ class _ItemFormScreenState extends State<ItemFormScreen>
         : null;
     if (!mounted) return;
     final saved = await runChange(context, (r) async {
-      if (widget.itemId == null) {
-        added = await r.addItem(_room ?? widget.roomId!, _input());
-      } else {
-        await r.updateItem(widget.itemId!, _input());
-      }
+      // A contractor added with the item joins the home with it, or not at
+      // all (`clean_new_contractor` of the web, made with the item).
+      await r.atomic(() async {
+        var contractor = _contractor;
+        if (contractor == newContractorChoice) {
+          contractor = await r.addContractor(
+            widget.homeId,
+            _newContractor.input(),
+          );
+        }
+        if (widget.itemId == null) {
+          added = await r.addItem(_room ?? widget.roomId!, _input(contractor));
+        } else {
+          await r.updateItem(widget.itemId!, _input(contractor));
+        }
+      });
       final id = added ?? widget.itemId!;
       // The photo of the product, re-encoded without metadata as any photo,
       // with its credit; only when the item still has none and the code is
@@ -762,16 +782,23 @@ class _ItemFormScreenState extends State<ItemFormScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // The last choice adds a contractor in place, as on the
+                  // web: a home with none still offers it.
                   hcChoice<String?>(
                     l10n.contractProvider,
-                    _contractor,
-                    [
-                      (null, l10n.contractNone),
-                      for (final c in _contractors) (c.id, c.name),
-                    ],
+                    shownContractor(_contractor, _contractors),
+                    contractorChoices(l10n, _contractors),
                     (v) => setState(() => _contractor = v),
                     key: const Key('item-contractor'),
+                    wrap: true,
                   ),
+                  if (_contractor == newContractorChoice)
+                    ..._newContractor.build(
+                      l10n,
+                      prefix: 'item',
+                      contractors: _contractors,
+                      setState: setState,
+                    ),
                   hcText(
                     l10n.contractNumber,
                     _contractNumber,

@@ -3758,6 +3758,18 @@ abstract class AppLocalizations {
   /// **'Name of the new contractor'**
   String get taskNewContractorName;
 
+  /// Message of a refusal: Add a contractor… chosen with no name. Web catalogue: Indiquez le nom du nouvel intervenant.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the name of the new contractor.'**
+  String get errNewContractorName;
+
+  /// Message of a refusal: the new contractor has the name of a contractor of the home, whatever its case. Web catalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is already a contractor of this home: choose it in the list.'**
+  String errNewContractorTaken(String name);
+
   /// Pill of a task whose date was moved. Web catalogue: Reportée.
   ///
   /// In en, this message translates to:
