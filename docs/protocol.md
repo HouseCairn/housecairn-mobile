@@ -324,11 +324,17 @@ synced): the app shows each change on its line, with the name of its row, the ki
 is, the reason in words and the server's own message when it gave one (`detail` of a `400`),
 to be sent again (back to `op_log`, as it was made) or no longer sent. **After an update** that
 changes how the phone writes operations for a server (`wireRevision` in
-`lib/data/sync_repository.dart`, 1 for the links above), the first sync puts every change of
-the list back in `op_log`, once, so that what an older version could not send goes as the new
-one writes it; one still refused is kept aside again by that push. The same step moves the
+`lib/data/sync_repository.dart`, 1 for the links above), the first sync puts back in
+`op_log`, once and as they were made, the changes of the list the server could not read
+(`malformed`), so that what an older version could not send goes as the new one writes it,
+with those refused as `invalid_reference` because a field of theirs names the row of one of
+them (the photo of an item refused before it, which the server could not attach). A change
+refused for any other reason (`clock_ahead`, `id_taken`, `forbidden`, `wrong_home`, another
+`invalid_reference`…) stays aside as it is, until the person decides (maintainer's decision,
+2026-11-20). One still refused is kept aside again by that push. The same step moves the
 links a server sent before, which an older version kept in `extra`, to their column, unless
-this phone wrote the links since. A change no longer
+this phone wrote the links since. It is one transaction, the revision written last: an app
+stopped in the middle changed nothing, and its next sync does it all. A change no longer
 sent gives the row back the server's value at once (maintainer's decision, 2026-11-16): the
 fields it wrote lose their clock while it is still the change's, and the phone reads the row
 again in the server's snapshot of the home (the sync API has no route that reads one row, and

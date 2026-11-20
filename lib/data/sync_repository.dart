@@ -337,20 +337,53 @@ extension SyncRepository on Repository {
 
   /// Settles once, after an update of the app that changes how it writes or
   /// reads operations ([wireRevision]): the links of an item a server sent
-  /// as a list, kept in `extra` until now, go to their column; and every
-  /// change the server refused is put back in `op_log`, to be sent again as
-  /// this version writes it. One the server still refuses is set aside
-  /// again by the next push, with its reason: nothing is lost.
-  Future<void> settleAfterUpdate() async {
+  /// as a list, kept in `extra` until now, go to their column; and the
+  /// changes the server could not read (`malformed`) are put back in
+  /// `op_log`, to be sent again as this version writes them, with those it
+  /// refused as `invalid_reference` because they name a row of one of them
+  /// (the photo of an item refused before it). A change refused for another
+  /// reason stays aside, as it is (maintainer's decision, 2026-11-20). One
+  /// the server still refuses is set aside again by the next push, with its
+  /// reason: nothing is lost.
+  ///
+  /// All of it is one transaction, the revision written last: an app killed
+  /// in the middle, or a failure, leaves everything as it was, and the next
+  /// sync does the work. [resend] stands for [sendAgain] in tests.
+  Future<void> settleAfterUpdate({
+    @visibleForTesting Future<void> Function(int id)? resend,
+  }) => db.transaction(() async {
     final done = int.tryParse(await _setting(_wireRevisionKey) ?? '') ?? 0;
     if (done >= wireRevision) return;
-    await db.transaction(() async {
-      await _moveLinksOutOfExtra();
-      for (final change in await refusedChanges()) {
-        await sendAgain(change.id);
-      }
-      await _setSetting(_wireRevisionKey, '$wireRevision');
-    });
+    await _moveLinksOutOfExtra();
+    final send = resend ?? sendAgain;
+    for (final change in resentAfterUpdate(await refusedChanges())) {
+      await send(change.id);
+    }
+    await _setSetting(_wireRevisionKey, '$wireRevision');
+  });
+
+  /// The refused changes [settleAfterUpdate] sends again, in their order:
+  /// each `malformed` one, and each `invalid_reference` one with a field
+  /// that names the row of one of those.
+  static List<RefusedChange> resentAfterUpdate(List<RefusedChange> refused) {
+    final rows = {
+      for (final c in refused)
+        if (c.code == 'malformed') c.operation[Op.id],
+    };
+    bool namesOne(RefusedChange c) {
+      final fields = c.operation[Op.fields];
+      if (fields is! Map) return false;
+      return fields.entries.any(
+        (f) => '${f.key}'.endsWith('_id') && rows.contains(f.value),
+      );
+    }
+
+    return [
+      for (final c in refused)
+        if (c.code == 'malformed' ||
+            (c.code == 'invalid_reference' && namesOne(c)))
+          c,
+    ];
   }
 
   /// The links of an item a server sent (a JSON list, which the text column
