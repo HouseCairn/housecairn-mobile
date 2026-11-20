@@ -287,7 +287,13 @@ Homes and Settings shows the current home.
    returns to that page).
 5. **Item**: details, the manufacturer's warranty (a duration in months or years, who gives it,
    its start, else the purchase date, and its end worked out; web ADR 0080), its state,
-   contract, **Report a problem** (Where starts with the item), links, photos, tasks. The
+   contract, **Report a problem** (Where starts with the item), links, its stock, photos, tasks.
+   Its stock is the stock items that fit it (their **Compatible items**, `compatible_items`), by
+   name, with their quantity and unit price, each opening its page; **Remove** ends a link and
+   leaves the stock item in the stock; **Link a stock item…** ticks stock items of the same home
+   that do not fit it yet, **New stock item…** opens the stock item form with the item ticked.
+   The link is the same row as the one the stock item form writes; none of it in an archived
+   home, and a read-only member of a server home is refused. The
    provider of the contract is a contractor of the home or, with the last choice **Add a
    contractor…**, one added with the item, in the fields of the task form (name, trade), checked
    as the web does (`clean_new_contractor`: a name, not one of the home whatever its case).

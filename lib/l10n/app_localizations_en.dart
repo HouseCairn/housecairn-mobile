@@ -3491,4 +3491,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get roomStockEmpty => 'No stock item for this room yet.';
+
+  @override
+  String get itemStockEmpty => 'No stock item for this item yet.';
+
+  @override
+  String itemStockUnitPrice(String price) {
+    return '$price each';
+  }
+
+  @override
+  String get itemStockLink => 'Link a stock item…';
+
+  @override
+  String get itemStockNew => 'New stock item…';
+
+  @override
+  String get itemStockLinkTitle => 'Link stock items';
+
+  @override
+  String get itemStockLinkIntro =>
+      'The stock items of this home that do not fit this item yet. Those you tick fit it, as in their Compatible items.';
+
+  @override
+  String get itemStockLinkAction => 'Link';
+
+  @override
+  String get itemStockLinkNone =>
+      'Every stock item of this home already fits this item.';
+
+  @override
+  String get itemStockNoneTicked => 'Tick at least one stock item.';
 }

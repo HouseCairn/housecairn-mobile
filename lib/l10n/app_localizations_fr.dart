@@ -3520,4 +3520,36 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get roomStockEmpty =>
       'Aucun article pour cette pièce pour l\'instant.';
+
+  @override
+  String get itemStockEmpty =>
+      'Aucun article pour cet élément pour l\'instant.';
+
+  @override
+  String itemStockUnitPrice(String price) {
+    return '$price l\'unité';
+  }
+
+  @override
+  String get itemStockLink => 'Lier un article…';
+
+  @override
+  String get itemStockNew => 'Nouvel article…';
+
+  @override
+  String get itemStockLinkTitle => 'Lier des articles';
+
+  @override
+  String get itemStockLinkIntro =>
+      'Les articles du matériel de ce logement qui ne conviennent pas encore à cet élément. Ceux que vous cochez lui conviennent, comme dans leurs Éléments compatibles.';
+
+  @override
+  String get itemStockLinkAction => 'Lier';
+
+  @override
+  String get itemStockLinkNone =>
+      'Tous les articles du matériel de ce logement conviennent déjà à cet élément.';
+
+  @override
+  String get itemStockNoneTicked => 'Cochez au moins un article.';
 }
