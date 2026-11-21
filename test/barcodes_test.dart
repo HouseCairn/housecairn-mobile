@@ -527,7 +527,7 @@ void main() {
         );
       }
       final db = AppDatabase(schema.newConnection());
-      await verifier.migrateAndValidate(db, 12);
+      await verifier.migrateAndValidate(db, 13);
       Future<List<Map<String, Object?>>> rows(String sql) async => [
         for (final r in await db.customSelect(sql).get()) r.data,
       ];

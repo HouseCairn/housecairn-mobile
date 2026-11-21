@@ -208,6 +208,14 @@ extension SyncRepository on Repository {
     String hlc,
   ) async {
     final home = table == 'homes' ? id : homeId ?? await _homeOf(table, id);
+    // The fields the server sets are never sent (web ADR 0092): a server
+    // refuses the whole operation that writes one.
+    final readOnly = serverOnlyFields[entityOf[table]] ?? const <String>{};
+    fields = {
+      for (final MapEntry(:key, :value) in fields.entries)
+        if (!readOnly.contains(key)) key: value,
+    };
+    if (fields.isEmpty) return;
     final op = <String, Object?>{
       Op.type: entityOf[table],
       Op.home: ?home,

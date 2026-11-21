@@ -9855,6 +9855,930 @@ i1.GeneratedColumn<String> _column_146(String aliasedName) =>
       $customConstraints: 'NOT NULL DEFAULT \'{}\'',
       defaultValue: const i1.CustomExpression('\'{}\''),
     );
+
+final class Schema13 extends i0.VersionedSchema {
+  Schema13({required super.database}) : super(version: 13);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    homes,
+    rooms,
+    items,
+    photos,
+    contractors,
+    tasks,
+    occurrences,
+    articles,
+    articleRooms,
+    articleItems,
+    suppliers,
+    movements,
+    taskMaterials,
+    materialDraws,
+    projects,
+    projectRooms,
+    budgetLines,
+    quotes,
+    projectFiles,
+    projectLinks,
+    projectTasks,
+    annualEnvelopes,
+    reports,
+    fieldClock,
+    localSettings,
+    opLog,
+    extra,
+    pending,
+    purgedHomes,
+    otherVersions,
+    serverSeen,
+    fileSync,
+    taskAttachments,
+    stepTicks,
+    labels,
+    roomHomePosition,
+    taskHomeCreated,
+    occHomeStatusDue,
+    occTaskStatus,
+    articleHomeName,
+    movementArticle,
+    materialTask,
+    drawOccurrence,
+    projectHomeStatus,
+    lineProject,
+    quoteProject,
+    reportHomeStatus,
+    attachmentTask,
+    labelCode,
+    labelHomeKind,
+  ];
+  late final Shape37 homes = Shape37(
+    source: i0.VersionedTable(
+      entityName: 'homes',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_139,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape16 rooms = Shape16(
+    source: i0.VersionedTable(
+      entityName: 'rooms',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_4,
+        _column_9,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+        _column_16,
+        _column_17,
+        _column_18,
+        _column_90,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape40 items = Shape40(
+    source: i0.VersionedTable(
+      entityName: 'items',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_19,
+        _column_4,
+        _column_20,
+        _column_21,
+        _column_22,
+        _column_23,
+        _column_24,
+        _column_25,
+        _column_121,
+        _column_122,
+        _column_123,
+        _column_124,
+        _column_125,
+        _column_126,
+        _column_26,
+        _column_27,
+        _column_28,
+        _column_29,
+        _column_11,
+        _column_144,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape41 photos = Shape41(
+    source: i0.VersionedTable(
+      entityName: 'photos',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_30,
+        _column_31,
+        _column_32,
+        _column_33,
+        _column_34,
+        _column_145,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 contractors = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'contractors',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_4,
+        _column_35,
+        _column_36,
+        _column_37,
+        _column_38,
+        _column_39,
+        _column_40,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape17 tasks = Shape17(
+    source: i0.VersionedTable(
+      entityName: 'tasks',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_41,
+        _column_30,
+        _column_31,
+        _column_42,
+        _column_43,
+        _column_11,
+        _column_44,
+        _column_45,
+        _column_46,
+        _column_47,
+        _column_48,
+        _column_49,
+        _column_50,
+        _column_51,
+        _column_52,
+        _column_53,
+        _column_91,
+        _column_92,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape43 occurrences = Shape43(
+    source: i0.VersionedTable(
+      entityName: 'occurrences',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_54,
+        _column_55,
+        _column_56,
+        _column_57,
+        _column_58,
+        _column_59,
+        _column_60,
+        _column_61,
+        _column_62,
+        _column_93,
+        _column_147,
+        _column_148,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape42 articles = Shape42(
+    source: i0.VersionedTable(
+      entityName: 'articles',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_4,
+        _column_70,
+        _column_71,
+        _column_72,
+        _column_73,
+        _column_74,
+        _column_75,
+        _column_76,
+        _column_11,
+        _column_77,
+        _column_144,
+        _column_146,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape10 articleRooms = Shape10(
+    source: i0.VersionedTable(
+      entityName: 'article_rooms',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_78,
+        _column_19,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape11 articleItems = Shape11(
+    source: i0.VersionedTable(
+      entityName: 'article_items',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_78,
+        _column_79,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape12 suppliers = Shape12(
+    source: i0.VersionedTable(
+      entityName: 'suppliers',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_78,
+        _column_4,
+        _column_80,
+        _column_81,
+        _column_82,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape13 movements = Shape13(
+    source: i0.VersionedTable(
+      entityName: 'movements',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_78,
+        _column_83,
+        _column_84,
+        _column_85,
+        _column_40,
+        _column_86,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape14 taskMaterials = Shape14(
+    source: i0.VersionedTable(
+      entityName: 'task_materials',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_54,
+        _column_78,
+        _column_84,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape44 materialDraws = Shape44(
+    source: i0.VersionedTable(
+      entityName: 'material_draws',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_87,
+        _column_78,
+        _column_88,
+        _column_89,
+        _column_76,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape19 projects = Shape19(
+    source: i0.VersionedTable(
+      entityName: 'projects',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_41,
+        _column_94,
+        _column_95,
+        _column_42,
+        _column_43,
+        _column_49,
+        _column_50,
+        _column_51,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape20 projectRooms = Shape20(
+    source: i0.VersionedTable(
+      entityName: 'project_rooms',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_96,
+        _column_19,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape21 budgetLines = Shape21(
+    source: i0.VersionedTable(
+      entityName: 'budget_lines',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_96,
+        _column_97,
+        _column_98,
+        _column_99,
+        _column_100,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape22 quotes = Shape22(
+    source: i0.VersionedTable(
+      entityName: 'quotes',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_96,
+        _column_45,
+        _column_101,
+        _column_102,
+        _column_103,
+        _column_104,
+        _column_105,
+        _column_40,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape23 projectFiles = Shape23(
+    source: i0.VersionedTable(
+      entityName: 'project_files',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_96,
+        _column_106,
+        _column_4,
+        _column_107,
+        _column_108,
+        _column_109,
+        _column_110,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape24 projectLinks = Shape24(
+    source: i0.VersionedTable(
+      entityName: 'project_links',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_96,
+        _column_111,
+        _column_112,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape25 projectTasks = Shape25(
+    source: i0.VersionedTable(
+      entityName: 'project_tasks',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_96,
+        _column_54,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape26 annualEnvelopes = Shape26(
+    source: i0.VersionedTable(
+      entityName: 'annual_envelopes',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_113,
+        _column_114,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape27 reports = Shape27(
+    source: i0.VersionedTable(
+      entityName: 'reports',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_41,
+        _column_115,
+        _column_30,
+        _column_31,
+        _column_116,
+        _column_117,
+        _column_118,
+        _column_119,
+        _column_120,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape7 fieldClock = Shape7(
+    source: i0.VersionedTable(
+      entityName: 'field_clock',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(entity, row_id, field)'],
+      columns: [_column_63, _column_64, _column_65, _column_66, _column_67],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape8 localSettings = Shape8(
+    source: i0.VersionedTable(
+      entityName: 'local_settings',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY("key")'],
+      columns: [_column_68, _column_69],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape29 opLog = Shape29(
+    source: i0.VersionedTable(
+      entityName: 'op_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_127, _column_67, _column_66, _column_128, _column_129],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape30 extra = Shape30(
+    source: i0.VersionedTable(
+      entityName: 'extra',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(entity, row_id)'],
+      columns: [_column_63, _column_64, _column_128, _column_130],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape31 pending = Shape31(
+    source: i0.VersionedTable(
+      entityName: 'pending',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY("key")'],
+      columns: [_column_68, _column_63, _column_128, _column_129],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape32 purgedHomes = Shape32(
+    source: i0.VersionedTable(
+      entityName: 'purged_homes',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(home_id)'],
+      columns: [_column_8],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape33 otherVersions = Shape33(
+    source: i0.VersionedTable(
+      entityName: 'other_versions',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(entity, row_id, field, hlc, device)'],
+      columns: [
+        _column_63,
+        _column_64,
+        _column_128,
+        _column_65,
+        _column_69,
+        _column_66,
+        _column_67,
+        _column_131,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape34 serverSeen = Shape34(
+    source: i0.VersionedTable(
+      entityName: 'server_seen',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(entity, row_id)'],
+      columns: [_column_63, _column_64, _column_8],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape35 fileSync = Shape35(
+    source: i0.VersionedTable(
+      entityName: 'file_sync',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(file_id)'],
+      columns: [
+        _column_132,
+        _column_8,
+        _column_133,
+        _column_64,
+        _column_134,
+        _column_135,
+        _column_136,
+        _column_137,
+        _column_138,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape36 taskAttachments = Shape36(
+    source: i0.VersionedTable(
+      entityName: 'task_attachments',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_54,
+        _column_86,
+        _column_4,
+        _column_107,
+        _column_108,
+        _column_109,
+        _column_110,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape38 stepTicks = Shape38(
+    source: i0.VersionedTable(
+      entityName: 'step_ticks',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(home_id, step_id)'],
+      columns: [_column_8, _column_140, _column_141],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape39 labels = Shape39(
+    source: i0.VersionedTable(
+      entityName: 'labels',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_8,
+        _column_83,
+        _column_30,
+        _column_31,
+        _column_116,
+        _column_142,
+        _column_143,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index roomHomePosition = i1.Index(
+    'room_home_position',
+    'CREATE INDEX room_home_position ON rooms (home_id, position)',
+  );
+  final i1.Index taskHomeCreated = i1.Index(
+    'task_home_created',
+    'CREATE INDEX task_home_created ON tasks (home_id, created_at)',
+  );
+  final i1.Index occHomeStatusDue = i1.Index(
+    'occ_home_status_due',
+    'CREATE INDEX occ_home_status_due ON occurrences (home_id, status, due_on)',
+  );
+  final i1.Index occTaskStatus = i1.Index(
+    'occ_task_status',
+    'CREATE INDEX occ_task_status ON occurrences (task_id, status)',
+  );
+  final i1.Index articleHomeName = i1.Index(
+    'article_home_name',
+    'CREATE INDEX article_home_name ON articles (home_id, name)',
+  );
+  final i1.Index movementArticle = i1.Index(
+    'movement_article',
+    'CREATE INDEX movement_article ON movements (article_id)',
+  );
+  final i1.Index materialTask = i1.Index(
+    'material_task',
+    'CREATE INDEX material_task ON task_materials (task_id)',
+  );
+  final i1.Index drawOccurrence = i1.Index(
+    'draw_occurrence',
+    'CREATE INDEX draw_occurrence ON material_draws (occurrence_id)',
+  );
+  final i1.Index projectHomeStatus = i1.Index(
+    'project_home_status',
+    'CREATE INDEX project_home_status ON projects (home_id, status)',
+  );
+  final i1.Index lineProject = i1.Index(
+    'line_project',
+    'CREATE INDEX line_project ON budget_lines (project_id)',
+  );
+  final i1.Index quoteProject = i1.Index(
+    'quote_project',
+    'CREATE INDEX quote_project ON quotes (project_id)',
+  );
+  final i1.Index reportHomeStatus = i1.Index(
+    'report_home_status',
+    'CREATE INDEX report_home_status ON reports (home_id, status)',
+  );
+  final i1.Index attachmentTask = i1.Index(
+    'attachment_task',
+    'CREATE INDEX attachment_task ON task_attachments (task_id)',
+  );
+  final i1.Index labelCode = i1.Index(
+    'label_code',
+    'CREATE UNIQUE INDEX label_code ON labels (code)',
+  );
+  final i1.Index labelHomeKind = i1.Index(
+    'label_home_kind',
+    'CREATE INDEX label_home_kind ON labels (home_id, kind)',
+  );
+}
+
+class Shape43 extends i0.VersionedTable {
+  Shape43({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<i2.Uint8List> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<i2.Uint8List>;
+  i1.GeneratedColumn<int> get createdAt =>
+      columnsByName['created_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get updatedAt =>
+      columnsByName['updated_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get deletedAt =>
+      columnsByName['deleted_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<i2.Uint8List> get homeId =>
+      columnsByName['home_id']! as i1.GeneratedColumn<i2.Uint8List>;
+  i1.GeneratedColumn<i2.Uint8List> get taskId =>
+      columnsByName['task_id']! as i1.GeneratedColumn<i2.Uint8List>;
+  i1.GeneratedColumn<String> get dueOn =>
+      columnsByName['due_on']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get visibleFrom =>
+      columnsByName['visible_from']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get status =>
+      columnsByName['status']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get statusBefore =>
+      columnsByName['status_before']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get postponedFrom =>
+      columnsByName['postponed_from']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get completedOn =>
+      columnsByName['completed_on']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get completionNote =>
+      columnsByName['completion_note']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<i2.Uint8List> get follows =>
+      columnsByName['follows']! as i1.GeneratedColumn<i2.Uint8List>;
+  i1.GeneratedColumn<String> get actualCost =>
+      columnsByName['actual_cost']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get plannedLabour =>
+      columnsByName['planned_labour']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get plannedMaterial =>
+      columnsByName['planned_material']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_147(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'planned_labour',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_148(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'planned_material',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+
+class Shape44 extends i0.VersionedTable {
+  Shape44({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<i2.Uint8List> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<i2.Uint8List>;
+  i1.GeneratedColumn<int> get createdAt =>
+      columnsByName['created_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get updatedAt =>
+      columnsByName['updated_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get deletedAt =>
+      columnsByName['deleted_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<i2.Uint8List> get homeId =>
+      columnsByName['home_id']! as i1.GeneratedColumn<i2.Uint8List>;
+  i1.GeneratedColumn<i2.Uint8List> get occurrenceId =>
+      columnsByName['occurrence_id']! as i1.GeneratedColumn<i2.Uint8List>;
+  i1.GeneratedColumn<i2.Uint8List> get articleId =>
+      columnsByName['article_id']! as i1.GeneratedColumn<i2.Uint8List>;
+  i1.GeneratedColumn<String> get wanted =>
+      columnsByName['wanted']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get drawn =>
+      columnsByName['drawn']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get unitPrice =>
+      columnsByName['unit_price']! as i1.GeneratedColumn<String>;
+}
+
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
@@ -9867,6 +10791,7 @@ i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema10 schema) from9To10,
   required Future<void> Function(i1.Migrator m, Schema11 schema) from10To11,
   required Future<void> Function(i1.Migrator m, Schema12 schema) from11To12,
+  required Future<void> Function(i1.Migrator m, Schema13 schema) from12To13,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -9925,6 +10850,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from11To12(migrator, schema);
         return 12;
+      case 12:
+        final schema = Schema13(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from12To13(migrator, schema);
+        return 13;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -9943,6 +10873,7 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema10 schema) from9To10,
   required Future<void> Function(i1.Migrator m, Schema11 schema) from10To11,
   required Future<void> Function(i1.Migrator m, Schema12 schema) from11To12,
+  required Future<void> Function(i1.Migrator m, Schema13 schema) from12To13,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from1To2: from1To2,
@@ -9956,5 +10887,6 @@ i1.OnUpgrade stepByStep({
     from9To10: from9To10,
     from10To11: from10To11,
     from11To12: from11To12,
+    from12To13: from12To13,
   ),
 );

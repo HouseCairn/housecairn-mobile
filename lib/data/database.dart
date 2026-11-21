@@ -32,7 +32,10 @@ part 'database.g.dart';
 /// Schema 10 (web ADR 0084) adds the mark `homes.is_example` of the example
 /// home of the guide and `step_ticks`, the steps of the guide done.
 /// Schema 11 (docs/adr/0014-qr-labels.md) adds `labels`, the QR labels of
-/// rooms, items and stock articles, kept on the phone.
+/// rooms, items and stock articles, kept on the phone. Schema 12 adds the
+/// barcodes. Schema 13 (web ADR 0092) adds the fields of the real cost the
+/// server keeps, read only: `material_draws.unit_price`,
+/// `occurrences.planned_labour` and `occurrences.planned_material`.
 /// Migrations are drift's
 /// guided migrations: `dart run drift_dev make-migrations` keeps one schema
 /// file per version in `drift_schemas/` and generates the step-by-step code
@@ -86,7 +89,7 @@ class AppDatabase extends _$AppDatabase implements Db {
       AppDatabase(driftDatabase(name: 'housecairn'));
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -267,6 +270,24 @@ class AppDatabase extends _$AppDatabase implements Db {
             await m.addColumn(schema.photos, schema.photos.attribution);
             await moveBarcodeFieldsOutOfExtra(this);
           },
+          from12To13: (m, schema) async {
+            // The real cost the server keeps (web ADR 0092): three nullable
+            // columns, read only. A value a server sent before this build
+            // waits in `extra` and moves to its column (below).
+            await m.addColumn(
+              schema.materialDraws,
+              schema.materialDraws.unitPrice,
+            );
+            await m.addColumn(
+              schema.occurrences,
+              schema.occurrences.plannedLabour,
+            );
+            await m.addColumn(
+              schema.occurrences,
+              schema.occurrences.plannedMaterial,
+            );
+            await moveCostFieldsOutOfExtra(this);
+          },
         ),
       );
     },
@@ -328,6 +349,72 @@ Future<void> moveBarcodeFieldsOutOfExtra(GeneratedDatabase db) async {
         moved[field] = value;
       } else if (field != 'ean' && value is Map) {
         moved[field] = jsonEncode(value);
+      }
+    }
+    if (moved.isEmpty) continue;
+    final rowId = r.data['row_id'] as Uint8List;
+    await db.customUpdate(
+      'UPDATE $table SET ${[for (final f in moved.keys) '$f = ?'].join(', ')} '
+      'WHERE id = ?',
+      variables: [
+        for (final v in moved.values) Variable<String>(v),
+        Variable<Uint8List>(rowId),
+      ],
+    );
+    final left = {...kept}..removeWhere((k, _) => moved.containsKey(k));
+    if (left.isEmpty) {
+      await db.customStatement(
+        'DELETE FROM extra WHERE entity = ? AND row_id = ?',
+        [entity, rowId],
+      );
+    } else {
+      await db.customStatement(
+        'UPDATE extra SET json = ? WHERE entity = ? AND row_id = ?',
+        [jsonEncode(left), entity, rowId],
+      );
+    }
+  }
+}
+
+/// The fields of the real cost a server sends (web ADR 0092), by entity type
+/// and table: before schema 13 the phone kept them in `extra`.
+const costFields = {
+  'tasks.materialdraw': ('material_draws', ['unit_price']),
+  'tasks.occurrence': ('occurrences', ['planned_labour', 'planned_material']),
+};
+
+final _amount = RegExp(r'^\d{1,10}(\.\d{1,2})?$');
+
+/// Moves the fields of the real cost kept in `extra` to their columns
+/// (schema 13), as [moveBarcodeFieldsOutOfExtra] does: their clocks are in
+/// `field_clock` already, nothing is logged. A value that is neither an
+/// amount (a decimal string) nor `null` stays in `extra`.
+Future<void> moveCostFieldsOutOfExtra(GeneratedDatabase db) async {
+  final rows = await db
+      .customSelect(
+        'SELECT entity, row_id, json FROM extra WHERE entity IN '
+        "('tasks.materialdraw', 'tasks.occurrence')",
+      )
+      .get();
+  for (final r in rows) {
+    final entity = r.data['entity'] as String;
+    final (table, fields) = costFields[entity]!;
+    final Map<String, Object?> kept;
+    try {
+      final json = jsonDecode(r.data['json'] as String);
+      if (json is! Map) continue;
+      kept = json.cast<String, Object?>();
+    } on FormatException {
+      continue;
+    }
+    final moved = <String, String?>{};
+    for (final field in fields) {
+      if (!kept.containsKey(field)) continue;
+      final value = kept[field];
+      if (value == null) {
+        moved[field] = null;
+      } else if (value is String && _amount.hasMatch(value)) {
+        moved[field] = value;
       }
     }
     if (moved.isEmpty) continue;

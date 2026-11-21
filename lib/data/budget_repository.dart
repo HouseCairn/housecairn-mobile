@@ -1098,6 +1098,7 @@ extension BudgetRepository on Repository {
             ))
             .get();
     final byTask = <String, List<budget.OccurrenceFacts>>{};
+    final real = await costsOf(homeId, occurrences);
     for (final o in occurrences) {
       (byTask[o.taskId] ??= []).add(
         budget.OccurrenceFacts(
@@ -1105,6 +1106,7 @@ extension BudgetRepository on Repository {
           o.dueOn == null ? null : Day.parse(o.dueOn!),
           o.completedOn == null ? null : Day.parse(o.completedOn!),
           o.actualCost == null ? null : budget.readMoney(o.actualCost!),
+          real[o.id],
         ),
       );
     }

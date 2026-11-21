@@ -2,6 +2,7 @@
 
 import 'package:decimal/decimal.dart';
 
+import 'costs.dart' as costs;
 import 'day.dart';
 import 'recurrence.dart' as recurrence;
 
@@ -243,12 +244,26 @@ class QuoteFacts {
 
 /// An occurrence as the budget reads it: done, or open (planned, postponed).
 class OccurrenceFacts {
-  const OccurrenceFacts(this.status, this.due, [this.completed, this.cost]);
+  const OccurrenceFacts(
+    this.status,
+    this.due, [
+    this.completed,
+    this.cost,
+    this.real,
+  ]);
 
   final String status;
   final Day? due;
   final Day? completed;
+
+  /// The amount typed.
   final Decimal? cost;
+
+  /// The real cost of a done one, its parts apart (lib/domain/costs.dart);
+  /// none: the amount typed alone.
+  final costs.OccurrenceCost? real;
+
+  costs.OccurrenceCost get realCost => real ?? costs.OccurrenceCost(cost);
 }
 
 class TaskFacts {
@@ -357,25 +372,45 @@ Map<String, Amounts> projectPlan(
 
 /// What a maintenance task plans and costs over a period (`TaskFigures`).
 class TaskFigures {
-  const TaskFigures(
+  TaskFigures(
     this.count,
     this.material,
     this.labour,
     this.paid,
     this.missing,
-    this.projected,
-  );
+    this.projected, [
+    Decimal? stock,
+    Decimal? planLabour,
+    Decimal? planMaterial,
+  ]) : stock = stock ?? zero,
+       planLabour = planLabour ?? zero,
+       planMaterial = planMaterial ?? zero;
 
   final int count;
   final Decimal material;
   final Decimal labour;
+
+  /// The real cost of what was done: the stock used and the rest (web ADR
+  /// 0090, 0091).
   final Decimal paid;
 
-  /// Done with no cost typed: counted in the plan, paid as zero.
+  /// Done with no cost typed, no plan kept and no stock of value: counted
+  /// in the plan, paid as zero.
   final int missing;
 
   /// Of [count]: the times the repetition will still bring.
   final int projected;
+
+  /// Of [paid]: the stock used, at its prices when taken.
+  final Decimal stock;
+
+  /// Of [paid]: the plan kept by the times done with nothing typed, by
+  /// nature.
+  final Decimal planLabour;
+  final Decimal planMaterial;
+
+  /// Of [paid]: the amounts typed, for what is not in the stock.
+  Decimal get typed => paid - stock - planLabour - planMaterial;
 
   Amounts get amounts => Amounts.line(material + labour, zero, paid);
 }
@@ -388,7 +423,7 @@ class TaskBudget {
   TaskBudget(this.task, this.today, this.stock)
     : done = [
         for (final o in task.occurrences)
-          if (o.status == _done) (o.completed ?? o.due, o.cost),
+          if (o.status == _done) (o.completed ?? o.due, o.realCost),
       ],
       open = [
         for (final o in task.occurrences)
@@ -398,7 +433,7 @@ class TaskBudget {
   final TaskFacts task;
   final Day today;
   final StockPlan stock;
-  final List<(Day?, Decimal?)> done;
+  final List<(Day?, costs.OccurrenceCost)> done;
   final List<Day?> open;
   final Map<int, int> _memo = {};
 
@@ -462,13 +497,23 @@ class TaskBudget {
     final more = year != null && openToo ? projected(year) : 0;
     final count = inDone.length + coming.length + more;
     final times = Decimal.fromInt(count);
+    final real = [for (final e in inDone) e.$2.total];
     return TaskFigures(
       count,
       materialPlanned * times,
       labour * times,
-      inDone.fold(zero, (sum, e) => e.$2 == null ? sum : sum + e.$2!),
-      inDone.where((e) => e.$2 == null).length,
+      real.fold(zero, (sum, cost) => cost == null ? sum : sum + cost),
+      real.where((cost) => cost == null).length,
       more,
+      inDone.fold<Decimal>(zero, (sum, e) => sum + e.$2.stock.amount),
+      inDone.fold<Decimal>(
+        zero,
+        (sum, e) => sum + (e.$2.fromPlan.labour ?? zero),
+      ),
+      inDone.fold<Decimal>(
+        zero,
+        (sum, e) => sum + (e.$2.fromPlan.material ?? zero),
+      ),
     );
   }
 
@@ -801,8 +846,9 @@ Report byTask(Ledger ledger, int year) {
   );
 }
 
-/// What was paid on a task, shared between materials and labour as its
-/// estimate is (`real_cost_split`).
+/// The amounts typed on a task, shared between materials and labour as its
+/// estimate is (`real_cost_split`). The stock used and the plan kept are not
+/// shared: [byNature] counts each under its own nature (web ADR 0090, 0091).
 (Decimal, Decimal) realCostSplit(
   TaskFigures figures,
   Decimal materialEstimate,
@@ -810,9 +856,9 @@ Report byTask(Ledger ledger, int year) {
 ) {
   final estimate = materialEstimate + labourEstimate;
   if (estimate <= zero) return (zero, zero);
-  final exact = (figures.paid * materialEstimate * _hundred) / estimate;
+  final exact = (figures.typed * materialEstimate * _hundred) / estimate;
   final inMaterials = Decimal.fromBigInt(exact.round()).shift(-2);
-  return (inMaterials, figures.paid - inMaterials);
+  return (inMaterials, figures.typed - inMaterials);
 }
 
 /// Materials, labour, rental, other (`by_nature`).
@@ -832,12 +878,18 @@ List<Line> byNature(Ledger ledger, int year) {
       task.labour,
     );
     found[material] =
-        found[material]! + Amounts.line(figures.material, zero, inMaterials);
+        found[material]! +
+        Amounts.line(
+          figures.material,
+          zero,
+          figures.stock + figures.planMaterial + inMaterials,
+        );
     found[labour] =
-        found[labour]! + Amounts.line(figures.labour, zero, inLabour);
+        found[labour]! +
+        Amounts.line(figures.labour, zero, figures.planLabour + inLabour);
     found[other] =
         found[other]! +
-        Amounts.line(zero, zero, figures.paid - inMaterials - inLabour);
+        Amounts.line(zero, zero, figures.typed - inMaterials - inLabour);
   }
   return [for (final n in natures) Line(null, n, found[n]!)];
 }

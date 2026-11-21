@@ -82,9 +82,13 @@ class HistoryEntry {
     this.roomName,
     this.itemName,
     this.contractorName,
+    this.cost = costs.noCost,
   });
 
   final OccurrenceRow occurrence;
+
+  /// Its real cost (lib/domain/costs.dart): the stock used and the rest.
+  final costs.OccurrenceCost cost;
   final TaskRow task;
 
   /// The day it was done; a skipped one has none, the day it was closed
@@ -125,6 +129,139 @@ class HistoryPage {
 
   int get pages =>
       cost.count == 0 ? 1 : (cost.count + taskPageSize - 1) ~/ taskPageSize;
+}
+
+/// The real cost of done occurrences, by the one rule of the web
+/// (lib/domain/costs.dart, web ADR 0090, 0091, 0092).
+extension OccurrenceCosts on Repository {
+  /// The real cost of each of [occurrences] of [homeId], by id: [costs.noCost]
+  /// for one that is not done.
+  ///
+  /// With a server, the prices of the draws and the plan are those the server
+  /// kept (read only, schema 13). An occurrence marked done on this phone that
+  /// the server has not taken yet (its status, or one of its draws, still
+  /// waits in `op_log`) has none: it is estimated with the prices of the
+  /// articles and the plan of its task of now, the way the web counts a
+  /// closing, and the next sync replaces the estimate with the server's
+  /// values. Without a server (the phone alone, the example home of the
+  /// guide), nothing else keeps them: the figures are those of now.
+  Future<Map<String, costs.OccurrenceCost>> costsOf(
+    String homeId,
+    Iterable<OccurrenceRow> occurrences,
+  ) async {
+    final rows = [
+      for (final o in occurrences)
+        if (o.status == 'done' && o.deletedAt == null) o,
+    ];
+    final found = {for (final o in occurrences) o.id: costs.noCost};
+    if (rows.isEmpty) return found;
+    final server =
+        !await isExampleHome(homeId) && await serverRole(homeId) != null;
+    final waitingStatus = <String>{};
+    final waitingDraws = <String>{};
+    if (server) {
+      for (final r
+          in await db
+              .customSelect(
+                "SELECT json_extract(body, '\$.t') AS t, "
+                "json_extract(body, '\$.id') AS id, body FROM op_log "
+                "WHERE json_extract(body, '\$.t') IN "
+                "('tasks.occurrence', 'tasks.materialdraw')",
+              )
+              .get()) {
+        final id = r.data['id'] as String?;
+        if (id == null) continue;
+        if (r.data['t'] == 'tasks.materialdraw') {
+          waitingDraws.add(id);
+          continue;
+        }
+        final op = jsonDecode(r.data['body'] as String);
+        final fields = op is Map ? op[Op.fields] : null;
+        if (fields is Map && fields.containsKey('status')) {
+          waitingStatus.add(id);
+        }
+      }
+    }
+    final wanted = {for (final o in rows) o.id};
+    final draws = await (db.select(
+      db.materialDraws,
+    )..where((d) => d.homeId.equalsValue(homeId) & d.deletedAt.isNull())).get();
+    final articles = {
+      for (final a in await (db.select(
+        db.articles,
+      )..where((a) => a.homeId.equalsValue(homeId))).get())
+        a.id: a,
+    };
+    Decimal? amount(String? text) => text == null ? null : Decimal.parse(text);
+    final drawsOf = <String, List<MaterialDrawRow>>{};
+    for (final d in draws) {
+      if (wanted.contains(d.occurrenceId)) {
+        (drawsOf[d.occurrenceId] ??= []).add(d);
+      }
+    }
+    final tasks = <String, TaskRow?>{};
+    final plans = <String, costs.Planned>{};
+    Future<costs.Planned> planOf(String taskId) async {
+      if (plans[taskId] case final plan?) return plan;
+      final task = tasks[taskId] ??= await (db.select(
+        db.tasks,
+      )..where((t) => t.id.equalsValue(taskId))).getSingleOrNull();
+      if (task == null) return plans[taskId] = costs.noPlan;
+      final inProject = await db
+          .customSelect(
+            'SELECT 1 FROM project_tasks l JOIN projects p ON p.id = '
+            'l.project_id WHERE l.task_id = ? AND l.deleted_at IS NULL AND '
+            'p.deleted_at IS NULL',
+            variables: [Variable<Uint8List>(uuidBytes(taskId))],
+          )
+          .getSingleOrNull();
+      final lines =
+          await (db.select(db.taskMaterials)..where(
+                (m) => m.taskId.equalsValue(taskId) & m.deletedAt.isNull(),
+              ))
+              .get();
+      final plan = budget.stockPlan([
+        for (final m in lines)
+          if (articles[m.articleId] case final a? when a.deletedAt == null)
+            (stock.readQuantity(m.quantity), amount(a.unitPrice)),
+      ]);
+      return plans[taskId] = costs.planWhenDone(
+        inProject: inProject != null,
+        labourBudget: amount(task.labourBudget),
+        materialBudget: amount(task.materialBudget),
+        materialFromStock: plan.priced > 0,
+      );
+    }
+
+    for (final o in rows) {
+      final mine = drawsOf[o.id] ?? const <MaterialDrawRow>[];
+      final waiting = waitingStatus.contains(o.id);
+      var estimated = server && waiting;
+      final used = costs.stockUsed([
+        for (final d in mine)
+          if (!server || waiting || waitingDraws.contains(d.id))
+            (
+              stock.readQuantity(d.drawn),
+              amount(articles[d.articleId]?.unitPrice),
+            )
+          else
+            (stock.readQuantity(d.drawn), amount(d.unitPrice)),
+      ]);
+      if (server && mine.any((d) => waitingDraws.contains(d.id))) {
+        estimated = true;
+      }
+      final planned = !server || waiting
+          ? await planOf(o.taskId)
+          : costs.Planned(amount(o.plannedLabour), amount(o.plannedMaterial));
+      found[o.id] = costs.OccurrenceCost(
+        amount(o.actualCost),
+        used,
+        planned,
+        estimated,
+      );
+    }
+    return found;
+  }
 }
 
 extension TaskListsRepository on Repository {
@@ -358,6 +495,9 @@ extension TaskListsRepository on Repository {
     final items = await _itemNames([homeId]);
     final names = {for (final c in await contractors(homeId)) c.id: c.name};
     final query = foldForSearch(selection.query.trim());
+    final real = await costsOf(homeId, [
+      for (final row in rows) row.readTable(db.occurrences),
+    ]);
     final entries = <HistoryEntry>[];
     for (final row in rows) {
       final occurrence = row.readTable(db.occurrences);
@@ -398,6 +538,7 @@ extension TaskListsRepository on Repository {
           roomName: rooms[task.roomId],
           itemName: items[task.itemId],
           contractorName: names[task.contractorId],
+          cost: real[occurrence.id] ?? costs.noCost,
         ),
       );
     }
@@ -412,9 +553,9 @@ extension TaskListsRepository on Repository {
     var total = Decimal.zero;
     var withCost = 0;
     for (final e in entries) {
-      final cost = e.occurrence.actualCost;
+      final cost = e.cost.total;
       if (cost == null) continue;
-      total += budget.readMoney(cost);
+      total += cost;
       withCost++;
     }
     final pages = entries.isEmpty

@@ -8,7 +8,6 @@ import '../design/filters.dart';
 import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
-import '../domain/budget.dart' as budget;
 import '../domain/day.dart';
 import 'help_button.dart';
 import '../l10n/app_localizations.dart';
@@ -365,13 +364,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           : HcPillTone.ghost,
                     ),
                   ],
-                  moreText: entry.occurrence.actualCost == null
+                  moreText: entry.cost.total == null
                       ? null
-                      : moneyIn(
-                          context,
-                          currency,
-                          budget.readMoney(entry.occurrence.actualCost!),
-                        ),
+                      : moneyIn(context, currency, entry.cost.total!),
                   onTap: () => Navigator.of(context).push(
                     hcRoute(
                       TaskScreen(homeId: widget.homeId, taskId: entry.task.id),

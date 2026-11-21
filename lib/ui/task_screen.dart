@@ -11,6 +11,7 @@ import '../design/tokens.dart';
 import '../design/values.dart';
 import '../design/widgets.dart';
 import '../domain/budget.dart' as budget;
+import '../domain/costs.dart' as costs;
 import '../domain/day.dart';
 import '../domain/durations.dart' as durations;
 import '../domain/recurrence.dart' as recurrence;
@@ -155,6 +156,7 @@ class _TaskPageState extends State<TaskPage> {
   OccurrenceRow? _current;
   OccurrenceRow? _lastClosed;
   List<OccurrenceRow> _history = const [];
+  Map<String, costs.OccurrenceCost> _costs = const {};
   List<ReportRow> _reports = const [];
   budget.TaskBudget? _cost;
   bool _loaded = false;
@@ -194,6 +196,7 @@ class _TaskPageState extends State<TaskPage> {
     final all = await repository.occurrencesOf(widget.taskId);
     final ledger = await repository.ledger(widget.homeId);
     final reports = await repository.reportsOfTask(widget.taskId);
+    final real = await repository.costsOf(widget.homeId, all);
     if (!mounted) return;
     final closed = all.where((o) => closedStatuses.contains(o.status)).toList()
       ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
@@ -206,6 +209,7 @@ class _TaskPageState extends State<TaskPage> {
       _current = open.isEmpty ? null : open.first;
       _lastClosed = closed.isEmpty ? null : closed.first;
       _history = all.where((o) => closedStatuses.contains(o.status)).toList();
+      _costs = real;
       _reports = reports;
       // A task of a project has its money in the lines of the project.
       _cost = ledger.tasks
@@ -579,6 +583,11 @@ class _TaskPageState extends State<TaskPage> {
             HcValueList(
               children: [HcValueRow(l10n.taskPaidSoFar, money(paid))],
             ),
+            if (row.done.any((d) => d.$2.estimated))
+              KeyedSubtree(
+                key: const Key('task-cost-estimated'),
+                child: smallNote(l10n.realCostEstimated),
+              ),
           ],
         ),
       ),
@@ -651,9 +660,11 @@ class _TaskPageState extends State<TaskPage> {
                 : l10n.historySkipped,
             text: o.status != 'done'
                 ? null
-                : o.actualCost == null
+                : _costs[o.id]?.total == null
                 ? l10n.costNotTyped
-                : l10n.realCost(_money(o.actualCost!)),
+                : l10n.realCost(
+                    moneyIn(context, _currency, _costs[o.id]!.total!),
+                  ),
             moreText: o.completionNote.isEmpty ? null : o.completionNote,
             onTap: o.status == 'done' && writable
                 ? () => _open(

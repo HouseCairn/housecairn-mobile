@@ -202,6 +202,12 @@ class Occurrences extends Table with ModelColumns, HomeOwned {
   /// The occurrence whose closing created this one.
   BlobColumn get follows => blob().map(const UuidConverter()).nullable()();
   TextColumn get actualCost => text().nullable()();
+
+  /// The plan the server kept when the occurrence was marked done (schema
+  /// 13, web ADR 0091 and 0092): read only, set by the server alone, never
+  /// sent by this phone ([serverOnlyFields]).
+  TextColumn get plannedLabour => text().nullable()();
+  TextColumn get plannedMaterial => text().nullable()();
 }
 
 /// `stock.article` (`stock/models.py:68-122`): something kept in stock. Its
@@ -292,7 +298,21 @@ class MaterialDraws extends Table with ModelColumns, HomeOwned {
   BlobColumn get articleId => blob().map(const UuidConverter())();
   TextColumn get wanted => text()();
   TextColumn get drawn => text()();
+
+  /// The unit price of the article when it was taken (schema 13, web ADR
+  /// 0090 and 0092): read only, set by the server alone, never sent by this
+  /// phone ([serverOnlyFields]).
+  TextColumn get unitPrice => text().nullable()();
 }
+
+/// The fields a server sets and this phone only reads (web ADR 0092), by
+/// entity type: kept in their column when they come, never written by a
+/// change of this phone, never in an operation it sends (a server refuses
+/// such an operation whole, `forbidden`).
+const serverOnlyFields = {
+  'tasks.materialdraw': {'unit_price'},
+  'tasks.occurrence': {'planned_labour', 'planned_material'},
+};
 
 /// `projects.project` (`projects/models.py:98-168`): a piece of work with an
 /// end. Only the title is required.

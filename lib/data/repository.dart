@@ -15,6 +15,7 @@ import '../core/hlc.dart';
 import '../core/store.dart';
 import '../domain/choices.dart';
 import '../domain/budget.dart' as budget;
+import '../domain/costs.dart' as costs;
 import '../domain/day.dart';
 import '../domain/file_reference.dart';
 import '../domain/gtin.dart';

@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import 'package:decimal/decimal.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
+import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../design/widgets.dart';
 import '../domain/budget.dart' as budget;
+import '../domain/costs.dart' as costs;
 import '../domain/day.dart';
 import '../l10n/app_localizations.dart';
 import 'budget_parts.dart';
@@ -41,6 +44,7 @@ class _OccurrenceScreenState extends State<OccurrenceScreen> {
   Day? _doneOn;
   String _currency = '';
   OccurrenceRow? _occurrence;
+  costs.OccurrenceCost _real = costs.noCost;
   bool _loaded = false;
 
   @override
@@ -56,9 +60,12 @@ class _OccurrenceScreenState extends State<OccurrenceScreen> {
     final repository = AppScope.of(context).repository;
     final found = await repository.occurrence(widget.occurrenceId);
     final home = await repository.home(widget.homeId);
-    if (found == null || !mounted) return;
+    if (found == null) return;
+    final real = await repository.costsOf(widget.homeId, [found]);
+    if (!mounted) return;
     setState(() {
       _occurrence = found;
+      _real = real[found.id] ?? costs.noCost;
       _currency = home?.currency ?? '';
       _doneOn = found.completedOn == null
           ? null
@@ -95,6 +102,45 @@ class _OccurrenceScreenState extends State<OccurrenceScreen> {
     if (saved) navigator.pop();
   }
 
+  /// What the real cost counts besides the amount typed
+  /// (`budget/_occurrence_cost.html`): the stock used at its prices when
+  /// taken, and the plan kept, counted when nothing is typed.
+  List<Widget> _costParts(AppLocalizations l10n) {
+    String money(Decimal value) => moneyIn(context, _currency, value);
+    final stock = _real.stock;
+    final planned = _real.planned;
+    return [
+      if (stock.any) ...[
+        Text(
+          l10n.stockUsed(money(stock.amount)),
+          style: HcText.body,
+          key: const Key('cost-stock-used'),
+        ),
+        smallNote(l10n.stockUsedHelp),
+        if (stock.unpriced > 0) smallNote(l10n.stockUnpriced(stock.unpriced)),
+      ],
+      if (planned.known) ...[
+        if (planned.labour != null)
+          Text(
+            l10n.labourPlanned(money(planned.labour!)),
+            style: HcText.body,
+            key: const Key('cost-labour-planned'),
+          ),
+        if (planned.material != null)
+          Text(
+            l10n.materialsPlanned(money(planned.material!)),
+            style: HcText.body,
+            key: const Key('cost-materials-planned'),
+          ),
+        smallNote(
+          stock.any ? l10n.plannedCountsHelpStock : l10n.plannedCountsHelp,
+        ),
+      ],
+      if (_real.estimated) smallNote(l10n.realCostEstimated),
+      if (stock.any || planned.known) const SizedBox(height: HcSpace.s3),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -116,12 +162,19 @@ class _OccurrenceScreenState extends State<OccurrenceScreen> {
                     clearable: false,
                     onChanged: (day) => setState(() => _doneOn = day),
                   ),
+                  ..._costParts(l10n),
                   hcAmount(
                     context,
-                    l10n.realCostTitle,
+                    _real.stock.any ? l10n.otherCostsTitle : l10n.realCostTitle,
                     _cost,
                     key: const Key('cost-amount'),
                   ),
+                  if (_real.stock.any && _real.planned.known)
+                    fieldHelp(l10n.otherCostsHelpPlanned)
+                  else if (_real.stock.any)
+                    fieldHelp(l10n.otherCostsHelp)
+                  else if (_real.planned.known)
+                    fieldHelp(l10n.costHelpPlanned),
                   fieldHelp(l10n.amountIsIn(_currency)),
                   hcText(
                     l10n.note,
