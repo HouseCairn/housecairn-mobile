@@ -290,7 +290,12 @@ to other fields. The columns the server keeps for itself, `updated_at` and `crea
 `stock.article`, `stock.supplier`, `stock.movement` and `reports.report`, whose `created_at` it
 takes), are not sent, nor the derived `visible_from` of `tasks.occurrence` (web
 `SYNC_DERIVED`, recomputed on each side, ADR 0003 "Derived"): one of them makes the whole
-operation `rejected` with `forbidden`. The
+operation `rejected` with `forbidden`. The fields of the real cost the server keeps (web ADR
+0092: `unit_price` of `tasks.materialdraw`, `planned_labour` and `planned_material` of
+`tasks.occurrence`) come in the changes and the snapshot like any field, with the server's clock,
+and are kept in their columns (schema 13); the phone never writes them and never sends them, not
+in a change, not when a row goes again after `410` (`serverOnlyFields`): one of them in a `put`
+makes it `forbidden` too. The
 device of the operations is the push's `device`, and their `sv` the push's. The `links` of
 `rooms.item`, JSON text in the phone's column, go as a JSON list and come back as JSON text
 (`ServerTransport.listFields`), as the file references and the credits of a photo go as objects:

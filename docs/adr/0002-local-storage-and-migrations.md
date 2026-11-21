@@ -184,6 +184,22 @@ never exported, emptied when the phone leaves the server
 ([ADR 0012](0012-files-with-a-server.md)). A photo fetched from a server is stored whole under
 the id of its row (`<id>.jpg`, its thumbnail `<id>.thumb.jpg`) as one made on the phone.
 
+## Schema 13 (the real cost the server keeps)
+
+Schema 13 adds three nullable amounts, read only (web ADR 0090, 0091, 0092):
+`material_draws.unit_price`, the unit price of the article when it was taken, and
+`occurrences.planned_labour` and `occurrences.planned_material`, the plan kept when the occurrence
+was marked done. The server alone sets them; the phone keeps what the feed and the snapshot give,
+writes them in no change and sends them in no operation (`serverOnlyFields` of
+`lib/data/tables.dart`). The guided step from schema 12 adds the columns and moves the values a
+phone of the third way kept in `extra` to them; their clocks were in `field_clock` already
+(`test/real_cost_test.dart`). The real cost is worked out on read by `lib/domain/costs.dart`, a
+port of the web's `tasks/costs.py`: the stock used plus the amount typed, else the plan kept.
+An occurrence marked done on the phone that the server has not taken yet (its status or a draw
+still in `op_log`) is estimated with the prices and the plan of now, as the web counts a closing,
+and the screen says so; the next sync gives the server's values. Without a server nothing keeps
+them, and the figures are those of now.
+
 ## Consequences
 
 - Every write goes through one repository layer that updates the row, `field_clock` and

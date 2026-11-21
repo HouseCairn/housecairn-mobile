@@ -3428,6 +3428,78 @@ abstract class AppLocalizations {
   /// **'No cost typed: tap to give it'**
   String get costNotTyped;
 
+  /// Web catalogue (budget/_occurrence_cost.html): the value of the stock a done occurrence used.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock used: {amount}'**
+  String stockUsed(String amount);
+
+  /// Web catalogue (budget/_occurrence_cost.html), under Stock used.
+  ///
+  /// In en, this message translates to:
+  /// **'The stock taken, at the unit prices of when it was taken, is in the real cost already.'**
+  String get stockUsedHelp;
+
+  /// Web catalogue (budget/_occurrence_cost.html): draws without a unit price.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} stock item had no unit price when it was taken: it counts for nothing.} other{{count} stock items had no unit price when they were taken: they count for nothing.}}'**
+  String stockUnpriced(int count);
+
+  /// Web catalogue (budget/_occurrence_cost.html): the labour planned kept when the task was marked done.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour planned: {amount}'**
+  String labourPlanned(String amount);
+
+  /// Web catalogue (budget/_occurrence_cost.html): the material budget kept when the task was marked done.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials planned: {amount}'**
+  String materialsPlanned(String amount);
+
+  /// Web catalogue (budget/_occurrence_cost.html), under the planned amounts, without stock.
+  ///
+  /// In en, this message translates to:
+  /// **'With no amount typed, the planned amounts count as paid, as the task planned them when it was marked done. An amount typed replaces them.'**
+  String get plannedCountsHelp;
+
+  /// Web catalogue (budget/_occurrence_cost.html), under the planned amounts, with stock used.
+  ///
+  /// In en, this message translates to:
+  /// **'With no amount typed, the planned amounts count as paid, as the task planned them when it was marked done. An amount typed replaces them; the stock used stays counted.'**
+  String get plannedCountsHelpStock;
+
+  /// Web catalogue (tasks/forms/occurrence.py): the amount field when the occurrence used stock.
+  ///
+  /// In en, this message translates to:
+  /// **'Other costs (labour, purchases outside the stock)'**
+  String get otherCostsTitle;
+
+  /// Web catalogue (tasks/forms/occurrence.py): help of the amount, with stock used and a plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave it empty to count the planned amounts shown above; an amount typed replaces them and is added to the stock used. Do not type the stock again.'**
+  String get otherCostsHelpPlanned;
+
+  /// Web catalogue (tasks/forms/occurrence.py): help of the amount, with stock used and no plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to the stock used, shown above: do not type the stock again.'**
+  String get otherCostsHelp;
+
+  /// Web catalogue (tasks/forms/occurrence.py): help of the amount, with a plan and no stock used.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave it empty to count the planned amounts shown above; an amount typed, 0 included, replaces them.'**
+  String get costHelpPlanned;
+
+  /// Under the real cost of a task marked done on the phone that the server has not answered yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated on this phone until the next sync: the server keeps the prices and the plan of when the task was marked done.'**
+  String get realCostEstimated;
+
   /// Web catalogue (projects, budget or reports): paint left in stock.
   ///
   /// In en, this message translates to:

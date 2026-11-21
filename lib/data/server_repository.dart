@@ -166,7 +166,13 @@ extension ServerSettings on Repository {
       final snapshot = await this.snapshot();
       for (final row in snapshot.rows) {
         if (!resend.contains((row.type, row.id))) continue;
+        final readOnly = serverOnlyFields[row.type] ?? const <String>{};
         for (final op in row.operations(schemaVersion: schemaVersion)) {
+          // A field the server sets never goes back to it (web ADR 0092).
+          if (op[Op.fields] case final Map<String, Object?> fields) {
+            fields.removeWhere((key, _) => readOnly.contains(key));
+            if (fields.isEmpty) continue;
+          }
           await db.customInsert(
             'INSERT INTO op_log (device, hlc, home_id, body) '
             'VALUES (?, ?, ?, ?)',

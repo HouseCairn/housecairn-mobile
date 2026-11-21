@@ -2003,6 +2003,66 @@ class AppLocalizationsFr extends AppLocalizations {
   String get costNotTyped => 'Aucun coût saisi : touchez pour l\'indiquer';
 
   @override
+  String stockUsed(String amount) {
+    return 'Stock utilisé : $amount';
+  }
+
+  @override
+  String get stockUsedHelp =>
+      'Le stock pris, aux prix unitaires du jour où il a été pris, est déjà dans le coût réel.';
+
+  @override
+  String stockUnpriced(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count articles n\'avaient pas de prix unitaire quand ils ont été pris : ils ne comptent pour rien.',
+      one:
+          '$count article n\'avait pas de prix unitaire quand il a été pris : il ne compte pour rien.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String labourPlanned(String amount) {
+    return 'Main-d\'œuvre prévue : $amount';
+  }
+
+  @override
+  String materialsPlanned(String amount) {
+    return 'Matériel prévu : $amount';
+  }
+
+  @override
+  String get plannedCountsHelp =>
+      'Sans montant saisi, les montants prévus comptent comme payés, tels que la tâche les prévoyait quand elle a été marquée faite. Un montant saisi les remplace.';
+
+  @override
+  String get plannedCountsHelpStock =>
+      'Sans montant saisi, les montants prévus comptent comme payés, tels que la tâche les prévoyait quand elle a été marquée faite. Un montant saisi les remplace ; le stock utilisé reste compté.';
+
+  @override
+  String get otherCostsTitle =>
+      'Autres coûts (main-d\'œuvre, achats hors stock)';
+
+  @override
+  String get otherCostsHelpPlanned =>
+      'Laissez-le vide pour compter les montants prévus affichés plus haut ; un montant saisi les remplace et s\'ajoute au stock utilisé. Ne saisissez pas le stock une seconde fois.';
+
+  @override
+  String get otherCostsHelp =>
+      'S\'ajoute au stock utilisé, affiché plus haut : ne saisissez pas le stock une seconde fois.';
+
+  @override
+  String get costHelpPlanned =>
+      'Laissez-le vide pour compter les montants prévus affichés plus haut ; un montant saisi, 0 compris, les remplace.';
+
+  @override
+  String get realCostEstimated =>
+      'Estimé sur ce téléphone jusqu\'à la prochaine synchronisation : le serveur garde les prix et le prévu du jour où la tâche a été marquée faite.';
+
+  @override
   String get paintArticle => 'Peinture restante en stock';
 
   @override

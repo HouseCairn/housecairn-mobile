@@ -1986,6 +1986,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String get costNotTyped => 'No cost typed: tap to give it';
 
   @override
+  String stockUsed(String amount) {
+    return 'Stock used: $amount';
+  }
+
+  @override
+  String get stockUsedHelp =>
+      'The stock taken, at the unit prices of when it was taken, is in the real cost already.';
+
+  @override
+  String stockUnpriced(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count stock items had no unit price when they were taken: they count for nothing.',
+      one:
+          '$count stock item had no unit price when it was taken: it counts for nothing.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String labourPlanned(String amount) {
+    return 'Labour planned: $amount';
+  }
+
+  @override
+  String materialsPlanned(String amount) {
+    return 'Materials planned: $amount';
+  }
+
+  @override
+  String get plannedCountsHelp =>
+      'With no amount typed, the planned amounts count as paid, as the task planned them when it was marked done. An amount typed replaces them.';
+
+  @override
+  String get plannedCountsHelpStock =>
+      'With no amount typed, the planned amounts count as paid, as the task planned them when it was marked done. An amount typed replaces them; the stock used stays counted.';
+
+  @override
+  String get otherCostsTitle =>
+      'Other costs (labour, purchases outside the stock)';
+
+  @override
+  String get otherCostsHelpPlanned =>
+      'Leave it empty to count the planned amounts shown above; an amount typed replaces them and is added to the stock used. Do not type the stock again.';
+
+  @override
+  String get otherCostsHelp =>
+      'Added to the stock used, shown above: do not type the stock again.';
+
+  @override
+  String get costHelpPlanned =>
+      'Leave it empty to count the planned amounts shown above; an amount typed, 0 included, replaces them.';
+
+  @override
+  String get realCostEstimated =>
+      'Estimated on this phone until the next sync: the server keeps the prices and the plan of when the task was marked done.';
+
+  @override
   String get paintArticle => 'Paint left in stock';
 
   @override

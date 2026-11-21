@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:housecairn_mobile/core/hlc.dart';
 import 'package:housecairn_mobile/core/store.dart';
 import 'package:housecairn_mobile/data/repository.dart';
+import 'package:housecairn_mobile/domain/costs.dart' as costs;
 import 'package:housecairn_mobile/domain/day.dart';
 import 'package:housecairn_mobile/domain/file_reference.dart';
 import 'package:housecairn_mobile/domain/photos.dart';
@@ -468,6 +469,89 @@ void main() {
       await phone.repo.stockLevel(article),
     );
     await expectOccurrencesEqual(task);
+  }, skip: skip);
+
+  Future<costs.OccurrenceCost> costOnPhone(String occurrence) async {
+    final row = (await phone.repo.occurrence(occurrence))!;
+    return (await phone.repo.costsOf(home, [row]))[occurrence]!;
+  }
+
+  void expectNoRejection() => expect([
+    for (final r in transport.rejections) '${r.code} ${r.operation}',
+  ], isEmpty);
+
+  test('web ADR 0092, the real cost: two priced stock items used by a '
+      'closing on the phone are 151 after sync, at the prices the server '
+      'kept', () async {
+    final (task, occurrence) = await repeatingTask('Service of the boiler');
+    final filter = await phone.repo.addArticle(
+      home,
+      const ArticleInput(name: 'Boiler filter', unitPrice: '45.50'),
+    );
+    final seal = await phone.repo.addArticle(
+      home,
+      const ArticleInput(name: 'Boiler seal', unitPrice: '60'),
+    );
+    for (final article in [filter, seal]) {
+      await phone.repo.recordMovement(
+        article,
+        kind: stock.entryKind,
+        quantity: '5',
+      );
+    }
+    await phone.repo.addMaterial(task, filter, '2');
+    await phone.repo.addMaterial(task, seal, '1');
+    await phone.sync();
+    expectNoRejection();
+    await phone.repo.complete(occurrence);
+    final estimate = await costOnPhone(occurrence);
+    expect([estimate.total, estimate.estimated], [Decimal.parse('151'), true]);
+    await syncTwice();
+    expectNoRejection();
+    final draws = await phone.repo.db.select(phone.repo.db.materialDraws).get();
+    expect(
+      {
+        for (final d in draws.where((d) => d.occurrenceId == occurrence))
+          d.articleId: d.unitPrice,
+      },
+      {filter: '45.50', seal: '60.00'},
+    );
+    // A price changed afterwards changes nothing: the server kept the one
+    // of the closing.
+    await phone.repo.updateArticle(
+      filter,
+      const ArticleInput(name: 'Boiler filter', unitPrice: '99'),
+    );
+    await syncTwice();
+    expectNoRejection();
+    final kept = await costOnPhone(occurrence);
+    expect([kept.total, kept.estimated], [Decimal.parse('151'), false]);
+  }, skip: skip);
+
+  test('web ADR 0092, the real cost: 120 of labour planned and nothing typed '
+      'is 120; 90 typed is 90; 0 typed is 0; an undo leaves nothing', () async {
+    final (task, occurrence) = await repeatingTask('Chimney sweeping');
+    await phone.repo.setTaskBudgets(task, material: '', labour: '120');
+    await phone.sync();
+    expectNoRejection();
+    await phone.repo.complete(occurrence);
+    await syncTwice();
+    expectNoRejection();
+    expect((await phone.repo.occurrence(occurrence))!.plannedLabour, '120.00');
+    final planned = await costOnPhone(occurrence);
+    expect([planned.total, planned.estimated], [Decimal.parse('120'), false]);
+    for (final (typed, total) in [('90', '90'), ('0', '0')]) {
+      await phone.repo.setActualCost(occurrence, typed);
+      await syncTwice();
+      expectNoRejection();
+      expect((await costOnPhone(occurrence)).total, Decimal.parse(total));
+    }
+    await phone.repo.undo(occurrence);
+    await syncTwice();
+    expectNoRejection();
+    final undone = (await phone.repo.occurrence(occurrence))!;
+    expect([undone.plannedLabour, undone.plannedMaterial], [null, null]);
+    expect((await costOnPhone(occurrence)).total, isNull);
   }, skip: skip);
 
   test('a stock item added from the materials of the task of an item fits '

@@ -19,8 +19,8 @@ void main() {
       final db = AppDatabase(NativeDatabase.memory());
       final Db asDb = db;
       await asDb.open();
-      expect(asDb.schemaVersion, 12);
-      expect(await pragma(db, 'user_version'), 12);
+      expect(asDb.schemaVersion, 13);
+      expect(await pragma(db, 'user_version'), 13);
       expect(await pragma(db, 'foreign_keys'), 1);
       expect(await asDb.integrityCheck(), 'ok');
       await asDb.close();
@@ -44,7 +44,7 @@ void main() {
       // neither creates nor upgrades anything.
       final second = AppDatabase(NativeDatabase(file));
       await second.open();
-      expect(await pragma(second, 'user_version'), 12);
+      expect(await pragma(second, 'user_version'), 13);
       expect(await pragma(second, 'journal_mode'), 'wal');
       expect(await pragma(second, 'foreign_keys'), 1);
       expect(await second.integrityCheck(), 'ok');
@@ -58,11 +58,11 @@ void main() {
     final file = File('${dir.path}/housecairn.sqlite');
     final first = AppDatabase(NativeDatabase(file));
     await first.open();
-    await first.customStatement('PRAGMA user_version = 13');
+    await first.customStatement('PRAGMA user_version = 14');
     await first.close();
 
-    // A file written by a newer version of the app (schema 13) is not
-    // downgraded silently: drift calls onUpgrade(13, 12), which throws.
+    // A file written by a newer version of the app (schema 14) is not
+    // downgraded silently: drift calls onUpgrade(14, 13), which throws.
     final second = AppDatabase(NativeDatabase(file));
     await expectLater(second.open(), throwsStateError);
     await second.close();

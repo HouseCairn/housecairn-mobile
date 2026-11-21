@@ -5706,6 +5706,28 @@ class $OccurrencesTable extends Occurrences
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _plannedLabourMeta = const VerificationMeta(
+    'plannedLabour',
+  );
+  @override
+  late final GeneratedColumn<String> plannedLabour = GeneratedColumn<String>(
+    'planned_labour',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _plannedMaterialMeta = const VerificationMeta(
+    'plannedMaterial',
+  );
+  @override
+  late final GeneratedColumn<String> plannedMaterial = GeneratedColumn<String>(
+    'planned_material',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -5723,6 +5745,8 @@ class $OccurrencesTable extends Occurrences
     completionNote,
     follows,
     actualCost,
+    plannedLabour,
+    plannedMaterial,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -5821,6 +5845,24 @@ class $OccurrencesTable extends Occurrences
         actualCost.isAcceptableOrUnknown(data['actual_cost']!, _actualCostMeta),
       );
     }
+    if (data.containsKey('planned_labour')) {
+      context.handle(
+        _plannedLabourMeta,
+        plannedLabour.isAcceptableOrUnknown(
+          data['planned_labour']!,
+          _plannedLabourMeta,
+        ),
+      );
+    }
+    if (data.containsKey('planned_material')) {
+      context.handle(
+        _plannedMaterialMeta,
+        plannedMaterial.isAcceptableOrUnknown(
+          data['planned_material']!,
+          _plannedMaterialMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -5898,6 +5940,14 @@ class $OccurrencesTable extends Occurrences
         DriftSqlType.string,
         data['${effectivePrefix}actual_cost'],
       ),
+      plannedLabour: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}planned_labour'],
+      ),
+      plannedMaterial: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}planned_material'],
+      ),
     );
   }
 
@@ -5935,6 +5985,12 @@ class OccurrenceRow extends DataClass implements Insertable<OccurrenceRow> {
   /// The occurrence whose closing created this one.
   final String? follows;
   final String? actualCost;
+
+  /// The plan the server kept when the occurrence was marked done (schema
+  /// 13, web ADR 0091 and 0092): read only, set by the server alone, never
+  /// sent by this phone ([serverOnlyFields]).
+  final String? plannedLabour;
+  final String? plannedMaterial;
   const OccurrenceRow({
     required this.id,
     required this.createdAt,
@@ -5951,6 +6007,8 @@ class OccurrenceRow extends DataClass implements Insertable<OccurrenceRow> {
     required this.completionNote,
     this.follows,
     this.actualCost,
+    this.plannedLabour,
+    this.plannedMaterial,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -5996,6 +6054,12 @@ class OccurrenceRow extends DataClass implements Insertable<OccurrenceRow> {
     if (!nullToAbsent || actualCost != null) {
       map['actual_cost'] = Variable<String>(actualCost);
     }
+    if (!nullToAbsent || plannedLabour != null) {
+      map['planned_labour'] = Variable<String>(plannedLabour);
+    }
+    if (!nullToAbsent || plannedMaterial != null) {
+      map['planned_material'] = Variable<String>(plannedMaterial);
+    }
     return map;
   }
 
@@ -6030,6 +6094,12 @@ class OccurrenceRow extends DataClass implements Insertable<OccurrenceRow> {
       actualCost: actualCost == null && nullToAbsent
           ? const Value.absent()
           : Value(actualCost),
+      plannedLabour: plannedLabour == null && nullToAbsent
+          ? const Value.absent()
+          : Value(plannedLabour),
+      plannedMaterial: plannedMaterial == null && nullToAbsent
+          ? const Value.absent()
+          : Value(plannedMaterial),
     );
   }
 
@@ -6054,6 +6124,8 @@ class OccurrenceRow extends DataClass implements Insertable<OccurrenceRow> {
       completionNote: serializer.fromJson<String>(json['completionNote']),
       follows: serializer.fromJson<String?>(json['follows']),
       actualCost: serializer.fromJson<String?>(json['actualCost']),
+      plannedLabour: serializer.fromJson<String?>(json['plannedLabour']),
+      plannedMaterial: serializer.fromJson<String?>(json['plannedMaterial']),
     );
   }
   @override
@@ -6075,6 +6147,8 @@ class OccurrenceRow extends DataClass implements Insertable<OccurrenceRow> {
       'completionNote': serializer.toJson<String>(completionNote),
       'follows': serializer.toJson<String?>(follows),
       'actualCost': serializer.toJson<String?>(actualCost),
+      'plannedLabour': serializer.toJson<String?>(plannedLabour),
+      'plannedMaterial': serializer.toJson<String?>(plannedMaterial),
     };
   }
 
@@ -6094,6 +6168,8 @@ class OccurrenceRow extends DataClass implements Insertable<OccurrenceRow> {
     String? completionNote,
     Value<String?> follows = const Value.absent(),
     Value<String?> actualCost = const Value.absent(),
+    Value<String?> plannedLabour = const Value.absent(),
+    Value<String?> plannedMaterial = const Value.absent(),
   }) => OccurrenceRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -6112,6 +6188,12 @@ class OccurrenceRow extends DataClass implements Insertable<OccurrenceRow> {
     completionNote: completionNote ?? this.completionNote,
     follows: follows.present ? follows.value : this.follows,
     actualCost: actualCost.present ? actualCost.value : this.actualCost,
+    plannedLabour: plannedLabour.present
+        ? plannedLabour.value
+        : this.plannedLabour,
+    plannedMaterial: plannedMaterial.present
+        ? plannedMaterial.value
+        : this.plannedMaterial,
   );
   OccurrenceRow copyWithCompanion(OccurrencesCompanion data) {
     return OccurrenceRow(
@@ -6142,6 +6224,12 @@ class OccurrenceRow extends DataClass implements Insertable<OccurrenceRow> {
       actualCost: data.actualCost.present
           ? data.actualCost.value
           : this.actualCost,
+      plannedLabour: data.plannedLabour.present
+          ? data.plannedLabour.value
+          : this.plannedLabour,
+      plannedMaterial: data.plannedMaterial.present
+          ? data.plannedMaterial.value
+          : this.plannedMaterial,
     );
   }
 
@@ -6162,7 +6250,9 @@ class OccurrenceRow extends DataClass implements Insertable<OccurrenceRow> {
           ..write('completedOn: $completedOn, ')
           ..write('completionNote: $completionNote, ')
           ..write('follows: $follows, ')
-          ..write('actualCost: $actualCost')
+          ..write('actualCost: $actualCost, ')
+          ..write('plannedLabour: $plannedLabour, ')
+          ..write('plannedMaterial: $plannedMaterial')
           ..write(')'))
         .toString();
   }
@@ -6184,6 +6274,8 @@ class OccurrenceRow extends DataClass implements Insertable<OccurrenceRow> {
     completionNote,
     follows,
     actualCost,
+    plannedLabour,
+    plannedMaterial,
   );
   @override
   bool operator ==(Object other) =>
@@ -6203,7 +6295,9 @@ class OccurrenceRow extends DataClass implements Insertable<OccurrenceRow> {
           other.completedOn == this.completedOn &&
           other.completionNote == this.completionNote &&
           other.follows == this.follows &&
-          other.actualCost == this.actualCost);
+          other.actualCost == this.actualCost &&
+          other.plannedLabour == this.plannedLabour &&
+          other.plannedMaterial == this.plannedMaterial);
 }
 
 class OccurrencesCompanion extends UpdateCompanion<OccurrenceRow> {
@@ -6222,6 +6316,8 @@ class OccurrencesCompanion extends UpdateCompanion<OccurrenceRow> {
   final Value<String> completionNote;
   final Value<String?> follows;
   final Value<String?> actualCost;
+  final Value<String?> plannedLabour;
+  final Value<String?> plannedMaterial;
   final Value<int> rowid;
   const OccurrencesCompanion({
     this.id = const Value.absent(),
@@ -6239,6 +6335,8 @@ class OccurrencesCompanion extends UpdateCompanion<OccurrenceRow> {
     this.completionNote = const Value.absent(),
     this.follows = const Value.absent(),
     this.actualCost = const Value.absent(),
+    this.plannedLabour = const Value.absent(),
+    this.plannedMaterial = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   OccurrencesCompanion.insert({
@@ -6257,6 +6355,8 @@ class OccurrencesCompanion extends UpdateCompanion<OccurrenceRow> {
     this.completionNote = const Value.absent(),
     this.follows = const Value.absent(),
     this.actualCost = const Value.absent(),
+    this.plannedLabour = const Value.absent(),
+    this.plannedMaterial = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -6279,6 +6379,8 @@ class OccurrencesCompanion extends UpdateCompanion<OccurrenceRow> {
     Expression<String>? completionNote,
     Expression<Uint8List>? follows,
     Expression<String>? actualCost,
+    Expression<String>? plannedLabour,
+    Expression<String>? plannedMaterial,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -6297,6 +6399,8 @@ class OccurrencesCompanion extends UpdateCompanion<OccurrenceRow> {
       if (completionNote != null) 'completion_note': completionNote,
       if (follows != null) 'follows': follows,
       if (actualCost != null) 'actual_cost': actualCost,
+      if (plannedLabour != null) 'planned_labour': plannedLabour,
+      if (plannedMaterial != null) 'planned_material': plannedMaterial,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -6317,6 +6421,8 @@ class OccurrencesCompanion extends UpdateCompanion<OccurrenceRow> {
     Value<String>? completionNote,
     Value<String?>? follows,
     Value<String?>? actualCost,
+    Value<String?>? plannedLabour,
+    Value<String?>? plannedMaterial,
     Value<int>? rowid,
   }) {
     return OccurrencesCompanion(
@@ -6335,6 +6441,8 @@ class OccurrencesCompanion extends UpdateCompanion<OccurrenceRow> {
       completionNote: completionNote ?? this.completionNote,
       follows: follows ?? this.follows,
       actualCost: actualCost ?? this.actualCost,
+      plannedLabour: plannedLabour ?? this.plannedLabour,
+      plannedMaterial: plannedMaterial ?? this.plannedMaterial,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -6395,6 +6503,12 @@ class OccurrencesCompanion extends UpdateCompanion<OccurrenceRow> {
     if (actualCost.present) {
       map['actual_cost'] = Variable<String>(actualCost.value);
     }
+    if (plannedLabour.present) {
+      map['planned_labour'] = Variable<String>(plannedLabour.value);
+    }
+    if (plannedMaterial.present) {
+      map['planned_material'] = Variable<String>(plannedMaterial.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -6419,6 +6533,8 @@ class OccurrencesCompanion extends UpdateCompanion<OccurrenceRow> {
           ..write('completionNote: $completionNote, ')
           ..write('follows: $follows, ')
           ..write('actualCost: $actualCost, ')
+          ..write('plannedLabour: $plannedLabour, ')
+          ..write('plannedMaterial: $plannedMaterial, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -10195,6 +10311,17 @@ class $MaterialDrawsTable extends MaterialDraws
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _unitPriceMeta = const VerificationMeta(
+    'unitPrice',
+  );
+  @override
+  late final GeneratedColumn<String> unitPrice = GeneratedColumn<String>(
+    'unit_price',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -10206,6 +10333,7 @@ class $MaterialDrawsTable extends MaterialDraws
     articleId,
     wanted,
     drawn,
+    unitPrice,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -10256,6 +10384,12 @@ class $MaterialDrawsTable extends MaterialDraws
       );
     } else if (isInserting) {
       context.missing(_drawnMeta);
+    }
+    if (data.containsKey('unit_price')) {
+      context.handle(
+        _unitPriceMeta,
+        unitPrice.isAcceptableOrUnknown(data['unit_price']!, _unitPriceMeta),
+      );
     }
     return context;
   }
@@ -10310,6 +10444,10 @@ class $MaterialDrawsTable extends MaterialDraws
         DriftSqlType.string,
         data['${effectivePrefix}drawn'],
       )!,
+      unitPrice: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit_price'],
+      ),
     );
   }
 
@@ -10337,6 +10475,11 @@ class MaterialDrawRow extends DataClass implements Insertable<MaterialDrawRow> {
   final String articleId;
   final String wanted;
   final String drawn;
+
+  /// The unit price of the article when it was taken (schema 13, web ADR
+  /// 0090 and 0092): read only, set by the server alone, never sent by this
+  /// phone ([serverOnlyFields]).
+  final String? unitPrice;
   const MaterialDrawRow({
     required this.id,
     required this.createdAt,
@@ -10347,6 +10490,7 @@ class MaterialDrawRow extends DataClass implements Insertable<MaterialDrawRow> {
     required this.articleId,
     required this.wanted,
     required this.drawn,
+    this.unitPrice,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -10378,6 +10522,9 @@ class MaterialDrawRow extends DataClass implements Insertable<MaterialDrawRow> {
     }
     map['wanted'] = Variable<String>(wanted);
     map['drawn'] = Variable<String>(drawn);
+    if (!nullToAbsent || unitPrice != null) {
+      map['unit_price'] = Variable<String>(unitPrice);
+    }
     return map;
   }
 
@@ -10394,6 +10541,9 @@ class MaterialDrawRow extends DataClass implements Insertable<MaterialDrawRow> {
       articleId: Value(articleId),
       wanted: Value(wanted),
       drawn: Value(drawn),
+      unitPrice: unitPrice == null && nullToAbsent
+          ? const Value.absent()
+          : Value(unitPrice),
     );
   }
 
@@ -10412,6 +10562,7 @@ class MaterialDrawRow extends DataClass implements Insertable<MaterialDrawRow> {
       articleId: serializer.fromJson<String>(json['articleId']),
       wanted: serializer.fromJson<String>(json['wanted']),
       drawn: serializer.fromJson<String>(json['drawn']),
+      unitPrice: serializer.fromJson<String?>(json['unitPrice']),
     );
   }
   @override
@@ -10427,6 +10578,7 @@ class MaterialDrawRow extends DataClass implements Insertable<MaterialDrawRow> {
       'articleId': serializer.toJson<String>(articleId),
       'wanted': serializer.toJson<String>(wanted),
       'drawn': serializer.toJson<String>(drawn),
+      'unitPrice': serializer.toJson<String?>(unitPrice),
     };
   }
 
@@ -10440,6 +10592,7 @@ class MaterialDrawRow extends DataClass implements Insertable<MaterialDrawRow> {
     String? articleId,
     String? wanted,
     String? drawn,
+    Value<String?> unitPrice = const Value.absent(),
   }) => MaterialDrawRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -10450,6 +10603,7 @@ class MaterialDrawRow extends DataClass implements Insertable<MaterialDrawRow> {
     articleId: articleId ?? this.articleId,
     wanted: wanted ?? this.wanted,
     drawn: drawn ?? this.drawn,
+    unitPrice: unitPrice.present ? unitPrice.value : this.unitPrice,
   );
   MaterialDrawRow copyWithCompanion(MaterialDrawsCompanion data) {
     return MaterialDrawRow(
@@ -10464,6 +10618,7 @@ class MaterialDrawRow extends DataClass implements Insertable<MaterialDrawRow> {
       articleId: data.articleId.present ? data.articleId.value : this.articleId,
       wanted: data.wanted.present ? data.wanted.value : this.wanted,
       drawn: data.drawn.present ? data.drawn.value : this.drawn,
+      unitPrice: data.unitPrice.present ? data.unitPrice.value : this.unitPrice,
     );
   }
 
@@ -10478,7 +10633,8 @@ class MaterialDrawRow extends DataClass implements Insertable<MaterialDrawRow> {
           ..write('occurrenceId: $occurrenceId, ')
           ..write('articleId: $articleId, ')
           ..write('wanted: $wanted, ')
-          ..write('drawn: $drawn')
+          ..write('drawn: $drawn, ')
+          ..write('unitPrice: $unitPrice')
           ..write(')'))
         .toString();
   }
@@ -10494,6 +10650,7 @@ class MaterialDrawRow extends DataClass implements Insertable<MaterialDrawRow> {
     articleId,
     wanted,
     drawn,
+    unitPrice,
   );
   @override
   bool operator ==(Object other) =>
@@ -10507,7 +10664,8 @@ class MaterialDrawRow extends DataClass implements Insertable<MaterialDrawRow> {
           other.occurrenceId == this.occurrenceId &&
           other.articleId == this.articleId &&
           other.wanted == this.wanted &&
-          other.drawn == this.drawn);
+          other.drawn == this.drawn &&
+          other.unitPrice == this.unitPrice);
 }
 
 class MaterialDrawsCompanion extends UpdateCompanion<MaterialDrawRow> {
@@ -10520,6 +10678,7 @@ class MaterialDrawsCompanion extends UpdateCompanion<MaterialDrawRow> {
   final Value<String> articleId;
   final Value<String> wanted;
   final Value<String> drawn;
+  final Value<String?> unitPrice;
   final Value<int> rowid;
   const MaterialDrawsCompanion({
     this.id = const Value.absent(),
@@ -10531,6 +10690,7 @@ class MaterialDrawsCompanion extends UpdateCompanion<MaterialDrawRow> {
     this.articleId = const Value.absent(),
     this.wanted = const Value.absent(),
     this.drawn = const Value.absent(),
+    this.unitPrice = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   MaterialDrawsCompanion.insert({
@@ -10543,6 +10703,7 @@ class MaterialDrawsCompanion extends UpdateCompanion<MaterialDrawRow> {
     required String articleId,
     required String wanted,
     required String drawn,
+    this.unitPrice = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -10562,6 +10723,7 @@ class MaterialDrawsCompanion extends UpdateCompanion<MaterialDrawRow> {
     Expression<Uint8List>? articleId,
     Expression<String>? wanted,
     Expression<String>? drawn,
+    Expression<String>? unitPrice,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -10574,6 +10736,7 @@ class MaterialDrawsCompanion extends UpdateCompanion<MaterialDrawRow> {
       if (articleId != null) 'article_id': articleId,
       if (wanted != null) 'wanted': wanted,
       if (drawn != null) 'drawn': drawn,
+      if (unitPrice != null) 'unit_price': unitPrice,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -10588,6 +10751,7 @@ class MaterialDrawsCompanion extends UpdateCompanion<MaterialDrawRow> {
     Value<String>? articleId,
     Value<String>? wanted,
     Value<String>? drawn,
+    Value<String?>? unitPrice,
     Value<int>? rowid,
   }) {
     return MaterialDrawsCompanion(
@@ -10600,6 +10764,7 @@ class MaterialDrawsCompanion extends UpdateCompanion<MaterialDrawRow> {
       articleId: articleId ?? this.articleId,
       wanted: wanted ?? this.wanted,
       drawn: drawn ?? this.drawn,
+      unitPrice: unitPrice ?? this.unitPrice,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -10642,6 +10807,9 @@ class MaterialDrawsCompanion extends UpdateCompanion<MaterialDrawRow> {
     if (drawn.present) {
       map['drawn'] = Variable<String>(drawn.value);
     }
+    if (unitPrice.present) {
+      map['unit_price'] = Variable<String>(unitPrice.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -10660,6 +10828,7 @@ class MaterialDrawsCompanion extends UpdateCompanion<MaterialDrawRow> {
           ..write('articleId: $articleId, ')
           ..write('wanted: $wanted, ')
           ..write('drawn: $drawn, ')
+          ..write('unitPrice: $unitPrice, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -23626,6 +23795,8 @@ typedef $$OccurrencesTableCreateCompanionBuilder =
       Value<String> completionNote,
       Value<String?> follows,
       Value<String?> actualCost,
+      Value<String?> plannedLabour,
+      Value<String?> plannedMaterial,
       Value<int> rowid,
     });
 typedef $$OccurrencesTableUpdateCompanionBuilder =
@@ -23645,6 +23816,8 @@ typedef $$OccurrencesTableUpdateCompanionBuilder =
       Value<String> completionNote,
       Value<String?> follows,
       Value<String?> actualCost,
+      Value<String?> plannedLabour,
+      Value<String?> plannedMaterial,
       Value<int> rowid,
     });
 
@@ -23735,6 +23908,16 @@ class $$OccurrencesTableFilterComposer
     column: $table.actualCost,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get plannedLabour => $composableBuilder(
+    column: $table.plannedLabour,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get plannedMaterial => $composableBuilder(
+    column: $table.plannedMaterial,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$OccurrencesTableOrderingComposer
@@ -23820,6 +24003,16 @@ class $$OccurrencesTableOrderingComposer
     column: $table.actualCost,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get plannedLabour => $composableBuilder(
+    column: $table.plannedLabour,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get plannedMaterial => $composableBuilder(
+    column: $table.plannedMaterial,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$OccurrencesTableAnnotationComposer
@@ -23887,6 +24080,16 @@ class $$OccurrencesTableAnnotationComposer
     column: $table.actualCost,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get plannedLabour => $composableBuilder(
+    column: $table.plannedLabour,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get plannedMaterial => $composableBuilder(
+    column: $table.plannedMaterial,
+    builder: (column) => column,
+  );
 }
 
 class $$OccurrencesTableTableManager
@@ -23935,6 +24138,8 @@ class $$OccurrencesTableTableManager
                 Value<String> completionNote = const Value.absent(),
                 Value<String?> follows = const Value.absent(),
                 Value<String?> actualCost = const Value.absent(),
+                Value<String?> plannedLabour = const Value.absent(),
+                Value<String?> plannedMaterial = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => OccurrencesCompanion(
                 id: id,
@@ -23952,6 +24157,8 @@ class $$OccurrencesTableTableManager
                 completionNote: completionNote,
                 follows: follows,
                 actualCost: actualCost,
+                plannedLabour: plannedLabour,
+                plannedMaterial: plannedMaterial,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -23971,6 +24178,8 @@ class $$OccurrencesTableTableManager
                 Value<String> completionNote = const Value.absent(),
                 Value<String?> follows = const Value.absent(),
                 Value<String?> actualCost = const Value.absent(),
+                Value<String?> plannedLabour = const Value.absent(),
+                Value<String?> plannedMaterial = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => OccurrencesCompanion.insert(
                 id: id,
@@ -23988,6 +24197,8 @@ class $$OccurrencesTableTableManager
                 completionNote: completionNote,
                 follows: follows,
                 actualCost: actualCost,
+                plannedLabour: plannedLabour,
+                plannedMaterial: plannedMaterial,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -25884,6 +26095,7 @@ typedef $$MaterialDrawsTableCreateCompanionBuilder =
       required String articleId,
       required String wanted,
       required String drawn,
+      Value<String?> unitPrice,
       Value<int> rowid,
     });
 typedef $$MaterialDrawsTableUpdateCompanionBuilder =
@@ -25897,6 +26109,7 @@ typedef $$MaterialDrawsTableUpdateCompanionBuilder =
       Value<String> articleId,
       Value<String> wanted,
       Value<String> drawn,
+      Value<String?> unitPrice,
       Value<int> rowid,
     });
 
@@ -25957,6 +26170,11 @@ class $$MaterialDrawsTableFilterComposer
     column: $table.drawn,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get unitPrice => $composableBuilder(
+    column: $table.unitPrice,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$MaterialDrawsTableOrderingComposer
@@ -26012,6 +26230,11 @@ class $$MaterialDrawsTableOrderingComposer
     column: $table.drawn,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get unitPrice => $composableBuilder(
+    column: $table.unitPrice,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$MaterialDrawsTableAnnotationComposer
@@ -26052,6 +26275,9 @@ class $$MaterialDrawsTableAnnotationComposer
 
   GeneratedColumn<String> get drawn =>
       $composableBuilder(column: $table.drawn, builder: (column) => column);
+
+  GeneratedColumn<String> get unitPrice =>
+      $composableBuilder(column: $table.unitPrice, builder: (column) => column);
 }
 
 class $$MaterialDrawsTableTableManager
@@ -26094,6 +26320,7 @@ class $$MaterialDrawsTableTableManager
                 Value<String> articleId = const Value.absent(),
                 Value<String> wanted = const Value.absent(),
                 Value<String> drawn = const Value.absent(),
+                Value<String?> unitPrice = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MaterialDrawsCompanion(
                 id: id,
@@ -26105,6 +26332,7 @@ class $$MaterialDrawsTableTableManager
                 articleId: articleId,
                 wanted: wanted,
                 drawn: drawn,
+                unitPrice: unitPrice,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -26118,6 +26346,7 @@ class $$MaterialDrawsTableTableManager
                 required String articleId,
                 required String wanted,
                 required String drawn,
+                Value<String?> unitPrice = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MaterialDrawsCompanion.insert(
                 id: id,
@@ -26129,6 +26358,7 @@ class $$MaterialDrawsTableTableManager
                 articleId: articleId,
                 wanted: wanted,
                 drawn: drawn,
+                unitPrice: unitPrice,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

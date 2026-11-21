@@ -161,18 +161,21 @@ jobs:
     # image pinned by digest, on the loopback of the runner (plain HTTP to a
     # local IP literal, the rule of docs/protocol.md section 2.10). The test
     # signs in by the real consent page and OAuth flow with PKCE, then syncs
-    # both ways and reads the result through the web API.
+    # both ways and reads the result through the web API. The image is the
+    # `edge` build of web `main` at 466f66c, not a release: v0.5.2 does not
+    # send the fields of the real cost the server keeps (web ADR 0092), which
+    # the real cost tests read. Move it to the first release that has them.
     name: Sync with a Housecairn server (e2e)
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      HC_SERVER_IMAGE: ghcr.io/housecairn/housecairn:0.5.2@sha256:db7d377a4eaff737244f5cb62d2c8147a909e542662ee0dcc5d49c23e34583fe
+      HC_SERVER_IMAGE: ghcr.io/housecairn/housecairn:sha-466f66c@sha256:bad0477c4b2d99980d38d1ae2ed5d40809e2fa9a992b3b0d0cae0293cedf0490
     steps:
       - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Start the Housecairn server (v0.5.2, pinned by digest)
+      - name: Start the Housecairn server (main at 466f66c, pinned by digest)
         run: |
           docker run --detach --name housecairn --publish 127.0.0.1:8000:8000 \
             --env ALLOWED_HOSTS=127.0.0.1 \

@@ -2,7 +2,7 @@
 
 // Migration tests of drift's guided migrations
 // (docs/adr/0002-local-storage-and-migrations.md): from every schema version
-// in drift_schemas/housecairn/ to the current one (schema 12). Each step runs
+// in drift_schemas/housecairn/ to the current one (schema 13). Each step runs
 // in turn: 1 to 2 (lot 2a), 2 to 3 (stock), 3 to 4 (lot 3b: projects, budget,
 // reports), 4 to 5 (the manufacturer's warranty, six columns of `items`) and
 // 5 to 6 (the tables of sync of lot 4, new and empty) and 6 to 7
@@ -13,8 +13,10 @@
 // is migrated in test/labels_test.dart) and 11 to 12 (the barcodes of web ADR
 // 0083: `ean` of `items` and `articles`, the credit of a photo, with a
 // default; a schema 11 file with data is migrated in test/barcodes_test.dart);
-// 12 to 12 checks that the schema of AppDatabase is the one of
-// drift_schema_v12.json.
+// 12 to 13 (the real cost the server keeps, web ADR 0092: three nullable
+// columns; a schema 12 file with data is migrated in test/real_cost_test.dart);
+// 13 to 13 checks that the schema of AppDatabase is the one of
+// drift_schema_v13.json.
 // The steps from
 // schemas 2, 3, 4, 5, 7, 8 and 9 also run on a file with data: every row is there
 // after them, every column it had unchanged, the new columns empty or at
@@ -49,7 +51,7 @@ void main() {
   }
 
   for (final from in [2, 3]) {
-    test('migrates a schema $from file with data to schema 12, keeping every '
+    test('migrates a schema $from file with data to schema 13, keeping every '
         'row', () async {
       final schema = await verifier.schemaAt(from);
       final raw = schema.rawDatabase;
@@ -110,7 +112,7 @@ void main() {
       expect(dumped, contains('Second gutters'));
 
       final db = AppDatabase(schema.newConnection());
-      await verifier.migrateAndValidate(db, 12);
+      await verifier.migrateAndValidate(db, 13);
       expect(dump(), dumped);
       for (final (table, column) in [
         ('rooms', 'paint_article_id'),
@@ -149,7 +151,7 @@ void main() {
     });
   }
 
-  test('migrates a schema 4 file with items to schema 12: the end of a '
+  test('migrates a schema 4 file with items to schema 13: the end of a '
       'warranty typed before stays, the new columns are empty', () async {
     final schema = await verifier.schemaAt(4);
     final raw = schema.rawDatabase;
@@ -217,7 +219,7 @@ void main() {
     expect(dumped, contains('2027-03-01'));
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 12);
+    await verifier.migrateAndValidate(db, 13);
     expect(dump(), dumped);
     final rows = raw.select(
       'SELECT purchased_on, warranty_duration, warranty_duration_unit, '
@@ -232,7 +234,7 @@ void main() {
     await db.close();
   });
 
-  test('migrates a schema 5 file with data to schema 12: every row and clock '
+  test('migrates a schema 5 file with data to schema 13: every row and clock '
       'stays, the tables of sync are new and empty', () async {
     final schema = await verifier.schemaAt(5);
     final raw = schema.rawDatabase;
@@ -338,7 +340,7 @@ void main() {
     expect(dumped, contains('0193a1b2c3d40002'));
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 12);
+    await verifier.migrateAndValidate(db, 13);
     expect(dump(), dumped);
     for (final table in [
       'op_log',
@@ -380,7 +382,7 @@ void main() {
     await db.close();
   });
 
-  test('migrates a schema 7 file with a photo to schema 12: the row and its '
+  test('migrates a schema 7 file with a photo to schema 13: the row and its '
       'mark stay, the list of files is new and empty', () async {
     final schema = await verifier.schemaAt(7);
     final raw = schema.rawDatabase;
@@ -400,7 +402,7 @@ void main() {
       [id(2), id(1)],
     );
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 12);
+    await verifier.migrateAndValidate(db, 13);
     expect(
       raw.select('SELECT image FROM photos').single['image'],
       '{"size":3,"type":"image/jpeg"}',
@@ -432,7 +434,7 @@ void main() {
       ['k', 'tasks.attachment', id(1), '{"t":"tasks.attachment"}'],
     );
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 12);
+    await verifier.migrateAndValidate(db, 13);
     expect(
       raw.select('SELECT title FROM tasks').single['title'],
       'Main gutters',
@@ -449,7 +451,7 @@ void main() {
     await db.close();
   });
 
-  test('migrates a schema 9 file with two homes to schema 12: every home '
+  test('migrates a schema 9 file with two homes to schema 13: every home '
       'stays as it was and reads as a real one, the table of ticks is new '
       'and empty', () async {
     final schema = await verifier.schemaAt(9);
@@ -488,7 +490,7 @@ void main() {
     expect(dumped, contains('Second home'));
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 12);
+    await verifier.migrateAndValidate(db, 13);
     expect(dump(), dumped);
     expect(
       raw

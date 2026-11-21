@@ -245,6 +245,57 @@ void main() {
       expect(find.text('Two batteries'), findsOneWidget);
     });
 
+    testWidgets('a done task with labour planned and nothing typed costs its '
+        'plan, and its details say an amount replaces it, $locale', (
+      tester,
+    ) async {
+      final data = await start(tester);
+      final repository = stateOf(tester).repository;
+      await tester.runAsync(() async {
+        await repository.setTaskBudgets(
+          data.doneTask,
+          material: '',
+          labour: '120',
+        );
+        await repository.setActualCost(data.doneOccurrence, '');
+      });
+      await openScreen(
+        tester,
+        TaskScreen(homeId: data.main, taskId: data.doneTask),
+      );
+      final row = find.byKey(Key('history-${data.doneOccurrence}'));
+      await _see(tester, row);
+      expect(
+        find.descendant(
+          of: row,
+          matching: find.textContaining(t('Actual cost: ', 'Coût réel : ')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: row, matching: find.textContaining('120')),
+        findsOneWidget,
+      );
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('cost-labour-planned')), findsOneWidget);
+      expect(
+        find.textContaining(t('Labour planned: ', "Main-d'œuvre prévue : ")),
+        findsOneWidget,
+      );
+      expect(
+        find.text(
+          t(
+            'Leave it empty to count the planned amounts shown above; an '
+                'amount typed, 0 included, replaces them.',
+            'Laissez-le vide pour compter les montants prévus affichés plus '
+                'haut ; un montant saisi, 0 compris, les remplace.',
+          ),
+        ),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('the photos of the room of a task are shown, read only, '
         '$locale', (tester) async {
       final data = await start(tester);

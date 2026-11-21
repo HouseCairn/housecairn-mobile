@@ -528,7 +528,7 @@ void main() {
           [id(2), id(1), 'Kitchen'],
         );
         final db = AppDatabase(schema.newConnection());
-        await verifier.migrateAndValidate(db, 12);
+        await verifier.migrateAndValidate(db, 13);
         final rooms = await db.customSelect('SELECT name FROM rooms').get();
         expect([for (final r in rooms) r.data['name']], ['Kitchen']);
         final labels = await db
