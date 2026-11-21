@@ -75,7 +75,7 @@ void main() {
     PackageInfo.setMockInitialValues(
       appName: 'Housecairn',
       packageName: 'app.example',
-      version: '0.5.1',
+      version: '0.5.2',
       buildNumber: '1',
       buildSignature: '',
     );

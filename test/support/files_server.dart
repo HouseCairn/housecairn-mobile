@@ -181,7 +181,7 @@ class FilesServer implements ServerHttp {
     if (path == '/api/v1/sync/info') {
       return _json(200, {
         'sync': [1],
-        'server': '0.5.1',
+        'server': '0.5.2',
         'limits': {
           'file_max_bytes': fileMaxBytes,
           'pushes_per_minute': 60,
